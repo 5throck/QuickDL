@@ -40,6 +40,7 @@
   "desktop.tray_quit": "退出",
 
   "app.error_url_required": "需要 URL。",
+  "app.error_invalid_url": "无效的URL。仅支持 http:// 和 https:// 链接。",
   "app.download_complete": "下载完成。",
 
   "ui.subtitle": "现代且快速的 YouTube 视频下载器",

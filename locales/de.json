@@ -40,6 +40,7 @@
   "desktop.tray_quit": "Beenden",
 
   "app.error_url_required": "URL ist erforderlich.",
+  "app.error_invalid_url": "Ungültige URL. Nur http:// und https://-Links werden unterstützt.",
   "app.download_complete": "Download abgeschlossen.",
 
   "ui.subtitle": "Moderner und schneller YouTube-Video-Downloader",

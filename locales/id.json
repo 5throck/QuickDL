@@ -40,6 +40,7 @@
   "desktop.tray_quit": "Keluar",
 
   "app.error_url_required": "URL diperlukan.",
+  "app.error_invalid_url": "URL tidak valid. Hanya tautan http:// dan https:// yang didukung.",
   "app.download_complete": "Unduhan selesai.",
 
   "ui.subtitle": "Pengunduh video YouTube yang modern dan cepat",

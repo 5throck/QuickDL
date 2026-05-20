@@ -40,6 +40,7 @@
   "desktop.tray_quit": "Выйти",
 
   "app.error_url_required": "Необходимо указать URL.",
+  "app.error_invalid_url": "Неверный URL. Поддерживаются только ссылки http:// и https://.",
   "app.download_complete": "Загрузка завершена.",
 
   "ui.subtitle": "Современный и быстрый загрузчик видео YouTube",

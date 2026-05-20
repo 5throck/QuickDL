@@ -40,6 +40,7 @@
   "desktop.tray_quit": "終了",
 
   "app.error_url_required": "URL が必要です。",
+  "app.error_invalid_url": "無効なURLです。http://またはhttps://リンクのみ対応しています。",
   "app.download_complete": "ダウンロード完了。",
 
   "ui.subtitle": "モダンで高速な YouTube 動画ダウンローダー",

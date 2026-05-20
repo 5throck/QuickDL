@@ -40,6 +40,7 @@
   "desktop.tray_quit": "Sair",
 
   "app.error_url_required": "URL é obrigatória.",
+  "app.error_invalid_url": "URL inválida. Apenas links http:// e https:// são suportados.",
   "app.download_complete": "Download concluído.",
 
   "ui.subtitle": "Baixador de vídeos do YouTube moderno e rápido",

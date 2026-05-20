@@ -17,6 +17,12 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 _jobs: dict = {}
 
+_URL_PATTERN = re.compile(r'^https?://', re.IGNORECASE)
+
+
+def _validate_url(url: str) -> bool:
+    return bool(url and _URL_PATTERN.match(url))
+
 
 @app.route('/')
 def index():
@@ -29,6 +35,8 @@ def get_info():
     url = data.get('url')
     if not url:
         return jsonify({'error': t('app.error_url_required')}), 400
+    if not _validate_url(url):
+        return jsonify({'error': t('app.error_invalid_url')}), 400
     try:
         info = get_video_info(url)
         return jsonify(info)
@@ -42,6 +50,8 @@ def download():
     url = data.get('url')
     if not url:
         return jsonify({'error': t('app.error_url_required')}), 400
+    if not _validate_url(url):
+        return jsonify({'error': t('app.error_invalid_url')}), 400
 
     job_id = str(uuid.uuid4())
     _jobs[job_id] = {"status": "pending", "filepath": None, "error": None}

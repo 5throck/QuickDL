@@ -40,6 +40,7 @@
   "desktop.tray_quit": "ออก",
 
   "app.error_url_required": "กรุณาระบุ URL",
+  "app.error_invalid_url": "URL ไม่ถูกต้อง รองรับเฉพาะลิงก์ http:// และ https:// เท่านั้น",
   "app.download_complete": "ดาวน์โหลดสำเร็จ",
 
   "ui.subtitle": "โปรแกรมดาวน์โหลดวิดีโอ YouTube ที่ทันสมัยและรวดเร็ว",

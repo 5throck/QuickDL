@@ -40,6 +40,7 @@
   "desktop.tray_quit": "خروج",
 
   "app.error_url_required": "الرابط مطلوب.",
+  "app.error_invalid_url": "رابط غير صالح. يُدعم فقط الروابط http:// و https://.",
   "app.download_complete": "اكتمل التحميل.",
 
   "ui.subtitle": "أداة تحميل فيديو يوتيوب حديثة وسريعة",

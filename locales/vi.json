@@ -40,6 +40,7 @@
   "desktop.tray_quit": "Thoát",
 
   "app.error_url_required": "Yêu cầu URL.",
+  "app.error_invalid_url": "URL không hợp lệ. Chỉ hỗ trợ liên kết http:// và https://.",
   "app.download_complete": "Tải xuống hoàn tất.",
 
   "ui.subtitle": "Công cụ tải video YouTube hiện đại và nhanh chóng",
