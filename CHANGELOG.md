@@ -1,0 +1,78 @@
+# Changelog
+
+All notable changes to QuickDL are documented here.
+
+Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+
+---
+
+## [Unreleased]
+
+---
+
+## [1.2.0] — 2026-05-20
+
+### Added
+- **Multi-agent harness engineering** — project-level config files for Claude Code (`CLAUDE.md`), Codex (`AGENTS.md`), and Gemini CLI (`GEMINI.md`)
+- `docs/agent-config/shared.md` — single source of truth for project context, conventions, i18n system, and Git rules shared across all AI tools
+- `docs/agent-config/agents.md` — authoritative role definitions for 7 agent types: PM, Designer, Frontend Developer, i18n Expert, Security Officer, Backend Developer, QA Engineer
+- **Malay (ms)** locale support — `locales/ms.json` with 49 translated keys
+- **Indonesian (id)** locale support — `locales/id.json` with 49 translated keys
+- `ytdl.bat` / `ytdl.sh` now display localized warning messages in Malay and Indonesian when `.venv` is missing
+
+### Changed
+- `i18n.py` `SUPPORTED` set expanded from 10 to 12 languages (added `ms`, `id`)
+
+---
+
+## [1.1.0] — 2026-05-20
+
+### Added
+- **i18n (internationalization)** — full multilingual support across all interfaces (web UI, desktop app, CLI, installer, shell launchers)
+- `i18n.py` — language detection module: `QUICKDL_LANG` env var → OS locale → `en` fallback
+- `locales/en.json` — English translations (baseline, 49 keys)
+- `locales/ko.json` — Korean translations
+- `locales/ja.json` — Japanese translations
+- `locales/zh-TW.json` — Traditional Chinese (Taiwan) translations
+- `locales/zh-CN.json` — Simplified Chinese translations
+- `locales/de.json` — German translations
+- `locales/es.json` — Spanish translations
+- `locales/fr.json` — French translations
+- `locales/pt.json` — Portuguese translations
+- `locales/vi.json` — Vietnamese translations
+- `app.py` — injects `window.I18N` via Flask template for JS-side i18n
+- `templates/index.html` — `<html lang>` attribute, Jinja2 i18n for static strings
+- `static/js/script.js` — `window.I18N['key']` for all dynamic user-facing strings
+
+### Changed
+- `cli.py` — all user-visible strings replaced with `t()` calls
+- `install.py` — all user-visible strings replaced with `t()` calls
+- `desktop.py` — tray menu labels and error dialogs use `t()` calls
+- `ytdl.bat` / `ytdl.sh` — localized `.venv` warning messages via `QUICKDL_LANG`
+- `README.md` — clone URL updated to `https://github.com/5throck/QuickDL.git`
+- `README_ko.md` — same
+
+---
+
+## [1.0.0] — 2026-05-20
+
+### Added
+- **Desktop app** (`desktop.py`) — pywebview window wrapping the Flask web UI; launches with a double-click
+- **System tray** — pystray icon with Open Window / Quit menu; closing the window keeps the app alive in the tray
+- **CLI** (`cli.py`) — `python cli.py <URL> [--output DIR]` for terminal-based downloads
+- **Cross-platform installer** (`install.py`) — creates `.venv/`, installs dependencies, sets `PYTHONIOENCODING=utf-8`; idempotent, works on Windows / macOS / Linux
+- **Windows launcher** (`ytdl.bat`) — double-click to start desktop app; warns if `.venv` is missing
+- **macOS/Linux launcher** (`ytdl.sh`) — same as above for Unix systems
+- `requirements.txt` — added `pywebview`, `pystray`, `Pillow`
+- `LICENSE` — GNU Affero General Public License v3.0
+- `.gitignore` — Python, venv, OS, IDE exclusions
+- `README.md` — English documentation (features, requirements, installation, usage, project structure)
+- `README_ko.md` — Korean documentation
+- GitHub repository registered at `https://github.com/5throck/QuickDL.git`
+
+---
+
+[Unreleased]: https://github.com/5throck/QuickDL/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/5throck/QuickDL/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/5throck/QuickDL/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/5throck/QuickDL/releases/tag/v1.0.0
