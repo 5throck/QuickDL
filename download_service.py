@@ -1,6 +1,6 @@
 import yt_dlp
 import os
-from i18n import t
+from i18n import t, format_duration
 
 def get_video_info(url):
     ydl_opts = {
@@ -10,8 +10,9 @@ def get_video_info(url):
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info_dict = ydl.extract_info(url, download=False)
         duration = info_dict.get('duration_string')
-        if not duration and info_dict.get('duration'):
-            duration = str(info_dict.get('duration')) + t("seconds_suffix")
+        raw_dur = info_dict.get('duration')
+        if not duration and raw_dur:
+            duration = format_duration(int(raw_dur))
             
         return {
             'title': info_dict.get('title'),

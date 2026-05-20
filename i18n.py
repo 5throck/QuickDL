@@ -65,3 +65,45 @@ def get_lang() -> str:
 def get_all() -> dict:
     """Return all translations dict (for Flask template injection)."""
     return dict(_translations)
+
+
+def format_duration(seconds: int) -> str:
+    """Return a locale-appropriate duration string for the current language.
+
+    Precondition: seconds >= 0. Caller must validate (None/negative values
+    should be treated as missing and skip this function entirely).
+    Thread safety: reads module-level _lang set once at startup via init().
+    Per-request reinit is not supported.
+    """
+    h = seconds // 3600
+    m = (seconds % 3600) // 60
+    s = seconds % 60
+    lang = _lang  # set once at startup
+
+    if lang in ('ko',):
+        if h:
+            return f"{h}시간 {m}분 {s}초"
+        if m:
+            return f"{m}분 {s}초"
+        return f"{s}초"
+
+    if lang in ('ja',):
+        if h:
+            return f"{h}時間{m}分{s}秒"
+        if m:
+            return f"{m}分{s}秒"
+        return f"{s}秒"
+
+    if lang in ('zh-TW', 'zh-CN'):
+        if h:
+            return f"{h}時{m}分{s}秒" if lang == 'zh-TW' else f"{h}时{m}分{s}秒"
+        if m:
+            return f"{m}分{s}秒"
+        return f"{s}秒"
+
+    # Default: HH:MM:SS or MM:SS (universal)
+    # All languages not explicitly listed (en, de, es, fr, pt, vi, ms, id, th, ru, it, ar)
+    # fall through here intentionally.
+    if h:
+        return f"{h}:{m:02d}:{s:02d}"
+    return f"{m}:{s:02d}"
