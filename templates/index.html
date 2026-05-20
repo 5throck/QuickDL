@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{ lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Downloader</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/styles.css">
+    <script>window.I18N = {{ i18n | tojson }};</script>
 </head>
 <body>
     <div class="glass-container">
@@ -17,20 +18,20 @@
                 </svg>
                 <h1>YouTube Fetcher</h1>
             </div>
-            <p class="subtitle">모던하고 빠른 유튜브 비디오 다운로더</p>
+            <p class="subtitle">{{ i18n['ui.subtitle'] }}</p>
         </header>
 
         <main>
             <form id="url-form" class="input-group">
-                <input type="url" id="url-input" placeholder="YouTube 링크를 여기에 붙여넣으세요..." required>
+                <input type="url" id="url-input" placeholder="{{ i18n['ui.placeholder'] }}" required>
                 <button type="submit" id="fetch-btn">
-                    <span>확인</span>
+                    <span>{{ i18n['ui.btn_fetch'] }}</span>
                 </button>
             </form>
 
             <div id="loading" class="hidden">
                 <div class="spinner"></div>
-                <p id="loading-text">비디오 정보를 불러오는 중...</p>
+                <p id="loading-text">{{ i18n['ui.loading_info'] }}</p>
             </div>
 
             <div id="video-card" class="hidden">
@@ -50,14 +51,14 @@
                         <polyline points="7 10 12 15 17 10"></polyline>
                         <line x1="12" y1="15" x2="12" y2="3"></line>
                     </svg>
-                    MP4 다운로드
+                    {{ i18n['ui.btn_download'] }}
                 </button>
             </div>
 
             <div id="status-message" class="hidden"></div>
         </main>
     </div>
-    
+
     <div class="background-elements">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>

@@ -21,7 +21,7 @@
 ## 설치
 
 ```bash
-git clone https://github.com/<your-username>/QuickDL.git
+git clone https://github.com/5throck/QuickDL.git
 cd QuickDL
 python install.py
 ```

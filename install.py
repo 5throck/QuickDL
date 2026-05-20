@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from i18n import init as i18n_init, t
 
 ROOT = Path(__file__).parent
 VENV = ROOT / ".venv"
@@ -26,52 +27,52 @@ def python_in_venv():
 
 def check_python_version():
     if sys.version_info < (3, 8):
-        print("❌ Python 3.8 이상이 필요합니다.")
+        print(t("install.python_bad"))
         sys.exit(1)
-    print(f"✅ Python {sys.version.split()[0]} 감지됨")
+    print(t("install.python_ok", version=sys.version.split()[0]))
 
 
 def check_ffmpeg():
     if shutil.which("ffmpeg"):
-        print("✅ ffmpeg 감지됨")
+        print(t("install.ffmpeg_ok"))
     else:
-        print("⚠️  ffmpeg가 설치되지 않았습니다. 고화질 MP4 병합이 제한될 수 있습니다.")
+        print(t("install.ffmpeg_missing"))
         if SYSTEM == "Windows":
-            print("   설치: https://ffmpeg.org/download.html 또는 'winget install ffmpeg'")
+            print(t("install.ffmpeg_win"))
         elif SYSTEM == "Darwin":
-            print("   설치: brew install ffmpeg")
+            print(t("install.ffmpeg_mac"))
         else:
-            print("   설치: sudo apt install ffmpeg  (또는 배포판 패키지 매니저)")
+            print(t("install.ffmpeg_linux"))
 
 
 def create_venv():
     py = python_in_venv()
     if VENV.exists():
         if py.exists():
-            print(f"✅ 가상환경 이미 존재: {VENV}")
+            print(t("install.venv_exists", path=VENV))
             return
-        print(f"⚠️  가상환경이 손상됨. 재생성 중: {VENV}")
+        print(t("install.venv_broken", path=VENV))
         shutil.rmtree(VENV)
-    print(f"📦 가상환경 생성 중: {VENV}")
+    print(t("install.venv_creating", path=VENV))
     run([sys.executable, "-m", "venv", str(VENV)])
 
 
 def install_packages():
-    print("📦 패키지 설치 중...")
+    print(t("install.packages_installing"))
     py = str(python_in_venv())
     run([py, "-m", "pip", "install", "--upgrade", "pip"])
     run([py, "-m", "pip", "install", "-r", str(ROOT / "requirements.txt")])
-    print("✅ 패키지 설치 완료")
+    print(t("install.packages_done"))
 
 
 def set_env_windows():
     """Windows: PYTHONIOENCODING을 사용자 환경변수로 설정 (UTF-8 콘솔 출력)."""
     current = os.environ.get("PYTHONIOENCODING", "")
     if current.lower() == "utf-8":
-        print("✅ PYTHONIOENCODING=utf-8 이미 설정됨")
+        print(t("install.env_already"))
         return
     run(["setx", "PYTHONIOENCODING", "utf-8"])
-    print("✅ PYTHONIOENCODING=utf-8 설정됨 (재로그인 후 적용)")
+    print(t("install.env_set_win"))
 
 
 def set_env_unix():
@@ -80,16 +81,16 @@ def set_env_unix():
     line = 'export PYTHONIOENCODING=utf-8\n'
     content = shell_rc.read_text(encoding="utf-8", errors="replace") if shell_rc.exists() else ""
     if "PYTHONIOENCODING" in content:
-        print("✅ PYTHONIOENCODING 이미 설정됨")
+        print(t("install.env_already"))
         return
     with open(shell_rc, "a", encoding="utf-8") as f:
         f.write(f"\n# QuickDL\n{line}")
-    print(f"✅ PYTHONIOENCODING=utf-8 → {shell_rc} 에 추가됨")
-    print(f"   적용: source {shell_rc}")
+    print(t("install.env_set_unix", rc=shell_rc))
+    print(t("install.env_source", rc=shell_rc))
 
 
 def set_environment():
-    print("🔧 환경변수 설정 중...")
+    print(t("install.env_setting"))
     if SYSTEM == "Windows":
         set_env_windows()
     else:
@@ -105,15 +106,16 @@ def print_done():
         cli_cmd = "python cli.py <URL>"
     print()
     print("=" * 50)
-    print("🎉 QuickDL 설치 완료!")
-    print(f"   데스크톱 앱: {run_cmd}")
-    print(f"   CLI:         {cli_cmd}")
+    print(t("install.done_title"))
+    print(t("install.done_desktop", cmd=run_cmd))
+    print(t("install.done_cli", cmd=cli_cmd))
     print("=" * 50)
 
 
 if __name__ == "__main__":
-    print("🚀 QuickDL 설치를 시작합니다...")
-    print(f"   OS: {SYSTEM} / Python: {sys.version.split()[0]}")
+    i18n_init()
+    print(t("install.start"))
+    print(t("install.os_info", system=SYSTEM, version=sys.version.split()[0]))
     check_python_version()
     check_ffmpeg()
     create_venv()

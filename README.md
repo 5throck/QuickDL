@@ -26,7 +26,7 @@ A lightweight YouTube video downloader with a desktop app, system tray, and CLI.
 ## Installation
 
 ```bash
-git clone https://github.com/<your-username>/QuickDL.git
+git clone https://github.com/5throck/QuickDL.git
 cd QuickDL
 python install.py
 ```

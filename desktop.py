@@ -11,6 +11,7 @@ import pystray
 
 sys.path.insert(0, str(Path(__file__).parent))
 from app import app as flask_app
+from i18n import init as i18n_init, t
 
 APP_NAME = "QuickDL"
 
@@ -51,6 +52,7 @@ def run_flask(port):
 
 
 def main():
+    i18n_init()
     port = find_free_port()
     url = f"http://127.0.0.1:{port}"
 
@@ -60,9 +62,9 @@ def main():
     if not wait_for_server(port):
         try:
             import tkinter.messagebox as mb
-            mb.showerror(APP_NAME, "서버를 시작하지 못했습니다.")
+            mb.showerror(APP_NAME, t("desktop.server_error_msg"))
         except Exception:
-            print("ERROR: 서버 시작 실패")
+            print(t("desktop.server_error_print"))
         sys.exit(1)
 
     event_queue = queue.Queue()
@@ -90,8 +92,8 @@ def main():
         menu=pystray.Menu(
             pystray.MenuItem(APP_NAME, None, enabled=False),
             pystray.Menu.SEPARATOR,
-            pystray.MenuItem("창 열기", tray_open),
-            pystray.MenuItem("종료", tray_quit),
+            pystray.MenuItem(t("desktop.tray_open"), tray_open),
+            pystray.MenuItem(t("desktop.tray_quit"), tray_quit),
         ),
     )
     threading.Thread(target=tray_icon.run, daemon=True).start()
