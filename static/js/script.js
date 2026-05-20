@@ -60,15 +60,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function setDownloadingState() {
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner';
+        spinner.style.cssText = 'width:20px;height:20px;border-width:2px;display:inline-block;vertical-align:middle;';
+        downloadBtn.replaceChildren(spinner, document.createTextNode(' ' + window.I18N['ui.downloading']));
+        downloadBtn.classList.add('downloading');
+        downloadBtn.disabled = true;
+    }
+
+    function resetDownloadBtn() {
+        downloadBtn.textContent = window.I18N['ui.btn_download'];
+        downloadBtn.classList.remove('downloading');
+        downloadBtn.disabled = false;
+    }
+
     downloadBtn.addEventListener('click', async () => {
         if (!currentUrl) return;
 
-        // Update Button State
-        const originalBtnText = downloadBtn.innerHTML;
-        // innerHTML used here for spinner + i18n text (server-controlled, not user input)
-        downloadBtn.innerHTML = '<div class="spinner" style="width: 20px; height: 20px; border-width: 2px;"></div> ' + window.I18N['ui.downloading'];
-        downloadBtn.classList.add('downloading');
+        setDownloadingState();
         hideStatus();
+
+        let pollTimer = null;
+
+        function stopPolling() {
+            if (pollTimer !== null) {
+                clearInterval(pollTimer);
+                pollTimer = null;
+            }
+            resetDownloadBtn();
+        }
 
         try {
             const response = await fetch('/api/download', {
@@ -80,16 +101,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || window.I18N['ui.error_download']);
+                resetDownloadBtn();
+                showStatus(data.error || window.I18N['ui.error_download'], 'error');
+                return;
             }
 
-            showStatus(window.I18N['ui.success'].replace('{filepath}', data.filepath), 'success');
+            const jobId = data.job_id;
+
+            pollTimer = setInterval(async () => {
+                try {
+                    const statusRes = await fetch(`/api/status/${jobId}`);
+                    const statusData = await statusRes.json();
+
+                    if (statusData.status === 'done') {
+                        stopPolling();
+                        showStatus(window.I18N['ui.success'].replace('{filepath}', statusData.filepath), 'success');
+                    } else if (statusData.status === 'error') {
+                        stopPolling();
+                        showStatus(statusData.error || window.I18N['ui.error_download'], 'error');
+                    }
+                } catch (_) {
+                    stopPolling();
+                    showStatus(window.I18N['ui.error_download'], 'error');
+                }
+            }, 2000);
 
         } catch (error) {
+            resetDownloadBtn();
             showStatus(error.message, 'error');
-        } finally {
-            downloadBtn.innerHTML = originalBtnText;
-            downloadBtn.classList.remove('downloading');
         }
     });
 

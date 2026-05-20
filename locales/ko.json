@@ -52,5 +52,7 @@
   "ui.error_download": "다운로드에 실패했습니다.",
   "ui.success": "✅ 성공! 파일 경로: {filepath}",
 
-  "shell.venv_missing": "[경고] .venv를 찾을 수 없습니다. python install.py 를 먼저 실행하세요."
+  "shell.venv_missing": "[경고] .venv를 찾을 수 없습니다. python install.py 를 먼저 실행하세요.",
+
+  "seconds_suffix": "초"
 }

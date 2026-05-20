@@ -52,5 +52,7 @@
   "ui.error_download": "ダウンロードに失敗しました。",
   "ui.success": "✅ 成功！ファイルを保存しました: {filepath}",
 
-  "shell.venv_missing": "[警告] .venv が見つかりません。次を実行してください: python install.py"
+  "shell.venv_missing": "[警告] .venv が見つかりません。次を実行してください: python install.py",
+
+  "seconds_suffix": "秒"
 }

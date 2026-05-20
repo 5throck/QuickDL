@@ -1,5 +1,6 @@
 import yt_dlp
 import os
+from i18n import t
 
 def get_video_info(url):
     ydl_opts = {
@@ -10,7 +11,7 @@ def get_video_info(url):
         info_dict = ydl.extract_info(url, download=False)
         duration = info_dict.get('duration_string')
         if not duration and info_dict.get('duration'):
-            duration = str(info_dict.get('duration')) + "초"
+            duration = str(info_dict.get('duration')) + t("seconds_suffix")
             
         return {
             'title': info_dict.get('title'),

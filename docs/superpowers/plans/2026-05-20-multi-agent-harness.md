@@ -1,6 +1,6 @@
 # Multi-Agent Harness Engineering Implementation Plan
 
-> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED: Use superpowers:subagent-driven-development (if subagents available) or superpowers:executing-plans to implement this plan. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Set up shared agent-config docs and per-tool MD files (Claude Code, Codex, Gemini CLI) so any AI tool can be used independently with full project context, plus add Malay (ms) and Indonesian (id) locale support.
 
@@ -32,7 +32,7 @@
 **Files:**
 - Create: `docs/agent-config/shared.md`
 
-- [ ] **Step 1: Create the directory and file**
+- [x] **Step 1: Create the directory and file**
 
 ```bash
 mkdir -p docs/agent-config
@@ -202,7 +202,7 @@ set QUICKDL_LANG=id && python cli.py <URL>  # Windows
 See `docs/agent-config/agents.md` for the full definition of each agent role (PM, Designer, Frontend Developer, i18n Expert, Security Officer, Backend Developer, QA Engineer).
 ```
 
-- [ ] **Step 2: Verify the file exists and is readable**
+- [x] **Step 2: Verify the file exists and is readable**
 
 ```bash
 python -c "
@@ -214,7 +214,7 @@ print(f'OK: {len(lines)} lines')
 
 Expected output: `OK: <N> lines` (no error)
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/agent-config/shared.md
@@ -228,7 +228,7 @@ git commit -m "Add shared agent-config core (shared.md)"
 **Files:**
 - Create: `docs/agent-config/agents.md`
 
-- [ ] **Step 1: Create the file**
+- [x] **Step 1: Create the file**
 
 Create `docs/agent-config/agents.md` with this exact content:
 
@@ -431,7 +431,7 @@ for p in sorted(pathlib.Path('locales').glob('*.json')):
 **Hands off to:** Backend Developer or Frontend Developer (bug fixes), PM (release decision)
 ```
 
-- [ ] **Step 2: Verify the file**
+- [x] **Step 2: Verify the file**
 
 ```bash
 python -c "
@@ -446,7 +446,7 @@ print('OK: all 7 roles present')
 
 Expected: `OK: all 7 roles present`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add docs/agent-config/agents.md
@@ -462,7 +462,7 @@ git commit -m "Add agent role definitions (agents.md)"
 
 Note: `C:/git/CLAUDE.md` is the workspace-level config. This file is the **project-level** override at `C:/git/youtube/CLAUDE.md`.
 
-- [ ] **Step 1: Create the file**
+- [x] **Step 1: Create the file**
 
 Create `CLAUDE.md` at the project root with this content:
 
@@ -517,7 +517,7 @@ Follow conventions in `docs/agent-config/shared.md`.
 Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 ```
 
-- [ ] **Step 2: Verify**
+- [x] **Step 2: Verify**
 
 ```bash
 python -c "
@@ -529,7 +529,7 @@ print('OK: references present')
 "
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add CLAUDE.md
@@ -543,7 +543,7 @@ git commit -m "Add project-level CLAUDE.md for Claude Code"
 **Files:**
 - Create: `AGENTS.md`
 
-- [ ] **Step 1: Create the file**
+- [x] **Step 1: Create the file**
 
 Create `AGENTS.md` at the project root:
 
@@ -595,7 +595,7 @@ Follow conventions in `docs/agent-config/shared.md`.
 Append to AI commits: `Co-Authored-By: Codex <noreply@openai.com>`
 ```
 
-- [ ] **Step 2: Verify**
+- [x] **Step 2: Verify**
 
 ```bash
 python -c "
@@ -608,7 +608,7 @@ print('OK')
 "
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add AGENTS.md
@@ -622,7 +622,7 @@ git commit -m "Add project-level AGENTS.md for Codex"
 **Files:**
 - Create: `GEMINI.md`
 
-- [ ] **Step 1: Create the file**
+- [x] **Step 1: Create the file**
 
 Create `GEMINI.md` at the project root:
 
@@ -691,7 +691,7 @@ Follow conventions in `docs/agent-config/shared.md`.
 Append to AI commits: `Co-Authored-By: Gemini <noreply@google.com>`
 ```
 
-- [ ] **Step 2: Verify**
+- [x] **Step 2: Verify**
 
 ```bash
 python -c "
@@ -704,7 +704,7 @@ print('OK')
 "
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add GEMINI.md
@@ -719,7 +719,7 @@ git commit -m "Add project-level GEMINI.md for Gemini CLI"
 - Create: `locales/ms.json`
 - Create: `locales/id.json`
 
-- [ ] **Step 1: Create `locales/ms.json`**
+- [x] **Step 1: Create `locales/ms.json`**
 
 ```json
 {
@@ -780,7 +780,7 @@ git commit -m "Add project-level GEMINI.md for Gemini CLI"
 }
 ```
 
-- [ ] **Step 2: Create `locales/id.json`**
+- [x] **Step 2: Create `locales/id.json`**
 
 ```json
 {
@@ -841,7 +841,7 @@ git commit -m "Add project-level GEMINI.md for Gemini CLI"
 }
 ```
 
-- [ ] **Step 3: Verify key count matches en.json**
+- [x] **Step 3: Verify key count matches en.json**
 
 ```bash
 python -c "
@@ -865,7 +865,7 @@ ms: OK (49 keys)
 id: OK (49 keys)
 ```
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add locales/ms.json locales/id.json
@@ -881,7 +881,7 @@ git commit -m "Add Malay (ms) and Indonesian (id) locale files"
 - Modify: `ytdl.bat`
 - Modify: `ytdl.sh`
 
-- [ ] **Step 1: Update `SUPPORTED` in `i18n.py`**
+- [x] **Step 1: Update `SUPPORTED` in `i18n.py`**
 
 Change line 8 of `i18n.py`:
 
@@ -893,7 +893,7 @@ SUPPORTED = {"ko", "en", "ja", "zh-TW", "zh-CN", "de", "es", "fr", "pt", "vi"}
 SUPPORTED = {"ko", "en", "ja", "zh-TW", "zh-CN", "de", "es", "fr", "pt", "vi", "ms", "id"}
 ```
 
-- [ ] **Step 2: Verify i18n.py accepts ms and id**
+- [x] **Step 2: Verify i18n.py accepts ms and id**
 
 ```bash
 python -c "
@@ -912,7 +912,7 @@ ms: 📥 Mendapatkan maklumat video...
 id: 📥 Mengambil informasi video...
 ```
 
-- [ ] **Step 3: Update `ytdl.bat`**
+- [x] **Step 3: Update `ytdl.bat`**
 
 Add two lines before `echo %MSG%` in the else block (after the `vi` line):
 
@@ -921,7 +921,7 @@ Add two lines before `echo %MSG%` in the else block (after the `vi` line):
     if "%QUICKDL_LANG%"=="id" set "MSG=[Peringatan] .venv tidak ditemukan. Jalankan terlebih dahulu: python install.py"
 ```
 
-- [ ] **Step 4: Update `ytdl.sh`**
+- [x] **Step 4: Update `ytdl.sh`**
 
 Add two lines before `*)` fallback in the case block (after the `vi)` line):
 
@@ -930,7 +930,7 @@ Add two lines before `*)` fallback in the case block (after the `vi)` line):
         id)    MSG="[Peringatan] .venv tidak ditemukan. Jalankan terlebih dahulu: python install.py" ;;
 ```
 
-- [ ] **Step 5: Verify shell scripts contain ms and id**
+- [x] **Step 5: Verify shell scripts contain ms and id**
 
 ```bash
 python -c "
@@ -943,7 +943,7 @@ for fname in ['ytdl.bat', 'ytdl.sh']:
 "
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add i18n.py ytdl.bat ytdl.sh
@@ -954,7 +954,7 @@ git commit -m "Add ms/id language support to i18n.py and shell launchers"
 
 ## Task 8: Final validation and push
 
-- [ ] **Step 1: Run full i18n audit**
+- [x] **Step 1: Run full i18n audit**
 
 ```bash
 python -c "
@@ -977,7 +977,7 @@ print('All locales OK' if all_ok else 'ISSUES FOUND')
 
 Expected: all 12 locale files show `OK`.
 
-- [ ] **Step 2: Verify all config files exist**
+- [x] **Step 2: Verify all config files exist**
 
 ```bash
 python -c "
@@ -995,7 +995,7 @@ for f in files:
 
 Expected: all 5 files show `OK`.
 
-- [ ] **Step 3: Verify SUPPORTED languages match locale files**
+- [x] **Step 3: Verify SUPPORTED languages match locale files**
 
 ```bash
 python -c "
@@ -1011,7 +1011,7 @@ print('In SUPPORTED but no locale file:', missing_locale_files or 'none')
 
 Expected: both lines show `none`.
 
-- [ ] **Step 4: Push to remote**
+- [x] **Step 4: Push to remote**
 
 ```bash
 git push origin master

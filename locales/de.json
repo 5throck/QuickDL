@@ -52,5 +52,7 @@
   "ui.error_download": "Download fehlgeschlagen.",
   "ui.success": "✅ Erfolgreich! Datei gespeichert unter: {filepath}",
 
-  "shell.venv_missing": "[Warnung] .venv nicht gefunden. Bitte ausführen: python install.py"
+  "shell.venv_missing": "[Warnung] .venv nicht gefunden. Bitte ausführen: python install.py",
+
+  "seconds_suffix": "Sek."
 }

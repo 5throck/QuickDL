@@ -52,5 +52,7 @@
   "ui.error_download": "Échec du téléchargement.",
   "ui.success": "✅ Succès ! Fichier enregistré dans : {filepath}",
 
-  "shell.venv_missing": "[Avertissement] .venv introuvable. Veuillez exécuter : python install.py"
+  "shell.venv_missing": "[Avertissement] .venv introuvable. Veuillez exécuter : python install.py",
+
+  "seconds_suffix": "s"
 }

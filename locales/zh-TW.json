@@ -52,5 +52,7 @@
   "ui.error_download": "下載失敗。",
   "ui.success": "✅ 成功！檔案已儲存至：{filepath}",
 
-  "shell.venv_missing": "[警告] 找不到 .venv，請執行：python install.py"
+  "shell.venv_missing": "[警告] 找不到 .venv，請執行：python install.py",
+
+  "seconds_suffix": "秒"
 }
