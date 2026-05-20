@@ -124,6 +124,35 @@ render_template('index.html', i18n=get_all(), lang=get_lang())
 - **No force push to master/main**
 - Remote: `https://github.com/5throck/QuickDL.git`
 
+### Branching Strategy
+
+All changes go through a feature branch → Pull Request → merge workflow:
+
+```bash
+# 1. Create a branch for each feature or fix
+git checkout -b feature/<feature-name>   # new feature
+git checkout -b fix/<bug-name>           # bug fix
+git checkout -b chore/<task-name>        # maintenance (docs, deps, config)
+
+# 2. Commit work on the branch
+git add <specific files>
+git commit -m "Add/Fix/Update <what and why>"
+
+# 3. Push and open a PR
+git push -u origin feature/<feature-name>
+gh pr create --title "<title>" --body "<description>"
+
+# 4. After review, merge into master via GitHub UI or:
+gh pr merge --squash
+```
+
+**Branch naming examples:**
+- `feature/thai-locale` — add Thai language support
+- `fix/tray-icon-crash` — fix pystray crash on macOS
+- `chore/update-yt-dlp` — bump yt-dlp dependency version
+
+**Never commit directly to `master`** after the initial setup.
+
 ---
 
 ## Running the Project
