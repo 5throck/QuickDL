@@ -16,6 +16,8 @@ if exist ".venv\Scripts\pythonw.exe" (
     if "%QUICKDL_LANG%"=="fr" set "MSG=[Avertissement] .venv introuvable. Veuillez d'abord executer : python install.py"
     if "%QUICKDL_LANG%"=="pt" set "MSG=[Aviso] .venv nao encontrado. Execute primeiro: python install.py"
     if "%QUICKDL_LANG%"=="vi" set "MSG=[Canh bao] Khong tim thay .venv. Hay chay truoc: python install.py"
+    if "%QUICKDL_LANG%"=="ms" set "MSG=[Amaran] .venv tidak dijumpai. Sila jalankan dahulu: python install.py"
+    if "%QUICKDL_LANG%"=="id" set "MSG=[Peringatan] .venv tidak ditemukan. Jalankan terlebih dahulu: python install.py"
     echo %MSG%
     pause
 )
