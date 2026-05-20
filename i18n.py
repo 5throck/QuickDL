@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from typing import Optional
 
-SUPPORTED = {"ko", "en", "ja", "zh-TW", "zh-CN", "de", "es", "fr", "pt", "vi"}
+SUPPORTED = {"ko", "en", "ja", "zh-TW", "zh-CN", "de", "es", "fr", "pt", "vi", "ms", "id"}
 DEFAULT_LANG = "en"
 _LOCALES_DIR = Path(__file__).parent / "locales"
 _translations: dict = {}

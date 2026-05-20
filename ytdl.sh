@@ -16,6 +16,8 @@ else
         fr)    MSG="[Avertissement] .venv introuvable. Veuillez d'abord exécuter : python install.py" ;;
         pt)    MSG="[Aviso] .venv não encontrado. Execute primeiro: python install.py" ;;
         vi)    MSG="[Cảnh báo] Không tìm thấy .venv. Hãy chạy trước: python install.py" ;;
+        ms)    MSG="[Amaran] .venv tidak dijumpai. Sila jalankan dahulu: python install.py" ;;
+        id)    MSG="[Peringatan] .venv tidak ditemukan. Jalankan terlebih dahulu: python install.py" ;;
         *)     MSG="[Warning] .venv not found. Please run: python install.py" ;;
     esac
     echo "$MSG"
