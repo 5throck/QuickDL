@@ -1,0 +1,6 @@
+flask
+yt-dlp
+flask-cors
+pywebview
+pystray
+pillow

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Downloader</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <div class="glass-container">
+        <header>
+            <div class="logo">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.582 6.186a2.506 2.506 0 0 0-1.762-1.766C18.265 4 12 4 12 4s-6.264 0-7.82.42a2.506 2.506 0 0 0-1.762 1.766C2 7.74 2 12 2 12s0 4.26.418 5.814a2.506 2.506 0 0 0 1.762 1.766C5.736 20 12 20 12 20s6.265 0 7.82-.42a2.506 2.506 0 0 0 1.762-1.766C22 16.26 22 12 22 12s0-4.26-.418-5.814z" fill="#FF0000"/>
+                    <path d="M10 15l5-3-5-3v6z" fill="#FFFFFF"/>
+                </svg>
+                <h1>YouTube Fetcher</h1>
+            </div>
+            <p class="subtitle">모던하고 빠른 유튜브 비디오 다운로더</p>
+        </header>
+
+        <main>
+            <form id="url-form" class="input-group">
+                <input type="url" id="url-input" placeholder="YouTube 링크를 여기에 붙여넣으세요..." required>
+                <button type="submit" id="fetch-btn">
+                    <span>확인</span>
+                </button>
+            </form>
+
+            <div id="loading" class="hidden">
+                <div class="spinner"></div>
+                <p id="loading-text">비디오 정보를 불러오는 중...</p>
+            </div>
+
+            <div id="video-card" class="hidden">
+                <div class="card-glass">
+                    <div class="thumbnail-wrapper">
+                        <img id="video-thumbnail" src="" alt="Thumbnail">
+                        <span id="video-duration" class="duration-badge"></span>
+                    </div>
+                    <div class="video-info">
+                        <h2 id="video-title"></h2>
+                        <p id="video-channel"></p>
+                    </div>
+                </div>
+                <button id="download-btn" class="download-action">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    MP4 다운로드
+                </button>
+            </div>
+
+            <div id="status-message" class="hidden"></div>
+        </main>
+    </div>
+    
+    <div class="background-elements">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
