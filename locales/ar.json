@@ -49,5 +49,7 @@
   "ui.error_download": "فشل التحميل.",
   "shell.venv_missing": "[تحذير] لم يُعثر على .venv. يرجى تشغيل: python install.py",
   "seconds_suffix": "ث",
-  "ui.success_download": "✅ جاهز للتحميل — انقر للحفظ"
+  "ui.success_download": "✅ جاهز للتحميل — انقر للحفظ",
+  "ui.progress_label": "جارٍ التحميل... {pct}%",
+  "ui.progress_speed": "{speed} — {eta}ث متبقية"
 }

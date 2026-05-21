@@ -49,5 +49,7 @@
   "ui.error_download": "ดาวน์โหลดล้มเหลว",
   "shell.venv_missing": "[คำเตือน] ไม่พบ .venv กรุณารัน: python install.py",
   "seconds_suffix": "วิ",
-  "ui.success_download": "✅ ดาวน์โหลดสำเร็จ — คลิกเพื่อบันทึก"
+  "ui.success_download": "✅ ดาวน์โหลดสำเร็จ — คลิกเพื่อบันทึก",
+  "ui.progress_label": "กำลังดาวน์โหลด... {pct}%",
+  "ui.progress_speed": "{speed} — อีก {eta}s"
 }

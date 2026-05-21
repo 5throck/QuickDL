@@ -49,5 +49,7 @@
   "ui.error_download": "Ошибка загрузки.",
   "shell.venv_missing": "[Предупреждение] .venv не найден. Выполните: python install.py",
   "seconds_suffix": "с",
-  "ui.success_download": "✅ Скачивание готово — нажмите для сохранения"
+  "ui.success_download": "✅ Скачивание готово — нажмите для сохранения",
+  "ui.progress_label": "Загрузка... {pct}%",
+  "ui.progress_speed": "{speed} — осталось {eta}с"
 }

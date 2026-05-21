@@ -49,5 +49,7 @@
   "ui.error_download": "Muat turun gagal.",
   "shell.venv_missing": "[Amaran] .venv tidak dijumpai. Sila jalankan dahulu: python install.py",
   "seconds_suffix": "det.",
-  "ui.success_download": "✅ Muat turun siap — klik untuk simpan"
+  "ui.success_download": "✅ Muat turun siap — klik untuk simpan",
+  "ui.progress_label": "Memuat turun... {pct}%",
+  "ui.progress_speed": "{speed} — {eta}s lagi"
 }

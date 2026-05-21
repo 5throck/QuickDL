@@ -46,6 +46,19 @@ def get_info():
         return jsonify({'error': str(e)}), 500
 
 
+def make_progress_hook(job_id):
+    def hook(d):
+        if d['status'] == 'downloading':
+            # _percent_str is deprecated in yt-dlp ≥2024; use byte counts
+            downloaded = d.get('downloaded_bytes', 0)
+            total = d.get('total_bytes') or d.get('total_bytes_estimate', 0)
+            if total:
+                _jobs[job_id]['progress'] = int(downloaded * 100 / total)
+            _jobs[job_id]['speed'] = d.get('_speed_str')
+            _jobs[job_id]['eta'] = d.get('eta')
+    return hook
+
+
 @app.route('/api/download', methods=['POST'])
 def download():
     data = request.json
@@ -56,12 +69,19 @@ def download():
         return jsonify({'error': t('app.error_invalid_url')}), 400
 
     job_id = str(uuid.uuid4())
-    _jobs[job_id] = {"status": "pending", "filename": None, "error": None}
+    _jobs[job_id] = {
+        "status": "pending",
+        "filename": None,
+        "error": None,
+        "progress": 0,
+        "speed": None,
+        "eta": None,
+    }
 
     def run():
         _jobs[job_id]["status"] = "running"
         try:
-            filepath = download_video(url, DOWNLOAD_DIR)
+            filepath = download_video(url, DOWNLOAD_DIR, progress_hook=make_progress_hook(job_id))
             filename = os.path.basename(filepath)
             _completed[job_id] = filename           # (1) write _completed FIRST (GIL ordering)
             _jobs[job_id].update({"status": "done", "filename": filename})  # (2) then mark done

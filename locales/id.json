@@ -49,5 +49,7 @@
   "ui.error_download": "Unduhan gagal.",
   "shell.venv_missing": "[Peringatan] .venv tidak ditemukan. Jalankan terlebih dahulu: python install.py",
   "seconds_suffix": "det.",
-  "ui.success_download": "✅ Unduhan siap — klik untuk simpan"
+  "ui.success_download": "✅ Unduhan siap — klik untuk simpan",
+  "ui.progress_label": "Mengunduh... {pct}%",
+  "ui.progress_speed": "{speed} — {eta}s lagi"
 }

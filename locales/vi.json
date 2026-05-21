@@ -49,5 +49,7 @@
   "ui.error_download": "Tải xuống thất bại.",
   "shell.venv_missing": "[Cảnh báo] Không tìm thấy .venv. Vui lòng chạy: python install.py",
   "seconds_suffix": "giây",
-  "ui.success_download": "✅ Đã tải xong — nhấp để lưu"
+  "ui.success_download": "✅ Đã tải xong — nhấp để lưu",
+  "ui.progress_label": "Đang tải... {pct}%",
+  "ui.progress_speed": "{speed} — còn {eta}s"
 }

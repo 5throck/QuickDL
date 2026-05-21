@@ -49,5 +49,7 @@
   "ui.error_download": "Falha no download.",
   "shell.venv_missing": "[Aviso] .venv não encontrado. Por favor execute: python install.py",
   "seconds_suffix": "s",
-  "ui.success_download": "✅ Download pronto — clique para salvar"
+  "ui.success_download": "✅ Download pronto — clique para salvar",
+  "ui.progress_label": "Baixando... {pct}%",
+  "ui.progress_speed": "{speed} — {eta}s restantes"
 }
