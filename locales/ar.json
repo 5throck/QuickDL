@@ -10,7 +10,6 @@
   "cli.saved": "✅ تم الحفظ: {saved_path}",
   "cli.done": "✅ اكتمل التحميل. تم الحفظ في: {output}",
   "cli.download_failed": "❌ فشل التحميل: {e}",
-
   "install.start": "🚀 بدء تثبيت QuickDL...",
   "install.os_info": "   نظام التشغيل: {system} / Python: {version}",
   "install.python_ok": "✅ تم اكتشاف Python {version}",
@@ -33,15 +32,13 @@
   "install.done_title": "🎉 اكتمل تثبيت QuickDL!",
   "install.done_desktop": "   تطبيق سطح المكتب: {cmd}",
   "install.done_cli": "   CLI:              {cmd}",
-
   "desktop.server_error_msg": "فشل تشغيل الخادم. تم اكتشاف تعارض في المنفذ أو خطأ.",
   "desktop.server_error_print": "خطأ: فشل تشغيل الخادم",
   "desktop.tray_open": "فتح النافذة",
   "desktop.tray_quit": "خروج",
-
   "app.error_url_required": "الرابط مطلوب.",
+  "app.error_invalid_url": "رابط غير صالح. يُدعم فقط الروابط http:// و https://.",
   "app.download_complete": "اكتمل التحميل.",
-
   "ui.subtitle": "أداة تحميل فيديو يوتيوب حديثة وسريعة",
   "ui.placeholder": "الصق رابط يوتيوب هنا...",
   "ui.btn_fetch": "استرجاع",
@@ -50,9 +47,12 @@
   "ui.error_info": "فشل تحميل معلومات الفيديو.",
   "ui.downloading": "جارٍ التحميل...",
   "ui.error_download": "فشل التحميل.",
-  "ui.success": "✅ نجاح! تم حفظ الملف في: {filepath}",
-
   "shell.venv_missing": "[تحذير] لم يُعثر على .venv. يرجى تشغيل: python install.py",
-
-  "seconds_suffix": "ث"
+  "seconds_suffix": "ث",
+  "ui.success_download": "✅ جاهز للتحميل — انقر للحفظ",
+  "ui.progress_label": "جارٍ التحميل... {pct}%",
+  "ui.progress_speed": "{speed} — {eta}ث متبقية",
+  "ui.btn_cancel": "إلغاء",
+  "ui.queue_title": "قائمة انتظار التحميل",
+  "ui.queue_empty": "لا توجد تنزيلات في قائمة الانتظار."
 }

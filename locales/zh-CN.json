@@ -10,7 +10,6 @@
   "cli.saved": "✅ 已保存：{saved_path}",
   "cli.done": "✅ 下载完成。已保存至：{output}",
   "cli.download_failed": "❌ 下载失败：{e}",
-
   "install.start": "🚀 开始安装 QuickDL...",
   "install.os_info": "   操作系统：{system} / Python：{version}",
   "install.python_ok": "✅ 已检测到 Python {version}",
@@ -33,15 +32,13 @@
   "install.done_title": "🎉 QuickDL 安装完成！",
   "install.done_desktop": "   桌面应用：{cmd}",
   "install.done_cli": "   CLI：         {cmd}",
-
   "desktop.server_error_msg": "服务器启动失败。检测到端口冲突或错误。",
   "desktop.server_error_print": "ERROR: Server failed to start",
   "desktop.tray_open": "打开窗口",
   "desktop.tray_quit": "退出",
-
   "app.error_url_required": "需要 URL。",
+  "app.error_invalid_url": "无效的URL。仅支持 http:// 和 https:// 链接。",
   "app.download_complete": "下载完成。",
-
   "ui.subtitle": "现代且快速的 YouTube 视频下载器",
   "ui.placeholder": "在此粘贴 YouTube 链接...",
   "ui.btn_fetch": "获取",
@@ -50,9 +47,12 @@
   "ui.error_info": "加载视频信息失败。",
   "ui.downloading": "下载中...",
   "ui.error_download": "下载失败。",
-  "ui.success": "✅ 成功！文件已保存至：{filepath}",
-
   "shell.venv_missing": "[警告] 未找到 .venv，请运行：python install.py",
-
-  "seconds_suffix": "秒"
+  "seconds_suffix": "秒",
+  "ui.success_download": "✅ 下载完成 — 点击保存",
+  "ui.progress_label": "下载中... {pct}%",
+  "ui.progress_speed": "{speed} — 剩余{eta}秒",
+  "ui.btn_cancel": "取消",
+  "ui.queue_title": "下载队列",
+  "ui.queue_empty": "队列中没有下载项目。"
 }

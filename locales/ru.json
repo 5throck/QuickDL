@@ -10,7 +10,6 @@
   "cli.saved": "✅ Сохранено: {saved_path}",
   "cli.done": "✅ Загрузка завершена. Сохранено в: {output}",
   "cli.download_failed": "❌ Ошибка загрузки: {e}",
-
   "install.start": "🚀 Начало установки QuickDL...",
   "install.os_info": "   ОС: {system} / Python: {version}",
   "install.python_ok": "✅ Обнаружен Python {version}",
@@ -33,15 +32,13 @@
   "install.done_title": "🎉 Установка QuickDL завершена!",
   "install.done_desktop": "   Десктоп-приложение: {cmd}",
   "install.done_cli": "   CLI:                {cmd}",
-
   "desktop.server_error_msg": "Не удалось запустить сервер. Обнаружен конфликт портов или ошибка.",
   "desktop.server_error_print": "ОШИБКА: Сервер не запустился",
   "desktop.tray_open": "Открыть окно",
   "desktop.tray_quit": "Выйти",
-
   "app.error_url_required": "Необходимо указать URL.",
+  "app.error_invalid_url": "Неверный URL. Поддерживаются только ссылки http:// и https://.",
   "app.download_complete": "Загрузка завершена.",
-
   "ui.subtitle": "Современный и быстрый загрузчик видео YouTube",
   "ui.placeholder": "Вставьте ссылку YouTube сюда...",
   "ui.btn_fetch": "Получить",
@@ -50,9 +47,12 @@
   "ui.error_info": "Не удалось загрузить информацию о видео.",
   "ui.downloading": "Загрузка...",
   "ui.error_download": "Ошибка загрузки.",
-  "ui.success": "✅ Готово! Файл сохранён: {filepath}",
-
   "shell.venv_missing": "[Предупреждение] .venv не найден. Выполните: python install.py",
-
-  "seconds_suffix": "с"
+  "seconds_suffix": "с",
+  "ui.success_download": "✅ Скачивание готово — нажмите для сохранения",
+  "ui.progress_label": "Загрузка... {pct}%",
+  "ui.progress_speed": "{speed} — осталось {eta}с",
+  "ui.btn_cancel": "Отмена",
+  "ui.queue_title": "Очередь загрузок",
+  "ui.queue_empty": "Нет загрузок в очереди."
 }

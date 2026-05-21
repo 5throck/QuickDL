@@ -10,7 +10,6 @@
   "cli.saved": "✅ 保存しました: {saved_path}",
   "cli.done": "✅ ダウンロード完了。保存先: {output}",
   "cli.download_failed": "❌ ダウンロード失敗: {e}",
-
   "install.start": "🚀 QuickDL のインストールを開始します...",
   "install.os_info": "   OS: {system} / Python: {version}",
   "install.python_ok": "✅ Python {version} を検出しました",
@@ -33,15 +32,13 @@
   "install.done_title": "🎉 QuickDL のインストールが完了しました！",
   "install.done_desktop": "   デスクトップアプリ: {cmd}",
   "install.done_cli": "   CLI:         {cmd}",
-
   "desktop.server_error_msg": "サーバーの起動に失敗しました。ポートの競合またはエラーが検出されました。",
   "desktop.server_error_print": "ERROR: Server failed to start",
   "desktop.tray_open": "ウィンドウを開く",
   "desktop.tray_quit": "終了",
-
   "app.error_url_required": "URL が必要です。",
+  "app.error_invalid_url": "無効なURLです。http://またはhttps://リンクのみ対応しています。",
   "app.download_complete": "ダウンロード完了。",
-
   "ui.subtitle": "モダンで高速な YouTube 動画ダウンローダー",
   "ui.placeholder": "YouTube リンクをここに貼り付けてください...",
   "ui.btn_fetch": "取得",
@@ -50,9 +47,12 @@
   "ui.error_info": "動画情報の読み込みに失敗しました。",
   "ui.downloading": "ダウンロード中...",
   "ui.error_download": "ダウンロードに失敗しました。",
-  "ui.success": "✅ 成功！ファイルを保存しました: {filepath}",
-
   "shell.venv_missing": "[警告] .venv が見つかりません。次を実行してください: python install.py",
-
-  "seconds_suffix": "秒"
+  "seconds_suffix": "秒",
+  "ui.success_download": "✅ ダウンロード完了 — クリックして保存",
+  "ui.progress_label": "ダウンロード中... {pct}%",
+  "ui.progress_speed": "{speed} — 残り{eta}秒",
+  "ui.btn_cancel": "キャンセル",
+  "ui.queue_title": "ダウンロードキュー",
+  "ui.queue_empty": "ダウンロード待ちはありません。"
 }

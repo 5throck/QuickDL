@@ -10,7 +10,6 @@
   "cli.saved": "✅ Salvo: {saved_path}",
   "cli.done": "✅ Download concluído. Salvo em: {output}",
   "cli.download_failed": "❌ Falha no download: {e}",
-
   "install.start": "🚀 Iniciando a instalação do QuickDL...",
   "install.os_info": "   SO: {system} / Python: {version}",
   "install.python_ok": "✅ Python {version} detectado",
@@ -33,15 +32,13 @@
   "install.done_title": "🎉 Instalação do QuickDL concluída!",
   "install.done_desktop": "   Aplicativo desktop: {cmd}",
   "install.done_cli": "   CLI:                {cmd}",
-
   "desktop.server_error_msg": "Falha ao iniciar o servidor. Conflito de porta ou erro detectado.",
   "desktop.server_error_print": "ERROR: Server failed to start",
   "desktop.tray_open": "Abrir janela",
   "desktop.tray_quit": "Sair",
-
   "app.error_url_required": "URL é obrigatória.",
+  "app.error_invalid_url": "URL inválida. Apenas links http:// e https:// são suportados.",
   "app.download_complete": "Download concluído.",
-
   "ui.subtitle": "Baixador de vídeos do YouTube moderno e rápido",
   "ui.placeholder": "Cole o link do YouTube aqui...",
   "ui.btn_fetch": "Obter",
@@ -50,9 +47,12 @@
   "ui.error_info": "Falha ao carregar informações do vídeo.",
   "ui.downloading": "Baixando...",
   "ui.error_download": "Falha no download.",
-  "ui.success": "✅ Sucesso! Arquivo salvo em: {filepath}",
-
   "shell.venv_missing": "[Aviso] .venv não encontrado. Por favor execute: python install.py",
-
-  "seconds_suffix": "s"
+  "seconds_suffix": "s",
+  "ui.success_download": "✅ Download pronto — clique para salvar",
+  "ui.progress_label": "Baixando... {pct}%",
+  "ui.progress_speed": "{speed} — {eta}s restantes",
+  "ui.btn_cancel": "Cancelar",
+  "ui.queue_title": "Fila de download",
+  "ui.queue_empty": "Nenhum download na fila."
 }

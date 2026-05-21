@@ -10,7 +10,6 @@
   "cli.saved": "✅ Đã lưu: {saved_path}",
   "cli.done": "✅ Tải xuống hoàn tất. Đã lưu vào: {output}",
   "cli.download_failed": "❌ Tải xuống thất bại: {e}",
-
   "install.start": "🚀 Đang bắt đầu cài đặt QuickDL...",
   "install.os_info": "   Hệ điều hành: {system} / Python: {version}",
   "install.python_ok": "✅ Đã phát hiện Python {version}",
@@ -33,15 +32,13 @@
   "install.done_title": "🎉 Cài đặt QuickDL hoàn tất!",
   "install.done_desktop": "   Ứng dụng desktop: {cmd}",
   "install.done_cli": "   CLI:               {cmd}",
-
   "desktop.server_error_msg": "Không thể khởi động máy chủ. Phát hiện xung đột cổng hoặc lỗi.",
   "desktop.server_error_print": "ERROR: Server failed to start",
   "desktop.tray_open": "Mở cửa sổ",
   "desktop.tray_quit": "Thoát",
-
   "app.error_url_required": "Yêu cầu URL.",
+  "app.error_invalid_url": "URL không hợp lệ. Chỉ hỗ trợ liên kết http:// và https://.",
   "app.download_complete": "Tải xuống hoàn tất.",
-
   "ui.subtitle": "Công cụ tải video YouTube hiện đại và nhanh chóng",
   "ui.placeholder": "Dán liên kết YouTube vào đây...",
   "ui.btn_fetch": "Lấy thông tin",
@@ -50,9 +47,12 @@
   "ui.error_info": "Không thể tải thông tin video.",
   "ui.downloading": "Đang tải xuống...",
   "ui.error_download": "Tải xuống thất bại.",
-  "ui.success": "✅ Thành công! Tệp đã được lưu vào: {filepath}",
-
   "shell.venv_missing": "[Cảnh báo] Không tìm thấy .venv. Vui lòng chạy: python install.py",
-
-  "seconds_suffix": "giây"
+  "seconds_suffix": "giây",
+  "ui.success_download": "✅ Đã tải xong — nhấp để lưu",
+  "ui.progress_label": "Đang tải... {pct}%",
+  "ui.progress_speed": "{speed} — còn {eta}s",
+  "ui.btn_cancel": "Hủy",
+  "ui.queue_title": "Hàng đợi tải xuống",
+  "ui.queue_empty": "Không có tải xuống trong hàng đợi."
 }

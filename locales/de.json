@@ -10,7 +10,6 @@
   "cli.saved": "✅ Gespeichert: {saved_path}",
   "cli.done": "✅ Download abgeschlossen. Gespeichert unter: {output}",
   "cli.download_failed": "❌ Download fehlgeschlagen: {e}",
-
   "install.start": "🚀 QuickDL-Installation wird gestartet...",
   "install.os_info": "   Betriebssystem: {system} / Python: {version}",
   "install.python_ok": "✅ Python {version} erkannt",
@@ -33,15 +32,13 @@
   "install.done_title": "🎉 QuickDL-Installation abgeschlossen!",
   "install.done_desktop": "   Desktop-App: {cmd}",
   "install.done_cli": "   CLI:         {cmd}",
-
   "desktop.server_error_msg": "Der Server konnte nicht gestartet werden. Port-Konflikt oder Fehler erkannt.",
   "desktop.server_error_print": "ERROR: Server failed to start",
   "desktop.tray_open": "Fenster öffnen",
   "desktop.tray_quit": "Beenden",
-
   "app.error_url_required": "URL ist erforderlich.",
+  "app.error_invalid_url": "Ungültige URL. Nur http:// und https://-Links werden unterstützt.",
   "app.download_complete": "Download abgeschlossen.",
-
   "ui.subtitle": "Moderner und schneller YouTube-Video-Downloader",
   "ui.placeholder": "YouTube-Link hier einfügen...",
   "ui.btn_fetch": "Abrufen",
@@ -50,9 +47,12 @@
   "ui.error_info": "Videoinformationen konnten nicht geladen werden.",
   "ui.downloading": "Wird heruntergeladen...",
   "ui.error_download": "Download fehlgeschlagen.",
-  "ui.success": "✅ Erfolgreich! Datei gespeichert unter: {filepath}",
-
   "shell.venv_missing": "[Warnung] .venv nicht gefunden. Bitte ausführen: python install.py",
-
-  "seconds_suffix": "Sek."
+  "seconds_suffix": "Sek.",
+  "ui.success_download": "✅ Download bereit — zum Speichern klicken",
+  "ui.progress_label": "Herunterladen... {pct}%",
+  "ui.progress_speed": "{speed} — noch {eta}s",
+  "ui.btn_cancel": "Abbrechen",
+  "ui.queue_title": "Download-Warteschlange",
+  "ui.queue_empty": "Keine Downloads in der Warteschlange."
 }

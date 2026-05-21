@@ -10,7 +10,6 @@
   "cli.saved": "✅ Enregistré : {saved_path}",
   "cli.done": "✅ Téléchargement terminé. Enregistré dans : {output}",
   "cli.download_failed": "❌ Échec du téléchargement : {e}",
-
   "install.start": "🚀 Démarrage de l'installation de QuickDL...",
   "install.os_info": "   Système : {system} / Python : {version}",
   "install.python_ok": "✅ Python {version} détecté",
@@ -33,15 +32,13 @@
   "install.done_title": "🎉 Installation de QuickDL terminée !",
   "install.done_desktop": "   Application bureau : {cmd}",
   "install.done_cli": "   CLI :                {cmd}",
-
   "desktop.server_error_msg": "Échec du démarrage du serveur. Conflit de port ou erreur détecté.",
   "desktop.server_error_print": "ERROR: Server failed to start",
   "desktop.tray_open": "Ouvrir la fenêtre",
   "desktop.tray_quit": "Quitter",
-
   "app.error_url_required": "L'URL est requise.",
+  "app.error_invalid_url": "URL invalide. Seuls les liens http:// et https:// sont pris en charge.",
   "app.download_complete": "Téléchargement terminé.",
-
   "ui.subtitle": "Téléchargeur de vidéos YouTube moderne et rapide",
   "ui.placeholder": "Collez le lien YouTube ici...",
   "ui.btn_fetch": "Récupérer",
@@ -50,9 +47,12 @@
   "ui.error_info": "Échec du chargement des informations de la vidéo.",
   "ui.downloading": "Téléchargement en cours...",
   "ui.error_download": "Échec du téléchargement.",
-  "ui.success": "✅ Succès ! Fichier enregistré dans : {filepath}",
-
   "shell.venv_missing": "[Avertissement] .venv introuvable. Veuillez exécuter : python install.py",
-
-  "seconds_suffix": "s"
+  "seconds_suffix": "s",
+  "ui.success_download": "✅ Téléchargement prêt — cliquer pour sauvegarder",
+  "ui.progress_label": "Téléchargement... {pct}%",
+  "ui.progress_speed": "{speed} — {eta}s restantes",
+  "ui.btn_cancel": "Annuler",
+  "ui.queue_title": "File d'attente",
+  "ui.queue_empty": "Aucun téléchargement en attente."
 }

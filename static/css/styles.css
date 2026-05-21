@@ -313,6 +313,23 @@ header {
     border: 1px solid rgba(52, 199, 89, 0.2);
 }
 
+#fetch-btn,
+#download-btn,
+.queue-cancel-btn {
+    min-height: 44px;
+}
+
+@media (min-width: 600px) {
+  #video-card .card-glass {
+    flex-direction: row;
+  }
+
+  /* .queue-item tablet layout — grid-template-columns defined here */
+  .queue-item {
+    grid-template-columns: 1fr auto;
+  }
+}
+
 @media (max-width: 600px) {
     .glass-container {
         padding: 30px 20px;
@@ -328,4 +345,136 @@ header {
     #fetch-btn {
         padding: 16px;
     }
+}
+
+/* Queue Panel */
+#queue-panel {
+    margin-top: 24px;
+}
+
+#queue-panel h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+#queue-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.queue-item {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+}
+
+.queue-item-title {
+    font-size: 14px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.queue-item-progress {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.queue-item-progress progress {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+}
+
+.queue-item-speed {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.queue-cancel-btn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    min-height: 44px;
+    transition: all 0.2s ease;
+}
+
+.queue-cancel-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.queue-download-link {
+    grid-column: 1 / -1;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.queue-empty-msg {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-color: #f0f2f5;
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --text-primary: #1a1a2e;
+    --text-secondary: rgba(26, 26, 46, 0.6);
+    /* --primary-color and --primary-color-hover intentionally unchanged */
+  }
+
+  .glass-container {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-glass {
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .download-action {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-primary);
+  }
+
+  .download-action:hover {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+
+  #url-input:focus {
+    border-color: rgba(255, 59, 48, 0.4);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.08);
+  }
+
+  #url-input::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+  }
+
+  .spinner {
+    border-color: rgba(0, 0, 0, 0.1);
+    border-top-color: var(--primary-color);
+  }
 }

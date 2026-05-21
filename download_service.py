@@ -1,18 +1,23 @@
-import yt_dlp
 import os
-from i18n import t
+import threading
+from typing import Optional, Callable
+from i18n import t, format_duration
 
-def get_video_info(url):
+
+def get_video_info(url: str, ydl_class=None) -> dict:
+    import yt_dlp as _yt_dlp
+    if ydl_class is None:
+        ydl_class = _yt_dlp.YoutubeDL
     ydl_opts = {
         'skip_download': True,
         'extract_flat': False,
     }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    with ydl_class(ydl_opts) as ydl:
         info_dict = ydl.extract_info(url, download=False)
         duration = info_dict.get('duration_string')
-        if not duration and info_dict.get('duration'):
-            duration = str(info_dict.get('duration')) + t("seconds_suffix")
-            
+        raw_dur = info_dict.get('duration')
+        if not duration and raw_dur:
+            duration = format_duration(int(raw_dur))
         return {
             'title': info_dict.get('title'),
             'thumbnail': info_dict.get('thumbnail'),
@@ -20,17 +25,37 @@ def get_video_info(url):
             'channel': info_dict.get('uploader')
         }
 
-def download_video(url, output_dir):
+
+def download_video(
+    url: str,
+    output_dir: str,
+    ydl_class=None,
+    progress_hook: Optional[Callable] = None,
+    cancel_event: Optional[threading.Event] = None,
+) -> str:
+    import yt_dlp as _yt_dlp
+    if ydl_class is None:
+        ydl_class = _yt_dlp.YoutubeDL
+
+    hooks = []
+    if progress_hook:
+        hooks.append(progress_hook)
+    if cancel_event:
+        def _cancel_hook(d):
+            if cancel_event.is_set():
+                raise Exception("Download cancelled")
+        hooks.append(_cancel_hook)
+
     ydl_opts = {
         'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
         'outtmpl': os.path.join(output_dir, '%(title).100s.%(ext)s'),
         'merge_output_format': 'mp4',
         'windowsfilenames': True,
-        'nocheckcertificate': True
+        'nocheckcertificate': True,
+        'progress_hooks': hooks,
     }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+    with ydl_class(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
         filename = ydl.prepare_filename(info)
         base, _ = os.path.splitext(filename)
-        # yt-dlp may merge and change the extension to mp4
         return base + '.mp4'
