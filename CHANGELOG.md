@@ -9,6 +9,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- Rewrite `CLAUDE.md`: add Doc intent header, CLI vs Desktop App hook matrix table, Claude Code Settings section, Git Hooks table — aligned with abap_vibe_coding reference structure
 - Move test files to `tests/` directory; add `pytest.ini` with `testpaths = tests`; add `tests/conftest.py` for automatic sys.path setup
 - Remove `docs/agent-config/` (merged Coding Conventions and Git strategy into `docs/context.md`); remove `docs/superpowers/` (Superpowers plugin artifacts)
 - Remove legacy root-level test files (`test_app.py`, `test_i18n.py`, `test_env.py`, `test_api.py`)
