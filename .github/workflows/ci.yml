@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          pip install flask yt-dlp flask-cors pytest
+          # pywebview and pystray excluded — require a display
+
+      - name: i18n key audit
+        run: |
+          python -c "
+          import json, sys
+          from pathlib import Path
+          base = json.loads(Path('locales/en.json').read_text(encoding='utf-8'))
+          failed = False
+          for p in sorted(Path('locales').glob('*.json')):
+              other = json.loads(p.read_text(encoding='utf-8'))
+              missing = set(base) - set(other)
+              extra = set(other) - set(base)
+              if missing or extra:
+                  print(f'FAIL {p.name}: missing={missing} extra={extra}')
+                  failed = True
+              else:
+                  print(f'OK   {p.name}')
+          sys.exit(1 if failed else 0)
+          "
+
+      - name: Run i18n unit tests
+        run: pytest test_i18n.py -v
+
+      - name: Run API tests
+        run: python test_app.py
