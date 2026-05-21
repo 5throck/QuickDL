@@ -21,7 +21,7 @@
 | Desktop shell | pywebview + pystray |
 | Frontend | Vanilla JS + Jinja2 templates |
 | i18n | Custom `i18n.py` (flat JSON locale files) |
-| Tests | pytest (`test_i18n.py`) + unittest (`test_app.py`) |
+| Tests | pytest (`tests/test_i18n.py`) + unittest (`tests/test_app.py`) |
 | CI | GitHub Actions (`.github/workflows/ci.yml`) — Python 3.8/3.10/3.12 |
 
 ---
@@ -139,7 +139,7 @@ quickdl/
 ## Git Conventions
 
 - **Commit messages:** English, imperative mood ("Add feature", not "Added feature")
-- **AI commits:** append `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+- **AI commits:** append the respective AI Co-Authored-By tag (see `CLAUDE.md`, `GEMINI.md`, or `AGENTS.md`)
 - **Stage specific files** — avoid `git add -A` or `git add .`
 - **No force push to master**
 

@@ -73,10 +73,8 @@ def main():
         win = webview.create_window(
             APP_NAME, url, width=900, height=700, min_size=(600, 500)
         )
-        # 창이 닫혀도 앱을 종료하지 않음 — 트레이에서 계속 접근 가능.
-        # pywebview 백엔드에 따라 창만 사라지고 프로세스는 유지됨.
-        # 완전 종료는 트레이 "종료" 메뉴를 통해서만 수행.
-        win.events.closed += lambda: event_queue.put("closed")
+        # 창이 닫힐 때 트레이로 가지 않고 앱을 완전히 종료하도록 수정
+        win.events.closed += lambda: event_queue.put("quit")
         return win
 
     def tray_open(_icon, _item):

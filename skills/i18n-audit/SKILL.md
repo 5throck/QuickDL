@@ -62,7 +62,7 @@ if extra:   print('EXTRA in SUPPORTED (no file):', extra)
 
 ### Step 4 — Run pytest i18n Suite
 ```bash
-pytest test_i18n.py -v
+pytest tests/test_i18n.py -v
 ```
 Must pass all 14 tests including `test_all_locales_have_same_keys`.
 

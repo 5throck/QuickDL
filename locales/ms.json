@@ -54,5 +54,8 @@
   "ui.progress_speed": "{speed} — {eta}s lagi",
   "ui.btn_cancel": "Batal",
   "ui.queue_title": "Giliran Muat Turun",
-  "ui.queue_empty": "Tiada muat turun dalam giliran."
+  "ui.queue_empty": "Tiada muat turun dalam giliran.",
+  "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
+  "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
 }

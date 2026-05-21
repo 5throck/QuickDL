@@ -9,6 +9,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
+- `desktop.py` — change window close behavior to fully quit the application instead of minimizing to the system tray
+- `install.py` — add cross-platform `ffmpeg` auto-installation logic (`winget`, `brew`, `apt`) and add new i18n keys to all 16 locales
+- Fix outdated test paths (`tests/`) in `skills/post-write-check/SKILL.md`, `skills/i18n-audit/SKILL.md`, `AGENTS.md`, and `docs/context.md`
+- Generalize AI `Co-Authored-By` rule in `docs/context.md` to be platform-agnostic
 - `ytdl.sh` — improve macOS/Linux launcher: add `pythonw` detection, 16-language error messages (th, ru, it, ar added), redirect error to stderr, use `exec` for clean process handoff
 - Rewrite `README.md` and `README_ko.md`: reflect current project structure (`tests/`, `locales/`, `i18n.py`, download queue, dark/light mode, 16 languages, CI badge, test/audit commands)
 - Fix `GEMINI.md`: replace broken `docs/agent-config/` references with `docs/context.md`; align response language to Korean; update agent role links to `agents/*.md`

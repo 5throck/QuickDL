@@ -54,5 +54,8 @@
   "ui.progress_speed": "{speed} — осталось {eta}с",
   "ui.btn_cancel": "Отмена",
   "ui.queue_title": "Очередь загрузок",
-  "ui.queue_empty": "Нет загрузок в очереди."
+  "ui.queue_empty": "Нет загрузок в очереди.",
+  "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
+  "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
 }

@@ -37,7 +37,7 @@
 
 | Agent | File | Role |
 |-------|------|------|
-| `qa` | [`agents/qa.md`](agents/qa.md) | test_app.py, test_i18n.py, cross-platform validation |
+| `qa` | [`agents/qa.md`](agents/qa.md) | tests/, cross-platform validation |
 
 ---
 
@@ -84,8 +84,8 @@ Phase 4 — QA Verification
 
 Phase 5 — Quality Gate (all must pass)
   bash scripts/audit.sh           exit 0
-  pytest test_i18n.py -v          14 passed
-  python test_app.py              9 passed
+  pytest tests/test_i18n.py -v    14 passed
+  pytest tests/test_app.py -v     9 passed
 
 Phase 6 — Finalization
   PM writes memory/YYYY-MM-DD.md

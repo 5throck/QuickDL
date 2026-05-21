@@ -54,5 +54,8 @@
   "ui.progress_speed": "{speed} — {eta}s remaining",
   "ui.btn_cancel": "Cancel",
   "ui.queue_title": "Download Queue",
-  "ui.queue_empty": "No downloads in queue."
+  "ui.queue_empty": "No downloads in queue.",
+  "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
+  "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
 }
