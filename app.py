@@ -48,7 +48,7 @@ def get_info():
 
 def make_progress_hook(job_id):
     def hook(d):
-        if d['status'] == 'downloading':
+        if d['status'] == 'downloading' and job_id in _jobs:
             # _percent_str is deprecated in yt-dlp ≥2024; use byte counts
             downloaded = d.get('downloaded_bytes', 0)
             total = d.get('total_bytes') or d.get('total_bytes_estimate', 0)
