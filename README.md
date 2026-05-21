@@ -13,7 +13,7 @@ A lightweight YouTube video downloader with a desktop app, system tray, web UI, 
 ## Features
 
 - **Desktop App** — Double-click to launch. No terminal needed.
-- **System Tray** — Minimize to tray, reopen anytime.
+- **System Tray** — Quick access tray icon for managing the app.
 - **Web UI** — Full browser interface with real-time download queue and progress.
 - **CLI** — `python cli.py <URL>` for quick terminal downloads.
 - **Best Quality** — Automatically merges best video + audio into MP4 (requires ffmpeg).
@@ -46,6 +46,7 @@ python install.py
 - Verifies Python version (3.8+)
 - Creates a virtual environment (`.venv/`)
 - Installs all dependencies from `requirements.txt`
+- Installs `ffmpeg` via package manager (winget, brew, apt) if missing
 - Sets required environment variables (`PYTHONIOENCODING=utf-8`)
 
 ---
@@ -68,7 +69,7 @@ python desktop.py
 ```
 
 The app opens a window with the full web UI and adds a tray icon.  
-Closing the window keeps the app running in the tray — right-click the tray icon to reopen or quit.
+Closing the window will completely exit the application. You can also quit via the tray icon.
 
 ### Web UI (browser)
 
