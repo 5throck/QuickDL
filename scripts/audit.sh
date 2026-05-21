@@ -44,7 +44,7 @@ fi
 # ── 3. Absolute path check in markdown files ─────────────────────────────────
 ABS_PATHS=$(grep -rEi "[A-Z]:\\\\|/Users/|/home/" . \
   --include="*.md" \
-  | grep -vE "node_modules|\.git|\.claude|\.venv|CLAUDE\.md|GEMINI\.md|docs/superpowers" \
+  | grep -vE "node_modules|\.git|\.claude|\.venv|CLAUDE\.md|GEMINI\.md" \
   2>/dev/null || true)
 if [[ -n "$ABS_PATHS" ]]; then
   echo "  [!] Absolute paths detected in docs:"
@@ -77,7 +77,6 @@ done < <(find . -name "*.md" \
   -not -path "*/.git/*" \
   -not -path "*/.claude/*" \
   -not -path "*/.venv/*" \
-  -not -path "*/docs/superpowers/*" \
   2>/dev/null)
 
 # ── 5. Script pairing check (.sh must have .ps1 and vice versa) ──────────────

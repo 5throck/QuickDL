@@ -1,20 +1,11 @@
 # CLAUDE.md — QuickDL (Project-Level)
 
-> **Shared context:** Read `docs/agent-config/shared.md` first.
-> **Agent roles:** See `docs/agent-config/agents.md`.
+> **Shared context:** Read `docs/context.md` first — it is the single source of truth.
+> **Agent roles:** See `agents/*.md` and `AGENTS.md`.
 
 ---
 
 ## Claude Code — Project-Specific Behavior
-
-### Superpowers Workflow
-
-Always follow the Superpowers skill hierarchy:
-1. **brainstorming** → design spec (`docs/superpowers/specs/`)
-2. **writing-plans** → implementation plan (`docs/superpowers/plans/`)
-3. **subagent-driven-development** → execute plan task-by-task
-
-Do NOT skip brainstorming for non-trivial changes. Even "simple" tasks need a design.
 
 ### Plan Mode
 

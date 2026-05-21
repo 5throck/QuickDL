@@ -45,9 +45,7 @@ quickdl/
 │   └── js/script.js        # Frontend JS (fetch API, download queue, polling)
 ├── agents/pm.md            # PM orchestrator agent definition
 ├── docs/
-│   ├── context.md          # THIS FILE
-│   ├── agent-config/       # Legacy agent + shared config (see agents/pm.md)
-│   └── superpowers/        # Design specs + implementation plans
+│   └── context.md          # THIS FILE — single source of truth for all AI tools
 ├── scripts/
 │   ├── audit.sh / audit.ps1        # Quality gate (CHANGELOG + i18n key parity)
 │   └── dev-sync.sh / dev-sync.ps1  # Full PR pipeline
@@ -67,35 +65,32 @@ quickdl/
 | Agent | File | Role |
 |-------|------|------|
 | PM | `agents/pm.md` | Orchestrates all work — planning, specs, task tracking, PR |
-| Designer | `docs/agent-config/agents.md` | HTML structure, CSS, accessibility |
-| Frontend | `docs/agent-config/agents.md` | JS logic, API wiring, i18n in templates |
-| i18n Expert | `docs/agent-config/agents.md` | locale files, i18n.py, launcher scripts |
-| Security Officer | `docs/agent-config/agents.md` | Read-only audit, injection/path risks |
-| Backend Developer | `docs/agent-config/agents.md` | Flask routes, download logic, CLI, installer |
-| QA Engineer | `docs/agent-config/agents.md` | test_*.py, cross-platform validation |
+| Designer | `agents/designer.md` | HTML structure, CSS, accessibility |
+| Frontend | `agents/frontend.md` | JS logic, API wiring, i18n in templates |
+| i18n Expert | `agents/i18n.md` | locale files, i18n.py, launcher scripts |
+| Security Officer | `agents/security.md` | Read-only audit, injection/path risks |
+| Backend Developer | `agents/backend.md` | Flask routes, download logic, CLI, installer |
+| QA Engineer | `agents/qa.md` | tests/, cross-platform validation |
 
 ---
 
 ## Skills
 
-| Skill | Trigger |
-|-------|---------|
-| `superpowers:brainstorming` | New feature or non-trivial change — design first |
-| `superpowers:writing-plans` | After brainstorming spec is approved |
-| `superpowers:subagent-driven-development` | Executing an implementation plan task-by-task |
-| `superpowers:finishing-a-development-branch` | After all tasks complete — verify, present options, merge/PR |
+| Skill | File | Trigger |
+|-------|------|---------|
+| `post-write-check` | `skills/post-write-check/SKILL.md` | After any Write/Edit to Python/JS files |
+| `i18n-audit` | `skills/i18n-audit/SKILL.md` | After any locale file or i18n.py change |
 
 ---
 
 ## Development Workflow
 
 ```
-1. /new-task "description"       → create task
-2. superpowers:brainstorming     → design spec → docs/superpowers/specs/
-3. superpowers:writing-plans     → impl plan   → docs/superpowers/plans/
-4. subagent-driven-development   → execute task-by-task with review
-5. /memlog                       → write session log to memory/YYYY-MM-DD.md
-6. /sync "feat: description"     → audit → commit → PR branch → gh pr create
+1. /new-task "description"   → create task
+2. Design (if non-trivial)   → write spec to docs/specs/YYYY-MM-DD-<topic>.md
+3. Implement                 → edit files; PostToolUse hook runs audit.sh automatically
+4. /memlog                   → write session log to memory/YYYY-MM-DD.md
+5. /sync "feat: description" → audit → commit → PR branch → gh pr create
 ```
 
 **PR rule:** All changes reach `master` via Pull Request — never direct push.
@@ -114,9 +109,10 @@ quickdl/
 | `download_service.py` | `get_video_info(url)`, `download_video(url, dir, progress_hook, cancel_event)` |
 | `i18n.py` | `init()`, `t(key)`, `get_all()`, `get_lang()`, `format_duration(seconds)` |
 | `locales/en.json` | i18n baseline — 56 keys, all other locales must match exactly |
-| `test_i18n.py` | 14 tests — format_duration + locale key parity (pytest) |
-| `test_app.py` | 9 tests — Flask API endpoints (unittest) |
-| `.github/workflows/ci.yml` | i18n audit + pytest + test_app.py on Python 3.8/3.10/3.12 |
+| `tests/test_i18n.py` | 14 tests — format_duration + locale key parity (pytest) |
+| `tests/test_app.py` | 9 tests — Flask API endpoints (unittest) |
+| `tests/manual/test_api.py` | Manual integration test — requires live server at :5000 |
+| `.github/workflows/ci.yml` | i18n audit + pytest tests/ on Python 3.8/3.10/3.12 |
 | `memory/MEMORY.md` | Index of all development session logs |
 | `CHANGELOG.md` | Keep-a-Changelog format; `[Unreleased]` section updated before each release |
 
@@ -130,6 +126,34 @@ quickdl/
 - **Web UI injection:** `render_template('index.html', i18n=get_all(), lang=get_lang())`
 - **JS access:** `window.I18N['key']`
 
+## Coding Conventions
+
+- **Python version:** 3.8+ — use `Optional[str]` from `typing`, NOT `str | None`
+- **Encoding:** UTF-8 everywhere; files opened with `encoding="utf-8"`
+- **Function size:** single responsibility; split functions that exceed ~30 lines
+- **Error handling:** no bare `except:`; catch specific exceptions
+- **Imports:** stdlib → third-party → local, separated by blank lines
+
+---
+
+## Git Conventions
+
+- **Commit messages:** English, imperative mood ("Add feature", not "Added feature")
+- **AI commits:** append `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+- **Stage specific files** — avoid `git add -A` or `git add .`
+- **No force push to master**
+
+### Branching Strategy
+
+```bash
+git checkout -b feature/<name>  # new feature
+git checkout -b fix/<name>      # bug fix
+git checkout -b chore/<name>    # maintenance (docs, deps, config)
+# → push + gh pr create → merge into master via PR only
+```
+
+---
+
 ## Running the Project
 
 ```bash
@@ -137,8 +161,6 @@ python app.py            # Web UI at http://localhost:5000
 python desktop.py        # Desktop app (pywebview + tray)
 python cli.py <URL>      # CLI download
 
-python test_app.py       # API tests (9 tests)
-pytest test_i18n.py -v   # i18n tests (14 tests)
-
+pytest tests/ -v         # All tests (23 tests)
 bash scripts/audit.sh    # Quality gate check
 ```

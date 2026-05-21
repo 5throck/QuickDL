@@ -45,8 +45,5 @@ jobs:
           sys.exit(1 if failed else 0)
           "
 
-      - name: Run i18n unit tests
-        run: pytest test_i18n.py -v
-
-      - name: Run API tests
-        run: pytest test_app.py -v
+      - name: Run tests
+        run: pytest tests/ -v

@@ -45,7 +45,7 @@ try {
 
 # ── 3. Absolute path check ────────────────────────────────────────────────────
 $mdFiles = Get-ChildItem -Recurse -Filter "*.md" | Where-Object {
-    $_.FullName -notmatch "node_modules|\.git|\.claude|\.venv|CLAUDE\.md|GEMINI\.md"
+    $_.FullName -notmatch "node_modules|\.git|\.claude|\.venv"
 }
 foreach ($f in $mdFiles) {
     $content = Get-Content $f.FullName -Raw -ErrorAction SilentlyContinue

@@ -1,11 +1,8 @@
 # test_app.py
 import json
-import sys
 import threading
 import unittest
 from unittest.mock import patch
-
-sys.path.insert(0, '.')
 
 
 class TestAppAPI(unittest.TestCase):
