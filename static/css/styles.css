@@ -410,3 +410,48 @@ header {
     font-size: 14px;
     font-weight: 500;
 }
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-color: #f0f2f5;
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --text-primary: #1a1a2e;
+    --text-secondary: rgba(26, 26, 46, 0.6);
+    /* --primary-color and --primary-color-hover intentionally unchanged */
+  }
+
+  .glass-container {
+    background: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-glass {
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .download-action {
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-primary);
+  }
+
+  .download-action:hover {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.15);
+  }
+
+  #url-input:focus {
+    border-color: rgba(255, 59, 48, 0.4);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 0 4px rgba(255, 59, 48, 0.08);
+  }
+
+  #url-input::placeholder {
+    color: rgba(0, 0, 0, 0.3);
+  }
+
+  .spinner {
+    border-color: rgba(0, 0, 0, 0.1);
+    border-top-color: var(--primary-color);
+  }
+}
