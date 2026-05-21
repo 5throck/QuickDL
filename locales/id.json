@@ -51,5 +51,6 @@
   "seconds_suffix": "det.",
   "ui.success_download": "✅ Unduhan siap — klik untuk simpan",
   "ui.progress_label": "Mengunduh... {pct}%",
-  "ui.progress_speed": "{speed} — {eta}s lagi"
+  "ui.progress_speed": "{speed} — {eta}s lagi",
+  "ui.btn_cancel": "Batal"
 }

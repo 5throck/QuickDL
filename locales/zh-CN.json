@@ -51,5 +51,6 @@
   "seconds_suffix": "秒",
   "ui.success_download": "✅ 下载完成 — 点击保存",
   "ui.progress_label": "下载中... {pct}%",
-  "ui.progress_speed": "{speed} — 剩余{eta}秒"
+  "ui.progress_speed": "{speed} — 剩余{eta}秒",
+  "ui.btn_cancel": "取消"
 }

@@ -51,5 +51,6 @@
   "seconds_suffix": "с",
   "ui.success_download": "✅ Скачивание готово — нажмите для сохранения",
   "ui.progress_label": "Загрузка... {pct}%",
-  "ui.progress_speed": "{speed} — осталось {eta}с"
+  "ui.progress_speed": "{speed} — осталось {eta}с",
+  "ui.btn_cancel": "Отмена"
 }

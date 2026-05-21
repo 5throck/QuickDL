@@ -24,6 +24,7 @@ os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 _jobs: dict = {}
 _completed: dict = {}  # job_id → filename; persists after _jobs entry is removed
+_cancel_events: dict = {}  # job_id → threading.Event
 
 
 @app.route('/')
@@ -78,15 +79,27 @@ def download():
         "eta": None,
     }
 
+    cancel_event = threading.Event()
+    _cancel_events[job_id] = cancel_event
+
     def run():
         _jobs[job_id]["status"] = "running"
         try:
-            filepath = download_video(url, DOWNLOAD_DIR, progress_hook=make_progress_hook(job_id))
+            filepath = download_video(
+                url, DOWNLOAD_DIR,
+                progress_hook=make_progress_hook(job_id),
+                cancel_event=cancel_event,
+            )
             filename = os.path.basename(filepath)
-            _completed[job_id] = filename           # (1) write _completed FIRST (GIL ordering)
-            _jobs[job_id].update({"status": "done", "filename": filename})  # (2) then mark done
+            _completed[job_id] = filename           # (1) write _completed FIRST
+            _jobs[job_id].update({"status": "done", "filename": filename})  # (2) then done
         except Exception as e:
-            _jobs[job_id].update({"status": "error", "error": str(e)})
+            if cancel_event.is_set():
+                _jobs[job_id].update({"status": "cancelled", "error": "Download cancelled by user"})
+            else:
+                _jobs[job_id].update({"status": "error", "error": str(e)})
+        finally:
+            _cancel_events.pop(job_id, None)  # always clean up cancel event
 
     threading.Thread(target=run, daemon=True).start()
     return jsonify({"job_id": job_id, "status": "pending"})
@@ -109,6 +122,15 @@ def serve_file(job_id):
         return jsonify({'error': 'File not found or already downloaded'}), 404
     _completed.pop(job_id, None)  # one-time link: consumed on first successful serve
     return send_from_directory(DOWNLOAD_DIR, filename, as_attachment=True)
+
+
+@app.route('/api/status/<job_id>', methods=['DELETE'])
+def cancel_job(job_id):
+    event = _cancel_events.get(job_id)  # peek — do NOT pop, thread still uses _jobs
+    if not event:
+        return jsonify({'error': 'Job not found or already finished'}), 404
+    event.set()  # signals cancel hook; thread catches exception and sets 'cancelled' status
+    return jsonify({'cancelled': True})
 
 
 if __name__ == '__main__':

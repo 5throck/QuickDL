@@ -51,5 +51,6 @@
   "seconds_suffix": "초",
   "ui.success_download": "✅ 다운로드 완료 — 클릭하여 저장",
   "ui.progress_label": "다운로드 중... {pct}%",
-  "ui.progress_speed": "{speed} — 남은 시간 {eta}초"
+  "ui.progress_speed": "{speed} — 남은 시간 {eta}초",
+  "ui.btn_cancel": "취소"
 }

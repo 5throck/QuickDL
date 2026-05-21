@@ -51,5 +51,6 @@
   "seconds_suffix": "s",
   "ui.success_download": "✅ Téléchargement prêt — cliquer pour sauvegarder",
   "ui.progress_label": "Téléchargement... {pct}%",
-  "ui.progress_speed": "{speed} — {eta}s restantes"
+  "ui.progress_speed": "{speed} — {eta}s restantes",
+  "ui.btn_cancel": "Annuler"
 }
