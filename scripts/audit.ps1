@@ -1,18 +1,17 @@
-# audit.ps1 — QuickDL quality gate (PowerShell)
+# scripts/audit.ps1 — QuickDL quality gate (PowerShell)
 # Runs automatically via PostToolUse hook after Write/Edit (Windows).
 # Also called by dev-sync.ps1 before committing.
-# Exit code non-zero → abort commit.
 
 Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 Set-Location $root
 
 $fail = $false
+Write-Host "--- Documentation Audit ---"
 
 # ── 1. CHANGELOG.md must exist ──────────────────────────────────────────────
 if (-not (Test-Path "CHANGELOG.md")) {
-    Write-Error "[audit] FAIL: CHANGELOG.md not found"
+    Write-Host "  [!] CHANGELOG.md not found — run /changelog to create it"
     $fail = $true
 }
 
@@ -30,30 +29,51 @@ for p in sorted(pathlib.Path("locales").glob("*.json")):
     missing = set(base) - set(other)
     extra   = set(other) - set(base)
     if missing or extra:
-        print(f"FAIL: {p.name} - missing={missing} extra={extra}")
+        print(f"  [!] {p.name}: missing={missing} extra={extra}")
         failed = True
-    else:
-        print(f"OK:   {p.name}")
 sys.exit(1 if failed else 0)
 '@
-
 $tmpFile = [System.IO.Path]::GetTempFileName() + ".py"
 Set-Content -Path $tmpFile -Value $pyScript -Encoding UTF8
 try {
     $output = python $tmpFile 2>&1
-    Write-Host $output
-    if ($output -match "^FAIL") {
-        $fail = $true
-    }
+    if ($output) { Write-Host $output }
+    if ($LASTEXITCODE -ne 0) { $fail = $true }
 } finally {
     Remove-Item $tmpFile -ErrorAction SilentlyContinue
 }
 
+# ── 3. Absolute path check ────────────────────────────────────────────────────
+$mdFiles = Get-ChildItem -Recurse -Filter "*.md" | Where-Object {
+    $_.FullName -notmatch "node_modules|\.git|\.claude|\.venv"
+}
+foreach ($f in $mdFiles) {
+    $content = Get-Content $f.FullName -Raw -ErrorAction SilentlyContinue
+    if ($content -match '[A-Z]:\\|/Users/|/home/') {
+        Write-Host "  [!] Absolute path detected in $($f.Name)"
+        $fail = $true
+    }
+}
+
+# ── 4. Script pairing check ───────────────────────────────────────────────────
+Get-ChildItem scripts -File | ForEach-Object {
+    $base = $_.BaseName
+    $ext  = $_.Extension
+    if ($ext -eq ".sh" -and -not (Test-Path "scripts\$base.ps1")) {
+        Write-Host "  [!] Missing .ps1 pair for scripts\$base.sh"
+        $fail = $true
+    }
+    elseif ($ext -eq ".ps1" -and -not (Test-Path "scripts\$base.sh")) {
+        Write-Host "  [!] Missing .sh pair for scripts\$base.ps1"
+        $fail = $true
+    }
+}
+
 # ── Result ───────────────────────────────────────────────────────────────────
 if ($fail) {
-    Write-Error "[audit] FAILED — fix issues above before committing"
+    Write-Host "Audit FAILED."
     exit 1
 }
 
-Write-Host "[audit] OK"
+Write-Host "Audit PASSED."
 exit 0

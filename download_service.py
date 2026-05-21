@@ -58,4 +58,10 @@ def download_video(
         info = ydl.extract_info(url, download=True)
         filename = ydl.prepare_filename(info)
         base, _ = os.path.splitext(filename)
-        return base + '.mp4'
+        # prepare_filename() returns the pre-merge stream filename; the actual
+        # merged output may have a different name on disk.  Prefer a real .mp4
+        # file that matches the base path, then fall back to the expected name.
+        import glob as _glob
+        candidates = _glob.glob(base + '.*')
+        mp4_files = [f for f in candidates if f.lower().endswith('.mp4')]
+        return mp4_files[0] if mp4_files else base + '.mp4'

@@ -1,20 +1,63 @@
-# CLAUDE.md — QuickDL (Project-Level)
+# CLAUDE.md — QuickDL
 
-> **Shared context:** Read `docs/agent-config/shared.md` first.
-> **Agent roles:** See `docs/agent-config/agents.md`.
+**Claude Code (CLI & Desktop App)** configuration for the QuickDL project.
+
+> **Doc intent:** This file is Claude Code-specific behavioral configuration.
+> Shared project context (architecture, tech stack, i18n system, git conventions) lives in [`docs/context.md`](docs/context.md).
+> Agent roles live in [`agents/*.md`](agents/) and [`AGENTS.md`](AGENTS.md).
 
 ---
 
-## Claude Code — Project-Specific Behavior
+## Session Start
 
-### Superpowers Workflow
+**At the start of every session, load the following skills:**
 
-Always follow the Superpowers skill hierarchy:
-1. **brainstorming** → design spec (`docs/superpowers/specs/`)
-2. **writing-plans** → implementation plan (`docs/superpowers/plans/`)
-3. **subagent-driven-development** → execute plan task-by-task
+1. [`skills/post-write-check/SKILL.md`](skills/post-write-check/SKILL.md) — mandatory QA chain after any Write/Edit
+2. [`skills/i18n-audit/SKILL.md`](skills/i18n-audit/SKILL.md) — locale key parity audit protocol
 
-Do NOT skip brainstorming for non-trivial changes. Even "simple" tasks need a design.
+Then read [`docs/context.md`](docs/context.md) for shared project context.
+
+---
+
+## Claude Code: CLI vs Desktop App
+
+Both the CLI and the Desktop App share the same `.claude/settings.json` and slash commands.
+
+> **Hook limitation**: `PostToolUse` hooks defined in `.claude/settings.json` do **not** fire in the Desktop App. After any Write/Edit, run `bash scripts/audit.sh` manually before committing.
+
+> **Recommended split**: Use CLI for automated workflows (hook-driven audit, multi-step tasks). Use Desktop App for PR monitoring and visual review.
+
+---
+
+## Claude Code Settings
+
+- `.claude/settings.json` — shared team config: PostToolUse audit hook (committed to repo)
+- `.claude/settings.local.json` — personal git/gh write permissions (gitignored)
+- `.claude/commands/` — slash commands: `/sync`, `/memlog`, `/new-task`
+
+Both files are loaded automatically by Claude Code.
+
+---
+
+## Hooks
+
+A `PostToolUse` hook fires after every `Write` or `Edit` call and runs `scripts/sync-md.sh`, which delegates to `scripts/audit.sh`.
+
+| Environment | Hook fires? | Action if not |
+|-------------|:-----------:|---------------|
+| Claude Code CLI | ✅ | Automatic |
+| Claude Code Desktop App | ❌ | Run `bash scripts/audit.sh` manually |
+| Gemini CLI | ❌ | Run `bash scripts/audit.sh` manually |
+
+`audit.sh` checks: CHANGELOG.md existence · locale key parity · absolute path detection · broken markdown links · `.sh`/`.ps1` script pairing.
+
+---
+
+## Behavioral Rules
+
+### Response Language
+
+Respond in **Korean** unless the user writes in English.
 
 ### Plan Mode
 
@@ -38,11 +81,27 @@ Each implementation task:
 3. Code-quality review subagent checks for issues
 4. Fix and re-review if issues found (max 3 iterations)
 
-### Response Language
+---
 
-Respond in **Korean** unless the user writes in English.
+## Git Hooks
 
-### Git
+Install project hooks once per clone:
+```bash
+git config core.hooksPath .githooks
+```
 
-Follow conventions in `docs/agent-config/shared.md`.
+| Hook | Trigger | Action |
+|------|---------|--------|
+| `.githooks/pre-commit` | Every commit | Blocks if `CHANGELOG.md` not staged |
+| `.githooks/pre-push` | Every push | Runs `audit.sh`; aborts on failure |
+
+---
+
+## Git
+
+Follow conventions in [`docs/context.md § Git Conventions`](docs/context.md#git-conventions).
 Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+
+---
+
+*Last Updated: 2026-05-21*

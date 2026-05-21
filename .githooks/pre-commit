@@ -1,0 +1,20 @@
+#!/bin/sh
+# .githooks/pre-commit
+# Enforce CHANGELOG.md update on every commit.
+# Install: git config core.hooksPath .githooks
+
+if ! git diff --cached --name-only | grep -q "^CHANGELOG.md$"; then
+  echo "==========================================================="
+  echo "❌  CHANGELOG.md must be updated for every commit."
+  echo "==========================================================="
+  echo ""
+  echo "Edit CHANGELOG.md under [Unreleased], stage it, and retry:"
+  echo "  git add CHANGELOG.md"
+  echo "  git commit ..."
+  echo ""
+  echo "To bypass (emergency only): git commit --no-verify"
+  echo "==========================================================="
+  exit 1
+fi
+
+exit 0

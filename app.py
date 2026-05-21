@@ -1,7 +1,9 @@
+import ipaddress
 import os
 import re
 import threading
 import time
+import urllib.parse
 import uuid
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_from_directory
@@ -29,7 +31,19 @@ def _cleanup_downloads(directory: str, keep_hours: int = 24) -> None:
 
 
 def _validate_url(url: str) -> bool:
-    return bool(url and _URL_PATTERN.match(url))
+    """Return True only for http/https URLs that do not resolve to private/loopback addresses."""
+    if not url or not _URL_PATTERN.match(url):
+        return False
+    try:
+        host = urllib.parse.urlparse(url).hostname or ''
+        addr = ipaddress.ip_address(host)
+        # Block SSRF via private, loopback, or link-local IP literals
+        if addr.is_private or addr.is_loopback or addr.is_link_local:
+            return False
+    except (ValueError, TypeError):
+        # host is a domain name (not an IP literal) — allow it through
+        pass
+    return True
 
 
 app = Flask(__name__)
@@ -40,6 +54,7 @@ i18n_init()
 DOWNLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'downloads')
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+_lock = threading.Lock()  # guards _jobs, _completed, _cancel_events
 _jobs: dict = {}
 _completed: dict = {}  # job_id → filename; persists after _jobs entry is removed
 _cancel_events: dict = {}  # job_id → threading.Event
@@ -52,7 +67,7 @@ def index():
 
 @app.route('/api/info', methods=['POST'])
 def get_info():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     url = data.get('url')
     if not url:
         return jsonify({'error': t('app.error_url_required')}), 400
@@ -67,20 +82,23 @@ def get_info():
 
 def make_progress_hook(job_id):
     def hook(d):
-        if d['status'] == 'downloading' and job_id in _jobs:
+        if d['status'] == 'downloading':
             # _percent_str is deprecated in yt-dlp ≥2024; use byte counts
             downloaded = d.get('downloaded_bytes', 0)
             total = d.get('total_bytes') or d.get('total_bytes_estimate', 0)
-            if total:
-                _jobs[job_id]['progress'] = int(downloaded * 100 / total)
-            _jobs[job_id]['speed'] = d.get('_speed_str')
-            _jobs[job_id]['eta'] = d.get('eta')
+            with _lock:
+                if job_id not in _jobs:
+                    return
+                if total:
+                    _jobs[job_id]['progress'] = int(downloaded * 100 / total)
+                _jobs[job_id]['speed'] = d.get('_speed_str')
+                _jobs[job_id]['eta'] = d.get('eta')
     return hook
 
 
 @app.route('/api/download', methods=['POST'])
 def download():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     url = data.get('url')
     if not url:
         return jsonify({'error': t('app.error_url_required')}), 400
@@ -88,20 +106,21 @@ def download():
         return jsonify({'error': t('app.error_invalid_url')}), 400
 
     job_id = str(uuid.uuid4())
-    _jobs[job_id] = {
-        "status": "pending",
-        "filename": None,
-        "error": None,
-        "progress": 0,
-        "speed": None,
-        "eta": None,
-    }
-
     cancel_event = threading.Event()
-    _cancel_events[job_id] = cancel_event
+    with _lock:
+        _jobs[job_id] = {
+            "status": "pending",
+            "filename": None,
+            "error": None,
+            "progress": 0,
+            "speed": None,
+            "eta": None,
+        }
+        _cancel_events[job_id] = cancel_event
 
     def run():
-        _jobs[job_id]["status"] = "running"
+        with _lock:
+            _jobs[job_id]["status"] = "running"
         try:
             filepath = download_video(
                 url, DOWNLOAD_DIR,
@@ -109,15 +128,18 @@ def download():
                 cancel_event=cancel_event,
             )
             filename = os.path.basename(filepath)
-            _completed[job_id] = filename           # (1) write _completed FIRST
-            _jobs[job_id].update({"status": "done", "filename": filename})  # (2) then done
+            with _lock:
+                _completed[job_id] = filename           # (1) write _completed FIRST
+                _jobs[job_id].update({"status": "done", "filename": filename})  # (2) then done
         except Exception as e:
-            if cancel_event.is_set():
-                _jobs[job_id].update({"status": "cancelled", "error": "Download cancelled by user"})
-            else:
-                _jobs[job_id].update({"status": "error", "error": str(e)})
+            with _lock:
+                if cancel_event.is_set():
+                    _jobs[job_id].update({"status": "cancelled", "error": "Download cancelled by user"})
+                else:
+                    _jobs[job_id].update({"status": "error", "error": str(e)})
         finally:
-            _cancel_events.pop(job_id, None)  # always clean up cancel event
+            with _lock:
+                _cancel_events.pop(job_id, None)  # always clean up cancel event
 
     threading.Thread(target=run, daemon=True).start()
     return jsonify({"job_id": job_id, "status": "pending"})
@@ -125,26 +147,29 @@ def download():
 
 @app.route('/api/status/<job_id>', methods=['GET'])
 def job_status(job_id):
-    job = _jobs.get(job_id)
-    if not job:
-        return jsonify({'error': 'Job not found'}), 404
-    if job["status"] in ("done", "error", "cancelled"):
-        _jobs.pop(job_id, None)
-    return jsonify(job)
+    with _lock:
+        job = _jobs.get(job_id)
+        if not job:
+            return jsonify({'error': 'Job not found'}), 404
+        snapshot = dict(job)
+        if job["status"] in ("done", "error", "cancelled"):
+            _jobs.pop(job_id, None)
+    return jsonify(snapshot)
 
 
 @app.route('/api/file/<job_id>', methods=['GET'])
 def serve_file(job_id):
-    filename = _completed.get(job_id)
+    with _lock:
+        filename = _completed.pop(job_id, None)  # one-time link: consumed on first successful serve
     if not filename:
         return jsonify({'error': 'File not found or already downloaded'}), 404
-    _completed.pop(job_id, None)  # one-time link: consumed on first successful serve
     return send_from_directory(DOWNLOAD_DIR, filename, as_attachment=True)
 
 
 @app.route('/api/status/<job_id>', methods=['DELETE'])
 def cancel_job(job_id):
-    event = _cancel_events.get(job_id)  # peek — do NOT pop, thread still uses _jobs
+    with _lock:
+        event = _cancel_events.get(job_id)  # peek — do NOT pop, thread still uses _jobs
     if not event:
         return jsonify({'error': 'Job not found or already finished'}), 404
     event.set()  # signals cancel hook; thread catches exception and sets 'cancelled' status

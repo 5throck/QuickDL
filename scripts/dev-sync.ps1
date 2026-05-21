@@ -1,23 +1,23 @@
-# dev-sync.ps1 — QuickDL full sync pipeline (PowerShell)
+# scripts/dev-sync.ps1 — QuickDL full sync pipeline (PowerShell)
 # Usage: .\scripts\dev-sync.ps1 "feat: description"
-#
-# Pipeline:
-#   1. audit.ps1         — abort on failure
-#   2. memory/YYYY-MM-DD.md — auto-create if missing
-#   3. MEMORY.md index   — update entry
-#   4. git add + commit
-#   5. On master/main → create pr/<date>-<slug> branch, reset master to HEAD~1
-#   6. git push + gh pr create
 
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$Message
+    [Parameter(Mandatory=$false)]
+    [string]$Message = ""
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 Set-Location $root
+
+if ([string]::IsNullOrWhiteSpace($Message)) {
+    $Message = Read-Host "Enter commit message (e.g., feat: add feature)"
+}
+if ([string]::IsNullOrWhiteSpace($Message)) {
+    Write-Error "Error: Commit message is required."
+    exit 1
+}
 
 # ── 1. Audit ─────────────────────────────────────────────────────────────────
 Write-Host "==> Running audit..."
@@ -30,60 +30,74 @@ $logFile = "memory\$today.md"
 New-Item -ItemType Directory -Force -Path "memory" | Out-Null
 
 if (-not (Test-Path $logFile)) {
+    $time = Get-Date -Format "HH:mm"
     @"
-## $today — Development Log
+# Development Log — $today
 
-<!-- Fill in: Files, Purpose, Decisions, Issues -->
+<!-- Auto-created by dev-sync.ps1. Fill in entries below. -->
 
-## Session Summary
-- **Files**:
-- **Purpose**:
-- **Decisions**:
-- **Issues**:
+## $time — Session
+
+<!-- Describe what was done today -->
 "@ | Set-Content -Path $logFile -Encoding UTF8
     Write-Host "==> Created $logFile"
 }
 
-# ── 3. Update MEMORY.md index ─────────────────────────────────────────────────
-$memoryIndex = "memory\MEMORY.md"
-if (Test-Path $memoryIndex) {
-    $content = Get-Content $memoryIndex -Raw
-    if ($content -notmatch [regex]::Escape($today)) {
-        Add-Content -Path $memoryIndex -Value "| [$today]($today.md) | $Message |"
-        Write-Host "==> Updated MEMORY.md"
+# ── 3. Update MEMORY.md index (insert after separator row) ───────────────────
+$indexFile = "memory\MEMORY.md"
+if ((Test-Path $indexFile) -and -not (Select-String -Path $indexFile -Pattern [regex]::Escape($today) -Quiet)) {
+    $summary = ($Message -replace '^[^:]+:\s*', '')
+    $newEntry = "| [$today]($today.md) | $summary |"
+    $lines = Get-Content $indexFile
+    $output = @()
+    foreach ($line in $lines) {
+        $output += $line
+        if ($line -match '^\|[-| ]+\|$') {
+            $output += $newEntry
+        }
     }
+    $output | Set-Content -Path $indexFile -Encoding UTF8
+    Write-Host "==> Updated MEMORY.md"
 }
 
 # ── 4. Stage and commit ──────────────────────────────────────────────────────
-Write-Host "==> Staging changes..."
+Write-Host "==> Committing..."
 git add -A
 $commitMsg = "$Message`n`nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
 git commit -m $commitMsg
 
-# ── 5. Branch strategy: PR branch from master ────────────────────────────────
+# ── 5. Branch strategy ───────────────────────────────────────────────────────
 $branch = git branch --show-current
+$baseBranch = $branch
+
 if ($branch -eq "master" -or $branch -eq "main") {
-    $slug = $Message -replace '[^a-zA-Z0-9]', '-' `
-                     -replace '-+', '-' `
-                     -replace '^-|-$', ''
-    $slug = $slug.ToLower().Substring(0, [Math]::Min(40, $slug.Length))
+    $slug = $Message.ToLower() -replace '[^a-z0-9]', '-' -replace '-+', '-' -replace '^-|-$', ''
+    $slug = $slug.Substring(0, [Math]::Min(40, $slug.Length))
     $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
     $prBranch = "pr/$timestamp-$slug"
 
     Write-Host "==> Creating PR branch: $prBranch"
-    git checkout -b $prBranch
-    git checkout $branch
+    $commitHash = git rev-parse HEAD
+    git checkout -b $prBranch $commitHash
+    git checkout $baseBranch
     git reset --hard HEAD~1
-
-    # ── 6. Push PR branch and open PR ───────────────────────────────────────
     git checkout $prBranch
-    git push -u origin $prBranch
+    $branch = $prBranch
+}
 
-    $body = "## Summary`n`n- $Message`n`n## Test Plan`n`n- [ ] Tests pass`n- [ ] i18n audit clean`n`n:robot: Generated with [Claude Code](https://claude.com/claude-code)"
-    Write-Host "==> Opening PR..."
-    gh pr create --title $Message --body $body
+# ── 6. Push ──────────────────────────────────────────────────────────────────
+Write-Host "==> Pushing $branch..."
+git push -u origin $branch
+
+# ── 7. Create PR (skip if already exists) ────────────────────────────────────
+$existingPr = gh pr view --json number -q '.number' 2>$null
+if ($existingPr) {
+    Write-Host "==> PR #$existingPr already exists — skipping creation."
+    gh pr view --json url -q '.url'
 } else {
-    git push
+    $body = "## Summary`n`n- $Message`n`n## Test Plan`n`n- [ ] ``bash scripts/audit.sh`` passes`n- [ ] ``pytest test_i18n.py -v`` passes`n- [ ] ``python test_app.py`` passes`n`n:robot: Generated with [Claude Code](https://claude.com/claude-code)"
+    Write-Host "==> Opening PR..."
+    gh pr create --title $Message --body $body --base $baseBranch --head $branch
 }
 
 Write-Host "==> Done."

@@ -1,24 +1,25 @@
 #!/usr/bin/env bash
-# audit.sh — QuickDL quality gate
-# Runs automatically via PostToolUse hook after Write/Edit.
+# scripts/audit.sh — QuickDL quality gate
+# Runs automatically via PostToolUse hook (sync-md.sh wrapper) after Write/Edit.
 # Also called by dev-sync.sh before committing.
 # Exit code non-zero → abort commit.
+# Intentionally omits 'set -e' — runs all checks to report every issue at once.
 
-set -euo pipefail
 cd "$(dirname "$0")/.."
 
 FAIL=0
+echo "--- Documentation Audit ---"
 
 # ── 1. CHANGELOG.md must exist ──────────────────────────────────────────────
 if [[ ! -f CHANGELOG.md ]]; then
-  echo "[audit] FAIL: CHANGELOG.md not found" >&2
+  echo "  [!] CHANGELOG.md not found — run /changelog to create it"
   FAIL=1
 fi
 
 # ── 2. locales/ key parity (all files must match en.json) ───────────────────
 if command -v python &>/dev/null || command -v python3 &>/dev/null; then
   PY=$(command -v python3 2>/dev/null || command -v python)
-  RESULT=$($PY - <<'PYEOF'
+  $PY - <<'PYEOF'
 import json, pathlib, sys
 base_path = pathlib.Path("locales/en.json")
 if not base_path.exists():
@@ -31,24 +32,75 @@ for p in sorted(pathlib.Path("locales").glob("*.json")):
     missing = set(base) - set(other)
     extra   = set(other) - set(base)
     if missing or extra:
-        print(f"FAIL: {p.name} — missing={missing} extra={extra}")
+        print(f"  [!] {p.name}: missing={missing} extra={extra}")
         failed = True
-    else:
-        print(f"OK:   {p.name}")
 sys.exit(1 if failed else 0)
 PYEOF
-  )
-  echo "$RESULT"
-  if echo "$RESULT" | grep -q "^FAIL"; then
+  if [[ $? -ne 0 ]]; then
     FAIL=1
   fi
 fi
 
+# ── 3. Absolute path check in markdown files ─────────────────────────────────
+ABS_PATHS=$(grep -rEi "[A-Z]:\\\\|/Users/|/home/" . \
+  --include="*.md" \
+  | grep -vE "node_modules|\.git|\.claude|\.venv|CLAUDE\.md|GEMINI\.md" \
+  2>/dev/null || true)
+if [[ -n "$ABS_PATHS" ]]; then
+  echo "  [!] Absolute paths detected in docs:"
+  echo "$ABS_PATHS" | head -n 5
+  FAIL=1
+fi
+
+# ── 4. Broken markdown link check ────────────────────────────────────────────
+while IFS= read -r file; do
+  # Backslash in markdown links (Windows-only style)
+  if grep -q '\[.*\](.*\\\\.*)'  "$file" 2>/dev/null; then
+    echo "  [!] Backslash in link: $file — use forward slashes"
+    FAIL=1
+  fi
+
+  links=$(grep -o '\[.*\]([^#)]*)' "$file" 2>/dev/null \
+    | sed -E 's/.*\]\(([^# )]+)\).*/\1/' \
+    | grep -vE "^http|^mailto:|^#|YYYY-MM-DD" || true)
+  for link in $links; do
+    decoded=$(echo "$link" | sed 's/%20/ /g')
+    dir=$(dirname "$file")
+    target="$dir/$decoded"
+    if [[ ! -e "$target" ]]; then
+      echo "  [!] Broken link in $file → $link"
+      FAIL=1
+    fi
+  done
+done < <(find . -name "*.md" \
+  -not -path "*/node_modules/*" \
+  -not -path "*/.git/*" \
+  -not -path "*/.claude/*" \
+  -not -path "*/.venv/*" \
+  2>/dev/null)
+
+# ── 5. Script pairing check (.sh must have .ps1 and vice versa) ──────────────
+for script in scripts/*; do
+  base=$(basename "$script" | sed 's/\.[^.]*$//')
+  ext="${script##*.}"
+  if [[ "$ext" == "sh" ]]; then
+    if [[ ! -f "scripts/${base}.ps1" ]]; then
+      echo "  [!] Missing .ps1 pair for scripts/${base}.sh"
+      FAIL=1
+    fi
+  elif [[ "$ext" == "ps1" ]]; then
+    if [[ ! -f "scripts/${base}.sh" ]]; then
+      echo "  [!] Missing .sh pair for scripts/${base}.ps1"
+      FAIL=1
+    fi
+  fi
+done
+
 # ── Result ───────────────────────────────────────────────────────────────────
 if [[ $FAIL -ne 0 ]]; then
-  echo "[audit] FAILED — fix issues above before committing" >&2
+  echo "Audit FAILED."
   exit 1
 fi
 
-echo "[audit] OK"
+echo "Audit PASSED."
 exit 0

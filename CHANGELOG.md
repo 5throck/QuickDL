@@ -8,6 +8,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- `ytdl.sh` — improve macOS/Linux launcher: add `pythonw` detection, 16-language error messages (th, ru, it, ar added), redirect error to stderr, use `exec` for clean process handoff
+- Rewrite `README.md` and `README_ko.md`: reflect current project structure (`tests/`, `locales/`, `i18n.py`, download queue, dark/light mode, 16 languages, CI badge, test/audit commands)
+- Fix `GEMINI.md`: replace broken `docs/agent-config/` references with `docs/context.md`; align response language to Korean; update agent role links to `agents/*.md`
+- Update `agents/qa.md`: replace `test_app.py`/`test_i18n.py` direct references with `tests/` paths; update test count to 23; update run command to `pytest tests/ -v`
+- Update `memory/MEMORY.md`: reflect all PRs since initial entry
+- Rewrite `CLAUDE.md`: add Doc intent header, CLI vs Desktop App hook matrix table, Claude Code Settings section, Git Hooks table — aligned with abap_vibe_coding reference structure
+- Move test files to `tests/` directory; add `pytest.ini` with `testpaths = tests`; add `tests/conftest.py` for automatic sys.path setup
+- Remove `docs/agent-config/` (merged Coding Conventions and Git strategy into `docs/context.md`); remove `docs/superpowers/` (Superpowers plugin artifacts)
+- Remove legacy root-level test files (`test_app.py`, `test_i18n.py`, `test_env.py`, `test_api.py`)
+- Move manual integration script to `tests/manual/test_api.py`
+- Simplify CI: single `pytest tests/ -v` step replaces separate i18n and API test steps
+- Update `CLAUDE.md` to reference `docs/context.md` as SSoT; remove Superpowers workflow section
+- Clean up `scripts/audit.sh` and `audit.ps1` to remove now-deleted `docs/superpowers` exclusion rules
+
+### Fixed
+- `download_service.py` — use glob to find actual merged `.mp4` on disk instead of relying on `prepare_filename()` pre-merge path
+- `app.py` — replace `request.json` with `request.get_json(silent=True) or {}` to prevent `AttributeError` on missing `Content-Type` header
+- `app.py` — add `threading.Lock` guarding all accesses to `_jobs`, `_completed`, and `_cancel_events` to eliminate data races
+- `app.py` — SSRF protection: block private, loopback, and link-local IP literals in `_validate_url()`
+- `static/js/script.js` — fix memory leak in download queue: remove `<li>` element and delete `queue` Map entry after download link click
+- `scripts/audit.sh` — fix locale key-parity check to use Python process exit code instead of stdout capture
+- `.github/workflows/ci.yml` — run API tests via `pytest test_app.py -v` for consistent output and exit code
+
 ---
 
 ## [1.2.0] — 2026-05-20

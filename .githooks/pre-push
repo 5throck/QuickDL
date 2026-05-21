@@ -1,0 +1,14 @@
+#!/bin/sh
+# .githooks/pre-push
+# Run audit before pushing to remote.
+# Install: git config core.hooksPath .githooks
+
+echo "--- Pre-Push Audit ---"
+bash scripts/audit.sh
+if [ $? -ne 0 ]; then
+  echo "❌  Audit failed — push aborted. Fix issues and retry."
+  exit 1
+fi
+
+echo "✅  Audit passed — proceeding with push."
+exit 0

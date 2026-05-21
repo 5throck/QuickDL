@@ -1,3 +1,10 @@
+---
+name: memlog
+description: Write or update today's development log entry in memory/YYYY-MM-DD.md and update the MEMORY.md index.
+argument-hint: "[session summary]"
+allowed-tools: ["Read", "Write", "Edit", "Bash"]
+---
+
 # /memlog — Write Development Log
 
 Write or update today's development log entry in `memory/YYYY-MM-DD.md`.
@@ -12,7 +19,7 @@ Write or update today's development log entry in `memory/YYYY-MM-DD.md`.
 
 1. Determines today's date (YYYY-MM-DD)
 2. Opens (or creates) `memory/YYYY-MM-DD.md`
-3. Asks what was done in this session and fills in the log
+3. Fills in the log based on this session's work
 4. Updates `memory/MEMORY.md` index if the date isn't already listed
 
 ## Log format
@@ -29,9 +36,8 @@ Write or update today's development log entry in `memory/YYYY-MM-DD.md`.
 
 1. Check today's date: `date +%Y-%m-%d`
 2. Read `memory/YYYY-MM-DD.md` if it exists
-3. Ask the user to summarize the session's work (or use conversation context)
-4. Write the log entry in the format above
-5. Ensure `memory/MEMORY.md` has a row for today:
+3. Write the log entry in the format above using this session's context
+4. Ensure `memory/MEMORY.md` has a row for today:
    `| [YYYY-MM-DD](YYYY-MM-DD.md) | <summary> |`
 
 Always write log files in **English**.
