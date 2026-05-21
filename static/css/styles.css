@@ -313,6 +313,23 @@ header {
     border: 1px solid rgba(52, 199, 89, 0.2);
 }
 
+#fetch-btn,
+#download-btn,
+.queue-cancel-btn {
+    min-height: 44px;
+}
+
+@media (min-width: 600px) {
+  #video-card .card-glass {
+    flex-direction: row;
+  }
+
+  /* .queue-item tablet layout — grid-template-columns defined here */
+  .queue-item {
+    grid-template-columns: 1fr auto;
+  }
+}
+
 @media (max-width: 600px) {
     .glass-container {
         padding: 30px 20px;
