@@ -19,7 +19,7 @@ fi
 # ── 2. locales/ key parity (all files must match en.json) ───────────────────
 if command -v python &>/dev/null || command -v python3 &>/dev/null; then
   PY=$(command -v python3 2>/dev/null || command -v python)
-  RESULT=$($PY - <<'PYEOF'
+  $PY - <<'PYEOF'
 import json, pathlib, sys
 base_path = pathlib.Path("locales/en.json")
 if not base_path.exists():
@@ -36,9 +36,7 @@ for p in sorted(pathlib.Path("locales").glob("*.json")):
         failed = True
 sys.exit(1 if failed else 0)
 PYEOF
-  )
-  if [[ -n "$RESULT" ]]; then
-    echo "$RESULT"
+  if [[ $? -ne 0 ]]; then
     FAIL=1
   fi
 fi

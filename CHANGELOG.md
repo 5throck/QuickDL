@@ -8,6 +8,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- `download_service.py` — use glob to find actual merged `.mp4` on disk instead of relying on `prepare_filename()` pre-merge path
+- `app.py` — replace `request.json` with `request.get_json(silent=True) or {}` to prevent `AttributeError` on missing `Content-Type` header
+- `app.py` — add `threading.Lock` guarding all accesses to `_jobs`, `_completed`, and `_cancel_events` to eliminate data races
+- `app.py` — SSRF protection: block private, loopback, and link-local IP literals in `_validate_url()`
+- `static/js/script.js` — fix memory leak in download queue: remove `<li>` element and delete `queue` Map entry after download link click
+- `scripts/audit.sh` — fix locale key-parity check to use Python process exit code instead of stdout capture
+- `.github/workflows/ci.yml` — run API tests via `pytest test_app.py -v` for consistent output and exit code
+
 ---
 
 ## [1.2.0] — 2026-05-20

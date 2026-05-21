@@ -164,7 +164,10 @@ document.addEventListener('DOMContentLoaded', () => {
             link.textContent = window.I18N['ui.success_download'];
             link.className = 'queue-download-link';
             link.download = '';
-            link.addEventListener('click', () => setTimeout(() => link.remove(), 100));
+            link.addEventListener('click', () => setTimeout(() => {
+                li.remove();
+                queue.delete(jobId);
+            }, 100));
             li.appendChild(link);
 
         } else if (statusData.status === 'error' || statusData.status === 'cancelled') {
