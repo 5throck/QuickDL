@@ -19,8 +19,8 @@ After ANY Write or Edit to Python source files, run these steps in order:
 | Step | Command | Pass Condition |
 |------|---------|----------------|
 | 1 | `bash scripts/audit.sh` | Exit 0 — CHANGELOG exists, all locale keys match |
-| 2 | `pytest test_i18n.py -v` | 0 failures (14 tests) |
-| 3 | `python test_app.py` | 0 failures (9 tests) |
+| 2 | `pytest tests/test_i18n.py -v` | 0 failures (14 tests) |
+| 3 | `pytest tests/test_app.py -v` | 0 failures (9 tests) |
 
 ## When to Run
 

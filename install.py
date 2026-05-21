@@ -32,11 +32,23 @@ def check_python_version():
     print(t("install.python_ok", version=sys.version.split()[0]))
 
 
-def check_ffmpeg():
+def check_and_install_ffmpeg():
     if shutil.which("ffmpeg"):
         print(t("install.ffmpeg_ok"))
-    else:
-        print(t("install.ffmpeg_missing"))
+        return
+
+    print(t("install.ffmpeg_missing"))
+    print(t("install.ffmpeg_installing"))
+    try:
+        if SYSTEM == "Windows":
+            run(["winget", "install", "ffmpeg", "--accept-source-agreements", "--accept-package-agreements"])
+        elif SYSTEM == "Darwin":
+            run(["brew", "install", "ffmpeg"])
+        else:
+            run(["sudo", "apt", "install", "-y", "ffmpeg"])
+        print(t("install.ffmpeg_success"))
+    except Exception as e:
+        print(t("install.ffmpeg_fail", e=str(e)))
         if SYSTEM == "Windows":
             print(t("install.ffmpeg_win"))
         elif SYSTEM == "Darwin":
@@ -117,7 +129,7 @@ if __name__ == "__main__":
     print(t("install.start"))
     print(t("install.os_info", system=SYSTEM, version=sys.version.split()[0]))
     check_python_version()
-    check_ffmpeg()
+    check_and_install_ffmpeg()
     create_venv()
     install_packages()
     set_environment()

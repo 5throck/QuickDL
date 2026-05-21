@@ -54,5 +54,8 @@
   "ui.progress_speed": "{speed} — 남은 시간 {eta}초",
   "ui.btn_cancel": "취소",
   "ui.queue_title": "다운로드 대기열",
-  "ui.queue_empty": "대기 중인 다운로드가 없습니다."
+  "ui.queue_empty": "대기 중인 다운로드가 없습니다.",
+  "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
+  "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
 }

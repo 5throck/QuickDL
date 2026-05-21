@@ -5,7 +5,7 @@
 >
 > In Gemini CLI, load the context file with `@` syntax:
 > ```
-> @docs/context.md
+> @c:\git\quickdl\docs\context.md
 > ```
 
 ---
@@ -29,12 +29,12 @@ Gemini CLI uses different tool names from Claude Code:
 
 Always load shared context at the start of a session:
 ```
-@docs/context.md
+@c:\git\quickdl\docs\context.md
 ```
 
 For i18n work, also load the baseline locale:
 ```
-@locales/en.json
+@c:\git\quickdl\locales\en.json
 ```
 
 ### i18n Workflow
