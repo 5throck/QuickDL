@@ -52,5 +52,7 @@
   "ui.success_download": "✅ 다운로드 완료 — 클릭하여 저장",
   "ui.progress_label": "다운로드 중... {pct}%",
   "ui.progress_speed": "{speed} — 남은 시간 {eta}초",
-  "ui.btn_cancel": "취소"
+  "ui.btn_cancel": "취소",
+  "ui.queue_title": "다운로드 대기열",
+  "ui.queue_empty": "대기 중인 다운로드가 없습니다."
 }

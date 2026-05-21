@@ -52,5 +52,7 @@
   "ui.success_download": "✅ ダウンロード完了 — クリックして保存",
   "ui.progress_label": "ダウンロード中... {pct}%",
   "ui.progress_speed": "{speed} — 残り{eta}秒",
-  "ui.btn_cancel": "キャンセル"
+  "ui.btn_cancel": "キャンセル",
+  "ui.queue_title": "ダウンロードキュー",
+  "ui.queue_empty": "ダウンロード待ちはありません。"
 }

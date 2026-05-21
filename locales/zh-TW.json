@@ -52,5 +52,7 @@
   "ui.success_download": "✅ 下載完成 — 點擊儲存",
   "ui.progress_label": "下載中... {pct}%",
   "ui.progress_speed": "{speed} — 剩餘{eta}秒",
-  "ui.btn_cancel": "取消"
+  "ui.btn_cancel": "取消",
+  "ui.queue_title": "下載佇列",
+  "ui.queue_empty": "佇列中沒有下載項目。"
 }

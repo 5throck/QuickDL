@@ -52,5 +52,7 @@
   "ui.success_download": "✅ Descarga lista — clic para guardar",
   "ui.progress_label": "Descargando... {pct}%",
   "ui.progress_speed": "{speed} — {eta}s restantes",
-  "ui.btn_cancel": "Cancelar"
+  "ui.btn_cancel": "Cancelar",
+  "ui.queue_title": "Cola de descarga",
+  "ui.queue_empty": "No hay descargas en cola."
 }

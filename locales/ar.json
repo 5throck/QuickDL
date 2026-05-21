@@ -52,5 +52,7 @@
   "ui.success_download": "✅ جاهز للتحميل — انقر للحفظ",
   "ui.progress_label": "جارٍ التحميل... {pct}%",
   "ui.progress_speed": "{speed} — {eta}ث متبقية",
-  "ui.btn_cancel": "إلغاء"
+  "ui.btn_cancel": "إلغاء",
+  "ui.queue_title": "قائمة انتظار التحميل",
+  "ui.queue_empty": "لا توجد تنزيلات في قائمة الانتظار."
 }

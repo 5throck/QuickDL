@@ -52,5 +52,7 @@
   "ui.success_download": "✅ Download bereit — zum Speichern klicken",
   "ui.progress_label": "Herunterladen... {pct}%",
   "ui.progress_speed": "{speed} — noch {eta}s",
-  "ui.btn_cancel": "Abbrechen"
+  "ui.btn_cancel": "Abbrechen",
+  "ui.queue_title": "Download-Warteschlange",
+  "ui.queue_empty": "Keine Downloads in der Warteschlange."
 }

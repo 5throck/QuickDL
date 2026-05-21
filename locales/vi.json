@@ -52,5 +52,7 @@
   "ui.success_download": "✅ Đã tải xong — nhấp để lưu",
   "ui.progress_label": "Đang tải... {pct}%",
   "ui.progress_speed": "{speed} — còn {eta}s",
-  "ui.btn_cancel": "Hủy"
+  "ui.btn_cancel": "Hủy",
+  "ui.queue_title": "Hàng đợi tải xuống",
+  "ui.queue_empty": "Không có tải xuống trong hàng đợi."
 }

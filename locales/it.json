@@ -52,5 +52,7 @@
   "ui.success_download": "✅ Download pronto — clicca per salvare",
   "ui.progress_label": "Scaricamento... {pct}%",
   "ui.progress_speed": "{speed} — {eta}s rimanenti",
-  "ui.btn_cancel": "Annulla"
+  "ui.btn_cancel": "Annulla",
+  "ui.queue_title": "Coda di download",
+  "ui.queue_empty": "Nessun download in coda."
 }

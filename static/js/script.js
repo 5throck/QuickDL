@@ -14,15 +14,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const downloadBtn = document.getElementById('download-btn');
     const statusMessage = document.getElementById('status-message');
+    const queuePanel = document.getElementById('queue-panel');
+    const queueList = document.getElementById('queue-list');
 
     let currentUrl = '';
+    let currentVideoTitle = '';
+
+    // queue Map: jobId → { li: HTMLElement, pollTimer: number }
+    const queue = new Map();
 
     urlForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const url = urlInput.value.trim();
         if (!url) return;
 
-        // Reset UI
         hideStatus();
         videoCard.classList.add('hidden');
         loading.classList.remove('hidden');
@@ -43,11 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || window.I18N['ui.error_info']);
             }
 
-            // Update UI with video info
             videoThumbnail.src = data.thumbnail;
             videoTitle.textContent = data.title;
             videoChannel.textContent = data.channel;
             videoDuration.textContent = data.duration || '';
+            currentVideoTitle = data.title;
 
             loading.classList.add('hidden');
             videoCard.classList.remove('hidden');
@@ -60,36 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function setDownloadingState() {
-        const spinner = document.createElement('div');
-        spinner.className = 'spinner';
-        spinner.style.cssText = 'width:20px;height:20px;border-width:2px;display:inline-block;vertical-align:middle;';
-        downloadBtn.replaceChildren(spinner, document.createTextNode(' ' + window.I18N['ui.downloading']));
-        downloadBtn.classList.add('downloading');
-        downloadBtn.disabled = true;
-    }
-
-    function resetDownloadBtn() {
-        downloadBtn.textContent = window.I18N['ui.btn_download'];
-        downloadBtn.classList.remove('downloading');
-        downloadBtn.disabled = false;
-    }
-
     downloadBtn.addEventListener('click', async () => {
         if (!currentUrl) return;
-
-        setDownloadingState();
-        hideStatus();
-
-        let pollTimer = null;
-
-        function stopPolling() {
-            if (pollTimer !== null) {
-                clearInterval(pollTimer);
-                pollTimer = null;
-            }
-            resetDownloadBtn();
-        }
 
         try {
             const response = await fetch('/api/download', {
@@ -101,50 +78,122 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
 
             if (!response.ok) {
-                resetDownloadBtn();
                 showStatus(data.error || window.I18N['ui.error_download'], 'error');
                 return;
             }
 
-            const jobId = data.job_id;
-
-            pollTimer = setInterval(async () => {
-                try {
-                    const statusRes = await fetch(`/api/status/${jobId}`);
-                    const statusData = await statusRes.json();
-
-                    if (statusData.status === 'done') {
-                        stopPolling();
-                        const link = document.createElement('a');
-                        link.href = `/api/file/${jobId}`;
-                        link.textContent = window.I18N['ui.success_download'];
-                        link.download = '';
-                        link.addEventListener('click', () => {
-                            setTimeout(() => link.remove(), 100);  // disable after first click
-                        });
-                        statusMessage.replaceChildren(link);
-                        statusMessage.className = '';
-                        statusMessage.classList.add('status-success');
-                        statusMessage.classList.remove('hidden');
-                    } else if (statusData.status === 'error') {
-                        stopPolling();
-                        showStatus(statusData.error || window.I18N['ui.error_download'], 'error');
-                    }
-                } catch (_) {
-                    stopPolling();
-                    showStatus(window.I18N['ui.error_download'], 'error');
-                }
-            }, 2000);
+            addToQueue(data.job_id, currentVideoTitle);
 
         } catch (error) {
-            resetDownloadBtn();
             showStatus(error.message, 'error');
         }
     });
 
+    function addToQueue(jobId, title) {
+        queuePanel.classList.remove('hidden');
+
+        const li = document.createElement('li');
+        li.className = 'queue-item';
+        li.dataset.jobId = jobId;
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'queue-item-title';
+        titleEl.textContent = title || jobId;
+
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'queue-cancel-btn';
+        cancelBtn.textContent = window.I18N['ui.btn_cancel'];
+        cancelBtn.addEventListener('click', () => cancelJob(jobId, cancelBtn));
+
+        const progressWrapper = document.createElement('div');
+        progressWrapper.className = 'queue-item-progress';
+
+        const progressEl = document.createElement('progress');
+        progressEl.value = 0;
+        progressEl.max = 100;
+
+        const speedEl = document.createElement('div');
+        speedEl.className = 'queue-item-speed';
+
+        progressWrapper.append(progressEl, speedEl);
+        li.append(titleEl, cancelBtn, progressWrapper);
+        queueList.appendChild(li);
+
+        const pollTimer = setInterval(() => pollJob(jobId), 2000);
+        queue.set(jobId, { li, pollTimer });
+    }
+
+    async function pollJob(jobId) {
+        try {
+            const res = await fetch(`/api/status/${jobId}`);
+            const data = await res.json();
+            updateQueueItem(jobId, data);
+        } catch (_) {
+            stopJobPolling(jobId);
+        }
+    }
+
+    function updateQueueItem(jobId, statusData) {
+        const entry = queue.get(jobId);
+        if (!entry) return;
+        const { li } = entry;
+
+        const progressEl = li.querySelector('progress');
+        const speedEl = li.querySelector('.queue-item-speed');
+        const cancelBtn = li.querySelector('.queue-cancel-btn');
+
+        if (statusData.status === 'running') {
+            const pct = statusData.progress || 0;
+            if (progressEl) progressEl.value = pct;
+            if (speedEl) {
+                speedEl.textContent = statusData.speed
+                    ? window.I18N['ui.progress_speed']
+                        .replace('{speed}', statusData.speed)
+                        .replace('{eta}', statusData.eta ?? '?')
+                    : window.I18N['ui.progress_label'].replace('{pct}', pct);
+            }
+        } else if (statusData.status === 'done') {
+            stopJobPolling(jobId);
+            if (cancelBtn) cancelBtn.remove();
+            li.querySelector('.queue-item-progress')?.remove();
+
+            const link = document.createElement('a');
+            link.href = `/api/file/${jobId}`;
+            link.textContent = window.I18N['ui.success_download'];
+            link.className = 'queue-download-link';
+            link.download = '';
+            link.addEventListener('click', () => setTimeout(() => link.remove(), 100));
+            li.appendChild(link);
+
+        } else if (statusData.status === 'error' || statusData.status === 'cancelled') {
+            stopJobPolling(jobId);
+            if (cancelBtn) cancelBtn.remove();
+            const msg = document.createElement('span');
+            msg.className = 'queue-item-speed';
+            msg.style.color = 'var(--primary-color)';
+            msg.textContent = statusData.error || statusData.status;
+            li.querySelector('.queue-item-progress')?.remove();
+            li.appendChild(msg);
+        }
+    }
+
+    async function cancelJob(jobId, cancelBtn) {
+        cancelBtn.disabled = true;
+        try {
+            await fetch(`/api/status/${jobId}`, { method: 'DELETE' });
+        } catch (_) { /* ignore */ }
+    }
+
+    function stopJobPolling(jobId) {
+        const entry = queue.get(jobId);
+        if (entry?.pollTimer) {
+            clearInterval(entry.pollTimer);
+        }
+    }
+
     function showStatus(message, type) {
         statusMessage.textContent = message;
-        statusMessage.className = ''; // remove hidden and other classes
+        statusMessage.className = '';
         statusMessage.classList.add('status-' + type);
         statusMessage.classList.remove('hidden');
     }

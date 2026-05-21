@@ -52,5 +52,7 @@
   "ui.success_download": "✅ Unduhan siap — klik untuk simpan",
   "ui.progress_label": "Mengunduh... {pct}%",
   "ui.progress_speed": "{speed} — {eta}s lagi",
-  "ui.btn_cancel": "Batal"
+  "ui.btn_cancel": "Batal",
+  "ui.queue_title": "Antrian Unduhan",
+  "ui.queue_empty": "Tidak ada unduhan dalam antrian."
 }

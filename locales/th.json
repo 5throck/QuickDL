@@ -52,5 +52,7 @@
   "ui.success_download": "✅ ดาวน์โหลดสำเร็จ — คลิกเพื่อบันทึก",
   "ui.progress_label": "กำลังดาวน์โหลด... {pct}%",
   "ui.progress_speed": "{speed} — อีก {eta}s",
-  "ui.btn_cancel": "ยกเลิก"
+  "ui.btn_cancel": "ยกเลิก",
+  "ui.queue_title": "คิวดาวน์โหลด",
+  "ui.queue_empty": "ไม่มีการดาวน์โหลดในคิว"
 }

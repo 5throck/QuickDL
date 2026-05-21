@@ -52,5 +52,7 @@
   "ui.success_download": "✅ Muat turun siap — klik untuk simpan",
   "ui.progress_label": "Memuat turun... {pct}%",
   "ui.progress_speed": "{speed} — {eta}s lagi",
-  "ui.btn_cancel": "Batal"
+  "ui.btn_cancel": "Batal",
+  "ui.queue_title": "Giliran Muat Turun",
+  "ui.queue_empty": "Tiada muat turun dalam giliran."
 }
