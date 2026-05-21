@@ -128,7 +128,7 @@ def job_status(job_id):
     job = _jobs.get(job_id)
     if not job:
         return jsonify({'error': 'Job not found'}), 404
-    if job["status"] in ("done", "error"):
+    if job["status"] in ("done", "error", "cancelled"):
         _jobs.pop(job_id, None)
     return jsonify(job)
 

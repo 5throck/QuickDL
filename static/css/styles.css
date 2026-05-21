@@ -428,6 +428,12 @@ header {
     font-weight: 500;
 }
 
+.queue-empty-msg {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     --bg-color: #f0f2f5;

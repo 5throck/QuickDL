@@ -91,6 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function addToQueue(jobId, title) {
         queuePanel.classList.remove('hidden');
+        const emptyMsg = document.getElementById('queue-empty-msg');
+        if (emptyMsg) emptyMsg.style.display = 'none';
 
         const li = document.createElement('li');
         li.className = 'queue-item';
