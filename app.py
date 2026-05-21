@@ -7,6 +7,13 @@ from flask_cors import CORS
 from download_service import get_video_info, download_video
 from i18n import init as i18n_init, t, get_all, get_lang
 
+_URL_PATTERN = re.compile(r'^https?://', re.IGNORECASE)
+
+
+def _validate_url(url: str) -> bool:
+    return bool(url and _URL_PATTERN.match(url))
+
+
 app = Flask(__name__)
 CORS(app, origins=re.compile(r"http://(localhost|127\.0\.0\.1)(:\d+)?$"))
 
@@ -16,12 +23,6 @@ DOWNLOAD_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'downloa
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 _jobs: dict = {}
-
-_URL_PATTERN = re.compile(r'^https?://', re.IGNORECASE)
-
-
-def _validate_url(url: str) -> bool:
-    return bool(url and _URL_PATTERN.match(url))
 
 
 @app.route('/')
