@@ -1,13 +1,31 @@
 import os
 import re
 import threading
+import time
 import uuid
+from pathlib import Path
 from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_cors import CORS
 from download_service import get_video_info, download_video
 from i18n import init as i18n_init, t, get_all, get_lang
 
 _URL_PATTERN = re.compile(r'^https?://', re.IGNORECASE)
+
+
+def _cleanup_downloads(directory: str, keep_hours: int = 24) -> None:
+    """Delete files in directory older than keep_hours. keep_hours=0 disables cleanup."""
+    if keep_hours == 0:
+        return
+    p_dir = Path(directory)
+    if not p_dir.exists():
+        return  # directory not yet created — safe skip
+    cutoff = time.time() - keep_hours * 3600
+    for p in p_dir.iterdir():
+        if p.is_file() and p.stat().st_mtime < cutoff:
+            try:
+                p.unlink()
+            except OSError:
+                pass  # file in use (Windows) or already gone — skip silently
 
 
 def _validate_url(url: str) -> bool:
@@ -134,5 +152,8 @@ def cancel_job(job_id):
 
 
 if __name__ == '__main__':
+    os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+    _keep_hours = int(os.environ.get('QUICKDL_KEEP_HOURS', '24'))
+    _cleanup_downloads(DOWNLOAD_DIR, _keep_hours)
     debug = os.environ.get('FLASK_DEBUG', '0') == '1'
     app.run(debug=debug, threaded=True, host='0.0.0.0', port=5000)
