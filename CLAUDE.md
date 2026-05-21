@@ -42,7 +42,30 @@ Each implementation task:
 
 Respond in **Korean** unless the user writes in English.
 
+### Session Start
+
+At the start of every coding session, load:
+1. [`skills/post-write-check/SKILL.md`](skills/post-write-check/SKILL.md) — mandatory QA chain after any Write/Edit
+2. [`skills/i18n-audit/SKILL.md`](skills/i18n-audit/SKILL.md) — locale audit protocol
+
+Then read [`docs/context.md`](docs/context.md) for shared project context.
+
+### Agents
+
+Agent roles live in [`agents/*.md`](agents/). Registry and orchestration contract: [`AGENTS.md`](AGENTS.md).
+
+### Git Hooks
+
+Install project hooks once per clone:
+```bash
+git config core.hooksPath .githooks
+```
+
+Hooks:
+- `.githooks/pre-commit` — blocks commit if `CHANGELOG.md` not staged
+- `.githooks/pre-push` — runs `audit.sh` before push
+
 ### Git
 
-Follow conventions in `docs/agent-config/shared.md`.
+Follow conventions in `docs/context.md`.
 Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
