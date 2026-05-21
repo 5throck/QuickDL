@@ -10,7 +10,6 @@
   "cli.saved": "✅ Salvato: {saved_path}",
   "cli.done": "✅ Download completato. Salvato in: {output}",
   "cli.download_failed": "❌ Download fallito: {e}",
-
   "install.start": "🚀 Avvio installazione QuickDL...",
   "install.os_info": "   OS: {system} / Python: {version}",
   "install.python_ok": "✅ Python {version} rilevato",
@@ -33,16 +32,13 @@
   "install.done_title": "🎉 Installazione QuickDL completata!",
   "install.done_desktop": "   App desktop: {cmd}",
   "install.done_cli": "   CLI:         {cmd}",
-
   "desktop.server_error_msg": "Impossibile avviare il server. Conflitto di porta o errore rilevato.",
   "desktop.server_error_print": "ERRORE: Avvio server fallito",
   "desktop.tray_open": "Apri finestra",
   "desktop.tray_quit": "Esci",
-
   "app.error_url_required": "L'URL è obbligatorio.",
   "app.error_invalid_url": "URL non valido. Sono supportati solo i link http:// e https://.",
   "app.download_complete": "Download completato.",
-
   "ui.subtitle": "Downloader di video YouTube moderno e veloce",
   "ui.placeholder": "Incolla il link YouTube qui...",
   "ui.btn_fetch": "Recupera",
@@ -51,9 +47,7 @@
   "ui.error_info": "Caricamento informazioni video fallito.",
   "ui.downloading": "Download in corso...",
   "ui.error_download": "Download fallito.",
-  "ui.success": "✅ Completato! File salvato in: {filepath}",
-
   "shell.venv_missing": "[Avviso] .venv non trovato. Eseguire: python install.py",
-
-  "seconds_suffix": "s"
+  "seconds_suffix": "s",
+  "ui.success_download": "✅ Download pronto — clicca per salvare"
 }

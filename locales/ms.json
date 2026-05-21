@@ -10,7 +10,6 @@
   "cli.saved": "✅ Disimpan: {saved_path}",
   "cli.done": "✅ Muat turun selesai. Disimpan ke: {output}",
   "cli.download_failed": "❌ Muat turun gagal: {e}",
-
   "install.start": "🚀 Memulakan pemasangan QuickDL...",
   "install.os_info": "   OS: {system} / Python: {version}",
   "install.python_ok": "✅ Python {version} dikesan",
@@ -33,16 +32,13 @@
   "install.done_title": "🎉 Pemasangan QuickDL selesai!",
   "install.done_desktop": "   Apl desktop: {cmd}",
   "install.done_cli": "   CLI:         {cmd}",
-
   "desktop.server_error_msg": "Gagal memulakan pelayan.",
   "desktop.server_error_print": "RALAT: Pelayan gagal dimulakan",
   "desktop.tray_open": "Buka Tetingkap",
   "desktop.tray_quit": "Keluar",
-
   "app.error_url_required": "URL diperlukan.",
   "app.error_invalid_url": "URL tidak sah. Hanya pautan http:// dan https:// disokong.",
   "app.download_complete": "Muat turun selesai.",
-
   "ui.subtitle": "Pemuat turun video YouTube yang moden dan pantas",
   "ui.placeholder": "Tampal pautan YouTube di sini...",
   "ui.btn_fetch": "Dapatkan",
@@ -51,9 +47,7 @@
   "ui.error_info": "Gagal memuatkan maklumat video.",
   "ui.downloading": "Memuat turun...",
   "ui.error_download": "Muat turun gagal.",
-  "ui.success": "✅ Berjaya! Fail disimpan ke: {filepath}",
-
   "shell.venv_missing": "[Amaran] .venv tidak dijumpai. Sila jalankan dahulu: python install.py",
-
-  "seconds_suffix": "det."
+  "seconds_suffix": "det.",
+  "ui.success_download": "✅ Muat turun siap — klik untuk simpan"
 }

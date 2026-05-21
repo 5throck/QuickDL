@@ -10,7 +10,6 @@
   "cli.saved": "✅ บันทึกแล้ว: {saved_path}",
   "cli.done": "✅ ดาวน์โหลดสำเร็จ บันทึกที่: {output}",
   "cli.download_failed": "❌ ดาวน์โหลดล้มเหลว: {e}",
-
   "install.start": "🚀 กำลังเริ่มติดตั้ง QuickDL...",
   "install.os_info": "   OS: {system} / Python: {version}",
   "install.python_ok": "✅ ตรวจพบ Python {version}",
@@ -33,16 +32,13 @@
   "install.done_title": "🎉 ติดตั้ง QuickDL สำเร็จ!",
   "install.done_desktop": "   แอปเดสก์ท็อป: {cmd}",
   "install.done_cli": "   CLI:         {cmd}",
-
   "desktop.server_error_msg": "ไม่สามารถเริ่มเซิร์ฟเวอร์ได้ พบข้อขัดแย้งพอร์ตหรือข้อผิดพลาด",
   "desktop.server_error_print": "ข้อผิดพลาด: เซิร์ฟเวอร์ไม่สามารถเริ่มได้",
   "desktop.tray_open": "เปิดหน้าต่าง",
   "desktop.tray_quit": "ออก",
-
   "app.error_url_required": "กรุณาระบุ URL",
   "app.error_invalid_url": "URL ไม่ถูกต้อง รองรับเฉพาะลิงก์ http:// และ https:// เท่านั้น",
   "app.download_complete": "ดาวน์โหลดสำเร็จ",
-
   "ui.subtitle": "โปรแกรมดาวน์โหลดวิดีโอ YouTube ที่ทันสมัยและรวดเร็ว",
   "ui.placeholder": "วาง YouTube link ที่นี่...",
   "ui.btn_fetch": "ดึงข้อมูล",
@@ -51,9 +47,7 @@
   "ui.error_info": "ไม่สามารถโหลดข้อมูลวิดีโอได้",
   "ui.downloading": "กำลังดาวน์โหลด...",
   "ui.error_download": "ดาวน์โหลดล้มเหลว",
-  "ui.success": "✅ สำเร็จ! บันทึกไฟล์ที่: {filepath}",
-
   "shell.venv_missing": "[คำเตือน] ไม่พบ .venv กรุณารัน: python install.py",
-
-  "seconds_suffix": "วิ"
+  "seconds_suffix": "วิ",
+  "ui.success_download": "✅ ดาวน์โหลดสำเร็จ — คลิกเพื่อบันทึก"
 }

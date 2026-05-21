@@ -10,7 +10,6 @@
   "cli.saved": "✅ Tersimpan: {saved_path}",
   "cli.done": "✅ Unduhan selesai. Disimpan ke: {output}",
   "cli.download_failed": "❌ Unduhan gagal: {e}",
-
   "install.start": "🚀 Memulai instalasi QuickDL...",
   "install.os_info": "   OS: {system} / Python: {version}",
   "install.python_ok": "✅ Python {version} terdeteksi",
@@ -33,16 +32,13 @@
   "install.done_title": "🎉 Instalasi QuickDL selesai!",
   "install.done_desktop": "   Aplikasi desktop: {cmd}",
   "install.done_cli": "   CLI:              {cmd}",
-
   "desktop.server_error_msg": "Gagal memulai server.",
   "desktop.server_error_print": "ERROR: Server gagal dimulai",
   "desktop.tray_open": "Buka Jendela",
   "desktop.tray_quit": "Keluar",
-
   "app.error_url_required": "URL diperlukan.",
   "app.error_invalid_url": "URL tidak valid. Hanya tautan http:// dan https:// yang didukung.",
   "app.download_complete": "Unduhan selesai.",
-
   "ui.subtitle": "Pengunduh video YouTube yang modern dan cepat",
   "ui.placeholder": "Tempel tautan YouTube di sini...",
   "ui.btn_fetch": "Ambil",
@@ -51,9 +47,7 @@
   "ui.error_info": "Gagal memuat informasi video.",
   "ui.downloading": "Mengunduh...",
   "ui.error_download": "Unduhan gagal.",
-  "ui.success": "✅ Berhasil! File disimpan ke: {filepath}",
-
   "shell.venv_missing": "[Peringatan] .venv tidak ditemukan. Jalankan terlebih dahulu: python install.py",
-
-  "seconds_suffix": "det."
+  "seconds_suffix": "det.",
+  "ui.success_download": "✅ Unduhan siap — klik untuk simpan"
 }

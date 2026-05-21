@@ -115,7 +115,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     if (statusData.status === 'done') {
                         stopPolling();
-                        showStatus(window.I18N['ui.success'].replace('{filepath}', statusData.filepath), 'success');
+                        const link = document.createElement('a');
+                        link.href = `/api/file/${jobId}`;
+                        link.textContent = window.I18N['ui.success_download'];
+                        link.download = '';
+                        link.addEventListener('click', () => {
+                            setTimeout(() => link.remove(), 100);  // disable after first click
+                        });
+                        statusMessage.replaceChildren(link);
+                        statusMessage.className = '';
+                        statusMessage.classList.add('status-success');
+                        statusMessage.classList.remove('hidden');
                     } else if (statusData.status === 'error') {
                         stopPolling();
                         showStatus(statusData.error || window.I18N['ui.error_download'], 'error');

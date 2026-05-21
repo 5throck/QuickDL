@@ -10,7 +10,6 @@
   "cli.saved": "✅ Guardado: {saved_path}",
   "cli.done": "✅ Descarga completa. Guardado en: {output}",
   "cli.download_failed": "❌ Descarga fallida: {e}",
-
   "install.start": "🚀 Iniciando la instalación de QuickDL...",
   "install.os_info": "   SO: {system} / Python: {version}",
   "install.python_ok": "✅ Python {version} detectado",
@@ -33,16 +32,13 @@
   "install.done_title": "🎉 ¡Instalación de QuickDL completada!",
   "install.done_desktop": "   Aplicación de escritorio: {cmd}",
   "install.done_cli": "   CLI:                   {cmd}",
-
   "desktop.server_error_msg": "No se pudo iniciar el servidor. Se detectó un conflicto de puertos o un error.",
   "desktop.server_error_print": "ERROR: Server failed to start",
   "desktop.tray_open": "Abrir ventana",
   "desktop.tray_quit": "Salir",
-
   "app.error_url_required": "Se requiere una URL.",
   "app.error_invalid_url": "URL no válida. Solo se admiten enlaces http:// y https://.",
   "app.download_complete": "Descarga completa.",
-
   "ui.subtitle": "Descargador de videos de YouTube moderno y rápido",
   "ui.placeholder": "Pega el enlace de YouTube aquí...",
   "ui.btn_fetch": "Obtener",
@@ -51,9 +47,7 @@
   "ui.error_info": "No se pudo cargar la información del video.",
   "ui.downloading": "Descargando...",
   "ui.error_download": "Descarga fallida.",
-  "ui.success": "✅ ¡Éxito! Archivo guardado en: {filepath}",
-
   "shell.venv_missing": "[Advertencia] .venv no encontrado. Por favor ejecuta: python install.py",
-
-  "seconds_suffix": "s"
+  "seconds_suffix": "s",
+  "ui.success_download": "✅ Descarga lista — clic para guardar"
 }

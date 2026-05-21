@@ -10,7 +10,6 @@
   "cli.saved": "✅ 已儲存：{saved_path}",
   "cli.done": "✅ 下載完成。已儲存至：{output}",
   "cli.download_failed": "❌ 下載失敗：{e}",
-
   "install.start": "🚀 開始安裝 QuickDL...",
   "install.os_info": "   作業系統：{system} / Python：{version}",
   "install.python_ok": "✅ 已偵測到 Python {version}",
@@ -33,16 +32,13 @@
   "install.done_title": "🎉 QuickDL 安裝完成！",
   "install.done_desktop": "   桌面應用程式：{cmd}",
   "install.done_cli": "   CLI：         {cmd}",
-
   "desktop.server_error_msg": "伺服器啟動失敗。偵測到埠衝突或錯誤。",
   "desktop.server_error_print": "ERROR: Server failed to start",
   "desktop.tray_open": "開啟視窗",
   "desktop.tray_quit": "結束",
-
   "app.error_url_required": "需要 URL。",
   "app.error_invalid_url": "無效的URL。僅支援 http:// 和 https:// 連結。",
   "app.download_complete": "下載完成。",
-
   "ui.subtitle": "現代且快速的 YouTube 影片下載器",
   "ui.placeholder": "在此貼上 YouTube 連結...",
   "ui.btn_fetch": "獲取",
@@ -51,9 +47,7 @@
   "ui.error_info": "載入影片資訊失敗。",
   "ui.downloading": "下載中...",
   "ui.error_download": "下載失敗。",
-  "ui.success": "✅ 成功！檔案已儲存至：{filepath}",
-
   "shell.venv_missing": "[警告] 找不到 .venv，請執行：python install.py",
-
-  "seconds_suffix": "秒"
+  "seconds_suffix": "秒",
+  "ui.success_download": "✅ 下載完成 — 點擊儲存"
 }
