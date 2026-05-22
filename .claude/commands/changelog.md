@@ -1,3 +1,10 @@
+---
+name: changelog
+description: Add a changelog entry to CHANGELOG.md under the Unreleased section.
+argument-hint: "<changelog text>"
+allowed-tools: ["Read", "Edit"]
+---
+
 Add a changelog entry to CHANGELOG.md under the `## [Unreleased]` section.
 
 Arguments: $ARGUMENTS

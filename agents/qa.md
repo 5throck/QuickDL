@@ -8,9 +8,9 @@ description: >
   "test coverage", "regression test", "cross-platform check".
 examples:
   - user: "Write a test for the cancel job endpoint"
-    assistant: "I'll dispatch the QA agent to add a test_cancel_job test to test_app.py."
+    assistant: "I'll dispatch the QA agent to add a test_cancel_job test to tests/test_app.py."
   - user: "Run the full test suite and report results"
-    assistant: "Let me use the QA agent to run pytest and test_app.py and summarize results."
+    assistant: "Let me use the QA agent to run pytest tests/test_app.py -v and summarize results."
 ---
 
 ## 1. System Prompt & Persona

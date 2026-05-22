@@ -8,6 +8,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed (2026-05-23 Documentation Consistency)
+- `agents/*.md`: Fix test execution paths to use `tests/` prefix
+- `CLAUDE.md`: Align Subagent Pattern with 6-phase harness workflow
+- `.claude/commands/changelog.md`: Add missing YAML frontmatter
+- `scripts/sync-md.sh` / `.ps1`: Update skip paths to use `docs/specs` and `docs/plans`
+- `.github/pull_request_template.md`: Standardize project test command placeholder
 ### Fixed (2026-05-23 Audit Script — Relative Link Filter)
 - `scripts/audit.sh` / `audit.ps1`: Add `../../` relative-path exclusion to markdown link checker — GitHub Security Advisory links (`../../security/advisories/new`) are cross-repo relative URLs, not local file paths, and must be excluded from broken-link validation
 

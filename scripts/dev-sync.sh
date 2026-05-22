@@ -96,7 +96,7 @@ else
   echo "==> Opening PR..."
   gh pr create \
     --title "$MSG" \
-    --body "$(printf "## Summary\n\n%s\n\n## Test Plan\n\n- [ ] \`bash scripts/audit.sh\` passes\n- [ ] \`pytest test_i18n.py -v\` passes\n- [ ] \`python test_app.py\` passes\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)" "$COMMITS")" \
+    --body "$(printf "## Summary\n\n%s\n\n## Test Plan\n\n- [ ] \`bash scripts/audit.sh\` passes\n- [ ] \`pytest tests/ -v\` passes (23 tests)\n\n🤖 Generated with AI Assistant" "$COMMITS")" \
     --base "$BASE_BRANCH" \
     --head "$BRANCH"
 fi

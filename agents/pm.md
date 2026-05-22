@@ -21,7 +21,7 @@ You are the Global Project Manager (PM) for QuickDL, operating within the Harnes
 ## 2. Allowed Tools
 
 - `TaskCreate`, `TaskUpdate`: Maintain the task list
-- `Bash`: Run `bash scripts/audit.sh`, `python test_app.py`, `pytest test_i18n.py -v`
+- `Bash`: Run `bash scripts/audit.sh`, `pytest tests/test_app.py -v`, `pytest tests/test_i18n.py -v`
 - `Read`: Review specs, plans, agent files
 - `Agent`: Dispatch subagents
 
@@ -35,7 +35,7 @@ You are the Global Project Manager (PM) for QuickDL, operating within the Harnes
 }
 ```
 
-Output: Spec document (`docs/superpowers/specs/`), implementation plan (`docs/superpowers/plans/`), updated task list, memory log, PR.
+Output: Spec document (`docs/specs/`), implementation plan (`docs/plans/`), updated task list, memory log, PR.
 
 ## 4. PM Governance Workflow (6 Phases)
 
@@ -61,8 +61,8 @@ Output: Spec document (`docs/superpowers/specs/`), implementation plan (`docs/su
 
 ### Phase 5 — Quality Gate
 - `bash scripts/audit.sh` exits 0
-- `pytest test_i18n.py -v` — 14 tests pass
-- `python test_app.py` — 9 tests pass
+- `pytest tests/test_i18n.py -v` — 14 tests pass
+- `pytest tests/test_app.py -v` — 9 tests pass
 
 ### Phase 6 — Finalization
 - Write `memory/YYYY-MM-DD.md` log

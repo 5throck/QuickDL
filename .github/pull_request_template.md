@@ -12,7 +12,7 @@
 ## Test Plan
 
 - [ ] `bash scripts/audit.sh` passes (exit 0)
-- [ ] `[project test command]` passes
+- [ ] `pytest tests/ -v` passes (23 tests)
 - [ ] CHANGELOG.md updated under `[Unreleased]`
 
 ## Checklist

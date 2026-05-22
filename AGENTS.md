@@ -111,3 +111,13 @@ Codex runs without outbound internet access:
 - Do NOT attempt to `pip install` additional packages; use `requirements.txt` only
 - Never modify `.venv/` or `downloads/`
 - Append to AI commits: `Co-Authored-By: Codex <noreply@openai.com>`
+
+
+## Universal Baseline Behaviors
+
+All agents, regardless of their role, must adhere to the following:
+- **Core Principles**: Always follow SOLID principles and write unit tests when creating functional code.
+- **Security Boundaries**: Never expose or log secrets (API keys, tokens). Do not modify CI/CD pipelines without explicit permission.
+- **Communication Style**: Keep explanations concise and use markdown formatting. Always explain "why", not just "what".
+- **Conflicting Instructions**: If a user request violates project rules (e.g., bypassing tests), warn the user and request explicit confirmation before proceeding.
+- **Anti-Patterns to Avoid**: Do not apply overly restrictive logical rules (e.g., "never use loops") or repeat basic knowledge.
