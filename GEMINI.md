@@ -1,12 +1,24 @@
 # GEMINI.md — QuickDL (Gemini CLI)
 
-> **Shared context:** Read `docs/context.md` first — it is the single source of truth.
-> **Agent roles:** See `agents/*.md` and `AGENTS.md`.
->
-> In Gemini CLI, load the context file with `@` syntax:
-> ```
-> @c:\git\quickdl\docs\context.md
-> ```
+> **Doc intent:** This file contains Gemini CLI-specific overrides only.
+> Shared project context lives in [`docs/context.md`](docs/context.md).
+> Agent roles live in [`agents/*.md`](agents/) and [`AGENTS.md`](AGENTS.md).
+
+## Context Loading
+
+Load project files at session start using the `@` syntax:
+
+```
+@../CONSTITUTION.md      # workspace design standard
+@docs/context.md         # project knowledge (includes Session Start Skills)
+@AGENTS.md               # canonical agent roster
+@memory/MEMORY.md        # recent changes (skip if file does not exist)
+```
+
+For i18n work, also load:
+```
+@locales/en.json         # baseline locale (56 keys)
+```
 
 ---
 
@@ -24,18 +36,6 @@ Gemini CLI uses different tool names from Claude Code:
 | `Bash` | `shell` |
 | `Grep` | `grep` |
 | `Glob` | `find_files` |
-
-### Loading Context
-
-Always load shared context at the start of a session:
-```
-@c:\git\quickdl\docs\context.md
-```
-
-For i18n work, also load the baseline locale:
-```
-@c:\git\quickdl\locales\en.json
-```
 
 ### i18n Workflow
 

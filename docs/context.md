@@ -26,6 +26,33 @@
 
 ---
 
+## Environment Setup
+
+```bash
+# Python 3.8+
+python -m venv .venv
+# macOS/Linux:
+source .venv/bin/activate
+# Windows:
+.venv\Scripts\activate
+
+pip install -r requirements.txt
+
+# Activate git hooks
+git config core.hooksPath .githooks
+
+# Run development server
+python app.py      # Web UI at http://localhost:5000
+
+# Run tests
+pytest tests/ -v   # 23 tests
+```
+
+Required env keys (see `.env.sample`):
+- N/A — no external API keys required
+
+---
+
 ## Architecture
 
 ```
@@ -153,6 +180,9 @@ quickdl/
 
 ### Branching Strategy
 
+Use `/sync "type: description"` (or `bash scripts/dev-sync.sh`) for the full pipeline — it auto-creates the branch in `pr/<YYYYMMDD-HHmmss>-<slug>` format, commits, pushes, and opens a PR.
+
+For manual branches:
 ```bash
 git checkout -b feature/<name>  # new feature
 git checkout -b fix/<name>      # bug fix
