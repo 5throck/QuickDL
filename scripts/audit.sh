@@ -62,7 +62,7 @@ while IFS= read -r file; do
 
   links=$(grep -o '\[.*\]([^#)]*)' "$file" 2>/dev/null \
     | sed -E 's/.*\]\(([^# )]+)\).*/\1/' \
-    | grep -vE "^http|^mailto:|^#|YYYY-MM-DD" || true)
+    | grep -vE "^http|^mailto:|^#|YYYY-MM-DD|\.\./\.\." || true)
   for link in $links; do
     decoded=$(echo "$link" | sed 's/%20/ /g')
     dir=$(dirname "$file")
