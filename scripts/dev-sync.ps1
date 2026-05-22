@@ -45,7 +45,7 @@ if (-not (Test-Path $logFile)) {
 
 # ── 3. Update MEMORY.md index (insert after separator row) ───────────────────
 $indexFile = "memory\MEMORY.md"
-if ((Test-Path $indexFile) -and -not (Select-String -Path $indexFile -Pattern [regex]::Escape($today) -Quiet)) {
+if ((Test-Path $indexFile) -and -not (Select-String -Path $indexFile -Pattern ([regex]::Escape($today)) -Quiet)) {
     $summary = ($Message -replace '^[^:]+:\s*', '')
     $newEntry = "| [$today]($today.md) | $summary |"
     $lines = Get-Content $indexFile
@@ -95,7 +95,7 @@ if ($existingPr) {
     Write-Host "==> PR #$existingPr already exists — skipping creation."
     gh pr view --json url -q '.url'
 } else {
-    $body = "## Summary`n`n- $Message`n`n## Test Plan`n`n- [ ] ``bash scripts/audit.sh`` passes`n- [ ] ``pytest test_i18n.py -v`` passes`n- [ ] ``python test_app.py`` passes`n`n:robot: Generated with [Claude Code](https://claude.com/claude-code)"
+    $body = "## Summary`n`n- $Message`n`n## Test Plan`n`n- [ ] ``bash scripts/audit.sh`` passes`n- [ ] ``pytest tests/ -v`` passes (23 tests)`n`n:robot: Generated with AI Assistant"
     Write-Host "==> Opening PR..."
     gh pr create --title $Message --body $body --base $baseBranch --head $branch
 }

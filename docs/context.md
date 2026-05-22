@@ -202,3 +202,8 @@ python cli.py <URL>      # CLI download
 pytest tests/ -v         # All tests (23 tests)
 bash scripts/audit.sh    # Quality gate check
 ```
+
+
+### Auto-Updating & Context Maintenance
+- **Trigger**: Agents MUST automatically append a summary to the `memory/MEMORY.md` or update architecture sections in `docs/context.md` whenever a significant architectural decision or multi-file feature is completed.
+- **Archiving**: If `docs/context.md` or logs become too unwieldy, older decisions should be archived to `docs/history.md`.

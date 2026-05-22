@@ -76,5 +76,5 @@ Action      : Fix and re-run before /sync
 
 1. Never skip `audit.sh` — even for "trivial" one-line changes.
 2. If `audit.sh` fails, fix before running tests.
-3. If `pytest` fails, do not run `test_app.py` until the i18n issue is fixed.
+3. If `pytest` fails, do not run `tests/test_app.py` until the i18n issue is fixed.
 4. All 3 gates must PASS before `/sync`.

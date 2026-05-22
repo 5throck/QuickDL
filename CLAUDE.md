@@ -75,11 +75,13 @@ Enter plan mode (`EnterPlanMode`) when:
 
 ### Subagent Pattern
 
-Each implementation task:
-1. Fresh subagent executes the task
-2. Spec-compliance review subagent checks the result
-3. Code-quality review subagent checks for issues
-4. Fix and re-review if issues found (max 3 iterations)
+Follow the 6-phase PM Subagent Dispatch Protocol defined in `AGENTS.md`:
+1. Phase 1: Triage (Parallel read-only)
+2. Phase 2: Design
+3. Phase 3: Implementation (Serial writes: backend → frontend → i18n)
+4. Phase 4: QA Verification
+5. Phase 5: Quality Gate
+6. Phase 6: Finalization
 
 ---
 
@@ -105,3 +107,8 @@ Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 ---
 
 *Last Updated: 2026-05-21*
+
+
+### Optimal Interaction Guidelines
+- **XML Tagging**: Utilize XML tags like `<thought>`, `<plan>`, and `<execution>` to structure complex reasoning and plans before generating final responses.
+- **Tone**: Maintain an objective, highly analytical tone. Focus on systematic execution.

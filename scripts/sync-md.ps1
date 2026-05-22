@@ -7,7 +7,7 @@ $ScriptDir = Split-Path $MyInvocation.MyCommand.Path -Parent
 $writtenFile = $env:CLAUDE_FILE_PATHS
 if ($writtenFile) {
     $skipPatterns = @("scratch/", "scratch\", "memory/", "memory\",
-                      "docs/superpowers/", "docs\superpowers\")
+                      "docs/specs/", "docs\specs\", "docs/plans/", "docs\plans\")
     foreach ($pattern in $skipPatterns) {
         if ($writtenFile -like "*$pattern*") {
             Write-Host "  [skip] Temporary/generated file — audit skipped: $writtenFile"

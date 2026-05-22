@@ -84,3 +84,8 @@ This project contains a `.claude/` directory used by Claude Code:
 - **Fallback**: If no `.gemini/` directory exists, Gemini may read `.claude/settings.json` and `.claude/commands/` as fallback.
 - **Command Emulation**: Slash commands in `.claude/commands/*.md` can be emulated by reading the markdown file and executing the described script directly via terminal tools.
 - **Agent Roles**: Gemini can instantiate roles defined in `agents/*.md` using `define_subagent` and `invoke_subagent` tools.
+
+
+### Optimal Interaction Guidelines
+- **Context Management**: Leverage your massive context window by cross-referencing multiple files simultaneously (e.g., when debugging, review log files along with related code).
+- **Tool Usage**: Actively use tools like `search_web` for real-time package version verification or resolving external dependencies.

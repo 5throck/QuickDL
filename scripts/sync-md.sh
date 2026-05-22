@@ -8,7 +8,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # --- Temporary file skip logic ---
 WRITTEN_FILE="${CLAUDE_FILE_PATHS:-}"
 if [ -n "$WRITTEN_FILE" ]; then
-  SKIP_PATTERNS=("scratch/" "memory/" "docs/superpowers/")
+  SKIP_PATTERNS=("scratch/" "memory/" "docs/specs/" "docs/plans/")
   for pattern in "${SKIP_PATTERNS[@]}"; do
     if [[ "$WRITTEN_FILE" == *"$pattern"* ]]; then
       echo "  [skip] Temporary/generated file — audit skipped: $WRITTEN_FILE"
