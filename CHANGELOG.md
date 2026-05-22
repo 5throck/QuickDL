@@ -8,6 +8,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added (2026-05-23 Antigravity CLI native config)
+- `QuickDL` and `templates/`: Map Antigravity write/edit tools to `.gemini/settings.json` PostToolUse hook
+- `QuickDL` and `templates/`: Copy `.claude/commands/` to `.gemini/commands/` for native slash command support
+- `QuickDL`: Update `GEMINI.md` to reflect new native features and tools
+
 ### Fixed (2026-05-23 Documentation Consistency)
 - `agents/*.md`: Fix test execution paths to use `tests/` prefix
 - `CLAUDE.md`: Align Subagent Pattern with 6-phase harness workflow

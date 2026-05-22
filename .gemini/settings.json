@@ -1,1 +1,15 @@
-{}
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content|multi_replace_file_content",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/sync-md.sh 2>/dev/null || pwsh -NonInteractive -File scripts/sync-md.ps1 2>/dev/null || powershell -NonInteractive -File scripts/sync-md.ps1"
+          }
+        ]
+      }
+    ]
+  }
+}
