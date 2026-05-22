@@ -8,6 +8,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed (2026-05-22 Skill Command Wrappers)
+- `.claude/commands/i18n-audit.md`: New wrapper — registers `i18n-audit` skill for Skill tool invocation
+- `.claude/commands/post-write.md`: Converted from standalone duplicate to thin wrapper delegating to `skills/post-write-check/SKILL.md`
+
 ### Fixed (2026-05-22)
 - `core.hooksPath` set to `.githooks` — CHANGELOG pre-commit hook was inactive (hooks were in `.githooks/` but hooksPath was not configured)
 - `scripts/sync-md.sh` / `sync-md.ps1`: Skip audit hook for temporary/generated MD files via `CLAUDE_FILE_PATHS` env var check
