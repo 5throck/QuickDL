@@ -8,6 +8,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+- Standardize session start checklist in CLAUDE.md to 6-step format (git config, CONSTITUTION, context, AGENTS, memory, skills)
+- Expand GEMINI.md with tool safeguards, Planning Mode artifacts, Subagent orchestration; remove duplicate Session Start section
+
 ### Added (2026-05-23 Antigravity CLI native config)
 - `QuickDL` and `templates/`: Map Antigravity write/edit tools to `.gemini/settings.json` PostToolUse hook
 - `QuickDL` and `templates/`: Copy `.claude/commands/` to `.gemini/commands/` for native slash command support

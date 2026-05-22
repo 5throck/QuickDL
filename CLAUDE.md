@@ -10,12 +10,17 @@
 
 ## Session Start
 
-**At the start of every session, load the following skills:**
+At the start of every Claude Code session, run this checklist:
 
-1. [`skills/post-write-check/SKILL.md`](skills/post-write-check/SKILL.md) — mandatory QA chain after any Write/Edit
-2. [`skills/i18n-audit/SKILL.md`](skills/i18n-audit/SKILL.md) — locale key parity audit protocol
-
-Then read [`docs/context.md`](docs/context.md) for shared project context.
+```
+0. git config core.hooksPath .githooks   # activate hooks (run once per clone)
+1. Read ../CONSTITUTION.md               # workspace design standard
+2. Read docs/context.md                  # project knowledge — architecture, i18n, workflow
+3. Read AGENTS.md                        # canonical agent roster
+4. Read memory/MEMORY.md                 # recent session history (skip if absent)
+5. Load skills/post-write-check/SKILL.md # mandatory QA chain after any Write/Edit
+6. Load skills/i18n-audit/SKILL.md       # locale key parity audit protocol
+```
 
 ---
 
