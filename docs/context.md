@@ -126,7 +126,15 @@ quickdl/
 - **Web UI injection:** `render_template('index.html', i18n=get_all(), lang=get_lang())`
 - **JS access:** `window.I18N['key']`
 
-## Coding Conventions
+## Session Start Skills
+<!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
+<!-- Format: `skills/<name>/SKILL.md` — reason / trigger                          -->
+- `skills/post-write-check/SKILL.md` — always load; mandatory QA after any write
+- `skills/i18n-audit/SKILL.md` — always load for locale key parity tasks
+
+---
+
+## Coding Guidelines
 
 - **Python version:** 3.8+ — use `Optional[str]` from `typing`, NOT `str | None`
 - **Encoding:** UTF-8 everywhere; files opened with `encoding="utf-8"`
