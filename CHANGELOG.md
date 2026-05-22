@@ -8,6 +8,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed (2026-05-22)
+- `core.hooksPath` set to `.githooks` — CHANGELOG pre-commit hook was inactive (hooks were in `.githooks/` but hooksPath was not configured)
+- `scripts/sync-md.sh` / `sync-md.ps1`: Skip audit hook for temporary/generated MD files via `CLAUDE_FILE_PATHS` env var check
+
 ### Changed
 - `desktop.py` — change window close behavior to fully quit the application instead of minimizing to the system tray
 - `install.py` — add cross-platform `ffmpeg` auto-installation logic (`winget`, `brew`, `apt`) and add new i18n keys to all 16 locales
