@@ -1,18 +1,26 @@
 #!/bin/sh
-# .githooks/pre-commit
-# Enforce CHANGELOG.md update on every commit.
-# Install: git config core.hooksPath .githooks
+# Enforce CHANGELOG.md update on commit
+# Skip check if only memory/ files are staged (session logs do not need changelog entries)
 
-if ! git diff --cached --name-only | grep -q "^CHANGELOG.md$"; then
+STAGED=$(git diff --cached --name-only)
+
+# If every staged file is under memory/, skip the check
+if [ -n "$STAGED" ] && ! echo "$STAGED" | grep -qv "^memory/"; then
+  exit 0
+fi
+
+if ! echo "$STAGED" | grep -q "^CHANGELOG.md$"; then
   echo "==========================================================="
-  echo "❌  CHANGELOG.md must be updated for every commit."
+  echo "❌ Error: CHANGELOG.md must be updated for every commit."
   echo "==========================================================="
+  echo "The project rules enforce that the CHANGELOG.md file is"
+  echo "updated to document your changes."
   echo ""
-  echo "Edit CHANGELOG.md under [Unreleased], stage it, and retry:"
-  echo "  git add CHANGELOG.md"
-  echo "  git commit ..."
+  echo "Please edit CHANGELOG.md, stage it (git add CHANGELOG.md),"
+  echo "and then try your commit again."
   echo ""
-  echo "To bypass (emergency only): git commit --no-verify"
+  echo "(If you must bypass this check for a special case,"
+  echo " you can use 'git commit --no-verify')"
   echo "==========================================================="
   exit 1
 fi

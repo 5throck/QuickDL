@@ -8,6 +8,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added (2026-05-23 Project Structure Compliance)
+- `SECURITY.md`: Security vulnerability reporting policy (CONSTITUTION §1 required file)
+- `.github/pull_request_template.md`: Standard PR body template (CONSTITUTION §1 required file)
+- `.env.sample`: Environment variable template (CONSTITUTION §1 required file)
+- `.gemini/settings.json`: Gemini CLI project settings (CONSTITUTION §1 required file)
+- `scripts/git-sync.sh` / `git-sync.ps1`: Cross-platform git sync script pair (CONSTITUTION §3 script parity rule)
+
+### Changed
+- Add ## Environment Setup, fix GEMINI.md absolute paths, clarify branching strategy in docs/context.md
+
+### Changed
+- Add standard slash commands, smart pre-commit hook (memory/ exclusion), and Coding Guidelines section to docs/context.md
+
 ### Fixed (2026-05-22 Skill Command Wrappers)
 - `.claude/commands/i18n-audit.md`: New wrapper — registers `i18n-audit` skill for Skill tool invocation
 - `.claude/commands/post-write.md`: Converted from standalone duplicate to thin wrapper delegating to `skills/post-write-check/SKILL.md`

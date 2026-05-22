@@ -26,6 +26,33 @@
 
 ---
 
+## Environment Setup
+
+```bash
+# Python 3.8+
+python -m venv .venv
+# macOS/Linux:
+source .venv/bin/activate
+# Windows:
+.venv\Scripts\activate
+
+pip install -r requirements.txt
+
+# Activate git hooks
+git config core.hooksPath .githooks
+
+# Run development server
+python app.py      # Web UI at http://localhost:5000
+
+# Run tests
+pytest tests/ -v   # 23 tests
+```
+
+Required env keys (see `.env.sample`):
+- N/A — no external API keys required
+
+---
+
 ## Architecture
 
 ```
@@ -126,7 +153,15 @@ quickdl/
 - **Web UI injection:** `render_template('index.html', i18n=get_all(), lang=get_lang())`
 - **JS access:** `window.I18N['key']`
 
-## Coding Conventions
+## Session Start Skills
+<!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
+<!-- Format: `skills/<name>/SKILL.md` — reason / trigger                          -->
+- `skills/post-write-check/SKILL.md` — always load; mandatory QA after any write
+- `skills/i18n-audit/SKILL.md` — always load for locale key parity tasks
+
+---
+
+## Coding Guidelines
 
 - **Python version:** 3.8+ — use `Optional[str]` from `typing`, NOT `str | None`
 - **Encoding:** UTF-8 everywhere; files opened with `encoding="utf-8"`
@@ -145,6 +180,9 @@ quickdl/
 
 ### Branching Strategy
 
+Use `/sync "type: description"` (or `bash scripts/dev-sync.sh`) for the full pipeline — it auto-creates the branch in `pr/<YYYYMMDD-HHmmss>-<slug>` format, commits, pushes, and opens a PR.
+
+For manual branches:
 ```bash
 git checkout -b feature/<name>  # new feature
 git checkout -b fix/<name>      # bug fix
