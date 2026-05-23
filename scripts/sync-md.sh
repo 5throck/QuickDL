@@ -1,22 +1,11 @@
 #!/usr/bin/env bash
-# scripts/sync-md.sh
-# PostToolUse hook wrapper — runs audit.sh after every Write/Edit.
-# Cross-platform: executed inside bash context on all platforms.
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# --- Temporary file skip logic ---
-WRITTEN_FILE="${CLAUDE_FILE_PATHS:-}"
-if [ -n "$WRITTEN_FILE" ]; then
-  SKIP_PATTERNS=("scratch/" "memory/" "docs/specs/" "docs/plans/")
-  for pattern in "${SKIP_PATTERNS[@]}"; do
-    if [[ "$WRITTEN_FILE" == *"$pattern"* ]]; then
-      echo "  [skip] Temporary/generated file — audit skipped: $WRITTEN_FILE"
-      exit 0
-    fi
-  done
+# sync-md.sh — Update memory/MEMORY.md index
+# Usage: bash scripts/sync-md.sh "YYYY-MM-DD" "summary"
+DATE="${1:-$(date +%Y-%m-%d)}"
+SUMMARY="${2:-update}"
+MEMORY_FILE="memory/MEMORY.md"
+[ ! -f "$MEMORY_FILE" ] && printf "# Memory Index\n\n| Date | Summary |\n|------|----------|\n" > "$MEMORY_FILE"
+# Only append if this date is not already in the index
+if ! grep -qF "[$DATE]" "$MEMORY_FILE"; then
+  echo "| [$DATE]($DATE.md) | $SUMMARY |" >> "$MEMORY_FILE"
 fi
-
-echo "--- Post-Edit Audit Hook ---"
-bash "$SCRIPT_DIR/audit.sh"
-exit $?

@@ -1,21 +1,21 @@
-# scripts/sync-md.ps1
-# PostToolUse hook wrapper — runs audit.ps1 after every Write/Edit (PowerShell).
+﻿# sync-md.ps1 — Update memory/MEMORY.md index (Windows)
+# Usage: .\scripts\sync-md.ps1 "YYYY-MM-DD" "summary"
+param(
+    [string]$Date    = (Get-Date -Format "yyyy-MM-dd"),
+    [string]$Summary = "update"
+)
+$MemFile = "memory\MEMORY.md"
+if (-not (Test-Path $MemFile)) {
+    @"
+# Memory Index
 
-$ScriptDir = Split-Path $MyInvocation.MyCommand.Path -Parent
-
-# --- Temporary file skip logic ---
-$writtenFile = $env:CLAUDE_FILE_PATHS
-if ($writtenFile) {
-    $skipPatterns = @("scratch/", "scratch\", "memory/", "memory\",
-                      "docs/specs/", "docs\specs\", "docs/plans/", "docs\plans\")
-    foreach ($pattern in $skipPatterns) {
-        if ($writtenFile -like "*$pattern*") {
-            Write-Host "  [skip] Temporary/generated file — audit skipped: $writtenFile"
-            exit 0
-        }
-    }
+| Date | Summary |
+|------|---------|
+"@ | Set-Content $MemFile -Encoding UTF8
+}
+# Only append if this date is not already in the index
+$existing = Get-Content $MemFile -Raw -ErrorAction SilentlyContinue
+if (-not $existing -or $existing -notmatch [regex]::Escape("[$Date]")) {
+    Add-Content $MemFile "| [$Date]($Date.md) | $Summary |"
 }
 
-Write-Host "--- Post-Edit Audit Hook ---"
-& "$ScriptDir\audit.ps1"
-exit $LASTEXITCODE

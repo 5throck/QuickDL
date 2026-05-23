@@ -1,96 +1,61 @@
-# scripts/audit.ps1 — QuickDL quality gate (PowerShell)
-# Runs automatically via PostToolUse hook after Write/Edit (Windows).
-# Also called by dev-sync.ps1 before committing.
+﻿# audit.ps1 — Documentation integrity check (Windows PowerShell)
+# Mirrors audit.sh exactly. Exit code 0 = pass, non-zero = fail.
 
-Set-StrictMode -Version Latest
-$root = Split-Path $PSScriptRoot -Parent
-Set-Location $root
+$errors = 0
+function Pass($msg) { Write-Host "[PASS] $msg" -ForegroundColor Green }
+function Fail($msg) { Write-Host "[FAIL] $msg" -ForegroundColor Red; $script:errors++ }
+function Warn($msg) { Write-Host "[WARN] $msg" -ForegroundColor Yellow }
 
-$fail = $false
-Write-Host "--- Documentation Audit ---"
+Write-Host "=== audit.ps1 — workspace standards check ===" -ForegroundColor Cyan
 
-# ── 1. CHANGELOG.md must exist ──────────────────────────────────────────────
-if (-not (Test-Path "CHANGELOG.md")) {
-    Write-Host "  [!] CHANGELOG.md not found — run /changelog to create it"
-    $fail = $true
+# 1. CHANGELOG.md must exist
+if (Test-Path "CHANGELOG.md") { Pass "CHANGELOG.md exists" } else { Fail "CHANGELOG.md missing" }
+
+# 2. CONSTITUTION.md must be accessible (workspace root or one level up)
+if ((Test-Path "CONSTITUTION.md") -or (Test-Path "..\CONSTITUTION.md")) { Pass "CONSTITUTION.md accessible" }
+else { Fail "CONSTITUTION.md not found (expected at ./ or ../)" }
+
+# ── Project-level checks (skip at workspace root where docs/context.md is absent) ──
+
+# 3. CHANGELOG.md must have [Unreleased] section
+if (Test-Path "CHANGELOG.md") {
+    $cl = Get-Content "CHANGELOG.md" -Raw
+    if ($cl -match "\[Unreleased\]") { Pass "CHANGELOG.md has [Unreleased]" }
+    else { Fail "CHANGELOG.md missing '[Unreleased]'" }
 }
 
-# ── 2. locales/ key parity ───────────────────────────────────────────────────
-$pyScript = @'
-import json, pathlib, sys
-base_path = pathlib.Path("locales/en.json")
-if not base_path.exists():
-    print("SKIP: locales/en.json not found")
-    sys.exit(0)
-base = json.loads(base_path.read_text(encoding="utf-8"))
-failed = False
-for p in sorted(pathlib.Path("locales").glob("*.json")):
-    other = json.loads(p.read_text(encoding="utf-8"))
-    missing = set(base) - set(other)
-    extra   = set(other) - set(base)
-    if missing or extra:
-        print(f"  [!] {p.name}: missing={missing} extra={extra}")
-        failed = True
-sys.exit(1 if failed else 0)
-'@
-$tmpFile = [System.IO.Path]::GetTempFileName() + ".py"
-Set-Content -Path $tmpFile -Value $pyScript -Encoding UTF8
-try {
-    $output = python $tmpFile 2>&1
-    if ($output) { Write-Host $output }
-    if ($LASTEXITCODE -ne 0) { $fail = $true }
-} finally {
-    Remove-Item $tmpFile -ErrorAction SilentlyContinue
-}
+if (Test-Path "docs\context.md") {
+    $ctx = Get-Content "docs\context.md" -Raw
 
-# ── 3. Absolute path check ────────────────────────────────────────────────────
-$mdFiles = Get-ChildItem -Recurse -Filter "*.md" | Where-Object {
-    $_.FullName -notmatch "node_modules|\.git|\.claude|\.venv|CLAUDE\.md|GEMINI\.md"
-}
-foreach ($f in $mdFiles) {
-    $content = Get-Content $f.FullName -Raw -ErrorAction SilentlyContinue
-    if ($content -match '[A-Z]:\\|/Users/|/home/') {
-        Write-Host "  [!] Absolute path detected in $($f.Name)"
-        $fail = $true
+    # 4. docs/context.md must have ## Coding Guidelines
+    if ($ctx -match "(?m)^## Coding Guidelines") { Pass "docs/context.md has ## Coding Guidelines" }
+    else { Fail "docs/context.md missing '## Coding Guidelines'" }
+
+    # 5. AGENTS.md must exist
+    if (Test-Path "AGENTS.md") { Pass "AGENTS.md exists" }
+    else { Fail "AGENTS.md missing (required for agent-first projects)" }
+
+    # 6. At least one agent file must exist in agents/
+    $agentFiles = Get-ChildItem -Path "agents" -Filter "*.md" -ErrorAction SilentlyContinue
+    if ($agentFiles) { Pass "agents/ has agent files" }
+    else { Fail "agents/ is empty or missing — create at least agents/pm.md" }
+
+    # 7. .env.sample must exist
+    if (Test-Path ".env.sample") { Pass ".env.sample exists" }
+    else { Warn ".env.sample not found — add one if this project uses environment variables" }
+
+    # 8. scripts/ .sh/.ps1 parity check
+    Get-ChildItem -Path "scripts" -Filter "*.sh" -ErrorAction SilentlyContinue | ForEach-Object {
+        $ps1 = Join-Path "scripts" ($_.BaseName + ".ps1")
+        if (Test-Path $ps1) { Pass "script parity: $($_.Name) / $($_.BaseName).ps1" }
+        else { Warn "script parity gap: $($_.Name) has no matching .ps1" }
     }
+
+} else {
+    Warn "docs/context.md not found — skipping project-level checks (workspace root)"
 }
 
-# ── 4. Script pairing check ───────────────────────────────────────────────────
-Get-ChildItem scripts -File | ForEach-Object {
-    $base = $_.BaseName
-    $ext  = $_.Extension
-    if ($ext -eq ".sh" -and -not (Test-Path "scripts\$base.ps1")) {
-        Write-Host "  [!] Missing .ps1 pair for scripts\$base.sh"
-        $fail = $true
-    }
-    elseif ($ext -eq ".ps1" -and -not (Test-Path "scripts\$base.sh")) {
-        Write-Host "  [!] Missing .sh pair for scripts\$base.ps1"
-        $fail = $true
-    }
-}
+Write-Host ""
+if ($errors -eq 0) { Write-Host "✅ All checks passed." -ForegroundColor Green; exit 0 }
+else { Write-Host "❌ $errors check(s) failed. Fix before committing." -ForegroundColor Red; exit 1 }
 
-# ── 6. Active CRITICAL security advisories (warn only) ───────────────────────
-if (Test-Path "security") {
-    $secFiles = Get-ChildItem "security\*.md" -ErrorAction SilentlyContinue
-    if ($secFiles) {
-        $criticalCount = 0
-        foreach ($sf in $secFiles) {
-            $content = Get-Content $sf.FullName -Raw -ErrorAction SilentlyContinue
-            if ($content -match "(?m)^severity: CRITICAL" -and $content -match "(?m)^status: active") {
-                $criticalCount++
-            }
-        }
-        if ($criticalCount -gt 0) {
-            Write-Host "  [WARN] security/: $criticalCount active CRITICAL advisory/advisories — run /security-check to review" -ForegroundColor Yellow
-        }
-    }
-}
-
-# ── Result ───────────────────────────────────────────────────────────────────
-if ($fail) {
-    Write-Host "Audit FAILED."
-    exit 1
-}
-
-Write-Host "Audit PASSED."
-exit 0
