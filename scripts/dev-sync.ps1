@@ -63,7 +63,7 @@ if ((Test-Path $indexFile) -and -not (Select-String -Path $indexFile -Pattern ([
 # ── 4. Stage and commit ──────────────────────────────────────────────────────
 Write-Host "==> Committing..."
 git add -A
-$commitMsg = "$Message`n`nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+$commitMsg = "$Message"
 git commit -m $commitMsg
 
 # ── 5. Branch strategy ───────────────────────────────────────────────────────
@@ -95,7 +95,7 @@ if ($existingPr) {
     Write-Host "==> PR #$existingPr already exists — skipping creation."
     gh pr view --json url -q '.url'
 } else {
-    $body = "## Summary`n`n- $Message`n`n## Test Plan`n`n- [ ] ``bash scripts/audit.sh`` passes`n- [ ] ``pytest tests/ -v`` passes (23 tests)`n`n:robot: Generated with AI Assistant"
+    $body = "## Summary`n`n- $Message`n`n## Test Plan`n`n- [ ] ``bash scripts/audit.sh`` passes`n- [ ] Tests pass`n`n:robot: Generated with AI Assistant"
     Write-Host "==> Opening PR..."
     gh pr create --title $Message --body $body --base $baseBranch --head $branch
 }

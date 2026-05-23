@@ -60,9 +60,7 @@ fi
 # ── 4. Stage and commit ──────────────────────────────────────────────────────
 echo "==> Committing..."
 git add -A
-git commit -m "${MSG}
-
-Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>"
+git commit -m "${MSG}"
 
 # ── 5. Branch strategy: PR branch from master ────────────────────────────────
 BRANCH=$(git branch --show-current)
@@ -96,7 +94,7 @@ else
   echo "==> Opening PR..."
   gh pr create \
     --title "$MSG" \
-    --body "$(printf "## Summary\n\n%s\n\n## Test Plan\n\n- [ ] \`bash scripts/audit.sh\` passes\n- [ ] \`pytest tests/ -v\` passes (23 tests)\n\n🤖 Generated with AI Assistant" "$COMMITS")" \
+    --body "$(printf "## Summary\n\n%s\n\n## Test Plan\n\n- [ ] \`bash scripts/audit.sh\` passes\n- [ ] Tests pass\n\n🤖 Generated with AI Assistant" "$COMMITS")" \
     --base "$BASE_BRANCH" \
     --head "$BRANCH"
 fi
