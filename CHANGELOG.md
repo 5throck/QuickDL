@@ -9,15 +9,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
-- **[2026-05-23]**: `.githooks/pre-commit`: Markdown date auto-bumper 및 CHANGELOG auto-dating 로직 추가. 커밋 시 스테이징된 `.md` 파일의 `Last Updated:` 날짜를 자동으로 갱신하며, `CHANGELOG.md`의 미기재 항목에 날짜를 주입.
-- **[2026-05-23]**: `docs/context.md`: Agents 테이블에 `security-monitor` (Security group) 추가.
-- **[2026-05-23]**: `AGENTS.md`: 전체 Agent Roster에 `security-monitor` 요원 정식 등록.
+- **[2026-05-23]**: `.githooks/pre-commit`: Add Markdown date auto-bumper and CHANGELOG auto-dating logic. Automatically updates `Last Updated:` date in staged `.md` files upon commit, and injects date into undated `CHANGELOG.md` entries.
+- **[2026-05-23]**: `docs/context.md`: Add `security-monitor` (Security group) to Agents table.
+- **[2026-05-23]**: `AGENTS.md`: Register `security-monitor` agent formally in the global Agent Roster.
 
 ### Changed
-- **[2026-05-23]**: Default Branch: 프로젝트 기본 브랜치를 `master`에서 워크스페이스 표준인 `main`으로 성공적으로 마이그레이션 및 동기화 완료.
+- **[2026-05-23]**: Default Branch: Successfully migrated and synced the default project branch from `master` to the workspace standard `main`.
 
 ### Removed
-- **[2026-05-23]**: `README.md` / `README_ko.md`: 더 이상 필요 없는 수동 킥오프 안내 문구 일괄 제거.
+- **[2026-05-23]**: `README.md` / `README_ko.md`: Remove obsolete manual kickoff instruction text.
 
 
 ### Changed
