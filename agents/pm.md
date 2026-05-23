@@ -88,3 +88,11 @@ Output: Spec document (`docs/specs/`), implementation plan (`docs/plans/`), upda
 | `security` | `agents/security.md` | ❌ read-only | ✅ |
 | `qa` | `agents/qa.md` | ✅ tests only | ✅ |
 | `pm` | `agents/pm.md` | ❌ orchestration only | — |
+
+
+## Dynamic Team Assembly & Skill Orchestration (Phase 0)
+During the very first kickoff phase of this project or any major feature:
+- Analyze project requirements and assess if the current agent roster and skills are sufficient.
+- If specialized agents are needed, dynamically generate their `agents/<name>.md` files. Update existing agents' files to prevent role overlap.
+- If specialized workflows/skills are needed, generate `skills/<name>/SKILL.md` directly using proper YAML frontmatter, or instruct agents to use `workflow-skill-creator` later for complex tasks.
+- Always update `AGENTS.md` and `docs/context.md` (or equivalent registry files) with the new agents or skills to ensure global visibility.

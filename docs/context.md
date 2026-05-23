@@ -155,6 +155,7 @@ quickdl/
 
 ## Session Start Skills
 <!-- Skills listed here are loaded at the start of EVERY session by ALL AI tools. -->
+<!-- NOTE: This list may be dynamically expanded by the PM during the Kickoff Phase.-->
 <!-- Format: `skills/<name>/SKILL.md` — reason / trigger                          -->
 - `skills/post-write-check/SKILL.md` — always load; mandatory QA after any write
 - `skills/i18n-audit/SKILL.md` — always load for locale key parity tasks
@@ -207,3 +208,7 @@ bash scripts/audit.sh    # Quality gate check
 ### Auto-Updating & Context Maintenance
 - **Trigger**: Agents MUST automatically append a summary to the `memory/MEMORY.md` or update architecture sections in `docs/context.md` whenever a significant architectural decision or multi-file feature is completed.
 - **Archiving**: If `docs/context.md` or logs become too unwieldy, older decisions should be archived to `docs/history.md`.
+
+
+## Dynamic Roster & Skills Note
+**Note:** The agent and skills lists in this project may be dynamically expanded by the PM orchestrator during the Kickoff Phase based on emerging requirements.
