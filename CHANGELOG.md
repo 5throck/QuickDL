@@ -8,73 +8,85 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+- **[2026-05-23]**: `.githooks/pre-commit`: Markdown date auto-bumper 및 CHANGELOG auto-dating 로직 추가. 커밋 시 스테이징된 `.md` 파일의 `Last Updated:` 날짜를 자동으로 갱신하며, `CHANGELOG.md`의 미기재 항목에 날짜를 주입.
+- **[2026-05-23]**: `docs/context.md`: Agents 테이블에 `security-monitor` (Security group) 추가.
+- **[2026-05-23]**: `AGENTS.md`: 전체 Agent Roster에 `security-monitor` 요원 정식 등록.
+
 ### Changed
-- Standardize session start checklist in CLAUDE.md to 6-step format (git config, CONSTITUTION, context, AGENTS, memory, skills)
-- Expand GEMINI.md with tool safeguards, Planning Mode artifacts, Subagent orchestration; remove duplicate Session Start section
+- **[2026-05-23]**: Default Branch: 프로젝트 기본 브랜치를 `master`에서 워크스페이스 표준인 `main`으로 성공적으로 마이그레이션 및 동기화 완료.
+
+### Removed
+- **[2026-05-23]**: `README.md` / `README_ko.md`: 더 이상 필요 없는 수동 킥오프 안내 문구 일괄 제거.
+
+
+### Changed
+- **[2026-05-23]**: Standardize session start checklist in CLAUDE.md to 6-step format (git config, CONSTITUTION, context, AGENTS, memory, skills)
+- **[2026-05-23]**: Expand GEMINI.md with tool safeguards, Planning Mode artifacts, Subagent orchestration; remove duplicate Session Start section
 
 ### Added (2026-05-23 Antigravity CLI native config)
-- `QuickDL` and `templates/`: Map Antigravity write/edit tools to `.gemini/settings.json` PostToolUse hook
-- `QuickDL` and `templates/`: Copy `.claude/commands/` to `.gemini/commands/` for native slash command support
-- `QuickDL`: Update `GEMINI.md` to reflect new native features and tools
+- **[2026-05-23]**: `QuickDL` and `templates/`: Map Antigravity write/edit tools to `.gemini/settings.json` PostToolUse hook
+- **[2026-05-23]**: `QuickDL` and `templates/`: Copy `.claude/commands/` to `.gemini/commands/` for native slash command support
+- **[2026-05-23]**: `QuickDL`: Update `GEMINI.md` to reflect new native features and tools
 
 ### Fixed (2026-05-23 Documentation Consistency)
-- `agents/*.md`: Fix test execution paths to use `tests/` prefix
-- `CLAUDE.md`: Align Subagent Pattern with 6-phase harness workflow
-- `.claude/commands/changelog.md`: Add missing YAML frontmatter
-- `scripts/sync-md.sh` / `.ps1`: Update skip paths to use `docs/specs` and `docs/plans`
-- `.github/pull_request_template.md`: Standardize project test command placeholder
+- **[2026-05-23]**: `agents/*.md`: Fix test execution paths to use `tests/` prefix
+- **[2026-05-23]**: `CLAUDE.md`: Align Subagent Pattern with 6-phase harness workflow
+- **[2026-05-23]**: `.claude/commands/changelog.md`: Add missing YAML frontmatter
+- **[2026-05-23]**: `scripts/sync-md.sh` / `.ps1`: Update skip paths to use `docs/specs` and `docs/plans`
+- **[2026-05-23]**: `.github/pull_request_template.md`: Standardize project test command placeholder
 ### Fixed (2026-05-23 Audit Script — Relative Link Filter)
-- `scripts/audit.sh` / `audit.ps1`: Add `../../` relative-path exclusion to markdown link checker — GitHub Security Advisory links (`../../security/advisories/new`) are cross-repo relative URLs, not local file paths, and must be excluded from broken-link validation
+- **[2026-05-23]**: `scripts/audit.sh` / `audit.ps1`: Add `../../` relative-path exclusion to markdown link checker — GitHub Security Advisory links (`../../security/advisories/new`) are cross-repo relative URLs, not local file paths, and must be excluded from broken-link validation
 
 
 ### Added (2026-05-23 Project Structure Compliance)
-- `SECURITY.md`: Security vulnerability reporting policy (CONSTITUTION §1 required file)
-- `.github/pull_request_template.md`: Standard PR body template (CONSTITUTION §1 required file)
-- `.env.sample`: Environment variable template (CONSTITUTION §1 required file)
-- `.gemini/settings.json`: Gemini CLI project settings (CONSTITUTION §1 required file)
-- `scripts/git-sync.sh` / `git-sync.ps1`: Cross-platform git sync script pair (CONSTITUTION §3 script parity rule)
+- **[2026-05-23]**: `SECURITY.md`: Security vulnerability reporting policy (CONSTITUTION §1 required file)
+- **[2026-05-23]**: `.github/pull_request_template.md`: Standard PR body template (CONSTITUTION §1 required file)
+- **[2026-05-23]**: `.env.sample`: Environment variable template (CONSTITUTION §1 required file)
+- **[2026-05-23]**: `.gemini/settings.json`: Gemini CLI project settings (CONSTITUTION §1 required file)
+- **[2026-05-23]**: `scripts/git-sync.sh` / `git-sync.ps1`: Cross-platform git sync script pair (CONSTITUTION §3 script parity rule)
 
 ### Changed
-- Add ## Environment Setup, fix GEMINI.md absolute paths, clarify branching strategy in docs/context.md
+- **[2026-05-23]**: Add ## Environment Setup, fix GEMINI.md absolute paths, clarify branching strategy in docs/context.md
 
 ### Changed
-- Add standard slash commands, smart pre-commit hook (memory/ exclusion), and Coding Guidelines section to docs/context.md
+- **[2026-05-23]**: Add standard slash commands, smart pre-commit hook (memory/ exclusion), and Coding Guidelines section to docs/context.md
 
 ### Fixed (2026-05-22 Skill Command Wrappers)
-- `.claude/commands/i18n-audit.md`: New wrapper — registers `i18n-audit` skill for Skill tool invocation
-- `.claude/commands/post-write.md`: Converted from standalone duplicate to thin wrapper delegating to `skills/post-write-check/SKILL.md`
+- **[2026-05-23]**: `.claude/commands/i18n-audit.md`: New wrapper — registers `i18n-audit` skill for Skill tool invocation
+- **[2026-05-23]**: `.claude/commands/post-write.md`: Converted from standalone duplicate to thin wrapper delegating to `skills/post-write-check/SKILL.md`
 
 ### Fixed (2026-05-22)
-- `core.hooksPath` set to `.githooks` — CHANGELOG pre-commit hook was inactive (hooks were in `.githooks/` but hooksPath was not configured)
-- `scripts/sync-md.sh` / `sync-md.ps1`: Skip audit hook for temporary/generated MD files via `CLAUDE_FILE_PATHS` env var check
+- **[2026-05-23]**: `core.hooksPath` set to `.githooks` — CHANGELOG pre-commit hook was inactive (hooks were in `.githooks/` but hooksPath was not configured)
+- **[2026-05-23]**: `scripts/sync-md.sh` / `sync-md.ps1`: Skip audit hook for temporary/generated MD files via `CLAUDE_FILE_PATHS` env var check
 
 ### Changed
-- `desktop.py` — change window close behavior to fully quit the application instead of minimizing to the system tray
-- `install.py` — add cross-platform `ffmpeg` auto-installation logic (`winget`, `brew`, `apt`) and add new i18n keys to all 16 locales
-- Fix outdated test paths (`tests/`) in `skills/post-write-check/SKILL.md`, `skills/i18n-audit/SKILL.md`, `AGENTS.md`, and `docs/context.md`
-- Generalize AI `Co-Authored-By` rule in `docs/context.md` to be platform-agnostic
-- `ytdl.sh` — improve macOS/Linux launcher: add `pythonw` detection, 16-language error messages (th, ru, it, ar added), redirect error to stderr, use `exec` for clean process handoff
-- Rewrite `README.md` and `README_ko.md`: reflect current project structure (`tests/`, `locales/`, `i18n.py`, download queue, dark/light mode, 16 languages, CI badge, test/audit commands)
-- Fix `GEMINI.md`: replace broken `docs/agent-config/` references with `docs/context.md`; align response language to Korean; update agent role links to `agents/*.md`
-- Update `agents/qa.md`: replace `test_app.py`/`test_i18n.py` direct references with `tests/` paths; update test count to 23; update run command to `pytest tests/ -v`
-- Update `memory/MEMORY.md`: reflect all PRs since initial entry
-- Rewrite `CLAUDE.md`: add Doc intent header, CLI vs Desktop App hook matrix table, Claude Code Settings section, Git Hooks table — aligned with abap_vibe_coding reference structure
-- Move test files to `tests/` directory; add `pytest.ini` with `testpaths = tests`; add `tests/conftest.py` for automatic sys.path setup
-- Remove `docs/agent-config/` (merged Coding Conventions and Git strategy into `docs/context.md`); remove `docs/superpowers/` (Superpowers plugin artifacts)
-- Remove legacy root-level test files (`test_app.py`, `test_i18n.py`, `test_env.py`, `test_api.py`)
-- Move manual integration script to `tests/manual/test_api.py`
-- Simplify CI: single `pytest tests/ -v` step replaces separate i18n and API test steps
-- Update `CLAUDE.md` to reference `docs/context.md` as SSoT; remove Superpowers workflow section
-- Clean up `scripts/audit.sh` and `audit.ps1` to remove now-deleted `docs/superpowers` exclusion rules
+- **[2026-05-23]**: `desktop.py` — change window close behavior to fully quit the application instead of minimizing to the system tray
+- **[2026-05-23]**: `install.py` — add cross-platform `ffmpeg` auto-installation logic (`winget`, `brew`, `apt`) and add new i18n keys to all 16 locales
+- **[2026-05-23]**: Fix outdated test paths (`tests/`) in `skills/post-write-check/SKILL.md`, `skills/i18n-audit/SKILL.md`, `AGENTS.md`, and `docs/context.md`
+- **[2026-05-23]**: Generalize AI `Co-Authored-By` rule in `docs/context.md` to be platform-agnostic
+- **[2026-05-23]**: `ytdl.sh` — improve macOS/Linux launcher: add `pythonw` detection, 16-language error messages (th, ru, it, ar added), redirect error to stderr, use `exec` for clean process handoff
+- **[2026-05-23]**: Rewrite `README.md` and `README_ko.md`: reflect current project structure (`tests/`, `locales/`, `i18n.py`, download queue, dark/light mode, 16 languages, CI badge, test/audit commands)
+- **[2026-05-23]**: Fix `GEMINI.md`: replace broken `docs/agent-config/` references with `docs/context.md`; align response language to Korean; update agent role links to `agents/*.md`
+- **[2026-05-23]**: Update `agents/qa.md`: replace `test_app.py`/`test_i18n.py` direct references with `tests/` paths; update test count to 23; update run command to `pytest tests/ -v`
+- **[2026-05-23]**: Update `memory/MEMORY.md`: reflect all PRs since initial entry
+- **[2026-05-23]**: Rewrite `CLAUDE.md`: add Doc intent header, CLI vs Desktop App hook matrix table, Claude Code Settings section, Git Hooks table — aligned with abap_vibe_coding reference structure
+- **[2026-05-23]**: Move test files to `tests/` directory; add `pytest.ini` with `testpaths = tests`; add `tests/conftest.py` for automatic sys.path setup
+- **[2026-05-23]**: Remove `docs/agent-config/` (merged Coding Conventions and Git strategy into `docs/context.md`); remove `docs/superpowers/` (Superpowers plugin artifacts)
+- **[2026-05-23]**: Remove legacy root-level test files (`test_app.py`, `test_i18n.py`, `test_env.py`, `test_api.py`)
+- **[2026-05-23]**: Move manual integration script to `tests/manual/test_api.py`
+- **[2026-05-23]**: Simplify CI: single `pytest tests/ -v` step replaces separate i18n and API test steps
+- **[2026-05-23]**: Update `CLAUDE.md` to reference `docs/context.md` as SSoT; remove Superpowers workflow section
+- **[2026-05-23]**: Clean up `scripts/audit.sh` and `audit.ps1` to remove now-deleted `docs/superpowers` exclusion rules
 
 ### Fixed
-- `download_service.py` — use glob to find actual merged `.mp4` on disk instead of relying on `prepare_filename()` pre-merge path
-- `app.py` — replace `request.json` with `request.get_json(silent=True) or {}` to prevent `AttributeError` on missing `Content-Type` header
-- `app.py` — add `threading.Lock` guarding all accesses to `_jobs`, `_completed`, and `_cancel_events` to eliminate data races
-- `app.py` — SSRF protection: block private, loopback, and link-local IP literals in `_validate_url()`
-- `static/js/script.js` — fix memory leak in download queue: remove `<li>` element and delete `queue` Map entry after download link click
-- `scripts/audit.sh` — fix locale key-parity check to use Python process exit code instead of stdout capture
-- `.github/workflows/ci.yml` — run API tests via `pytest test_app.py -v` for consistent output and exit code
+- **[2026-05-23]**: `download_service.py` — use glob to find actual merged `.mp4` on disk instead of relying on `prepare_filename()` pre-merge path
+- **[2026-05-23]**: `app.py` — replace `request.json` with `request.get_json(silent=True) or {}` to prevent `AttributeError` on missing `Content-Type` header
+- **[2026-05-23]**: `app.py` — add `threading.Lock` guarding all accesses to `_jobs`, `_completed`, and `_cancel_events` to eliminate data races
+- **[2026-05-23]**: `app.py` — SSRF protection: block private, loopback, and link-local IP literals in `_validate_url()`
+- **[2026-05-23]**: `static/js/script.js` — fix memory leak in download queue: remove `<li>` element and delete `queue` Map entry after download link click
+- **[2026-05-23]**: `scripts/audit.sh` — fix locale key-parity check to use Python process exit code instead of stdout capture
+- **[2026-05-23]**: `.github/workflows/ci.yml` — run API tests via `pytest test_app.py -v` for consistent output and exit code
 
 ---
 
