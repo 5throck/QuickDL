@@ -205,6 +205,10 @@ bash scripts/audit.sh    # Quality gate check
 ```
 
 
+### Tracking Management: CHANGELOG vs. Memory
+- **`CHANGELOG.md`**: For end-users and release notes. Record *what* changed (features, fixes) using structured categories.
+- **`memory/` logs**: For developers and AI agents. Record *how* and *why* changes were made, including architectural decisions and debugging context.
+
 ### Auto-Updating & Context Maintenance
 - **Trigger**: Agents MUST automatically append a summary to the `memory/MEMORY.md` or update architecture sections in `docs/context.md` whenever a significant architectural decision or multi-file feature is completed.
 - **Archiving**: If `docs/context.md` or logs become too unwieldy, older decisions should be archived to `docs/history.md`.
