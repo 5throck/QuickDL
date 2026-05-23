@@ -139,6 +139,3 @@ bash scripts/audit.sh   # Quality gate (CHANGELOG, i18n parity, broken links)
 ## License
 
 This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
-
-
-This will trigger the Phase 0 Dynamic Team Assembly process to align roles and skills.

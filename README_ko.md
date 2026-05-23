@@ -142,6 +142,3 @@ bash scripts/audit.sh   # 품질 게이트 (CHANGELOG, i18n 키 동기화, 링�
 ## 라이선스
 
 이 프로젝트는 [GNU Affero General Public License v3.0](LICENSE) 라이선스를 따릅니다.
-
-
-This will trigger the Phase 0 Dynamic Team Assembly process to align roles and skills.
