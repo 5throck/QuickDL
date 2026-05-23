@@ -139,3 +139,9 @@ bash scripts/audit.sh   # Quality gate (CHANGELOG, i18n parity, broken links)
 ## License
 
 This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+
+
+## 🤖 Multi-Agent Kickoff (Recommended)
+Before writing any code or beginning a new major feature, ask the AI to start a PM-led kickoff meeting:
+> *"Let's start the PM agent kickoff meeting for this project."*
+This will trigger the Phase 0 Dynamic Team Assembly process to align roles and skills.
