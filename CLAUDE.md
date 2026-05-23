@@ -1,4 +1,4 @@
-# CLAUDE.md — QuickDL
+﻿# CLAUDE.md ??QuickDL
 
 **Claude Code (CLI & Desktop App)** configuration for the QuickDL project.
 
@@ -14,8 +14,8 @@ At the start of every Claude Code session, run this checklist:
 
 ```
 0. git config core.hooksPath .githooks   # activate hooks (run once per clone)
-1. Read ../CONSTITUTION.md               # workspace design standard
-2. Read docs/context.md                  # project knowledge — architecture, i18n, workflow
+1. Read https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md               # workspace design standard
+2. Read docs/context.md                  # project knowledge ??architecture, i18n, workflow
 3. Read AGENTS.md                        # canonical agent roster
 4. Read memory/MEMORY.md                 # recent session history (skip if absent)
 5. Load skills/post-write-check/SKILL.md # mandatory QA chain after any Write/Edit
@@ -36,9 +36,9 @@ Both the CLI and the Desktop App share the same `.claude/settings.json` and slas
 
 ## Claude Code Settings
 
-- `.claude/settings.json` — shared team config: PostToolUse audit hook (committed to repo)
-- `.claude/settings.local.json` — personal git/gh write permissions (gitignored)
-- `.claude/commands/` — slash commands: `/sync`, `/memlog`, `/new-task`
+- `.claude/settings.json` ??shared team config: PostToolUse audit hook (committed to repo)
+- `.claude/settings.local.json` ??personal git/gh write permissions (gitignored)
+- `.claude/commands/` ??slash commands: `/sync`, `/memlog`, `/new-task`
 
 Both files are loaded automatically by Claude Code.
 
@@ -50,11 +50,11 @@ A `PostToolUse` hook fires after every `Write` or `Edit` call and runs `scripts/
 
 | Environment | Hook fires? | Action if not |
 |-------------|:-----------:|---------------|
-| Claude Code CLI | ✅ | Automatic |
-| Claude Code Desktop App | ❌ | Run `bash scripts/audit.sh` manually |
-| Gemini CLI | ❌ | Run `bash scripts/audit.sh` manually |
+| Claude Code CLI | ??| Automatic |
+| Claude Code Desktop App | ??| Run `bash scripts/audit.sh` manually |
+| Gemini CLI | ??| Run `bash scripts/audit.sh` manually |
 
-`audit.sh` checks: CHANGELOG.md existence · locale key parity · absolute path detection · broken markdown links · `.sh`/`.ps1` script pairing.
+`audit.sh` checks: CHANGELOG.md existence 쨌 locale key parity 쨌 absolute path detection 쨌 broken markdown links 쨌 `.sh`/`.ps1` script pairing.
 
 ---
 
@@ -83,7 +83,7 @@ Enter plan mode (`EnterPlanMode`) when:
 Follow the 6-phase PM Subagent Dispatch Protocol defined in `AGENTS.md`:
 1. Phase 1: Triage (Parallel read-only)
 2. Phase 2: Design
-3. Phase 3: Implementation (Serial writes: backend → frontend → i18n)
+3. Phase 3: Implementation (Serial writes: backend ??frontend ??i18n)
 4. Phase 4: QA Verification
 5. Phase 5: Quality Gate
 6. Phase 6: Finalization
@@ -106,14 +106,15 @@ git config core.hooksPath .githooks
 
 ## Git
 
-Follow conventions in [`docs/context.md § Git Conventions`](docs/context.md#git-conventions).
+Follow conventions in [`docs/context.md 짠 Git Conventions`](docs/context.md#git-conventions).
 Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 
 ---
 
-*Last Updated: 2026-05-21*
+*Last Updated: 2026-05-23*
 
 
 ### Optimal Interaction Guidelines
 - **XML Tagging**: Utilize XML tags like `<thought>`, `<plan>`, and `<execution>` to structure complex reasoning and plans before generating final responses.
 - **Tone**: Maintain an objective, highly analytical tone. Focus on systematic execution.
+
