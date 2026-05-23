@@ -1,102 +1,59 @@
 #!/usr/bin/env bash
-# scripts/dev-sync.sh — QuickDL full sync pipeline
+# dev-sync.sh — Full pipeline: memlog → sync-md → changelog → audit → commit → PR
 # Usage: bash scripts/dev-sync.sh "feat: description"
-#
-# Pipeline:
-#   1. audit.sh          — abort on failure
-#   2. memory/YYYY-MM-DD.md — auto-create if missing
-#   3. MEMORY.md index   — awk insertion after header row
-#   4. git add + commit
-#   5. On master/main → create pr/<date>-<slug> branch, reset master to HEAD~1
-#   6. git push + gh pr create (skip if PR already exists)
-
 set -euo pipefail
-cd "$(dirname "$0")/.."
 
-MSG="${1:-}"
-if [[ -z "$MSG" ]]; then
-  echo -n "Enter commit message (e.g., feat: add feature): "
-  read -r MSG
-fi
-if [[ -z "$MSG" ]]; then
-  echo "Error: Commit message is required." >&2
-  exit 1
+MSG="${1:-chore: update}"
+DATE=$(date +%Y-%m-%d)
+
+# ── 1. Write daily session log ─────────────────────────────────────────────────
+mkdir -p memory
+GIT_STATUS=$(git status --short 2>/dev/null || true)
+FILE_LIST=""
+if [ -n "$GIT_STATUS" ]; then
+  # Extract just file names, join with commas
+  FILE_LIST=$(echo "$GIT_STATUS" | sed -E 's/^.{2}[[:space:]]+//' | paste -sd ", " -)
 fi
 
-# ── 1. Audit ─────────────────────────────────────────────────────────────────
-echo "==> Running audit..."
+SEPARATOR=""
+if [ -f "memory/$DATE.md" ]; then
+  SEPARATOR="\n---\n\n"
+fi
+
+printf "${SEPARATOR}## $MSG\n- **Files**: $FILE_LIST\n- **Purpose**: \n- **Decisions**: \n- **Issues**: None\n" >> "memory/$DATE.md"
+
+
+# ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
+bash scripts/sync-md.sh "$DATE" "$MSG"
+
+# ── 3. Auto-add to CHANGELOG.md [Unreleased] if the section has no entries ────
+if [ -f "CHANGELOG.md" ]; then
+  SECTION=$(awk '/\[Unreleased\]/{f=1;next} f && /^## /{exit} f{print}' CHANGELOG.md)
+  if ! echo "$SECTION" | grep -qE "^[[:space:]]*[-*]|^### "; then
+    perl -pi -e 'BEGIN{$m=shift} s/## \[Unreleased\]/## [Unreleased]\n\n- $m/' "$MSG" CHANGELOG.md
+    echo "📝 Auto-added changelog entry: $MSG"
+  fi
+fi
+
+# ── 4. Audit gate ──────────────────────────────────────────────────────────────
 bash scripts/audit.sh
 
-# ── 2. Ensure today's memory log exists ──────────────────────────────────────
-TODAY=$(date +%Y-%m-%d)
-LOGFILE="memory/${TODAY}.md"
-mkdir -p memory
-
-if [[ ! -f "$LOGFILE" ]]; then
-  cat > "$LOGFILE" <<TEMPLATE
-# Development Log — ${TODAY}
-
-<!-- Auto-created by dev-sync.sh. Fill in entries below. -->
-
-## $(date '+%H:%M') — Session
-
-<!-- Describe what was done today -->
-TEMPLATE
-  echo "==> Created $LOGFILE"
-fi
-
-# ── 3. Update MEMORY.md index (awk: insert after separator row) ───────────────
-INDEX="memory/MEMORY.md"
-if [[ -f "$INDEX" ]] && ! grep -q "\[${TODAY}\]" "$INDEX"; then
-  SUMMARY="${MSG#*: }"   # strip "type: " prefix for the summary
-  NEW_ENTRY="| [${TODAY}](${TODAY}.md) | ${SUMMARY} |"
-  awk -v entry="$NEW_ENTRY" '
-    /^\|[-| ]+\|$/ { print; print entry; next }
-    { print }
-  ' "$INDEX" > "$INDEX.tmp" && mv "$INDEX.tmp" "$INDEX"
-  echo "==> Updated MEMORY.md"
-fi
-
-# ── 4. Stage and commit ──────────────────────────────────────────────────────
-echo "==> Committing..."
-git add -A
-git commit -m "${MSG}"
-
-# ── 5. Branch strategy: PR branch from master ────────────────────────────────
-BRANCH=$(git branch --show-current)
-BASE_BRANCH="$BRANCH"
-
-if [[ "$BRANCH" == "master" || "$BRANCH" == "main" ]]; then
-  SLUG=$(echo "$MSG" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | sed 's/^-//;s/-$//' | cut -c1-40)
-  TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-  PR_BRANCH="pr/${TIMESTAMP}-${SLUG}"
-
-  echo "==> Creating PR branch: $PR_BRANCH"
-  COMMIT_HASH=$(git rev-parse HEAD)
-  git checkout -b "$PR_BRANCH" "$COMMIT_HASH"
-  git checkout "$BASE_BRANCH"
-  git reset --hard HEAD~1
-  git checkout "$PR_BRANCH"
-  BRANCH="$PR_BRANCH"
-fi
-
-# ── 6. Push ──────────────────────────────────────────────────────────────────
-echo "==> Pushing $BRANCH..."
-git push -u origin "$BRANCH"
-
-# ── 7. Create PR (skip if already exists) ────────────────────────────────────
-EXISTING_PR=$(gh pr view --json number -q '.number' 2>/dev/null || true)
-if [[ -n "$EXISTING_PR" ]]; then
-  echo "==> PR #${EXISTING_PR} already exists — skipping creation."
-  gh pr view --json url -q '.url'
+# ── 5. Branch → commit → push → PR ────────────────────────────────────────────
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
+  BRANCH="pr/$(date +%Y%m%d-%H%M%S)-$(echo "$MSG" | sed 's/[^a-z0-9]/-/g' | sed 's/--*/-/g' | cut -c1-40)"
+  git checkout -b "$BRANCH"
 else
-  COMMITS=$(git log "${BASE_BRANCH}..HEAD" --pretty=format:"- %s" 2>/dev/null | head -20 || git log -1 --pretty=format:"- %s")
-  echo "==> Opening PR..."
-  gh pr create \
-    --title "$MSG" \
-    --body "$(printf "## Summary\n\n%s\n\n## Test Plan\n\n- [ ] \`bash scripts/audit.sh\` passes\n- [ ] Tests pass\n\n🤖 Generated with AI Assistant" "$COMMITS")" \
-    --base "$BASE_BRANCH" \
-    --head "$BRANCH"
+  BRANCH="$CURRENT_BRANCH"
+  echo "ℹ️  Already on branch '$BRANCH' — committing here without creating a new branch."
 fi
-
-echo "==> Done."
+git add -A
+# NOTE: This is a template script. Update the commit message or AI Co-Author below as needed for your specific project.
+git commit -m "$MSG"
+git push -u origin "$BRANCH"
+# Use PR template if present; fall back to --fill
+if [ -f ".github/pull_request_template.md" ]; then
+  gh pr create --title "$MSG" --body "$(cat .github/pull_request_template.md)"
+else
+  gh pr create --fill
+fi

@@ -1,103 +1,77 @@
-# scripts/dev-sync.ps1 — QuickDL full sync pipeline (PowerShell)
+# dev-sync.ps1 — Full pipeline: memlog → sync-md → changelog → audit → commit → PR (Windows)
 # Usage: .\scripts\dev-sync.ps1 "feat: description"
+param([string]$Msg = "chore: update")
 
-param(
-    [Parameter(Mandatory=$false)]
-    [string]$Message = ""
-)
+$Date = Get-Date -Format "yyyy-MM-dd"
 
-Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
-$root = Split-Path $PSScriptRoot -Parent
-Set-Location $root
-
-if ([string]::IsNullOrWhiteSpace($Message)) {
-    $Message = Read-Host "Enter commit message (e.g., feat: add feature)"
-}
-if ([string]::IsNullOrWhiteSpace($Message)) {
-    Write-Error "Error: Commit message is required."
-    exit 1
+# ── 1. Write daily session log ─────────────────────────────────────────────────
+New-Item -ItemType Directory -Path "memory" -Force | Out-Null
+$GitStatus = git status --short 2>$null
+$FileList = ""
+if ($GitStatus) {
+    # Extract just file names, ignoring status codes, and join with commas
+    $FileList = ($GitStatus | ForEach-Object { ($_ -replace '^.{2}\s+', '').Trim() }) -join ", "
 }
 
-# ── 1. Audit ─────────────────────────────────────────────────────────────────
-Write-Host "==> Running audit..."
-& "$PSScriptRoot\audit.ps1"
-if ($LASTEXITCODE -ne 0) { exit 1 }
+# Determine appropriate header: if this file has existing content, add a separator
+$separator = ""
+if (Test-Path "memory\$Date.md") { $separator = "`n---`n`n" }
 
-# ── 2. Ensure today's memory log exists ──────────────────────────────────────
-$today = Get-Date -Format "yyyy-MM-dd"
-$logFile = "memory\$today.md"
-New-Item -ItemType Directory -Force -Path "memory" | Out-Null
+$template = @"
+$separator## $Msg
+- **Files**: $FileList
+- **Purpose**: 
+- **Decisions**: 
+- **Issues**: None
+"@
 
-if (-not (Test-Path $logFile)) {
-    $time = Get-Date -Format "HH:mm"
-    @"
-# Development Log — $today
+Add-Content "memory\$Date.md" $template -Encoding UTF8
 
-<!-- Auto-created by dev-sync.ps1. Fill in entries below. -->
 
-## $time — Session
+# ── 2. Update MEMORY.md index ─────────────────────────────────────────────────
+.\scripts\sync-md.ps1 $Date $Msg
 
-<!-- Describe what was done today -->
-"@ | Set-Content -Path $logFile -Encoding UTF8
-    Write-Host "==> Created $logFile"
-}
-
-# ── 3. Update MEMORY.md index (insert after separator row) ───────────────────
-$indexFile = "memory\MEMORY.md"
-if ((Test-Path $indexFile) -and -not (Select-String -Path $indexFile -Pattern ([regex]::Escape($today)) -Quiet)) {
-    $summary = ($Message -replace '^[^:]+:\s*', '')
-    $newEntry = "| [$today]($today.md) | $summary |"
-    $lines = Get-Content $indexFile
-    $output = @()
-    foreach ($line in $lines) {
-        $output += $line
-        if ($line -match '^\|[-| ]+\|$') {
-            $output += $newEntry
+# ── 3. Auto-add to CHANGELOG.md [Unreleased] if the section has no entries ────
+if (Test-Path "CHANGELOG.md") {
+    $cl = Get-Content "CHANGELOG.md" -Raw
+    # Extract [Unreleased] section content
+    if ($cl -match '## \[Unreleased\]([\s\S]*?)(?=\n## |\z)') {
+        $section = $Matches[1]
+        if ($section -notmatch '(?m)^\s*[-*]' -and $section -notmatch '(?m)^### ') {
+            $Category = "### Changed"
+            if ($Msg -match "^feat") { $Category = "### Added" }
+            elseif ($Msg -match "^fix") { $Category = "### Fixed" }
+            elseif ($Msg -match "^revert") { $Category = "### Removed" }
+            
+            $cl = $cl -replace '(## \[Unreleased\])', "`$1`n`n$Category`n- **[$Date]**: $Msg"
+            Set-Content "CHANGELOG.md" $cl -Encoding UTF8
+            Write-Host "📝 Auto-added changelog entry: $Msg" -ForegroundColor Cyan
         }
     }
-    $output | Set-Content -Path $indexFile -Encoding UTF8
-    Write-Host "==> Updated MEMORY.md"
 }
 
-# ── 4. Stage and commit ──────────────────────────────────────────────────────
-Write-Host "==> Committing..."
-git add -A
-$commitMsg = "$Message"
-git commit -m $commitMsg
+# ── 4. Audit gate ──────────────────────────────────────────────────────────────
+.\scripts\audit.ps1
+if ($LASTEXITCODE -ne 0) { exit 1 }
 
-# ── 5. Branch strategy ───────────────────────────────────────────────────────
-$branch = git branch --show-current
-$baseBranch = $branch
-
-if ($branch -eq "master" -or $branch -eq "main") {
-    $slug = $Message.ToLower() -replace '[^a-z0-9]', '-' -replace '-+', '-' -replace '^-|-$', ''
-    $slug = $slug.Substring(0, [Math]::Min(40, $slug.Length))
-    $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-    $prBranch = "pr/$timestamp-$slug"
-
-    Write-Host "==> Creating PR branch: $prBranch"
-    $commitHash = git rev-parse HEAD
-    git checkout -b $prBranch $commitHash
-    git checkout $baseBranch
-    git reset --hard HEAD~1
-    git checkout $prBranch
-    $branch = $prBranch
-}
-
-# ── 6. Push ──────────────────────────────────────────────────────────────────
-Write-Host "==> Pushing $branch..."
-git push -u origin $branch
-
-# ── 7. Create PR (skip if already exists) ────────────────────────────────────
-$existingPr = gh pr view --json number -q '.number' 2>$null
-if ($existingPr) {
-    Write-Host "==> PR #$existingPr already exists — skipping creation."
-    gh pr view --json url -q '.url'
+# ── 5. Branch → commit → push → PR ────────────────────────────────────────────
+$CurrentBranch = git rev-parse --abbrev-ref HEAD
+if ($CurrentBranch -eq "main" -or $CurrentBranch -eq "master") {
+    $Slug = ($Msg -replace '[^a-z0-9]', '-' -replace '-+', '-').ToLower().TrimEnd('-')
+    $Slug = $Slug.Substring(0, [Math]::Min(40, $Slug.Length))
+    $Branch = "pr/$(Get-Date -Format 'yyyyMMdd-HHmmss')-$Slug"
+    git checkout -b $Branch
 } else {
-    $body = "## Summary`n`n- $Message`n`n## Test Plan`n`n- [ ] ``bash scripts/audit.sh`` passes`n- [ ] Tests pass`n`n:robot: Generated with AI Assistant"
-    Write-Host "==> Opening PR..."
-    gh pr create --title $Message --body $body --base $baseBranch --head $branch
+    $Branch = $CurrentBranch
+    Write-Host "ℹ️  Already on branch '$Branch' — committing here without creating a new branch." -ForegroundColor Cyan
 }
-
-Write-Host "==> Done."
+# NOTE: This is a template script. Update the commit message or AI Co-Author below as needed for your specific project.
+git commit -m "$Msg"
+git push -u origin $Branch
+# Use PR template if present; fall back to --fill
+if (Test-Path ".github\pull_request_template.md") {
+    $prBody = Get-Content ".github\pull_request_template.md" -Raw
+    gh pr create --title $Msg --body $prBody
+} else {
+    gh pr create --fill
+}
