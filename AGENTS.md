@@ -12,7 +12,7 @@
 
 ## Agent Groups
 
-### 🟡 Orchestration
+### 🟡 Orchestration / Audit
 
 | Agent | File | Role |
 |-------|------|------|
