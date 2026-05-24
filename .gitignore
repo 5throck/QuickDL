@@ -1,31 +1,33 @@
+# Secrets — never commit
+.env
+
 # Python
-__pycache__/
-*.py[cod]
-*.pyo
 .venv/
-venv/
-env/
+__pycache__/
+*.pyc
+*.pyo
 dist/
-build/
 *.egg-info/
 
-# Downloads
-downloads/
+# Node.js
+node_modules/
+.next/
+dist/
+build/
 
-# OS
+# OS artifacts
 .DS_Store
 Thumbs.db
-desktop.ini
 
 # IDE
-.vscode/
 .idea/
+.vscode/
+*.swp
 
-# Superpowers
-.superpowers/
-
-# Git Worktrees
-.worktrees/
+# Local AI settings (personal overrides — never shared)
+.claude/settings.local.json
+.gemini/settings.local.json
+.mcp.local.json
 
 # Crypto / certificates — never commit private key material
 *.pem
@@ -47,5 +49,5 @@ desktop.ini
 *.sqlite
 *.db
 
-# Local MCP overrides
-.mcp.local.json
+# CodeGraph Index
+.codegraph/
