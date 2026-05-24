@@ -107,7 +107,8 @@ git config core.hooksPath .githooks
 ## Git
 
 Follow conventions in [`docs/context.md 짠 Git Conventions`](docs/context.md#git-conventions).
-Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
+Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
+Co-Authored-By: Gemini <noreply@google.com>`
 
 ---
 
