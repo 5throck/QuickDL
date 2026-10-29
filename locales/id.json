@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 Subtitle: {files}",
   "cli.help_audio_lang": "Bahasa audio: kode seperti 'en' atau 'ko' memaksa trek tersebut; 'auto' (bawaan) memilih trek asli saat ada beberapa trek sulih suara.",
   "cli.help_captions_langs": "Daftar bahasa subtitle, dipisah koma (mis. \"ko,en\"). Setiap bahasa memakai sumber terbaik: manual → otomatis → terjemahan otomatis YouTube (dibatasi laju; disarankan fallback ke langkah terjemahan eksternal). Menyiratkan --write-subs.",
+  "cli.help_require_caption_coverage": "Gerat cakupan takarir yang ketat: dengan --verify, unduhan gagal jika berkas takarir mana pun mencakup kurang dari 0.95 durasi video (bawaan: hanya peringatan di manifes).",
+  "cli.help_swap": "Ganti video dari batch sebelumnya: OLD_ID (ID video 11 karakter) dipindahkan ke daftar retired[] manifes dan entri yang diunduh dari NEW_URL ditandai swapped_from (dapat diulang).",
+  "cli.help_swap_reason": "Alasan yang dicatat pada entri swap/retired manifes (digunakan dengan --swap).",
   "cli.audio_lang": "🔊 Bahasa audio: {lang} (anti-sulih suara)"
 }

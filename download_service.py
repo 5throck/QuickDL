@@ -1,3 +1,4 @@
+import html
 import os
 import re
 import threading
@@ -212,6 +213,149 @@ def subtitle_entry(vtt_path: str, saved_path: str, plan: Optional[list] = None) 
     if source is None:
         source = classify_sidecar_token(token)
     return {'path': vtt_path, 'lang': token, 'source': source}
+
+
+# --- caption cleaning pipeline -------------------------------------------
+# Raw YouTube VTT sidecars carry inline timestamp/<c> tags, rolling caption
+# windows (each cue repeats the previous cue's lines plus one new line) and
+# overlapping cue intervals. Proven in the co-deck production rounds: the
+# tag-strip + rolling-dedup + overlap-clip pipeline turns raw grabs into
+# clean cue files (e.g. a raw 424-cue ASR track) without changing content.
+
+VTT_CUE_LINE_RE = re.compile(
+    r'^(?:(\d+):)?(\d{1,2}):(\d{2})[.,](\d{3})\s*-->\s*'
+    r'(?:(\d+):)?(\d{1,2}):(\d{2})[.,](\d{3})'
+)
+OVERLAP_FLOOR_MS = 500  # minimum display window after clipping an overlap
+
+
+def _vtt_ts_ms(groups) -> int:
+    """Convert one VTT timestamp regex match group tuple to milliseconds."""
+    h, m, s, ms = groups
+    return (int(h) if h else 0) * 3600000 + int(m) * 60000 + int(s) * 1000 + int(ms)
+
+
+def _strip_vtt_markup(text: str) -> str:
+    """Entity-decode and remove inline markup (`<c>`, `<00:00:01.000>`, ...)."""
+    text = html.unescape(text)
+    return re.sub(r'<[^>]+>', '', text).strip()
+
+
+def parse_vtt_cues(raw: str) -> list:
+    """Parse a WebVTT string into cues `{'start', 'end', 'text'}` (ms/text).
+
+    Tag-strips cue text, drops empty cues, and skips NOTE/STYLE/REGION
+    blocks and cue identifier lines (a standalone line directly followed by
+    a timing line).
+    """
+    lines = raw.splitlines()
+    cues = []
+    cur = None
+    i = 0
+    n = len(lines)
+    while i < n:
+        stripped = lines[i].strip()
+        m = VTT_CUE_LINE_RE.match(stripped)
+        if m:
+            start = _vtt_ts_ms(m.groups()[:4])
+            end = _vtt_ts_ms(m.groups()[4:])
+            cur = {'start': start, 'end': max(end, start), 'text': ''}
+            cues.append(cur)
+            i += 1
+            continue
+        if not stripped:
+            i += 1
+            continue
+        if stripped.startswith(('NOTE', 'STYLE', 'REGION')):
+            # header/metadata block — runs until the next blank line
+            i += 1
+            while i < n and lines[i].strip():
+                i += 1
+            cur = None
+            continue
+        # A non-empty non-timing line is cue text — unless it is a cue
+        # identifier, i.e. it is directly followed by a timing line.
+        if cur is None or (i + 1 < n and VTT_CUE_LINE_RE.match(lines[i + 1].strip())):
+            i += 1
+            continue
+        text = _strip_vtt_markup(stripped)
+        if text and text != cur['text']:
+            cur['text'] = (cur['text'] + '\n' + text).strip()
+        i += 1
+    return [c for c in cues if c['text']]
+
+
+def dedup_rolling_cues(cues: list) -> list:
+    """Drop consecutive duplicate cue texts (YouTube rolling-window ASR).
+
+    When a cue repeats the previous cue's text the window is merged by
+    extending the previous cue's end, so no caption time is lost.
+    """
+    out = []
+    for c in cues:
+        if out and c['text'] == out[-1]['text']:
+            out[-1]['end'] = max(out[-1]['end'], c['end'])
+            continue
+        out.append(dict(c))
+    return out
+
+
+def clip_cue_overlaps(cues: list, floor_ms: int = OVERLAP_FLOOR_MS) -> list:
+    """Clip each cue's end at the next cue's start (with a minimum window).
+
+    ASR word-timed tracks produce rolling overlapping windows; without
+    clipping, players stack two cues on screen at once.
+    """
+    for i, c in enumerate(cues):
+        if i + 1 < len(cues):
+            nxt = cues[i + 1]['start']
+            if nxt > c['start']:
+                c['end'] = min(c['end'], max(nxt, c['start'] + floor_ms))
+    return cues
+
+
+def format_vtt(cues: list) -> str:
+    """Render cleaned cues as a WebVTT string."""
+    blocks = []
+    for c in cues:
+        blocks.append('%s --> %s\n%s' % (
+            _ms_to_vtt_ts(c['start']), _ms_to_vtt_ts(c['end']), c['text'],
+        ))
+    return 'WEBVTT\n\n' + '\n\n'.join(blocks) + ('\n' if blocks else '')
+
+
+def _ms_to_vtt_ts(ms: int) -> str:
+    h, rem = divmod(int(ms), 3600000)
+    m, rem = divmod(rem, 60000)
+    s, milli = divmod(rem, 1000)
+    return '%02d:%02d:%02d.%03d' % (h, m, s, milli)
+
+
+def clean_vtt(raw: str) -> str:
+    """Full cleaning pipeline: parse → tag-strip → rolling dedup → overlap clip."""
+    cues = parse_vtt_cues(raw)
+    cues = dedup_rolling_cues(cues)
+    cues = clip_cue_overlaps(cues)
+    return format_vtt(cues)
+
+
+def clean_sidecar(vtt_path: str) -> Optional[int]:
+    """Clean a downloaded sidecar VTT in place; return the final cue count.
+
+    The raw file is overwritten with the cleaned pipeline output (the raw
+    grab is transient — the manifest records `cleaned: true` + cue count).
+    Returns None when the file cannot be read (left untouched; the manifest
+    entry simply gets no cleaned/cues fields — nothing is guessed).
+    """
+    try:
+        with open(vtt_path, encoding='utf-8') as f:
+            raw = f.read()
+    except OSError:
+        return None
+    cleaned = clean_vtt(raw)
+    with open(vtt_path, 'w', encoding='utf-8') as f:
+        f.write(cleaned)
+    return len(parse_vtt_cues(cleaned))
 
 
 def get_video_info(url: str, ydl_class=None) -> dict:

@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 Legendas: {files}",
   "cli.help_audio_lang": "Idioma do áudio: um código como 'en' ou 'ko' força essa faixa; 'auto' (padrão) escolhe a faixa original quando há várias dublagens.",
   "cli.help_captions_langs": "Idiomas de legendas separados por vírgula (ex.: \"ko,en\"). Para cada idioma usa-se a melhor fonte: manual → gerado automaticamente → tradução automática do YouTube (com limite de taxa; recomenda-se recorrer a uma etapa de tradução externa). Implica --write-subs.",
+  "cli.help_require_caption_coverage": "Verificação estrita de cobertura de legendas: com --verify, o download falha se algum arquivo de legendas cobrir menos de 0.95 da duração do vídeo (padrão: apenas aviso no manifesto).",
+  "cli.help_swap": "Substitui um vídeo de um lote anterior: OLD_ID (ID de vídeo de 11 caracteres) vai para a lista retired[] do manifesto e a entrada baixada de NEW_URL é marcada com swapped_from (repetível).",
+  "cli.help_swap_reason": "Motivo registrado nas entradas swap/retired do manifesto (usado com --swap).",
   "cli.audio_lang": "🔊 Idioma do áudio: {lang} (anti-dublagem)"
 }

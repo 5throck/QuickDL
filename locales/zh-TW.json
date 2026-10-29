@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 字幕：{files}",
   "cli.help_audio_lang": "音訊語言：指定 'en'、'ko' 等代碼強制選擇對應音軌；'auto'（預設）在存在多條配音音軌時選擇原聲音軌。",
   "cli.help_captions_langs": "字幕語言清單（逗號分隔，如 \"ko,en\"）。每種語言使用最佳來源：手動 → 自動產生 → YouTube 自動翻譯（有速率限制，建議以清單為依據回退到外部翻譯步驟）。隱含 --write-subs。",
+  "cli.help_require_caption_coverage": "嚴格字幕涵蓋率關卡：搭配 --verify 時，若任何字幕側車檔涵蓋率低於影片時長的 0.95，則判定下載失敗（預設：僅在資訊清單中警告）。",
+  "cli.help_swap": "替換先前批次的影片：OLD_ID（11 碼影片 ID）會移入資訊清單的 retired[] 清單，從 NEW_URL 下載的項目會標記 swapped_from（可重複）。",
+  "cli.help_swap_reason": "搭配 --swap 使用，記錄在 swap/retired 資訊清單紀錄上的原因。",
   "cli.audio_lang": "🔊 音訊語言：{lang}（避免配音）"
 }

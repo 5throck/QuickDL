@@ -335,3 +335,102 @@ def test_classify_sidecar_token():
     assert ds.classify_sidecar_token('en-ko') == 'translated'
     assert ds.classify_sidecar_token('ko') == 'unknown'
     assert ds.classify_sidecar_token('pt-BR') == 'unknown'  # not a translation pair
+
+
+# --- caption cleaning pipeline (co-deck rounds 7–8) ---
+
+RAW_ROLLING_VTT = (
+    'WEBVTT\n'
+    'Kind: captions\n'
+    'Language: ko\n'
+    '\n'
+    'NOTE this is a comment block\n'
+    'spanning two lines\n'
+    '\n'
+    'cue-1\n'
+    '00:00:00.000 --> 00:00:02.000\n'
+    '<c>Hello</c><00:00:01.000><c> world</c></c>\n'
+    '\n'
+    '00:00:02.000 --> 00:00:04.000\n'
+    'Hello world\n'  # rolling duplicate of cue 1's text
+    '\n'
+    '00:00:04.000 --> 00:00:06.000\n'
+    'Second line\n'
+)
+
+
+def test_parse_vtt_cues_strips_tags_skips_blocks_and_ids():
+    cues = ds.parse_vtt_cues(RAW_ROLLING_VTT)
+    # cue-1 + rolling dup merge in later stages; parse keeps 3 raw cues
+    assert len(cues) == 3
+    assert cues[0]['text'] == 'Hello world'  # tags + inline timestamp stripped
+    assert cues[0]['start'] == 0 and cues[0]['end'] == 2000
+    assert cues[2]['text'] == 'Second line'
+
+
+def test_parse_vtt_cues_drops_empty_and_supports_mmss():
+    raw = (
+        'WEBVTT\n\n'
+        '00:01.000 --> 00:02.000\n'
+        '<c></c>\n'  # markup-only → empty → dropped
+        '\n'
+        '01:02.500 --> 01:03.500\n'
+        'Hi\n'
+    )
+    cues = ds.parse_vtt_cues(raw)
+    assert len(cues) == 1
+    assert cues[0]['start'] == 62500 and cues[0]['end'] == 63500
+    assert cues[0]['text'] == 'Hi'
+
+
+def test_dedup_rolling_cues_merges_duplicate_extending_end():
+    cues = [
+        {'start': 0, 'end': 2000, 'text': 'Hello world'},
+        {'start': 2000, 'end': 4000, 'text': 'Hello world'},  # rolling dup
+        {'start': 4000, 'end': 6000, 'text': 'Second line'},
+    ]
+    out = ds.dedup_rolling_cues(cues)
+    assert len(out) == 2
+    assert out[0]['end'] == 4000  # window merged, no time lost
+    assert out[1]['text'] == 'Second line'
+
+
+def test_clip_cue_overlaps_with_floor():
+    cues = [
+        {'start': 0, 'end': 5000, 'text': 'A'},
+        {'start': 2000, 'end': 9000, 'text': 'B'},  # overlaps A
+        {'start': 2050, 'end': 9000, 'text': 'C'},  # nearly zero gap → floor
+    ]
+    out = ds.clip_cue_overlaps([dict(c) for c in cues])
+    assert out[0]['end'] == 2000              # clipped at next start
+    assert out[1]['end'] == 2500              # 500 ms floor preserved
+    assert out[2]['end'] == 9000              # last cue untouched
+
+
+def test_clean_vtt_full_pipeline():
+    cleaned = ds.clean_vtt(RAW_ROLLING_VTT)
+    assert cleaned.startswith('WEBVTT\n\n')
+    # rolling duplicate merged, overlap clipped, tags gone
+    assert cleaned.count('Hello world') == 1
+    assert '<c>' not in cleaned and 'NOTE' not in cleaned and 'cue-1' not in cleaned
+    # merged rolling duplicate keeps the first window and the later end
+    assert '00:00:00.000 --> 00:00:04.000\nHello world' in cleaned
+    assert '00:00:04.000 --> 00:00:06.000\nSecond line' in cleaned
+
+
+def test_clean_vtt_empty_returns_header_only():
+    assert ds.clean_vtt('WEBVTT\n') == 'WEBVTT\n\n'
+
+
+def test_clean_sidecar_overwrites_and_returns_count(tmp_path):
+    f = tmp_path / 'video.ko.vtt'
+    f.write_text(RAW_ROLLING_VTT, encoding='utf-8')
+    count = ds.clean_sidecar(str(f))
+    assert count == 2
+    content = f.read_text(encoding='utf-8')
+    assert content.startswith('WEBVTT\n\n')
+    assert '<c>' not in content
+
+
+def test_clean_sidecar_missing_file_returns_none(tmp_path):
+    assert ds.clean_sidecar(str(tmp_path / 'gone.vtt')) is None

@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 Phụ đề: {files}",
   "cli.help_audio_lang": "Ngôn ngữ âm thanh: mã như 'en' hoặc 'ko' buộc chọn track đó; 'auto' (mặc định) chọn track gốc khi có nhiều track lồng tiếng.",
   "cli.help_captions_langs": "Danh sách ngôn ngữ phụ đề, phân tách bằng dấu phẩy (vd: \"ko,en\"). Mỗi ngôn ngữ dùng nguồn tốt nhất: thủ công → tự động → dịch tự động YouTube (giới hạn tần suất; nên fallback sang bước dịch bên ngoài). Ngụ ý --write-subs.",
+  "cli.help_require_caption_coverage": "Cổng kiểm tra độ phủ phụ đề nghiêm ngặt: với --verify, tải xuống thất bại nếu tệp phụ đề nào phủ dưới 0.95 thời lượng video (mặc định: chỉ cảnh báo trong manifest).",
+  "cli.help_swap": "Thay thế một video của lô trước: OLD_ID (ID video 11 ký tự) được chuyển vào danh sách retired[] của manifest và mục tải từ NEW_URL được gắn swapped_from (có thể lặp lại).",
+  "cli.help_swap_reason": "Lý do được ghi vào các bản ghi swap/retired của manifest (dùng với --swap).",
   "cli.audio_lang": "🔊 Ngôn ngữ âm thanh: {lang} (tránh lồng tiếng)"
 }

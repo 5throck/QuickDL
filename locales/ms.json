@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 Sari kata: {files}",
   "cli.help_audio_lang": "Bahasa audio: kod seperti 'en' atau 'ko' memaksa trek itu; 'auto' (lalai) memilih trek asal apabila trek alih suara berganda wujud.",
   "cli.help_captions_langs": "Senarai bahasa sari kata, dipisah koma (cth: \"ko,en\"). Setiap bahasa guna sumber terbaik: manual → auto-jana → terjemahan auto YouTube (had kadar; disyorkan fallback ke langkah terjemahan luaran). Tersirat --write-subs.",
+  "cli.help_require_caption_coverage": "Gerat liputan kapsien yang ketat: dengan --verify, muat turun gagal jika mana-mana fail sari kata meliputi kurang daripada 0.95 tempoh video (lalai: amaran sahaja dalam manifes).",
+  "cli.help_swap": "Gantikan video daripada kelompok terdahulu: OLD_ID (ID video 11 aksara) dipindahkan ke senarai retired[] manifes dan entri yang dimuat turun dari NEW_URL ditandakan swapped_from (boleh berulang).",
+  "cli.help_swap_reason": "Sebab yang direkodkan pada entri swap/retired manifes (digunakan dengan --swap).",
   "cli.audio_lang": "🔊 Bahasa audio: {lang} (elak alih suara)"
 }

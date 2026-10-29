@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 자막: {files}",
   "cli.help_audio_lang": "오디오 언어: 'en', 'ko' 같은 코드로 해당 오디오 트랙을 강제하고, 'auto'(기본값)는 더빙 트랙이 여럿일 때 원어 트랙을 선택합니다.",
   "cli.help_captions_langs": "자막 언어 목록, 쉼표 구분 (예: \"ko,en\"). 언어별 최적 소스 사용: 수동 → 자동 생성 → YouTube 자동 번역(요청 한도 제한 있음 — 외부 번역 단계로 대체 권장). --write-subs를 함추합니다.",
+  "cli.help_require_caption_coverage": "엄격한 자막 커버리지 게이트: --verify 사용 시 자막 사이드카가 비디오 길이 대비 커버리지가 0.95 미만이면 다운로드를 실패 처리합니다(기본: 매니페스트에 경고만 기록).",
+  "cli.help_swap": "이전 배치의 비디오를 교체합니다: OLD_ID(11자 비디오 ID)는 매니페스트의 retired[] 목록으로 옮겨지고 NEW_URL에서 다운로드된 항목에는 swapped_from이 기록됩니다(반복 가능).",
+  "cli.help_swap_reason": "--swap과 함께 사용되며 swap/retired 매니페스트 레코드에 기록될 사유입니다.",
   "cli.audio_lang": "🔊 오디오 언어: {lang} (더빙 방지)"
 }

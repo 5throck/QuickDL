@@ -32,6 +32,14 @@ OEMBED_ENDPOINT = 'https://www.youtube.com/oembed'
 # It is never used as a download cap.
 DEFAULT_REFERENCE_HEIGHT = 1080
 
+# Caption coverage gate: a caption sidecar whose last cue ends before this
+# fraction of the video duration is partial (proven production defect: a
+# source track covering only 0:00–5:22 of an 8:50 video — invisible until a
+# client watched past 5:22). Below-threshold coverage is a manifest WARNING
+# by default; `--require-caption-coverage` turns it into a hard gate.
+CAPTION_COVERAGE_THRESHOLD = 0.95
+DEFAULT_SWAP_REASON = 'replaced via --swap'
+
 # Stable prefix of the source-cap warning so consumers (cli.py) can identify
 # it without duplicating the message text.
 SOURCE_CAP_WARNING_PREFIX = 'source caps at'
@@ -133,6 +141,136 @@ def _fetch_oembed_title(video_id: str, fetch: Fetch) -> Optional[str]:
         return None
 
 
+# WebVTT cue timing line: `HH:MM:SS.mmm --> HH:MM:SS.mmm` (hours optional).
+VTT_CUE_LINE_RE = re.compile(
+    r'^(?:(\d+):)?(\d{1,2}):(\d{2})[.,](\d{3})\s*-->\s*'
+    r'(?:(\d+):)?(\d{1,2}):(\d{2})[.,](\d{3})'
+)
+
+
+def _vtt_ts_to_sec(groups) -> float:
+    """Convert one VTT timestamp regex match group tuple to seconds."""
+    h, m, s, ms = groups
+    return (int(h) if h else 0) * 3600 + int(m) * 60 + int(s) + int(ms) / 1000.0
+
+
+def parse_vtt_last_cue_end(vtt_path: str) -> Optional[float]:
+    """Return the END time (seconds) of the latest cue in a WebVTT file.
+
+    Scans every `-->` timing line and keeps the maximum end timestamp, so
+    shuffled or overlapping cue blocks still yield the true last coverage
+    point. Returns None when the file is unreadable or carries no cues.
+    """
+    try:
+        with open(vtt_path, encoding='utf-8') as f:
+            raw = f.read()
+    except OSError:
+        return None
+    last = None
+    for line in raw.splitlines():
+        m = VTT_CUE_LINE_RE.match(line.strip())
+        if not m:
+            continue
+        end = _vtt_ts_to_sec(m.groups()[4:])
+        if last is None or end > last:
+            last = end
+    return last
+
+
+def caption_coverage(vtt_path: str, duration_sec: Optional[float]) -> Optional[float]:
+    """Coverage ratio (0–1) of a caption sidecar vs the video duration.
+
+    Ratio = last cue end / video duration, clamped to 1.0. Returns None when
+    the video duration is unknown or the sidecar carries no parsable cues —
+    'unknown' is reported, never guessed.
+    """
+    if not duration_sec or duration_sec <= 0:
+        return None
+    last_end = parse_vtt_last_cue_end(vtt_path)
+    if last_end is None:
+        return None
+    return round(min(last_end / duration_sec, 1.0), 4)
+
+
+def _coverage_warning(lang: str, last_end: float, duration: float,
+                      ratio: float, threshold: float) -> str:
+    return (
+        'caption coverage for %r: last cue ends at %.1fs of %.1fs video '
+        '(%.0f%%) — below the %.0f%% threshold'
+        % (lang, last_end, duration, ratio * 100, threshold * 100)
+    )
+
+
+def annotate_caption_coverage(
+    subtitles: List[Dict],
+    duration_sec: Optional[float],
+    threshold: float = CAPTION_COVERAGE_THRESHOLD,
+) -> List[str]:
+    """Fill `coverage` into manifest `subtitles[]` entries and return warnings.
+
+    Mutates each entry in place: entries with a real sidecar path gain
+    `coverage` (0–1, or None when duration/cues are unknown). A warning
+    string is returned for every entry measurably below `threshold`.
+    """
+    warnings: List[str] = []
+    for sub in subtitles:
+        path = sub.get('path')
+        if not path:
+            continue
+        ratio = caption_coverage(path, duration_sec)
+        sub['coverage'] = ratio
+        if ratio is not None and duration_sec and ratio < threshold:
+            last_end = parse_vtt_last_cue_end(path)
+            warnings.append(_coverage_warning(
+                sub.get('lang'), last_end or 0.0, duration_sec, ratio, threshold,
+            ))
+    return warnings
+
+
+def apply_swaps(
+    entries: List[Dict],
+    swaps: List,
+    reason: Optional[str] = None,
+    today: Optional[str] = None,
+):
+    """Apply `--swap OLD_ID:NEW_URL` directives to a batch of manifest entries.
+
+    For each swap: the entry whose `id` matches the old video is REMOVED from
+    `entries` and appended to the returned `retired` list (audit record with
+    the retirement date and reason); the replacement entry (matched by URL)
+    is tagged `swapped_from: <old_id>` plus `swap: {date, reason}`. Swap
+    directives whose old id is not in the batch are ignored (nothing to
+    retire). Returns `(entries, retired)`; `entries` is mutated in place.
+    """
+    if today is None:
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+    retired: List[Dict] = []
+    for old_id, new_url in swaps:
+        idx = next((i for i, e in enumerate(entries) if e.get('id') == old_id), None)
+        if idx is None:
+            continue
+        old = entries.pop(idx)
+        retired.append({
+            'video_id': old.get('id'),
+            'title': old.get('title'),
+            'url': old.get('url'),
+            'path': old.get('path'),
+            'size_mb': old.get('size_mb'),
+            'duration_min': old.get('duration_min'),
+            'status': old.get('status'),
+            'retired': today,
+            'reason': reason or DEFAULT_SWAP_REASON,
+        })
+        replacement = next((e for e in entries if e.get('url') == new_url), None)
+        if replacement is not None:
+            replacement['swapped_from'] = old_id
+            replacement['swap'] = {
+                'date': today,
+                'reason': reason or DEFAULT_SWAP_REASON,
+            }
+    return entries, retired
+
+
 def verify_download(
     path: str,
     expected_duration_sec: Optional[float] = None,
@@ -142,6 +280,9 @@ def verify_download(
     reference_height: Optional[int] = None,
     run_cmd: Optional[RunCmd] = None,
     fetch: Optional[Fetch] = None,
+    subtitles: Optional[List[Dict]] = None,
+    require_caption_coverage: bool = False,
+    caption_coverage_threshold: float = CAPTION_COVERAGE_THRESHOLD,
 ) -> Dict:
     """Run the post-download verification gates for one file.
 
@@ -152,6 +293,13 @@ def verify_download(
     - 'failed'      — a hard gate failed (see 'reasons')
     Soft findings (resolution below probed max, tools/network unavailable) are
     recorded in 'warnings' and do not fail the download.
+
+    Caption coverage gate (additive): when `subtitles` (manifest
+    `subtitles[]` entries) is given, each sidecar gains a `coverage` field
+    (0–1, or None) and below-threshold coverage is recorded as a warning.
+    With `require_caption_coverage` the gate is strict: any sidecar below the
+    threshold — or a requested language with no captions at all (`source:
+    'failed'`) — fails the download.
     """
     if run_cmd is None:
         run_cmd = _default_run_cmd
@@ -165,6 +313,7 @@ def verify_download(
             'exists': False, 'size_ok': False,
             'duration_ok': None, 'audio_ok': None,
             'title_ok': None, 'resolution_ok': None,
+            'caption_coverage_ok': None,
         },
         'measured': {
             'duration_sec': None, 'mean_volume_db': None,
@@ -249,6 +398,50 @@ def verify_download(
                 'downloaded height %dp is below the probed maximum %dp' % (height, expected_height)
             )
 
+    # Gate 6 — caption coverage vs video duration (additive; warn by default).
+    # Duration preference: the ffprobe-measured duration, falling back to the
+    # probed expectation when ffprobe is unavailable.
+    if subtitles:
+        coverage_duration = duration if duration is not None else expected_duration_sec
+        coverage_warnings = annotate_caption_coverage(
+            subtitles, coverage_duration, caption_coverage_threshold,
+        )
+        result['warnings'].extend(coverage_warnings)
+        coverage_ok = True
+        for sub in subtitles:
+            lang = sub.get('lang')
+            if sub.get('path') is None:
+                if sub.get('source') == 'failed':
+                    coverage_ok = False
+                    if require_caption_coverage:
+                        hard_fail = True
+                        result['reasons'].append(
+                            'caption coverage gate: requested language %r has '
+                            'no captions at all (source: failed)' % lang
+                        )
+                continue
+            cov = sub.get('coverage')
+            if cov is None:
+                result['warnings'].append(
+                    'caption coverage for %r could not be measured '
+                    '(no duration or unreadable sidecar)' % lang
+                )
+            elif cov < caption_coverage_threshold:
+                coverage_ok = False
+                if require_caption_coverage:
+                    hard_fail = True
+                    result['reasons'].append(
+                        'caption coverage gate: %r covers only %.0f%% of the '
+                        'video (threshold %.0f%%)'
+                        % (lang, cov * 100, caption_coverage_threshold * 100)
+                    )
+        if coverage_duration is None:
+            result['warnings'].append(
+                'caption coverage gate could not be evaluated (no video duration)'
+            )
+        else:
+            result['checks']['caption_coverage_ok'] = coverage_ok
+
     if hard_fail:
         return result
 
@@ -266,8 +459,17 @@ def verify_download(
     return result
 
 
-def build_manifest(entries: List[Dict], tool: Optional[Dict] = None) -> Dict:
-    """Assemble a batch manifest: per-video entries + totals + tool info."""
+def build_manifest(
+    entries: List[Dict],
+    tool: Optional[Dict] = None,
+    retired: Optional[List[Dict]] = None,
+) -> Dict:
+    """Assemble a batch manifest: per-video entries + totals + tool info.
+
+    `retired` (additive): swapped-out video records from `apply_swaps`. The
+    top-level `retired[]` key is only present when the parameter is not None,
+    so plain batches keep their exact previous schema.
+    """
     counts = {'ok': 0, 'already_max': 0, 'failed': 0, 'other': 0}
     for entry in entries:
         status = entry.get('status')
@@ -279,7 +481,7 @@ def build_manifest(entries: List[Dict], tool: Optional[Dict] = None) -> Dict:
             counts['failed'] += 1
         else:
             counts['other'] += 1
-    return {
+    manifest = {
         'generated_at': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         'tool': tool or {},
         'videos': entries,
@@ -291,3 +493,6 @@ def build_manifest(entries: List[Dict], tool: Optional[Dict] = None) -> Dict:
             'other': counts['other'],
         },
     }
+    if retired is not None:
+        manifest['retired'] = retired
+    return manifest
