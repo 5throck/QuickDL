@@ -57,5 +57,21 @@
   "ui.queue_empty": "ダウンロード待ちはありません。",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "品質モード: 'best' = 利用可能な最大解像度（同品質では h264/aac を優先）、'cap:N' = 高さを N に制限。省略時は従来方式。",
+  "cli.help_subs": "字幕も .vtt ファイルとしてダウンロードします（手動字幕を自動生成より優先）。",
+  "cli.help_sub_langs": "字幕言語パターン（カンマ区切り、順序＝優先度、既定: \"ko.*,en.*\"）",
+  "cli.help_manifest": "指定パスに JSON ダウンロードマニフェストを書き出します。",
+  "cli.help_verify": "ダウンロードごとに検証します: サイズ、長さ、音量、oEmbed タイトル、解像度。",
+  "cli.help_id_names": "タイトルの代わりに動画 ID をファイル名にします（バッチ処理に安全）。",
+  "cli.verifying": "🔍 ダウンロードを検証中...",
+  "cli.verify_ok": "✅ 検証に合格しました。",
+  "cli.verify_failed": "❌ 検証失敗: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  ソースは {height}p まで — すでに最大品質です。",
+  "cli.manifest_written": "📋 マニフェストを保存しました: {path}",
+  "cli.subs_saved": "💬 字幕: {files}",
+  "cli.help_audio_lang": "音声音語: 'en' や 'ko' などのコードで音声トラックを強制し、'auto'（既定）は吹き替えトラックが複数ある場合に元の音声を選択します。",
+  "cli.help_captions_langs": "字幕言語のリスト（カンマ区切り、例: \"ko,en\"）。言語ごとに最適なソースを使用: 手動 → 自動生成 → YouTube 自動翻訳（レート制限あり — 外部翻訳ステップでの代替を推奨）。--write-subs を含みます。",
+  "cli.audio_lang": "🔊 音声音語: {lang}（吹き替え回避）"
 }

@@ -57,5 +57,21 @@
   "ui.queue_empty": "No hay descargas en cola.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "Modo de calidad: 'best' = resolución máxima disponible sin límite (se prefiere h264/aac a igual calidad), 'cap:N' = limitar la altura a N. Si se omite, se usa la selección de formato tradicional.",
+  "cli.help_subs": "Descargar también los subtítulos como archivos .vtt (se prefieren los manuales sobre los automáticos).",
+  "cli.help_sub_langs": "Patrones de idioma de los subtítulos, separados por comas; el orden = prioridad (predeterminado: \"ko.*,en.*\")",
+  "cli.help_manifest": "Escribir un manifiesto de descargas JSON en la ruta indicada.",
+  "cli.help_verify": "Verificar cada descarga: tamaño, duración, volumen de audio, título oEmbed y resolución.",
+  "cli.help_id_names": "Nombrar los archivos por ID de vídeo en lugar de título (seguro para lotes con scripts).",
+  "cli.verifying": "🔍 Verificando descarga...",
+  "cli.verify_ok": "✅ Verificación superada.",
+  "cli.verify_failed": "❌ Verificación fallida: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  La fuente llega como máximo a {height}p — ya es la mejor calidad disponible.",
+  "cli.manifest_written": "📋 Manifiesto escrito: {path}",
+  "cli.subs_saved": "💬 Subtítulos: {files}",
+  "cli.help_audio_lang": "Idioma de audio: un código como 'en' o 'ko' fuerza esa pista; 'auto' (predeterminado) elige la pista original cuando existen varios doblajes.",
+  "cli.help_captions_langs": "Idiomas de subtítulos separados por comas (p. ej. \"ko,en\"). Por idioma se usa la mejor fuente: manual → autogenerado → traducción automática de YouTube (con límite de tasa; se recomienda recaer en un paso de traducción externo). Implica --write-subs.",
+  "cli.audio_lang": "🔊 Idioma del audio: {lang} (evitar doblaje)"
 }

@@ -57,5 +57,21 @@
   "ui.queue_empty": "Нет загрузок в очереди.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "Режим качества: 'best' = максимальное доступное разрешение без ограничения (при равном качестве предпочтительны h264/aac), 'cap:N' = ограничить высоту значением N. Без параметра используется прежний выбор формата.",
+  "cli.help_subs": "Также скачивать субтитры в файлах .vtt (ручные предпочтительнее автоматических).",
+  "cli.help_sub_langs": "Шаблоны языков субтитров, через запятую; порядок = приоритет (по умолчанию: \"ko.*,en.*\")",
+  "cli.help_manifest": "Записать JSON-манифест загрузок по указанному пути.",
+  "cli.help_verify": "Проверять каждую загрузку: размер, длительность, громкость звука, заголовок oEmbed, разрешение.",
+  "cli.help_id_names": "Именовать файлы по ID видео, а не по названию (надёжно для пакетных сценариев).",
+  "cli.verifying": "🔍 Проверка загрузки...",
+  "cli.verify_ok": "✅ Проверка пройдена.",
+  "cli.verify_failed": "❌ Проверка не пройдена: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  Источник ограничен {height}p — это уже максимальное доступное качество.",
+  "cli.manifest_written": "📋 Манифест записан: {path}",
+  "cli.subs_saved": "💬 Субтитры: {files}",
+  "cli.help_audio_lang": "Язык аудио: код вроде 'en' или 'ko' принудительно выбирает эту дорожку; 'auto' (по умолчанию) выбирает оригинальную дорожку при наличии дубляжей.",
+  "cli.help_captions_langs": "Языки субтитров через запятую (напр. \"ko,en\"). Для каждого языка берётся лучший источник: ручные → автосгенерированные → автоперевод YouTube (ограничен по частоте; рекомендуется запасной внешний перевод). Подразумевает --write-subs.",
+  "cli.audio_lang": "🔊 Язык аудио: {lang} (защита от дубляжа)"
 }

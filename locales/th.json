@@ -57,5 +57,21 @@
   "ui.queue_empty": "ไม่มีการดาวน์โหลดในคิว",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "โหมดคุณภาพ: 'best' = ความละเอียดสูงสุดที่มีโดยไม่จำกัด (เลือก h264/aac เมื่อคุณภาพเท่ากัน), 'cap:N' = จำกัดความสูงที่ N ถ้าไม่ระบุจะใช้การเลือกรูปแบบแบบเดิม",
+  "cli.help_subs": "ดาวน์โหลดคำบรรยายเป็นไฟล์ .vtt ด้วย (แบบที่ผู้อัปโหลดสร้างได้ลำดับความสำคัญกว่าแบบอัตโนมัติ)",
+  "cli.help_sub_langs": "รูปแบบภาษาคำบรรยาย คั่นด้วยจุลภาค ลำดับ = ความสำคัญ (ค่าเริ่มต้น: \"ko.*,en.*\")",
+  "cli.help_manifest": "เขียนรายการดาวน์โหลด JSON ไปยังพาธที่กำหนด",
+  "cli.help_verify": "ตรวจสอบแต่ละการดาวน์โหลด: ขนาด ระยะเวลา ระดับเสียง ชื่อเรื่อง oEmbed ความละเอียด",
+  "cli.help_id_names": "ตั้งชื่อไฟล์ด้วย ID ของวิดีโอแทนชื่อเรื่อง (ปลอดภัยสำหรับการประมวลผลเป็นชุด)",
+  "cli.verifying": "🔍 กำลังตรวจสอบการดาวน์โหลด...",
+  "cli.verify_ok": "✅ ผ่านการตรวจสอบ",
+  "cli.verify_failed": "❌ การตรวจสอบล้มเหลว: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  แหล่งที่มาสูงสุดที่ {height}p — เป็นคุณภาพสูงสุดที่มีอยู่แล้ว",
+  "cli.manifest_written": "📋 เขียนรายการแล้ว: {path}",
+  "cli.subs_saved": "💬 คำบรรยาย: {files}",
+  "cli.help_audio_lang": "ภาษาเสียง: รหัส เช่น 'en' หรือ 'ko' บังคับแทร็กนั้น, 'auto' (ค่าเริ่มต้น) เลือกแทร็กต้นฉบับเมื่อมีแทร็กพากย์หลายแทร็ก",
+  "cli.help_captions_langs": "รายการภาษาคำบรรยาย คั่นด้วยจุลภาค (เช่น \"ko,en\") แต่ละภาษาใช้แหล่งที่ดีที่สุด: ด้วยมือ → สร้างอัตโนมัติ → แปลอัตโนมัติของ YouTube (จำกัดอัตรา; แนะนำให้สำรองด้วยขั้นตอนแปลภายนอก) นัยว่า --write-subs",
+  "cli.audio_lang": "🔊 ภาษาเสียง: {lang} (เลี่ยงเสียงพากย์)"
 }

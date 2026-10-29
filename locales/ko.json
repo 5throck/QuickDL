@@ -57,5 +57,21 @@
   "ui.queue_empty": "대기 중인 다운로드가 없습니다.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "품질 모드: 'best' = 사용 가능한 최대 해상도(동일 화질에서는 h264/aac 우선), 'cap:N' = 최대 높이를 N으로 제한. 생략 시 기존 방식 사용.",
+  "cli.help_subs": "자막을 .vtt 파일로 함께 다운로드합니다 (수동 자막 우선, 자동 생성 자막은 대체).",
+  "cli.help_sub_langs": "자막 언어 패턴, 쉼표 구분, 순서 = 우선순위 (기본: \"ko.*,en.*\")",
+  "cli.help_manifest": "지정한 경로에 JSON 다운로드 매니페스트를 기록합니다.",
+  "cli.help_verify": "각 다운로드를 검증합니다: 크기, 길이, 오디오 음량, oEmbed 제목, 해상도.",
+  "cli.help_id_names": "제목 대신 비디오 ID로 파일명을 지정합니다 (스크립트 배치에 안전).",
+  "cli.verifying": "🔍 다운로드 검증 중...",
+  "cli.verify_ok": "✅ 검증 통과.",
+  "cli.verify_failed": "❌ 검증 실패: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  원본이 {height}p까지 제공됩니다 — 이미 최대 품질입니다.",
+  "cli.manifest_written": "📋 매니페스트 저장됨: {path}",
+  "cli.subs_saved": "💬 자막: {files}",
+  "cli.help_audio_lang": "오디오 언어: 'en', 'ko' 같은 코드로 해당 오디오 트랙을 강제하고, 'auto'(기본값)는 더빙 트랙이 여럿일 때 원어 트랙을 선택합니다.",
+  "cli.help_captions_langs": "자막 언어 목록, 쉼표 구분 (예: \"ko,en\"). 언어별 최적 소스 사용: 수동 → 자동 생성 → YouTube 자동 번역(요청 한도 제한 있음 — 외부 번역 단계로 대체 권장). --write-subs를 함추합니다.",
+  "cli.audio_lang": "🔊 오디오 언어: {lang} (더빙 방지)"
 }

@@ -15,8 +15,14 @@ A lightweight YouTube video downloader with a desktop app, system tray, web UI, 
 - **Desktop App** — Double-click to launch. No terminal needed.
 - **System Tray** — Quick access tray icon for managing the app.
 - **Web UI** — Full browser interface with real-time download queue and progress.
-- **CLI** — `python cli.py <URL>` for quick terminal downloads.
+- **CLI** — `python cli.py <URL>` for quick terminal downloads, with batch support.
 - **Best Quality** — Automatically merges best video + audio into MP4 (requires ffmpeg).
+- **Best-Available Mode** — `--quality best` probes each video, downloads the max resolution with no artificial cap, and prefers h264/aac at equal quality for browser/device compatibility.
+- **Subtitle Sidecars** — `--write-subs` saves manual (or auto-generated fallback) WebVTT subtitles next to the video.
+- **Caption Fallback Chain** — `--captions-langs "ko,en"` fetches BOTH requested languages per video via an honest per-language chain: manual → auto-generated → YouTube auto-translated; each sidecar is tagged `manual | auto | translated | failed` in the manifest. YouTube's translation endpoint rate-limits (429), so a robust pipeline uses the manifest to drive an external translation step for `failed` languages.
+- **Original-Audio Forcing** — `--audio-lang auto` (default) detects each video's original spoken track and refuses YouTube auto-dubbed audio (a real failure mode: English seminars downloaded with Japanese dubs); `--audio-lang en|ko|…` forces a specific track, and the language tag is stamped into the merged MP4.
+- **Verification Gates** — `--verify` checks file size, duration, audio loudness, oEmbed title identity, and resolution after each download.
+- **Download Manifest** — `--manifest out.json` writes an auditable JSON report per batch (per-video status + totals).
 - **Dark / Light Mode** — Follows your OS theme.
 - **Download Queue** — Start multiple downloads simultaneously; track progress per item.
 - **16 Languages** — Auto-detects OS locale (en, ko, ja, zh-TW, zh-CN, de, es, fr, pt, vi, ms, id, th, ru, it, ar).
@@ -90,10 +96,35 @@ python cli.py <YouTube URL>
 # Custom output folder
 python cli.py <YouTube URL> --output /path/to/folder
 
+# Best-available quality (no height cap, h264/aac preferred at equal quality)
+python cli.py <URL> --quality best
+
+# Cap resolution at 720p
+python cli.py <URL> --quality cap:720
+
+# Subtitle sidecars (.vtt) — manual preferred, language priority configurable
+python cli.py <URL> --write-subs --sub-langs "ko.*,en.*"
+
+# Caption fallback chain for BOTH languages (manual → auto → auto-translated,
+# each tagged manual|auto|translated|failed in the manifest)
+python cli.py <URL> --write-subs --captions-langs "ko,en"
+
+# Avoid YouTube auto-dubbing: 'auto' picks the original spoken track
+# (multi-language videos), or force one explicitly
+python cli.py <URL> --audio-lang auto
+python cli.py <URL> --audio-lang en
+
+# Full production batch: verify each download and write a JSON manifest
+python cli.py <URL1> <URL2> --quality best --write-subs --verify \
+    --manifest batch.json --id-names
+
 # Force a specific language
 QUICKDL_LANG=ko python cli.py <URL>   # macOS/Linux
 set QUICKDL_LANG=ko && python cli.py <URL>  # Windows
 ```
+
+CLI exit codes: `0` success · `1` download failure · `2` verification failure
+(with `--verify`). One failed URL in a batch does not abort the remaining ones.
 
 ---
 
@@ -103,6 +134,7 @@ set QUICKDL_LANG=ko && python cli.py <URL>  # Windows
 QuickDL/
 ├── app.py                  # Flask server — routes, job queue, file serving
 ├── download_service.py     # yt-dlp wrapper (get_video_info, download_video)
+├── verification.py         # Post-download gates + batch manifest builder
 ├── desktop.py              # Desktop entry point (pywebview + pystray)
 ├── cli.py                  # CLI entry point (argparse)
 ├── install.py              # Cross-platform installer
@@ -116,9 +148,11 @@ QuickDL/
 │   ├── css/styles.css      # UI styles (dark + light, responsive)
 │   └── js/script.js        # Frontend JS (fetch, queue, polling)
 ├── tests/
-│   ├── test_app.py         # Flask API tests (9 tests — unittest)
-│   ├── test_i18n.py        # i18n tests (14 tests — pytest)
-│   └── test_env.py         # Dependency check
+│   ├── test_app.py               # Flask API tests (9 tests — unittest)
+│   ├── test_i18n.py              # i18n tests (14 tests — pytest)
+│   ├── test_download_service.py  # service-layer tests (pytest, mocked yt-dlp)
+│   ├── test_verification.py      # verification gate tests (pytest, mocked)
+│   └── test_env.py               # Dependency check
 ├── scripts/
 │   ├── audit.sh / audit.ps1        # Quality gate
 │   └── dev-sync.sh / dev-sync.ps1  # PR pipeline
@@ -130,7 +164,7 @@ QuickDL/
 ## Running Tests
 
 ```bash
-pytest tests/ -v        # All 23 tests
+pytest tests/ -v        # All 60 tests
 bash scripts/audit.sh   # Quality gate (CHANGELOG, i18n parity, broken links)
 ```
 

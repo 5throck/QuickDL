@@ -57,5 +57,21 @@
   "ui.queue_empty": "No downloads in queue.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "Quality mode: 'best' = max available resolution with no cap (h264/aac preferred at equal quality), 'cap:N' = cap height at N. Omit for legacy format selection.",
+  "cli.help_subs": "Also download subtitles as .vtt sidecar files (manual preferred over auto-generated).",
+  "cli.help_sub_langs": "Subtitle language patterns, comma-separated, order = priority (default: \"ko.*,en.*\")",
+  "cli.help_manifest": "Write a JSON download manifest to the given path.",
+  "cli.help_verify": "Verify each download: size, duration, audio loudness, oEmbed title, resolution.",
+  "cli.help_id_names": "Name output files by video ID instead of title (safe for scripted batches).",
+  "cli.verifying": "🔍 Verifying download...",
+  "cli.verify_ok": "✅ Verification passed.",
+  "cli.verify_failed": "❌ Verification failed: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  Source caps at {height}p — already max available quality.",
+  "cli.manifest_written": "📋 Manifest written: {path}",
+  "cli.subs_saved": "💬 Subtitles: {files}",
+  "cli.help_audio_lang": "Audio language: a code like 'en' or 'ko' forces that audio track; 'auto' (default) picks the video's original spoken track when multiple dub tracks exist.",
+  "cli.help_captions_langs": "Comma-separated caption languages (e.g. \"ko,en\"). Per language the best source is used: manual → auto-generated → YouTube auto-translated (rate-limited; a robust pipeline falls back to an external translation step keyed off the manifest). Implies --write-subs.",
+  "cli.audio_lang": "🔊 Audio language: {lang} (dub-avoidance)"
 }

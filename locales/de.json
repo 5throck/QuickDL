@@ -57,5 +57,21 @@
   "ui.queue_empty": "Keine Downloads in der Warteschlange.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "Qualitätsmodus: 'best' = maximal verfügbare Auflösung ohne Limit (bei gleicher Qualität werden h264/aac bevorzugt), 'cap:N' = Höhe auf N begrenzen. Ohne Angabe gilt die bisherige Formatauswahl.",
+  "cli.help_subs": "Untertitel zusätzlich als .vtt-Dateien herunterladen (manuelle vor automatisch erzeugten bevorzugt).",
+  "cli.help_sub_langs": "Untertitel-Sprachmuster, kommasepariert, Reihenfolge = Priorität (Standard: \"ko.*,en.*\")",
+  "cli.help_manifest": "Ein JSON-Download-Manifest in den angegebenen Pfad schreiben.",
+  "cli.help_verify": "Jeden Download prüfen: Größe, Dauer, Lautstärke, oEmbed-Titel, Auflösung.",
+  "cli.help_id_names": "Ausgabedateien nach Video-ID statt Titel benennen (sicher für Skript-Batches).",
+  "cli.verifying": "🔍 Download wird überprüft...",
+  "cli.verify_ok": "✅ Überprüfung bestanden.",
+  "cli.verify_failed": "❌ Überprüfung fehlgeschlagen: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  Quelle bietet maximal {height}p — bereits beste verfügbare Qualität.",
+  "cli.manifest_written": "📋 Manifest geschrieben: {path}",
+  "cli.subs_saved": "💬 Untertitel: {files}",
+  "cli.help_audio_lang": "Audiosprache: ein Code wie 'en' oder 'ko' erzwingt diese Tonspur; 'auto' (Standard) wählt bei mehreren Synchronspuren die Originalspur.",
+  "cli.help_captions_langs": "Kommagetrennte Untertitelsprachen (z. B. \"ko,en\"). Pro Sprache wird die beste Quelle genutzt: manuell → automatisch generiert → YouTube-Autoübersetzung (ratenlimitiert; als Fallback wird ein externer Übersetzungsschritt empfohlen). Impliziert --write-subs.",
+  "cli.audio_lang": "🔊 Audiosprache: {lang} (Synchronisationsvermeidung)"
 }
