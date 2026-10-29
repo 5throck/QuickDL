@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 Subtitles: {files}",
   "cli.help_audio_lang": "Audio language: a code like 'en' or 'ko' forces that audio track; 'auto' (default) picks the video's original spoken track when multiple dub tracks exist.",
   "cli.help_captions_langs": "Comma-separated caption languages (e.g. \"ko,en\"). Per language the best source is used: manual → auto-generated → YouTube auto-translated (rate-limited; a robust pipeline falls back to an external translation step keyed off the manifest). Implies --write-subs.",
+  "cli.help_require_caption_coverage": "Strict caption coverage gate: with --verify, fail the download when any caption sidecar covers less than 0.95 of the video duration (default: warn only in the manifest).",
+  "cli.help_swap": "Replace a video from a prior batch: OLD_ID (11-char video id) is retired into the manifest's retired[] list and the batch entry downloaded from NEW_URL is tagged swapped_from (repeatable).",
+  "cli.help_swap_reason": "Reason recorded on the swap/retired manifest records (used with --swap).",
   "cli.audio_lang": "🔊 Audio language: {lang} (dub-avoidance)"
 }

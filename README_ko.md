@@ -20,6 +20,9 @@
 - **최대 품질 모드** — `--quality best`: 영상별로 프로브하여 인위적 해상도 제한 없이 최대 해상도를 다운로드하고, 동일 화질에서는 브라우저/기기 호환을 위해 h264/aac를 우선합니다.
 - **자막 사이드카** — `--write-subs`: 수동 자막(없으면 자동 생성)을 WebVTT(.vtt)로 영상 옆에 저장합니다.
 - **자막 폴백 체인** — `--captions-langs "ko,en"`: 요청한 두 언어를 영상별로 모두 수집합니다. 언어별 정직한 폴백 체인(수동 → 자동 생성 → YouTube 자동 번역)을 적용하고, 매니페스트의 각 사이드카에 `manual | auto | translated | failed`로 표시합니다. YouTube 번역 엔드포인트는 요청 한도(429)가 있으므로, 견고한 파이프라인은 매니페스트를 근거로 `failed` 언어를 외부 번역 단계로 처리해야 합니다.
+- **자막 정제 파이프라인** — 다운로드된 모든 사이드카는 최종 저장 전에 자동으로 정제됩니다: 인라인 `<c>`/타임스탬프 태그 제거, 롤링 중복 큐 병합, 겹치는 큐 구간 클리핑(원본 YouTube ASR grab이 깨끗한 큐 파일로 변환됨). 매니페스트에는 사이드카별로 `cleaned: true`와 최종 큐 수가 기록됩니다.
+- **자막 커버리지 게이트** — 각 사이드카를 영상 길이와 비교해 측정합니다(매니페스트에 `coverage` 0–1, 알 수 없으면 null). 커버리지가 0.95 미만이면 기본적으로 매니페스트에 경고를 기록하고, `--require-caption-coverage`(`--verify`와 함께)는 다운로드를 실패 처리합니다 — 전체 길이를 덮는 자막이 아니면 이 영상을 사용하지 마세요. 영상 중간에 끊기는 소스 트랙 같은 보이지 않는 결함을 잡아냅니다.
+- **교체/은퇴 감사 추적** — `--swap OLD_ID:NEW_URL`(반복 가능)은 이전 배치의 영상을 매니페스트 최상위 `retired[]` 목록으로 날짜·사유와 함께 옮기고, 대체 항목에는 `swapped_from` + `swap {date, reason}`을 기록합니다 — 배치 재실행을 위한 완전한 감사 추적입니다.
 - **원어 오디오 강제** — `--audio-lang auto`(기본값)는 영상의 원어 음성 트랙을 감지하여 YouTube 자동 더빙 오디오를 배제합니다(실제 장애 사례: 영어 세미나가 일본어 더빙으로 저장됨). `--audio-lang en|ko|…`로 특정 트랙을 강제할 수 있고, 언어 태그가 병합된 MP4에 기록됩니다.
 - **검증 게이트** — `--verify`: 다운로드 후 파일 크기, 길이, 오디오 음량, oEmbed 제목 일치, 해상도를 검증합니다.
 - **다운로드 매니페스트** — `--manifest out.json`: 배치별 감사 가능한 JSON 보고서를 기록합니다 (영상별 상태 + 합계).
@@ -112,6 +115,17 @@ python cli.py <URL> --write-subs --sub-langs "ko.*,en.*"
 # 매니페스트에 manual|auto|translated|failed 로 기록)
 python cli.py <URL> --write-subs --captions-langs "ko,en"
 
+# 엄격한 자막 커버리지 게이트 (--verify와 함께): 사이드카가 영상 길이의
+# 0.95 미만만 덮으면 경고 대신 다운로드를 실패 처리
+python cli.py <URL> --write-subs --verify --require-caption-coverage
+
+# 후반 요구사항(예: 부분 자막)을 통과하지 못한 영상 교체: 기존 항목은
+# 매니페스트의 retired[] 목록으로 날짜+사유와 함께 이동하고, 대체 항목에는
+# swapped_from이 기록됨
+python cli.py <URL_OLD> <URL_NEW> --manifest batch.json \
+    --swap dQw4w9WgXcQ:https://youtu.be/<new_id> \
+    --swap-reason "소스 자막이 영상의 62%만 커버"
+
 # YouTube 자동 더빙 방지: 'auto'는 원어 트랙 선택 (다중 언어 영상),
 # 또는 특정 트랙을 명시적으로 강제
 python cli.py <URL> --audio-lang auto
@@ -167,7 +181,7 @@ QuickDL/
 ## 테스트 실행
 
 ```bash
-pytest tests/ -v        # 전체 60개 테스트
+pytest tests/ -v        # 전체 111개 테스트
 bash scripts/audit.sh   # 품질 게이트 (CHANGELOG, i18n 키 동기화, 링크 검사)
 ```
 

@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 Sottotitoli: {files}",
   "cli.help_audio_lang": "Lingua audio: un codice come 'en' o 'ko' forza quella traccia; 'auto' (predefinito) sceglie la traccia originale quando esistono più doppiaggi.",
   "cli.help_captions_langs": "Lingue dei sottotitoli separate da virgole (es. \"ko,en\"). Per ogni lingua viene usata la fonte migliore: manuale → autogenerato → traduzione automatica YouTube (limitata di frequenza; consigliato un fallback a un passaggio di traduzione esterno). Implica --write-subs.",
+  "cli.help_require_caption_coverage": "Controllo rigoroso della copertura dei sottotitoli: con --verify il download fallisce se un file di sottotitoli copre meno di 0,95 della durata del video (predefinito: solo avviso nel manifest).",
+  "cli.help_swap": "Sostituisce un video di un batch precedente: OLD_ID (ID video di 11 caratteri) viene spostato nell'elenco retired[] del manifest e la voce scaricata da NEW_URL viene contrassegnata con swapped_from (ripetibile).",
+  "cli.help_swap_reason": "Motivo registrato nelle voci swap/retired del manifest (usato con --swap).",
   "cli.audio_lang": "🔊 Lingua audio: {lang} (anti-doppiaggio)"
 }

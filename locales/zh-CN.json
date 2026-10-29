@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 字幕：{files}",
   "cli.help_audio_lang": "音频语言：指定 'en'、'ko' 等代码强制选择对应音轨；'auto'（默认）在存在多条配音音轨时选择原声音轨。",
   "cli.help_captions_langs": "字幕语言列表（逗号分隔，如 \"ko,en\"）。每种语言使用最佳来源：手动 → 自动生成 → YouTube 自动翻译（有速率限制，建议以清单为依据回退到外部翻译步骤）。隐含 --write-subs。",
+  "cli.help_require_caption_coverage": "严格字幕覆盖率门禁：搭配 --verify 时，若任何字幕侧车文件覆盖率不足视频时长的 0.95，则判定下载失败（默认：仅在清单中警告）。",
+  "cli.help_swap": "替换之前批次的视频：OLD_ID（11 位视频 ID）会移入清单的 retired[] 列表，从 NEW_URL 下载的条目会标记 swapped_from（可重复）。",
+  "cli.help_swap_reason": "搭配 --swap 使用，记录在 swap/retired 清单记录上的原因。",
   "cli.audio_lang": "🔊 音频语言：{lang}（避免配音）"
 }

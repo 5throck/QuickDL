@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 Subtítulos: {files}",
   "cli.help_audio_lang": "Idioma de audio: un código como 'en' o 'ko' fuerza esa pista; 'auto' (predeterminado) elige la pista original cuando existen varios doblajes.",
   "cli.help_captions_langs": "Idiomas de subtítulos separados por comas (p. ej. \"ko,en\"). Por idioma se usa la mejor fuente: manual → autogenerado → traducción automática de YouTube (con límite de tasa; se recomienda recaer en un paso de traducción externo). Implica --write-subs.",
+  "cli.help_require_caption_coverage": "Comprobación estricta de cobertura de subtítulos: con --verify, la descarga falla si algún archivo de subtítulos cubre menos de 0.95 de la duración del vídeo (por defecto: solo advertencia en el manifiesto).",
+  "cli.help_swap": "Sustituye un vídeo de un lote anterior: OLD_ID (id de vídeo de 11 caracteres) se mueve a la lista retired[] del manifiesto y la entrada descargada de NEW_URL se marca con swapped_from (repetible).",
+  "cli.help_swap_reason": "Motivo registrado en las entradas swap/retired del manifiesto (se usa con --swap).",
   "cli.audio_lang": "🔊 Idioma del audio: {lang} (evitar doblaje)"
 }

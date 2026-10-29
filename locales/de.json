@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 Untertitel: {files}",
   "cli.help_audio_lang": "Audiosprache: ein Code wie 'en' oder 'ko' erzwingt diese Tonspur; 'auto' (Standard) wählt bei mehreren Synchronspuren die Originalspur.",
   "cli.help_captions_langs": "Kommagetrennte Untertitelsprachen (z. B. \"ko,en\"). Pro Sprache wird die beste Quelle genutzt: manuell → automatisch generiert → YouTube-Autoübersetzung (ratenlimitiert; als Fallback wird ein externer Übersetzungsschritt empfohlen). Impliziert --write-subs.",
+  "cli.help_require_caption_coverage": "Strenge Untertitel-Abdeckungsprüfung: Mit --verify schlägt der Download fehl, wenn eine Untertitel-Datei weniger als 0.95 der Videodauer abdeckt (Standard: nur Warnung im Manifest).",
+  "cli.help_swap": "Ersetzt ein Video aus einem früheren Batch: OLD_ID (11-stellige Video-ID) wandert in die retired[]-Liste des Manifests, der von NEW_URL heruntergeladene Eintrag wird mit swapped_from markiert (wiederholbar).",
+  "cli.help_swap_reason": "Grund für die swap/retired-Einträge im Manifest (zusammen mit --swap).",
   "cli.audio_lang": "🔊 Audiosprache: {lang} (Synchronisationsvermeidung)"
 }

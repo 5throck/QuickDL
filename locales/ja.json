@@ -73,5 +73,8 @@
   "cli.subs_saved": "💬 字幕: {files}",
   "cli.help_audio_lang": "音声音語: 'en' や 'ko' などのコードで音声トラックを強制し、'auto'（既定）は吹き替えトラックが複数ある場合に元の音声を選択します。",
   "cli.help_captions_langs": "字幕言語のリスト（カンマ区切り、例: \"ko,en\"）。言語ごとに最適なソースを使用: 手動 → 自動生成 → YouTube 自動翻訳（レート制限あり — 外部翻訳ステップでの代替を推奨）。--write-subs を含みます。",
+  "cli.help_require_caption_coverage": "厳格な字幕カバレッジゲート: --verify 指定時、字幕サイドカーが動画時間に対するカバレッジが0.95未満ならダウンロードを失敗扱いにします(既定: マニフェストに警告のみ記録)。",
+  "cli.help_swap": "以前のバッチの動画を差し替えます: OLD_ID(11文字の動画ID)はマニフェストの retired[] リストに移動し、NEW_URL からダウンロードしたエントリには swapped_from が記録されます(繰り返し指定可)。",
+  "cli.help_swap_reason": "--swap と併用し、swap/retired マニフェスト記録に残る理由を指定します。",
   "cli.audio_lang": "🔊 音声音語: {lang}（吹き替え回避）"
 }

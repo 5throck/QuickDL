@@ -20,6 +20,9 @@ A lightweight YouTube video downloader with a desktop app, system tray, web UI, 
 - **Best-Available Mode** — `--quality best` probes each video, downloads the max resolution with no artificial cap, and prefers h264/aac at equal quality for browser/device compatibility.
 - **Subtitle Sidecars** — `--write-subs` saves manual (or auto-generated fallback) WebVTT subtitles next to the video.
 - **Caption Fallback Chain** — `--captions-langs "ko,en"` fetches BOTH requested languages per video via an honest per-language chain: manual → auto-generated → YouTube auto-translated; each sidecar is tagged `manual | auto | translated | failed` in the manifest. YouTube's translation endpoint rate-limits (429), so a robust pipeline uses the manifest to drive an external translation step for `failed` languages.
+- **Caption Cleaning Pipeline** — every downloaded sidecar is automatically cleaned before being finalized: inline `<c>`/timestamp tags stripped, rolling duplicate cues merged, overlapping cue windows clipped (raw YouTube ASR grabs become clean cue files). The manifest records `cleaned: true` + the final cue count per sidecar.
+- **Caption Coverage Gate** — each sidecar is measured against the video duration (`coverage` 0–1 in the manifest, null when unknown); coverage below 0.95 is a manifest warning by default, and `--require-caption-coverage` (with `--verify`) fails the download — full-coverage captions or don't use this video. Catches the invisible defect of a source track that stops mid-video.
+- **Swap / Retire Provenance** — `--swap OLD_ID:NEW_URL` (repeatable) retires a prior batch video into the manifest's top-level `retired[]` list with a date and reason, and tags the replacement entry `swapped_from` + `swap {date, reason}` — a complete audit trail for batch re-runs.
 - **Original-Audio Forcing** — `--audio-lang auto` (default) detects each video's original spoken track and refuses YouTube auto-dubbed audio (a real failure mode: English seminars downloaded with Japanese dubs); `--audio-lang en|ko|…` forces a specific track, and the language tag is stamped into the merged MP4.
 - **Verification Gates** — `--verify` checks file size, duration, audio loudness, oEmbed title identity, and resolution after each download.
 - **Download Manifest** — `--manifest out.json` writes an auditable JSON report per batch (per-video status + totals).
@@ -109,6 +112,17 @@ python cli.py <URL> --write-subs --sub-langs "ko.*,en.*"
 # each tagged manual|auto|translated|failed in the manifest)
 python cli.py <URL> --write-subs --captions-langs "ko,en"
 
+# Strict caption coverage gate (with --verify): a sidecar covering less than
+# 0.95 of the video duration FAILS the download instead of only warning
+python cli.py <URL> --write-subs --verify --require-caption-coverage
+
+# Swap out a video that failed a downstream requirement (e.g. partial
+# captions): the old entry moves to the manifest's retired[] list (date +
+# reason) and the replacement is tagged swapped_from
+python cli.py <URL_OLD> <URL_NEW> --manifest batch.json \
+    --swap dQw4w9WgXcQ:https://youtu.be/<new_id> \
+    --swap-reason "source captions cover only 62% of the video"
+
 # Avoid YouTube auto-dubbing: 'auto' picks the original spoken track
 # (multi-language videos), or force one explicitly
 python cli.py <URL> --audio-lang auto
@@ -164,7 +178,7 @@ QuickDL/
 ## Running Tests
 
 ```bash
-pytest tests/ -v        # All 60 tests
+pytest tests/ -v        # All 111 tests
 bash scripts/audit.sh   # Quality gate (CHANGELOG, i18n parity, broken links)
 ```
 

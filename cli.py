@@ -16,13 +16,26 @@ if sys.stderr.encoding and sys.stderr.encoding.lower() not in ("utf-8", "utf8"):
 sys.path.insert(0, str(Path(__file__).parent))
 import download_service
 from verification import (
+    CAPTION_COVERAGE_THRESHOLD,
     DEFAULT_REFERENCE_HEIGHT,
     SOURCE_CAP_WARNING_PREFIX,
+    annotate_caption_coverage,
+    apply_swaps,
     build_manifest,
     extract_video_id,
     verify_download,
 )
 from i18n import init as i18n_init, t
+
+
+def _swap_spec(value: str):
+    """Parse a `--swap OLD_ID:NEW_URL` argument (URLs contain colons)."""
+    old, sep, new = value.partition(':')
+    if not sep or not old.strip() or not new.strip():
+        raise argparse.ArgumentTypeError(
+            "expected OLD_ID:NEW_URL (e.g. dQw4w9WgXcQ:https://youtu.be/<new_id>)"
+        )
+    return (old.strip(), new.strip())
 
 
 def _parse_args():
@@ -57,6 +70,24 @@ def _parse_args():
         "--audio-lang",
         default="auto",
         help=t("cli.help_audio_lang"),
+    )
+    parser.add_argument(
+        "--require-caption-coverage",
+        action="store_true",
+        help=t("cli.help_require_caption_coverage"),
+    )
+    parser.add_argument(
+        "--swap",
+        action="append",
+        default=[],
+        type=_swap_spec,
+        metavar="OLD_ID:NEW_URL",
+        help=t("cli.help_swap"),
+    )
+    parser.add_argument(
+        "--swap-reason",
+        default=None,
+        help=t("cli.help_swap_reason"),
     )
     parser.add_argument(
         "--manifest",
@@ -167,7 +198,7 @@ def _tool_info(args) -> dict:
     sub_langs = None
     if _write_subs(args):
         sub_langs = args.sub_langs or download_service.DEFAULT_SUB_LANGS
-    return {
+    tool = {
         "name": "yt-dlp",
         "version": version,
         "quality": args.quality or "legacy",
@@ -179,7 +210,16 @@ def _tool_info(args) -> dict:
         "audio_lang": args.audio_lang,
         "id_keyed_names": bool(args.id_names),
         "verify": bool(args.verify),
+        "require_caption_coverage": bool(args.require_caption_coverage),
+        "caption_coverage_threshold": CAPTION_COVERAGE_THRESHOLD,
     }
+    if args.swap:
+        # Audit trail: the exact swap directives applied to this batch
+        # (per-entry swapped_from/swap and retired[] carry the outcome).
+        tool["swaps"] = [{"retires": old, "replaced_by_url": new} for old, new in args.swap]
+        if args.swap_reason:
+            tool["swap_reason"] = args.swap_reason
+    return tool
 
 
 def _print_verification(result: dict, expected_height) -> None:
@@ -268,7 +308,17 @@ def _download_one(url: str, args) -> dict:
 
     if write_subs:
         paths = _discover_subtitles(saved_path)
-        subs = [download_service.subtitle_entry(p, saved_path, plan) for p in paths]
+        subs = []
+        for p in paths:
+            # Cleaning pipeline: strip inline tags, drop rolling duplicates,
+            # clip overlapping windows — in place, before the manifest entry
+            # is built (the raw grab is transient).
+            cue_count = download_service.clean_sidecar(p)
+            sub = download_service.subtitle_entry(p, saved_path, plan)
+            if cue_count is not None:
+                sub["cleaned"] = True
+                sub["cues"] = cue_count
+            subs.append(sub)
         for p in plan:
             if p["source"] == "failed":
                 subs.append({"path": None, "lang": p["lang"], "source": "failed"})
@@ -276,6 +326,14 @@ def _download_one(url: str, args) -> dict:
         if paths:
             names = ", ".join(os.path.basename(p) for p in paths)
             print(t("cli.subs_saved", files=names))
+        # Caption coverage: manifest warnings by default. With --verify the
+        # gate runs inside verify_download (measured duration, optional
+        # strict failure via --require-caption-coverage); without it the
+        # probe duration annotates the entries directly.
+        if not args.verify:
+            entry["warnings"].extend(
+                annotate_caption_coverage(subs, info.get("duration_sec"))
+            )
 
     if args.verify:
         print(t("cli.verifying"))
@@ -286,6 +344,8 @@ def _download_one(url: str, args) -> dict:
             expected_title=info.get("title"),
             video_id=info.get("id") or extract_video_id(url),
             reference_height=_reference_height(args.quality),
+            subtitles=entry.get("subtitles") or None,
+            require_caption_coverage=args.require_caption_coverage,
         )
         _print_verification(result, info.get("height"))
         entry["resolution_height"] = result["measured"].get("height")
@@ -321,8 +381,14 @@ def main():
         elif args.verify and entry["status"] == "failed":
             verify_failures += 1
 
+    # Swap/retire provenance: retired entries move to a top-level manifest
+    # `retired[]` list; replacements are tagged swapped_from + swap{date,reason}.
+    retired = None
+    if args.swap:
+        entries, retired = apply_swaps(entries, args.swap, reason=args.swap_reason)
+
     if args.manifest:
-        manifest = build_manifest(entries, tool=_tool_info(args))
+        manifest = build_manifest(entries, tool=_tool_info(args), retired=retired)
         manifest_dir = os.path.dirname(os.path.abspath(args.manifest))
         os.makedirs(manifest_dir, exist_ok=True)
         with open(args.manifest, "w", encoding="utf-8") as f:
