@@ -57,5 +57,21 @@
   "ui.queue_empty": "Tidak ada unduhan dalam antrian.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "Mode kualitas: 'best' = resolusi maksimum yang tersedia tanpa batas (h264/aac diutamakan pada kualitas sama), 'cap:N' = batasi tinggi pada N. Tanpa opsi, pemilihan format lama digunakan.",
+  "cli.help_subs": "Unduh juga subtitle sebagai berkas .vtt (manual diutamakan daripada otomatis).",
+  "cli.help_sub_langs": "Pola bahasa subtitle, dipisahkan koma; urutan = prioritas (bawaan: \"ko.*,en.*\")",
+  "cli.help_manifest": "Tulis manifest unduhan JSON ke jalur yang diberikan.",
+  "cli.help_verify": "Verifikasi setiap unduhan: ukuran, durasi, volume audio, judul oEmbed, resolusi.",
+  "cli.help_id_names": "Namai berkas berdasarkan ID video alih-alih judul (aman untuk batch skrip).",
+  "cli.verifying": "🔍 Memverifikasi unduhan...",
+  "cli.verify_ok": "✅ Verifikasi lulus.",
+  "cli.verify_failed": "❌ Verifikasi gagal: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  Sumber maksimal {height}p — sudah kualitas terbaik yang tersedia.",
+  "cli.manifest_written": "📋 Manifest ditulis: {path}",
+  "cli.subs_saved": "💬 Subtitle: {files}",
+  "cli.help_audio_lang": "Bahasa audio: kode seperti 'en' atau 'ko' memaksa trek tersebut; 'auto' (bawaan) memilih trek asli saat ada beberapa trek sulih suara.",
+  "cli.help_captions_langs": "Daftar bahasa subtitle, dipisah koma (mis. \"ko,en\"). Setiap bahasa memakai sumber terbaik: manual → otomatis → terjemahan otomatis YouTube (dibatasi laju; disarankan fallback ke langkah terjemahan eksternal). Menyiratkan --write-subs.",
+  "cli.audio_lang": "🔊 Bahasa audio: {lang} (anti-sulih suara)"
 }

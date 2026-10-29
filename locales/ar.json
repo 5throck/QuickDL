@@ -57,5 +57,21 @@
   "ui.queue_empty": "لا توجد تنزيلات في قائمة الانتظار.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "وضع الجودة: 'best' = أقصى دقة متاحة دون حد (يُفضَّل h264/aac عند تساوي الجودة)، 'cap:N' = حَدّ الارتفاع عند N. بدون الخيار تُستخدم آلية الاختيار السابقة.",
+  "cli.help_subs": "تنزيل الترجمات أيضًا كملفات ‎.vtt (تُفضَّل اليدوية على التلقائية).",
+  "cli.help_sub_langs": "أنماط لغات الترجمة، مفصولة بفواصل؛ الترتيب = الأولوية (الافتراضي: \"ko.*,en.*\")",
+  "cli.help_manifest": "كتابة بيان تنزيل JSON إلى المسار المحدد.",
+  "cli.help_verify": "التحقق من كل تنزيل: الحجم والمدة ومستوى الصوت والعنوان عبر oEmbed والدقة.",
+  "cli.help_id_names": "تسمية الملفات بمعرّف الفيديو بدلاً من العنوان (آمنة للدفعات البرمجية).",
+  "cli.verifying": "🔍 جارٍ التحقق من التنزيل...",
+  "cli.verify_ok": "✅ اجتاز التحقق.",
+  "cli.verify_failed": "❌ فشل التحقق: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  المصدر يصل بحد أقصى إلى {height}p — هذه بالفعل أفضل جودة متاحة.",
+  "cli.manifest_written": "📋 تمت كتابة البيان: {path}",
+  "cli.subs_saved": "💬 الترجمات: {files}",
+  "cli.help_audio_lang": "لغة الصوت: كود مثل 'en' أو 'ko' يفرض هذا المسار؛ 'auto' (الافتراضي) يختار المسار الأصلي عند وجود مسارات دبلجة متعددة.",
+  "cli.help_captions_langs": "لغات الترجمة مفصولة بفواصل (مثل \"ko,en\"). لكل لغة تُستخدم أفضل مصدر: يدوي → تلقائي → ترجمة YouTube الآلية (محدودة المعدل؛ يُنصح بالرجوع إلى خطوة ترجمة خارجية). يتضمن --write-subs.",
+  "cli.audio_lang": "🔊 لغة الصوت: {lang} (تجنب الدبلجة)"
 }

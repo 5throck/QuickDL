@@ -57,5 +57,21 @@
   "ui.queue_empty": "队列中没有下载项目。",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "画质模式：'best' = 可用最高分辨率（同画质下优先 h264/aac），'cap:N' = 高度上限 N。省略则使用旧版格式选择。",
+  "cli.help_subs": "同时下载字幕为 .vtt 文件（手动字幕优先于自动生成）。",
+  "cli.help_sub_langs": "字幕语言模式，逗号分隔，顺序＝优先级（默认：\"ko.*,en.*\"）",
+  "cli.help_manifest": "将 JSON 下载清单写入指定路径。",
+  "cli.help_verify": "验证每个下载：大小、时长、音量、oEmbed 标题、分辨率。",
+  "cli.help_id_names": "以视频 ID 而非标题命名输出文件（适合脚本批处理）。",
+  "cli.verifying": "🔍 正在验证下载...",
+  "cli.verify_ok": "✅ 验证通过。",
+  "cli.verify_failed": "❌ 验证失败：{reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  源最高仅 {height}p — 已是最高可用画质。",
+  "cli.manifest_written": "📋 清单已写入：{path}",
+  "cli.subs_saved": "💬 字幕：{files}",
+  "cli.help_audio_lang": "音频语言：指定 'en'、'ko' 等代码强制选择对应音轨；'auto'（默认）在存在多条配音音轨时选择原声音轨。",
+  "cli.help_captions_langs": "字幕语言列表（逗号分隔，如 \"ko,en\"）。每种语言使用最佳来源：手动 → 自动生成 → YouTube 自动翻译（有速率限制，建议以清单为依据回退到外部翻译步骤）。隐含 --write-subs。",
+  "cli.audio_lang": "🔊 音频语言：{lang}（避免配音）"
 }

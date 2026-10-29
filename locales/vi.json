@@ -57,5 +57,21 @@
   "ui.queue_empty": "Không có tải xuống trong hàng đợi.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "Chế độ chất lượng: 'best' = độ phân giải tối đa có thể, không giới hạn (ưu tiên h264/aac khi cùng chất lượng), 'cap:N' = giới hạn chiều cao ở N. Bỏ qua để dùng cách chọn định dạng cũ.",
+  "cli.help_subs": "Tải thêm phụ đề dưới dạng tệp .vtt (ưu tiên phụ đề thủ công hơn tự động).",
+  "cli.help_sub_langs": "Mẫu ngôn ngữ phụ đề, phân tách bằng dấu phẩy; thứ tự = ưu tiên (mặc định: \"ko.*,en.*\")",
+  "cli.help_manifest": "Ghi bản kê tải xuống JSON vào đường dẫn đã cho.",
+  "cli.help_verify": "Xác minh từng lượt tải: kích thước, thời lượng, âm lượng, tiêu đề oEmbed, độ phân giải.",
+  "cli.help_id_names": "Đặt tên tệp theo ID video thay vì tiêu đề (an toàn cho lô chạy bằng tập lệnh).",
+  "cli.verifying": "🔍 Đang xác minh lượt tải...",
+  "cli.verify_ok": "✅ Đã vượt qua xác minh.",
+  "cli.verify_failed": "❌ Xác minh thất bại: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  Nguồn tối đa chỉ {height}p — đây đã là chất lượng tốt nhất hiện có.",
+  "cli.manifest_written": "📋 Đã ghi bản kê: {path}",
+  "cli.subs_saved": "💬 Phụ đề: {files}",
+  "cli.help_audio_lang": "Ngôn ngữ âm thanh: mã như 'en' hoặc 'ko' buộc chọn track đó; 'auto' (mặc định) chọn track gốc khi có nhiều track lồng tiếng.",
+  "cli.help_captions_langs": "Danh sách ngôn ngữ phụ đề, phân tách bằng dấu phẩy (vd: \"ko,en\"). Mỗi ngôn ngữ dùng nguồn tốt nhất: thủ công → tự động → dịch tự động YouTube (giới hạn tần suất; nên fallback sang bước dịch bên ngoài). Ngụ ý --write-subs.",
+  "cli.audio_lang": "🔊 Ngôn ngữ âm thanh: {lang} (tránh lồng tiếng)"
 }

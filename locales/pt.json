@@ -57,5 +57,21 @@
   "ui.queue_empty": "Nenhum download na fila.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "Modo de qualidade: 'best' = resolução máxima disponível sem limite (h264/aac preferidos em qualidade igual), 'cap:N' = limitar a altura a N. Sem opção, usa a seleção de formato tradicional.",
+  "cli.help_subs": "Baixar também as legendas como arquivos .vtt (manuais preferidos sobre as automáticas).",
+  "cli.help_sub_langs": "Padrões de idioma das legendas, separados por vírgula; ordem = prioridade (padrão: \"ko.*,en.*\")",
+  "cli.help_manifest": "Gravar um manifesto de downloads JSON no caminho indicado.",
+  "cli.help_verify": "Verificar cada download: tamanho, duração, volume do áudio, título oEmbed, resolução.",
+  "cli.help_id_names": "Nomear os arquivos pelo ID do vídeo em vez do título (seguro para lotes com scripts).",
+  "cli.verifying": "🔍 Verificando o download...",
+  "cli.verify_ok": "✅ Verificação concluída.",
+  "cli.verify_failed": "❌ Falha na verificação: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  A fonte vai até {height}p — já é a melhor qualidade disponível.",
+  "cli.manifest_written": "📋 Manifesto gravado: {path}",
+  "cli.subs_saved": "💬 Legendas: {files}",
+  "cli.help_audio_lang": "Idioma do áudio: um código como 'en' ou 'ko' força essa faixa; 'auto' (padrão) escolhe a faixa original quando há várias dublagens.",
+  "cli.help_captions_langs": "Idiomas de legendas separados por vírgula (ex.: \"ko,en\"). Para cada idioma usa-se a melhor fonte: manual → gerado automaticamente → tradução automática do YouTube (com limite de taxa; recomenda-se recorrer a uma etapa de tradução externa). Implica --write-subs.",
+  "cli.audio_lang": "🔊 Idioma do áudio: {lang} (anti-dublagem)"
 }

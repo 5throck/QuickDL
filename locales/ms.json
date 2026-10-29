@@ -57,5 +57,21 @@
   "ui.queue_empty": "Tiada muat turun dalam giliran.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "Mod kualiti: 'best' = resolusi maksimum yang tersedia tanpa had (h264/aac diutamakan pada kualiti sama), 'cap:N' = hadkan ketinggian pada N. Tanpa pilihan, pemilihan format lalai digunakan.",
+  "cli.help_subs": "Muat turun sari kata sebagai fail .vtt juga (manual diutamakan berbanding automatik).",
+  "cli.help_sub_langs": "Pola bahasa sari kata, dipisahkan koma; susunan = keutamaan (lalai: \"ko.*,en.*\")",
+  "cli.help_manifest": "Tulis manifest muat turun JSON ke laluan yang diberi.",
+  "cli.help_verify": "Sahkan setiap muat turun: saiz, tempoh, kelantangan audio, tajuk oEmbed, resolusi.",
+  "cli.help_id_names": "Namakan fail mengikut ID video dan bukannya tajuk (selamat untuk kelompok skrip).",
+  "cli.verifying": "🔍 Menyahkan muat turun...",
+  "cli.verify_ok": "✅ Pengesahan berjaya.",
+  "cli.verify_failed": "❌ Pengesahan gagal: {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  Sumber mencapai maksimum {height}p — sudah kualiti terbaik yang tersedia.",
+  "cli.manifest_written": "📋 Manifest ditulis: {path}",
+  "cli.subs_saved": "💬 Sari kata: {files}",
+  "cli.help_audio_lang": "Bahasa audio: kod seperti 'en' atau 'ko' memaksa trek itu; 'auto' (lalai) memilih trek asal apabila trek alih suara berganda wujud.",
+  "cli.help_captions_langs": "Senarai bahasa sari kata, dipisah koma (cth: \"ko,en\"). Setiap bahasa guna sumber terbaik: manual → auto-jana → terjemahan auto YouTube (had kadar; disyorkan fallback ke langkah terjemahan luaran). Tersirat --write-subs.",
+  "cli.audio_lang": "🔊 Bahasa audio: {lang} (elak alih suara)"
 }

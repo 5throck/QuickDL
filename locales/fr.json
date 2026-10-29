@@ -57,5 +57,21 @@
   "ui.queue_empty": "Aucun téléchargement en attente.",
   "install.ffmpeg_installing": "📦 Installing ffmpeg automatically...",
   "install.ffmpeg_success": "✅ ffmpeg installed successfully.",
-  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}"
+  "install.ffmpeg_fail": "❌ Failed to install ffmpeg automatically: {e}",
+  "cli.help_quality": "Mode de qualité : 'best' = résolution maximale disponible sans limite (h264/aac privilégiés à qualité égale), 'cap:N' = hauteur limitée à N. Sans option, sélection de format historique.",
+  "cli.help_subs": "Télécharger aussi les sous-titres en fichiers .vtt (manuels préférés aux automatiques).",
+  "cli.help_sub_langs": "Motifs de langues des sous-titres, séparés par des virgules ; l'ordre = priorité (par défaut : \"ko.*,en.*\")",
+  "cli.help_manifest": "Écrire un manifeste de téléchargement JSON dans le chemin indiqué.",
+  "cli.help_verify": "Vérifier chaque téléchargement : taille, durée, volume audio, titre oEmbed, résolution.",
+  "cli.help_id_names": "Nommer les fichiers par ID de vidéo plutôt que par titre (sûr pour les lots scriptés).",
+  "cli.verifying": "🔍 Vérification du téléchargement...",
+  "cli.verify_ok": "✅ Vérification réussie.",
+  "cli.verify_failed": "❌ Échec de la vérification : {reason}",
+  "cli.verify_warning": "⚠️  {reason}",
+  "cli.already_max": "ℹ️  La source plafonne à {height}p — qualité maximale déjà atteinte.",
+  "cli.manifest_written": "📋 Manifeste écrit : {path}",
+  "cli.subs_saved": "💬 Sous-titres : {files}",
+  "cli.help_audio_lang": "Langue audio : un code comme 'en' ou 'ko' force cette piste ; 'auto' (défaut) choisit la piste originale quand plusieurs doublages existent.",
+  "cli.help_captions_langs": "Langues de sous-titres séparées par des virgules (ex. \"ko,en\"). Pour chaque langue, la meilleure source est utilisée : manuel → auto-généré → traduction automatique YouTube (limitée en débit ; un repli vers une étape de traduction externe est recommandé). Implique --write-subs.",
+  "cli.audio_lang": "🔊 Langue audio : {lang} (anti-doublage)"
 }
