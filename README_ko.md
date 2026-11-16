@@ -2,7 +2,7 @@
 
 데스크톱 앱, 시스템 트레이, 웹 UI, CLI를 갖춘 경량 YouTube 영상 다운로더입니다.
 
-![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![CI](https://github.com/5throck/QuickDL/actions/workflows/ci.yml/badge.svg)
 
@@ -189,4 +189,4 @@ bash scripts/audit.sh   # 품질 게이트 (CHANGELOG, i18n 키 동기화, 링�
 
 ## 라이선스
 
-이 프로젝트는 [GNU Affero General Public License v3.0](LICENSE) 라이선스를 따릅니다.
+이 프로젝트는 [MIT License](LICENSE) 라이선스를 따릅니다.

@@ -2,7 +2,7 @@
 
 A lightweight YouTube video downloader with a desktop app, system tray, web UI, and CLI.
 
-![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![CI](https://github.com/5throck/QuickDL/actions/workflows/ci.yml/badge.svg)
 
@@ -186,4 +186,4 @@ bash scripts/audit.sh   # Quality gate (CHANGELOG, i18n parity, broken links)
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+This project is licensed under the [MIT License](LICENSE).
