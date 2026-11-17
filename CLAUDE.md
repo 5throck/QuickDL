@@ -1,4 +1,4 @@
-﻿# CLAUDE.md —QuickDL
+# CLAUDE.md —QuickDL
 
 **Claude Code (CLI & Desktop App)** configuration for the QuickDL project.
 

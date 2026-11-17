@@ -1,4 +1,4 @@
-﻿# QuickDL —Project Context
+# QuickDL —Project Context
 
 > Single source of truth shared by all AI tools (Claude Code, Gemini CLI, Codex).
 > Read this file before starting any task on QuickDL.

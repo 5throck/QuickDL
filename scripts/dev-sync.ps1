@@ -1,4 +1,4 @@
-﻿# dev-sync.ps1 — Full pipeline: memlog → sync-md → changelog → audit → commit → PR (Windows)
+# dev-sync.ps1 — Full pipeline: memlog → sync-md → changelog → audit → commit → PR (Windows)
 # Usage: .\scripts\dev-sync.ps1 "feat: description"
 param([string]$Msg = "chore: update")
 

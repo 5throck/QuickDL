@@ -1,4 +1,4 @@
-﻿# audit.ps1 — Documentation integrity check (Windows PowerShell)
+# audit.ps1 — Documentation integrity check (Windows PowerShell)
 # Mirrors audit.sh exactly. Exit code 0 = pass, non-zero = fail.
 
 $errors = 0

@@ -1,4 +1,4 @@
-﻿# GEMINI.md
+# GEMINI.md
 
 > **All project context, coding guidelines, and dev workflow —[`docs/context.md`](docs/context.md)**
 > Workspace-level Gemini behaviors —[`https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md`](https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/GEMINI.md)
