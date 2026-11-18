@@ -106,13 +106,13 @@ git config core.hooksPath .githooks
 
 ## Git
 
-Follow conventions in [docs/context.md — Git Conventions](docs/context.md#git-conventions).
+Follow conventions in [docs/context.md — Git / PR Workflow](docs/context.md#git--pr-workflow).
 Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 Co-Authored-By: Gemini <noreply@google.com>`
 
 ---
 
-*Last Updated: 2026-05-24*
+*Last Updated: 2026-11-19*
 
 ### Optimal Interaction Guidelines
 - **XML Tagging**: Utilize XML tags like `<thought>`, `<plan>`, and `<execution>` to structure complex reasoning and plans before generating final responses.
@@ -329,5 +329,5 @@ All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-s
 
 - **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
 
-*Last Updated: 2026-11-12 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
+*Last Updated: 2026-11-19 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
 <!-- COMMON-CLAUDE:END -->
