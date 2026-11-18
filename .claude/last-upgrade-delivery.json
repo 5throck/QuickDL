@@ -1,833 +1,180 @@
 {
   "schemaVersion": 2,
-  "timestamp": "2026-11-18T16:45:17.589Z",
+  "timestamp": "2026-11-18T17:33:15.846Z",
   "project": "QuickDL",
   "templateVersion": "0.30.0",
-  "templateSha": "7c1b592f201720f11f8ef1a9597bbf59f159cb28",
-  "baseSha": "e85f3d76c20a7765279308ca40b41cea4430bfc5",
+  "templateSha": "b694167a902c988303513ad264921be2bdd60fbc",
+  "baseSha": "476f1364ab8d7c005e7fafec6b66cabcaff7d76e",
   "files": [
-    ".claude/commands/security-check.md",
-    ".claude/settings.json",
-    ".gemini/settings.json",
-    ".gitattributes",
-    ".githooks/commit-msg",
-    ".githooks/pre-commit",
-    ".githooks/pre-push",
-    ".github/pull_request_template.md",
-    ".github/workflows/ci.yml",
-    ".gitignore",
-    ".gitleaks.toml",
-    "AGENTS.md",
-    "CLAUDE.md",
-    "GEMINI.md",
-    "agents/designer.md",
-    "agents/pm.md",
-    "agents/security-monitor.md",
-    "docs/security.md",
-    "skills/i18n-audit/SKILL.md",
-    ".agents/mcp.json",
-    ".agents/skills.json",
-    ".agents/skills/accessibility-audit/SKILL.md",
-    ".agents/skills/agent-lifecycle-manager/SKILL.md",
-    ".agents/skills/api-documentation/SKILL.md",
-    ".agents/skills/ci-triage/SKILL.md",
-    ".agents/skills/code-review/SKILL.md",
-    ".agents/skills/decision-record/SKILL.md",
-    ".agents/skills/delegate-to-hub/SKILL.md",
-    ".agents/skills/design-foundation/SKILL.md",
-    ".agents/skills/documentation-writing/SKILL.md",
-    ".agents/skills/evidence-ledger/SKILL.md",
-    ".agents/skills/explain-me/SKILL.md",
-    ".agents/skills/explain-me/references/BUILD_GUIDE.md",
-    ".agents/skills/explain-me/references/PLATFORM_HARNESS.md",
-    ".agents/skills/explain-me/references/loanword-refinements.json",
-    ".agents/skills/explain-me/scripts/validate_report.py",
-    ".agents/skills/explain-me/templates/publish/.nojekyll",
-    ".agents/skills/explain-me/templates/publish/dot-gitignore",
-    ".agents/skills/explain-me/templates/report.html",
-    ".agents/skills/gateguard/SKILL.md",
-    ".agents/skills/handbook-sync-audit/SKILL.md",
-    ".agents/skills/handbook/SKILL.md",
-    ".agents/skills/handbook/assets/css/handbook-components.css",
-    ".agents/skills/handbook/assets/css/handbook-variables.css",
-    ".agents/skills/handbook/assets/js/copy-code.js",
-    ".agents/skills/handbook/assets/js/dark-mode-toggle.js",
-    ".agents/skills/handbook/assets/js/inpage-search.js",
-    ".agents/skills/handbook/assets/js/lang-switcher.js",
-    ".agents/skills/handbook/assets/js/site-search.js",
-    ".agents/skills/handbook/examples/course/chapter_01.html",
-    ".agents/skills/handbook/examples/course/chapter_02.html",
-    ".agents/skills/handbook/examples/course/course-overview.html",
-    ".agents/skills/handbook/examples/course/index.html",
-    ".agents/skills/handbook/examples/course/instructor-guide.html",
-    ".agents/skills/handbook/examples/handbook/chapter_01.html",
-    ".agents/skills/handbook/examples/handbook/chapter_02.html",
-    ".agents/skills/handbook/examples/handbook/chapter_03.html",
-    ".agents/skills/handbook/examples/handbook/index.html",
-    ".agents/skills/handbook/examples/minimal/chapter_01.html",
-    ".agents/skills/handbook/examples/minimal/index.html",
-    ".agents/skills/handbook/references/AUTHORING_GUIDELINES.md",
-    ".agents/skills/handbook/references/BUILD_GUIDE.md",
-    ".agents/skills/handbook/references/I18N_PARITY_PLAYBOOK.md",
-    ".agents/skills/handbook/references/KOREAN_LANGUAGE.md",
-    ".agents/skills/handbook/references/MAINTENANCE_PLAYBOOK.md",
-    ".agents/skills/handbook/references/QUALITY_CHECKLIST.md",
-    ".agents/skills/handbook/references/SECTION_TYPES.md",
-    ".agents/skills/handbook/references/validation/NAV_VALIDATION.md",
-    ".agents/skills/handbook/templates/.gitignore",
-    ".agents/skills/handbook/templates/.nojekyll",
-    ".agents/skills/handbook/templates/base.html",
-    ".agents/skills/handbook/templates/chapter.html",
-    ".agents/skills/handbook/templates/course-overview.html",
-    ".agents/skills/handbook/templates/examples.html",
-    ".agents/skills/handbook/templates/index.html",
-    ".agents/skills/handbook/templates/instructor-guide.html",
-    ".agents/skills/handbook/templates/manual.html",
-    ".agents/skills/handbook/templates/quiz.html",
-    ".agents/skills/i18n-audit/SKILL.md",
-    ".agents/skills/i18n-formatting/SKILL.md",
-    ".agents/skills/i18n-layout/SKILL.md",
-    ".agents/skills/i18n-locale-config/SKILL.md",
-    ".agents/skills/meeting-facilitation/SKILL.md",
-    ".agents/skills/post-write-check/SKILL.md",
-    ".agents/skills/project-review/SKILL.md",
-    ".agents/skills/refactoring/SKILL.md",
-    ".agents/skills/research-analysis/SKILL.md",
-    ".agents/skills/script-lifecycle-manager/SKILL.md",
-    ".agents/skills/security-scan/SKILL.md",
-    ".agents/skills/service-design/SKILL.md",
-    ".agents/skills/skill-lifecycle-manager/SKILL.md",
-    ".agents/skills/source-command-commit-push-pr/SKILL.md",
-    ".agents/skills/standup-synthesizer/SKILL.md",
-    ".agents/skills/swe-solve/SKILL.md",
-    ".agents/skills/sync/SKILL.md",
-    ".agents/skills/team-builder/SKILL.md",
-    ".agents/skills/test-driven-development/SKILL.md",
-    ".agents/skills/token-usage-lint/SKILL.md",
     ".agents/skills/translate/SKILL.md",
-    ".agents/skills/ui-ux-design-intelligence/SKILL.md",
-    ".agents/skills/update-bun-packages/SKILL.md",
-    ".agents/skills/zod-contract-gate/SKILL.md",
-    ".claude/skills.json",
-    ".claude/skills/accessibility-audit/SKILL.md",
-    ".claude/skills/agent-lifecycle-manager/SKILL.md",
-    ".claude/skills/api-documentation/SKILL.md",
-    ".claude/skills/ci-triage/SKILL.md",
-    ".claude/skills/code-review/SKILL.md",
-    ".claude/skills/decision-record/SKILL.md",
-    ".claude/skills/delegate-to-hub/SKILL.md",
-    ".claude/skills/design-foundation/SKILL.md",
-    ".claude/skills/documentation-writing/SKILL.md",
-    ".claude/skills/evidence-ledger/SKILL.md",
-    ".claude/skills/explain-me/SKILL.md",
-    ".claude/skills/explain-me/references/BUILD_GUIDE.md",
-    ".claude/skills/explain-me/references/PLATFORM_HARNESS.md",
-    ".claude/skills/explain-me/references/loanword-refinements.json",
-    ".claude/skills/explain-me/scripts/validate_report.py",
-    ".claude/skills/explain-me/templates/publish/.nojekyll",
-    ".claude/skills/explain-me/templates/publish/dot-gitignore",
-    ".claude/skills/explain-me/templates/report.html",
-    ".claude/skills/gateguard/SKILL.md",
-    ".claude/skills/handbook-sync-audit/SKILL.md",
-    ".claude/skills/handbook/SKILL.md",
-    ".claude/skills/handbook/assets/css/handbook-components.css",
-    ".claude/skills/handbook/assets/css/handbook-variables.css",
-    ".claude/skills/handbook/assets/js/copy-code.js",
-    ".claude/skills/handbook/assets/js/dark-mode-toggle.js",
-    ".claude/skills/handbook/assets/js/inpage-search.js",
-    ".claude/skills/handbook/assets/js/lang-switcher.js",
-    ".claude/skills/handbook/assets/js/site-search.js",
-    ".claude/skills/handbook/examples/course/chapter_01.html",
-    ".claude/skills/handbook/examples/course/chapter_02.html",
-    ".claude/skills/handbook/examples/course/course-overview.html",
-    ".claude/skills/handbook/examples/course/index.html",
-    ".claude/skills/handbook/examples/course/instructor-guide.html",
-    ".claude/skills/handbook/examples/handbook/chapter_01.html",
-    ".claude/skills/handbook/examples/handbook/chapter_02.html",
-    ".claude/skills/handbook/examples/handbook/chapter_03.html",
-    ".claude/skills/handbook/examples/handbook/index.html",
-    ".claude/skills/handbook/examples/minimal/chapter_01.html",
-    ".claude/skills/handbook/examples/minimal/index.html",
-    ".claude/skills/handbook/references/AUTHORING_GUIDELINES.md",
-    ".claude/skills/handbook/references/BUILD_GUIDE.md",
-    ".claude/skills/handbook/references/I18N_PARITY_PLAYBOOK.md",
-    ".claude/skills/handbook/references/KOREAN_LANGUAGE.md",
-    ".claude/skills/handbook/references/MAINTENANCE_PLAYBOOK.md",
-    ".claude/skills/handbook/references/QUALITY_CHECKLIST.md",
-    ".claude/skills/handbook/references/SECTION_TYPES.md",
-    ".claude/skills/handbook/references/validation/NAV_VALIDATION.md",
-    ".claude/skills/handbook/templates/.gitignore",
-    ".claude/skills/handbook/templates/.nojekyll",
-    ".claude/skills/handbook/templates/base.html",
-    ".claude/skills/handbook/templates/chapter.html",
-    ".claude/skills/handbook/templates/course-overview.html",
-    ".claude/skills/handbook/templates/examples.html",
-    ".claude/skills/handbook/templates/index.html",
-    ".claude/skills/handbook/templates/instructor-guide.html",
-    ".claude/skills/handbook/templates/manual.html",
-    ".claude/skills/handbook/templates/quiz.html",
-    ".claude/skills/i18n-audit/SKILL.md",
-    ".claude/skills/i18n-formatting/SKILL.md",
-    ".claude/skills/i18n-layout/SKILL.md",
-    ".claude/skills/i18n-locale-config/SKILL.md",
-    ".claude/skills/meeting-facilitation/SKILL.md",
-    ".claude/skills/post-write-check/SKILL.md",
-    ".claude/skills/project-review/SKILL.md",
-    ".claude/skills/refactoring/SKILL.md",
-    ".claude/skills/research-analysis/SKILL.md",
-    ".claude/skills/script-lifecycle-manager/SKILL.md",
-    ".claude/skills/security-scan/SKILL.md",
-    ".claude/skills/service-design/SKILL.md",
-    ".claude/skills/skill-lifecycle-manager/SKILL.md",
-    ".claude/skills/source-command-commit-push-pr/SKILL.md",
-    ".claude/skills/standup-synthesizer/SKILL.md",
-    ".claude/skills/swe-solve/SKILL.md",
-    ".claude/skills/sync/SKILL.md",
-    ".claude/skills/team-builder/SKILL.md",
-    ".claude/skills/test-driven-development/SKILL.md",
-    ".claude/skills/token-usage-lint/SKILL.md",
+    ".claude/settings.json",
     ".claude/skills/translate/SKILL.md",
-    ".claude/skills/ui-ux-design-intelligence/SKILL.md",
-    ".claude/skills/update-bun-packages/SKILL.md",
-    ".claude/skills/zod-contract-gate/SKILL.md",
-    ".codex/config.toml",
-    ".codex/hooks.json",
-    ".codex/prompts/changelog.md",
-    ".codex/prompts/i18n-audit.md",
-    ".codex/prompts/memlog.md",
-    ".codex/prompts/new-task.md",
-    ".codex/prompts/post-write.md",
-    ".codex/prompts/security-check.md",
-    ".codex/prompts/sync.md",
-    ".codex/skills/accessibility-audit/SKILL.md",
-    ".codex/skills/agent-lifecycle-manager/SKILL.md",
-    ".codex/skills/api-documentation/SKILL.md",
-    ".codex/skills/ci-triage/SKILL.md",
-    ".codex/skills/code-review/SKILL.md",
-    ".codex/skills/decision-record/SKILL.md",
-    ".codex/skills/delegate-to-hub/SKILL.md",
-    ".codex/skills/design-foundation/SKILL.md",
-    ".codex/skills/documentation-writing/SKILL.md",
-    ".codex/skills/evidence-ledger/SKILL.md",
-    ".codex/skills/explain-me/SKILL.md",
-    ".codex/skills/explain-me/references/BUILD_GUIDE.md",
-    ".codex/skills/explain-me/references/PLATFORM_HARNESS.md",
-    ".codex/skills/explain-me/references/loanword-refinements.json",
-    ".codex/skills/explain-me/scripts/validate_report.py",
-    ".codex/skills/explain-me/templates/publish/.nojekyll",
-    ".codex/skills/explain-me/templates/publish/dot-gitignore",
-    ".codex/skills/explain-me/templates/report.html",
-    ".codex/skills/gateguard/SKILL.md",
-    ".codex/skills/handbook-sync-audit/SKILL.md",
-    ".codex/skills/handbook/SKILL.md",
-    ".codex/skills/handbook/assets/css/handbook-components.css",
-    ".codex/skills/handbook/assets/css/handbook-variables.css",
-    ".codex/skills/handbook/assets/js/copy-code.js",
-    ".codex/skills/handbook/assets/js/dark-mode-toggle.js",
-    ".codex/skills/handbook/assets/js/inpage-search.js",
-    ".codex/skills/handbook/assets/js/lang-switcher.js",
-    ".codex/skills/handbook/assets/js/site-search.js",
-    ".codex/skills/handbook/examples/course/chapter_01.html",
-    ".codex/skills/handbook/examples/course/chapter_02.html",
-    ".codex/skills/handbook/examples/course/course-overview.html",
-    ".codex/skills/handbook/examples/course/index.html",
-    ".codex/skills/handbook/examples/course/instructor-guide.html",
-    ".codex/skills/handbook/examples/handbook/chapter_01.html",
-    ".codex/skills/handbook/examples/handbook/chapter_02.html",
-    ".codex/skills/handbook/examples/handbook/chapter_03.html",
-    ".codex/skills/handbook/examples/handbook/index.html",
-    ".codex/skills/handbook/examples/minimal/chapter_01.html",
-    ".codex/skills/handbook/examples/minimal/index.html",
-    ".codex/skills/handbook/references/AUTHORING_GUIDELINES.md",
-    ".codex/skills/handbook/references/BUILD_GUIDE.md",
-    ".codex/skills/handbook/references/I18N_PARITY_PLAYBOOK.md",
-    ".codex/skills/handbook/references/KOREAN_LANGUAGE.md",
-    ".codex/skills/handbook/references/MAINTENANCE_PLAYBOOK.md",
-    ".codex/skills/handbook/references/QUALITY_CHECKLIST.md",
-    ".codex/skills/handbook/references/SECTION_TYPES.md",
-    ".codex/skills/handbook/references/validation/NAV_VALIDATION.md",
-    ".codex/skills/handbook/templates/.gitignore",
-    ".codex/skills/handbook/templates/.nojekyll",
-    ".codex/skills/handbook/templates/base.html",
-    ".codex/skills/handbook/templates/chapter.html",
-    ".codex/skills/handbook/templates/course-overview.html",
-    ".codex/skills/handbook/templates/examples.html",
-    ".codex/skills/handbook/templates/index.html",
-    ".codex/skills/handbook/templates/instructor-guide.html",
-    ".codex/skills/handbook/templates/manual.html",
-    ".codex/skills/handbook/templates/quiz.html",
-    ".codex/skills/i18n-audit/SKILL.md",
-    ".codex/skills/i18n-formatting/SKILL.md",
-    ".codex/skills/i18n-layout/SKILL.md",
-    ".codex/skills/i18n-locale-config/SKILL.md",
-    ".codex/skills/meeting-facilitation/SKILL.md",
-    ".codex/skills/post-write-check/SKILL.md",
-    ".codex/skills/project-review/SKILL.md",
-    ".codex/skills/refactoring/SKILL.md",
-    ".codex/skills/research-analysis/SKILL.md",
-    ".codex/skills/script-lifecycle-manager/SKILL.md",
-    ".codex/skills/security-scan/SKILL.md",
-    ".codex/skills/service-design/SKILL.md",
-    ".codex/skills/skill-lifecycle-manager/SKILL.md",
-    ".codex/skills/source-command-commit-push-pr/SKILL.md",
-    ".codex/skills/standup-synthesizer/SKILL.md",
-    ".codex/skills/swe-solve/SKILL.md",
-    ".codex/skills/sync/SKILL.md",
-    ".codex/skills/team-builder/SKILL.md",
-    ".codex/skills/test-driven-development/SKILL.md",
-    ".codex/skills/token-usage-lint/SKILL.md",
     ".codex/skills/translate/SKILL.md",
-    ".codex/skills/ui-ux-design-intelligence/SKILL.md",
-    ".codex/skills/update-bun-packages/SKILL.md",
-    ".codex/skills/zod-contract-gate/SKILL.md",
-    ".editorconfig",
-    ".env.sample",
-    ".gemini/commands/security-check.md",
-    ".gemini/skills.json",
-    ".gemini/skills/accessibility-audit/SKILL.md",
-    ".gemini/skills/agent-lifecycle-manager/SKILL.md",
-    ".gemini/skills/api-documentation/SKILL.md",
-    ".gemini/skills/ci-triage/SKILL.md",
-    ".gemini/skills/code-review/SKILL.md",
-    ".gemini/skills/decision-record/SKILL.md",
-    ".gemini/skills/delegate-to-hub/SKILL.md",
-    ".gemini/skills/design-foundation/SKILL.md",
-    ".gemini/skills/documentation-writing/SKILL.md",
-    ".gemini/skills/evidence-ledger/SKILL.md",
-    ".gemini/skills/explain-me/SKILL.md",
-    ".gemini/skills/explain-me/references/BUILD_GUIDE.md",
-    ".gemini/skills/explain-me/references/PLATFORM_HARNESS.md",
-    ".gemini/skills/explain-me/references/loanword-refinements.json",
-    ".gemini/skills/explain-me/scripts/validate_report.py",
-    ".gemini/skills/explain-me/templates/publish/.nojekyll",
-    ".gemini/skills/explain-me/templates/publish/dot-gitignore",
-    ".gemini/skills/explain-me/templates/report.html",
-    ".gemini/skills/gateguard/SKILL.md",
-    ".gemini/skills/handbook-sync-audit/SKILL.md",
-    ".gemini/skills/handbook/SKILL.md",
-    ".gemini/skills/handbook/assets/css/handbook-components.css",
-    ".gemini/skills/handbook/assets/css/handbook-variables.css",
-    ".gemini/skills/handbook/assets/js/copy-code.js",
-    ".gemini/skills/handbook/assets/js/dark-mode-toggle.js",
-    ".gemini/skills/handbook/assets/js/inpage-search.js",
-    ".gemini/skills/handbook/assets/js/lang-switcher.js",
-    ".gemini/skills/handbook/assets/js/site-search.js",
-    ".gemini/skills/handbook/examples/course/chapter_01.html",
-    ".gemini/skills/handbook/examples/course/chapter_02.html",
-    ".gemini/skills/handbook/examples/course/course-overview.html",
-    ".gemini/skills/handbook/examples/course/index.html",
-    ".gemini/skills/handbook/examples/course/instructor-guide.html",
-    ".gemini/skills/handbook/examples/handbook/chapter_01.html",
-    ".gemini/skills/handbook/examples/handbook/chapter_02.html",
-    ".gemini/skills/handbook/examples/handbook/chapter_03.html",
-    ".gemini/skills/handbook/examples/handbook/index.html",
-    ".gemini/skills/handbook/examples/minimal/chapter_01.html",
-    ".gemini/skills/handbook/examples/minimal/index.html",
-    ".gemini/skills/handbook/references/AUTHORING_GUIDELINES.md",
-    ".gemini/skills/handbook/references/BUILD_GUIDE.md",
-    ".gemini/skills/handbook/references/I18N_PARITY_PLAYBOOK.md",
-    ".gemini/skills/handbook/references/KOREAN_LANGUAGE.md",
-    ".gemini/skills/handbook/references/MAINTENANCE_PLAYBOOK.md",
-    ".gemini/skills/handbook/references/QUALITY_CHECKLIST.md",
-    ".gemini/skills/handbook/references/SECTION_TYPES.md",
-    ".gemini/skills/handbook/references/validation/NAV_VALIDATION.md",
-    ".gemini/skills/handbook/templates/.gitignore",
-    ".gemini/skills/handbook/templates/.nojekyll",
-    ".gemini/skills/handbook/templates/base.html",
-    ".gemini/skills/handbook/templates/chapter.html",
-    ".gemini/skills/handbook/templates/course-overview.html",
-    ".gemini/skills/handbook/templates/examples.html",
-    ".gemini/skills/handbook/templates/index.html",
-    ".gemini/skills/handbook/templates/instructor-guide.html",
-    ".gemini/skills/handbook/templates/manual.html",
-    ".gemini/skills/handbook/templates/quiz.html",
-    ".gemini/skills/i18n-audit/SKILL.md",
-    ".gemini/skills/i18n-formatting/SKILL.md",
-    ".gemini/skills/i18n-layout/SKILL.md",
-    ".gemini/skills/i18n-locale-config/SKILL.md",
-    ".gemini/skills/meeting-facilitation/SKILL.md",
-    ".gemini/skills/post-write-check/SKILL.md",
-    ".gemini/skills/project-review/SKILL.md",
-    ".gemini/skills/refactoring/SKILL.md",
-    ".gemini/skills/research-analysis/SKILL.md",
-    ".gemini/skills/script-lifecycle-manager/SKILL.md",
-    ".gemini/skills/security-scan/SKILL.md",
-    ".gemini/skills/service-design/SKILL.md",
-    ".gemini/skills/skill-lifecycle-manager/SKILL.md",
-    ".gemini/skills/source-command-commit-push-pr/SKILL.md",
-    ".gemini/skills/standup-synthesizer/SKILL.md",
-    ".gemini/skills/swe-solve/SKILL.md",
-    ".gemini/skills/sync/SKILL.md",
-    ".gemini/skills/team-builder/SKILL.md",
-    ".gemini/skills/test-driven-development/SKILL.md",
-    ".gemini/skills/token-usage-lint/SKILL.md",
     ".gemini/skills/translate/SKILL.md",
-    ".gemini/skills/ui-ux-design-intelligence/SKILL.md",
-    ".gemini/skills/update-bun-packages/SKILL.md",
-    ".gemini/skills/zod-contract-gate/SKILL.md",
-    ".githooks/post-checkout",
-    ".githooks/pre-rebase",
-    ".github/CODEOWNERS",
-    ".github/workflows/delete-merged-branches.yml",
-    ".hermes/skills/accessibility-audit/SKILL.md",
-    ".hermes/skills/agent-lifecycle-manager/SKILL.md",
-    ".hermes/skills/api-documentation/SKILL.md",
-    ".hermes/skills/ci-triage/SKILL.md",
-    ".hermes/skills/code-review/SKILL.md",
-    ".hermes/skills/decision-record/SKILL.md",
-    ".hermes/skills/delegate-to-hub/SKILL.md",
-    ".hermes/skills/design-foundation/SKILL.md",
-    ".hermes/skills/documentation-writing/SKILL.md",
-    ".hermes/skills/evidence-ledger/SKILL.md",
-    ".hermes/skills/explain-me/SKILL.md",
-    ".hermes/skills/explain-me/references/BUILD_GUIDE.md",
-    ".hermes/skills/explain-me/references/PLATFORM_HARNESS.md",
-    ".hermes/skills/explain-me/references/loanword-refinements.json",
-    ".hermes/skills/explain-me/scripts/validate_report.py",
-    ".hermes/skills/explain-me/templates/publish/.nojekyll",
-    ".hermes/skills/explain-me/templates/publish/dot-gitignore",
-    ".hermes/skills/explain-me/templates/report.html",
-    ".hermes/skills/gateguard/SKILL.md",
-    ".hermes/skills/handbook-sync-audit/SKILL.md",
-    ".hermes/skills/handbook/SKILL.md",
-    ".hermes/skills/handbook/assets/css/handbook-components.css",
-    ".hermes/skills/handbook/assets/css/handbook-variables.css",
-    ".hermes/skills/handbook/assets/js/copy-code.js",
-    ".hermes/skills/handbook/assets/js/dark-mode-toggle.js",
-    ".hermes/skills/handbook/assets/js/inpage-search.js",
-    ".hermes/skills/handbook/assets/js/lang-switcher.js",
-    ".hermes/skills/handbook/assets/js/site-search.js",
-    ".hermes/skills/handbook/examples/course/chapter_01.html",
-    ".hermes/skills/handbook/examples/course/chapter_02.html",
-    ".hermes/skills/handbook/examples/course/course-overview.html",
-    ".hermes/skills/handbook/examples/course/index.html",
-    ".hermes/skills/handbook/examples/course/instructor-guide.html",
-    ".hermes/skills/handbook/examples/handbook/chapter_01.html",
-    ".hermes/skills/handbook/examples/handbook/chapter_02.html",
-    ".hermes/skills/handbook/examples/handbook/chapter_03.html",
-    ".hermes/skills/handbook/examples/handbook/index.html",
-    ".hermes/skills/handbook/examples/minimal/chapter_01.html",
-    ".hermes/skills/handbook/examples/minimal/index.html",
-    ".hermes/skills/handbook/references/AUTHORING_GUIDELINES.md",
-    ".hermes/skills/handbook/references/BUILD_GUIDE.md",
-    ".hermes/skills/handbook/references/I18N_PARITY_PLAYBOOK.md",
-    ".hermes/skills/handbook/references/KOREAN_LANGUAGE.md",
-    ".hermes/skills/handbook/references/MAINTENANCE_PLAYBOOK.md",
-    ".hermes/skills/handbook/references/QUALITY_CHECKLIST.md",
-    ".hermes/skills/handbook/references/SECTION_TYPES.md",
-    ".hermes/skills/handbook/references/validation/NAV_VALIDATION.md",
-    ".hermes/skills/handbook/templates/.gitignore",
-    ".hermes/skills/handbook/templates/.nojekyll",
-    ".hermes/skills/handbook/templates/base.html",
-    ".hermes/skills/handbook/templates/chapter.html",
-    ".hermes/skills/handbook/templates/course-overview.html",
-    ".hermes/skills/handbook/templates/examples.html",
-    ".hermes/skills/handbook/templates/index.html",
-    ".hermes/skills/handbook/templates/instructor-guide.html",
-    ".hermes/skills/handbook/templates/manual.html",
-    ".hermes/skills/handbook/templates/quiz.html",
-    ".hermes/skills/i18n-audit/SKILL.md",
-    ".hermes/skills/i18n-formatting/SKILL.md",
-    ".hermes/skills/i18n-layout/SKILL.md",
-    ".hermes/skills/i18n-locale-config/SKILL.md",
-    ".hermes/skills/meeting-facilitation/SKILL.md",
-    ".hermes/skills/post-write-check/SKILL.md",
-    ".hermes/skills/project-review/SKILL.md",
-    ".hermes/skills/refactoring/SKILL.md",
-    ".hermes/skills/research-analysis/SKILL.md",
-    ".hermes/skills/script-lifecycle-manager/SKILL.md",
-    ".hermes/skills/security-scan/SKILL.md",
-    ".hermes/skills/service-design/SKILL.md",
-    ".hermes/skills/skill-lifecycle-manager/SKILL.md",
-    ".hermes/skills/source-command-commit-push-pr/SKILL.md",
-    ".hermes/skills/standup-synthesizer/SKILL.md",
-    ".hermes/skills/swe-solve/SKILL.md",
-    ".hermes/skills/sync/SKILL.md",
-    ".hermes/skills/team-builder/SKILL.md",
-    ".hermes/skills/test-driven-development/SKILL.md",
-    ".hermes/skills/token-usage-lint/SKILL.md",
+    ".gitattributes",
     ".hermes/skills/translate/SKILL.md",
-    ".hermes/skills/ui-ux-design-intelligence/SKILL.md",
-    ".hermes/skills/update-bun-packages/SKILL.md",
-    ".hermes/skills/zod-contract-gate/SKILL.md",
-    ".ignore",
-    ".mcp.json",
-    ".trail/.gitignore",
-    ".trail/README.md",
-    ".trail/hook.cjs",
-    "CODEX.md",
-    "HERMES.md",
-    "PROMOTION_CHECKLIST.md",
-    "agents/architect.md",
-    "agents/code-writer.md",
-    "agents/i18n-specialist.md",
-    "agents/stack-setup.md",
-    "agents/test-runner.md",
-    "docs/README.template.md",
-    "docs/README_ko.template.md",
-    "docs/benchmark-fixtures/ISSUE-001.md",
-    "docs/benchmark-fixtures/ISSUE-002.md",
-    "docs/benchmark-fixtures/ISSUE-003.md",
-    "docs/benchmark-fixtures/README.md",
+    "AGENTS.md",
+    "agents/pm.md",
     "docs/co-develop.context.md",
-    "docs/components.template.md",
-    "docs/country-profiles.md",
-    "docs/design-foundation.md",
-    "docs/design-tokens.template.css",
-    "docs/governance/agents/execution-plan-templates.md",
-    "docs/governance/agents/workflows.md",
-    "docs/handoff-spec.md",
-    "docs/handoff-spec_ko.md",
-    "docs/lifecycle/agents/architect.md",
-    "docs/lifecycle/agents/code-writer.md",
-    "docs/lifecycle/agents/designer.md",
-    "docs/lifecycle/agents/i18n-specialist.md",
-    "docs/lifecycle/agents/pm.md",
-    "docs/lifecycle/agents/security-monitor.md",
-    "docs/lifecycle/agents/stack-setup.md",
-    "docs/lifecycle/agents/test-runner.md",
-    "docs/lifecycle/skills/accessibility-audit.md",
-    "docs/lifecycle/skills/agent-lifecycle-manager.md",
-    "docs/lifecycle/skills/api-documentation.md",
-    "docs/lifecycle/skills/ci-triage.md",
-    "docs/lifecycle/skills/code-review.md",
-    "docs/lifecycle/skills/decision-record.md",
-    "docs/lifecycle/skills/delegate-to-hub.md",
-    "docs/lifecycle/skills/design-foundation.md",
-    "docs/lifecycle/skills/documentation-writing.md",
-    "docs/lifecycle/skills/evidence-ledger.md",
-    "docs/lifecycle/skills/explain-me.md",
-    "docs/lifecycle/skills/finishing-a-development-branch.md",
-    "docs/lifecycle/skills/gateguard.md",
-    "docs/lifecycle/skills/handbook-sync-audit.md",
-    "docs/lifecycle/skills/handbook.md",
-    "docs/lifecycle/skills/i18n-audit.md",
-    "docs/lifecycle/skills/i18n-formatting.md",
-    "docs/lifecycle/skills/i18n-layout.md",
-    "docs/lifecycle/skills/i18n-locale-config.md",
-    "docs/lifecycle/skills/k-dart.md",
-    "docs/lifecycle/skills/k-ecos.md",
-    "docs/lifecycle/skills/k-kosis.md",
-    "docs/lifecycle/skills/k-krx.md",
-    "docs/lifecycle/skills/k-law.md",
-    "docs/lifecycle/skills/k-opendata.md",
-    "docs/lifecycle/skills/meeting-facilitation.md",
-    "docs/lifecycle/skills/platform-command-lifecycle-manager.md",
-    "docs/lifecycle/skills/platform-skill-lifecycle-manager.md",
-    "docs/lifecycle/skills/project-review.md",
-    "docs/lifecycle/skills/refactoring.md",
-    "docs/lifecycle/skills/research-analysis.md",
-    "docs/lifecycle/skills/script-lifecycle-manager.md",
-    "docs/lifecycle/skills/security-scan.md",
-    "docs/lifecycle/skills/service-design.md",
-    "docs/lifecycle/skills/skill-lifecycle-manager.md",
-    "docs/lifecycle/skills/source-command-commit-push-pr.md",
-    "docs/lifecycle/skills/standup-synthesizer.md",
-    "docs/lifecycle/skills/swe-solve.md",
-    "docs/lifecycle/skills/sync.md",
-    "docs/lifecycle/skills/team-builder.md",
-    "docs/lifecycle/skills/test-driven-development.md",
-    "docs/lifecycle/skills/token-usage-lint.md",
-    "docs/lifecycle/skills/translate.md",
-    "docs/lifecycle/skills/ui-ux-design-intelligence.md",
-    "docs/lifecycle/skills/update-bun-packages.md",
-    "docs/lifecycle/skills/zod-contract-gate.md",
-    "docs/phase-definitions.md",
-    "docs/privacy-design-checklist.md",
-    "docs/privacy-design-checklist_ko.md",
-    "docs/procedure-schema-spec.md",
-    "docs/project.md",
-    "docs/screen-patterns.template.md",
-    "docs/skill-graph.overrides.json",
-    "docs/specs/.gitkeep",
-    "docs/specs/registry.json",
-    "docs/stack-profile.json",
-    "docs/standards/llm-interaction-standard.md",
-    "docs/user-guide.md",
-    "docs/user-guide_ko.md",
     "docs/workspace-schema.json",
-    "external-deps.json",
-    "opencode.json",
-    "procedures/_output-types.yaml",
-    "procedures/architecture-design/schema.yaml",
-    "procedures/environment-bootstrap/schema.yaml",
-    "procedures/feature-implementation/schema.yaml",
-    "procedures/release-verification/schema.yaml",
-    "procedures/security-release-retrospective/schema.yaml",
-    "procedures/technical-planning/schema.yaml",
-    "scripts/agent-create.ts",
-    "scripts/agent-delete.ts",
-    "scripts/agent-lifecycle-audit.ts",
-    "scripts/agent-list.ts",
-    "scripts/agent-verify.ts",
-    "scripts/analyze-git-history.ts",
-    "scripts/archive-memory.ts",
-    "scripts/audit.ts",
-    "scripts/bootstrap-stages.ts",
-    "scripts/changelog-normalize.ts",
-    "scripts/cleanup-completed-md.ts",
-    "scripts/clear-pm-approval.ts",
-    "scripts/compile-tokens.ts",
-    "scripts/dependency-audit.ts",
-    "scripts/design-lint.ts",
-    "scripts/detect-backport.ts",
-    "scripts/dev-sync.ts",
-    "scripts/dispatch-parallel.ts",
-    "scripts/dispatch-serial.ts",
-    "scripts/dispatch.ts",
-    "scripts/evidence-backport-scan.ts",
-    "scripts/external-deps.ts",
-    "scripts/gen-pr-body.ts",
-    "scripts/generate-ide-rules.ts",
-    "scripts/generate-raci.ts",
-    "scripts/generate-skill-graph.ts",
-    "scripts/generate-skill-lifecycle-records.ts",
-    "scripts/generate-version-manifest.ts",
-    "scripts/graph-delta-log.ts",
-    "scripts/handbook/apply-handbook-theme.ts",
-    "scripts/handbook/build-search-index.ts",
-    "scripts/handbook/check-a11y.ts",
-    "scripts/handbook/check-authoring.ts",
-    "scripts/handbook/check-external-links.ts",
-    "scripts/handbook/check-i18n-parity.ts",
-    "scripts/handbook/check-labels.ts",
-    "scripts/handbook/check-links.ts",
-    "scripts/handbook/check-lint.ts",
-    "scripts/handbook/check-search.ts",
-    "scripts/handbook/check-spell.ts",
-    "scripts/handbook/check-structure.ts",
-    "scripts/handbook/check-symmetry.ts",
-    "scripts/handbook/check-tables.ts",
-    "scripts/handbook/deploy-handbook.ts",
-    "scripts/handbook/extract-copycode.ts",
-    "scripts/handbook/handbook-doctor.ts",
-    "scripts/handbook/handbook-sync-audit.ts",
-    "scripts/handbook/nav-utils.ts",
-    "scripts/handbook/scaffold-handbook.ts",
-    "scripts/handbook/update-footers.ts",
-    "scripts/handbook/validate-handbook.ts",
-    "scripts/handbook/validate-nav.ts",
-    "scripts/helpers/agent-mechanical-date-bump.ts",
-    "scripts/helpers/audit-hook-sweep.ts",
-    "scripts/helpers/changelog-duplicates.ts",
-    "scripts/helpers/commit-message.ts",
-    "scripts/helpers/context-sections.ts",
-    "scripts/helpers/design-lint-roots.ts",
-    "scripts/helpers/extends-validator.ts",
-    "scripts/helpers/gitleaks-merge.ts",
-    "scripts/helpers/golden-reference-loader.ts",
-    "scripts/helpers/hub-topology.ts",
-    "scripts/helpers/ignored-tooling.ts",
-    "scripts/helpers/l0-ref-policy.ts",
-    "scripts/helpers/layer-filter.ts",
-    "scripts/helpers/local-patch-scan.ts",
-    "scripts/helpers/markers.ts",
-    "scripts/helpers/memory-union-verify.ts",
-    "scripts/helpers/merge-frontmatter.ts",
-    "scripts/helpers/merge-state.ts",
-    "scripts/helpers/mirror-hygiene.ts",
-    "scripts/helpers/pm-md-parser.ts",
-    "scripts/helpers/pre-commit-script-gate.ts",
-    "scripts/helpers/registries/capability-registry.ts",
-    "scripts/helpers/registries/validation-policy.ts",
-    "scripts/helpers/registries/variant-type-registry.ts",
-    "scripts/helpers/registry-append.ts",
-    "scripts/helpers/resolve-pm-stub.ts",
-    "scripts/helpers/rollback-partial-project.ts",
-    "scripts/helpers/scaffold-markers.ts",
-    "scripts/helpers/security-validator.ts",
-    "scripts/helpers/skills-registry.ts",
-    "scripts/helpers/spec-header-consistency.ts",
-    "scripts/helpers/substitute-placeholders.ts",
-    "scripts/helpers/template-utils.ts",
-    "scripts/helpers/theme-token-policy.ts",
-    "scripts/helpers/ticket-drift.ts",
-    "scripts/helpers/upgrade-versions.ts",
-    "scripts/helpers/variant-context.ts",
-    "scripts/helpers/version-bump.ts",
-    "scripts/hooks/agent-model-gate.ts",
-    "scripts/hooks/codex-user-prompt-gate.ts",
-    "scripts/hooks/delete-guard.ts",
-    "scripts/hooks/gateguard-fact-force.ts",
-    "scripts/hooks/pm-dispatch-gate.ts",
-    "scripts/hooks/pm-role-bootstrap.ts",
-    "scripts/hooks/post-write-lifecycle-check.ts",
-    "scripts/hooks/pre-commit.ts",
-    "scripts/hooks/pre-push.ts",
-    "scripts/lib/auth.ts",
-    "scripts/lib/ci-workflow-merge.ts",
-    "scripts/lib/constitution-scrub.ts",
-    "scripts/lib/context-md-schema.ts",
-    "scripts/lib/country-scoped-agents.ts",
-    "scripts/lib/dependency-guard.ts",
-    "scripts/lib/encoding-utils.ts",
-    "scripts/lib/env-sample.ts",
-    "scripts/lib/error-handling.ts",
-    "scripts/lib/external-deps.ts",
-    "scripts/lib/fleet.ts",
-    "scripts/lib/generator-manifest.ts",
-    "scripts/lib/git-aware-scan.ts",
-    "scripts/lib/git-env.ts",
-    "scripts/lib/git-status.ts",
-    "scripts/lib/hermetic-test-roots.ts",
-    "scripts/lib/hook-dedupe.ts",
-    "scripts/lib/language-guard.ts",
-    "scripts/lib/local-date.ts",
-    "scripts/lib/managed-block-merge.ts",
-    "scripts/lib/managed-block-parity.ts",
-    "scripts/lib/model-literal-patterns.ts",
-    "scripts/lib/package-merge.ts",
-    "scripts/lib/pipeline-state.ts",
-    "scripts/lib/platform-context.ts",
-    "scripts/lib/platform-delivery.ts",
-    "scripts/lib/platform-mirror-freshness.ts",
-    "scripts/lib/platform-skeleton-merge.ts",
-    "scripts/lib/platforms.ts",
-    "scripts/lib/post-delivery-verify.ts",
-    "scripts/lib/propagation-map-schema.ts",
-    "scripts/lib/repo-integrity.ts",
-    "scripts/lib/self-managed-tools.ts",
-    "scripts/lib/skill-graph-compat.ts",
-    "scripts/lib/skills-used.ts",
-    "scripts/lib/spec-landing.ts",
-    "scripts/lib/ssrf.ts",
-    "scripts/lib/template-vintage.ts",
-    "scripts/lib/trail-block-parity.ts",
-    "scripts/lib/upgrade-policy.ts",
-    "scripts/lib/variant-overlay-guard.ts",
-    "scripts/lib/workspace-hygiene.ts",
-    "scripts/lifecycle-sync-audit.ts",
-    "scripts/lint-instructions.ts",
-    "scripts/md-to-ooxml.ts",
-    "scripts/migrate-quality-gates.ts",
-    "scripts/normalize-registry-provenance.ts",
-    "scripts/qa-gate.ts",
-    "scripts/readme-lifecycle-audit.ts",
-    "scripts/regenerate-agents-md.ts",
-    "scripts/render-commands.ts",
-    "scripts/render-pdf-deck.ts",
-    "scripts/resolve-variants.ts",
-    "scripts/retry-handler.ts",
-    "scripts/route-audit-scan.ts",
-    "scripts/setup-github-branch-protection.ts",
-    "scripts/skill-lifecycle-audit.ts",
-    "scripts/skill-session-review.ts",
-    "scripts/spec-register.ts",
-    "scripts/sync-agent-mirrors.ts",
-    "scripts/sync-md.ts",
-    "scripts/sync-skill-status.ts",
-    "scripts/sync-skills.ts",
-    "scripts/team-builder.ts",
-    "scripts/test-runner.ts",
-    "scripts/tests/apply-handbook-theme.test.ts",
-    "scripts/tests/check-structure.test.ts",
-    "scripts/tests/deploy-readme-patch.test.ts",
-    "scripts/translate-readme.ts",
-    "scripts/typecheck.ts",
-    "scripts/validate-agents.ts",
-    "scripts/validate-decisions.ts",
-    "scripts/validate-doc-folder.ts",
-    "scripts/validate-docs-links.ts",
-    "scripts/validate-md-language.ts",
-    "scripts/validate-model-registry.ts",
-    "scripts/validate-pm-extends.ts",
-    "scripts/validate-procedures.ts",
-    "scripts/validate-process.ts",
-    "scripts/validate-raci.ts",
-    "scripts/validate-skills.ts",
-    "scripts/validate-surface-registry.ts",
-    "scripts/validate-templates.ts",
-    "scripts/validate-variant-readiness.ts",
-    "scripts/verify-agent-deliverables.ts",
-    "scripts/verify-memory.ts",
-    "scripts/verify-platform-lifecycle.ts",
-    "scripts/verify-readme-sync.ts",
-    "scripts/verify-scripts.ts",
-    "scripts/verify-skill-graph.ts",
-    "scripts/verify-skills.ts",
     "skills/.sync-skills-managed.json",
-    "skills/accessibility-audit/SKILL.md",
-    "skills/agent-lifecycle-manager/SKILL.md",
-    "skills/api-documentation/SKILL.md",
-    "skills/ci-triage/SKILL.md",
-    "skills/code-review/SKILL.md",
-    "skills/decision-record/SKILL.md",
-    "skills/delegate-to-hub/SKILL.md",
-    "skills/design-foundation/SKILL.md",
-    "skills/documentation-writing/SKILL.md",
-    "skills/evidence-ledger/SKILL.md",
-    "skills/explain-me/SKILL.md",
-    "skills/explain-me/references/BUILD_GUIDE.md",
-    "skills/explain-me/references/PLATFORM_HARNESS.md",
-    "skills/explain-me/references/loanword-refinements.json",
-    "skills/explain-me/scripts/validate_report.py",
-    "skills/explain-me/templates/publish/.nojekyll",
-    "skills/explain-me/templates/publish/dot-gitignore",
-    "skills/explain-me/templates/report.html",
-    "skills/gateguard/SKILL.md",
-    "skills/handbook-sync-audit/SKILL.md",
-    "skills/handbook/SKILL.md",
-    "skills/handbook/assets/css/handbook-components.css",
-    "skills/handbook/assets/css/handbook-variables.css",
-    "skills/handbook/assets/js/copy-code.js",
-    "skills/handbook/assets/js/dark-mode-toggle.js",
-    "skills/handbook/assets/js/inpage-search.js",
-    "skills/handbook/assets/js/lang-switcher.js",
-    "skills/handbook/assets/js/site-search.js",
-    "skills/handbook/examples/course/chapter_01.html",
-    "skills/handbook/examples/course/chapter_02.html",
-    "skills/handbook/examples/course/course-overview.html",
-    "skills/handbook/examples/course/index.html",
-    "skills/handbook/examples/course/instructor-guide.html",
-    "skills/handbook/examples/handbook/chapter_01.html",
-    "skills/handbook/examples/handbook/chapter_02.html",
-    "skills/handbook/examples/handbook/chapter_03.html",
-    "skills/handbook/examples/handbook/index.html",
-    "skills/handbook/examples/minimal/chapter_01.html",
-    "skills/handbook/examples/minimal/index.html",
-    "skills/handbook/references/AUTHORING_GUIDELINES.md",
-    "skills/handbook/references/BUILD_GUIDE.md",
-    "skills/handbook/references/I18N_PARITY_PLAYBOOK.md",
-    "skills/handbook/references/KOREAN_LANGUAGE.md",
-    "skills/handbook/references/MAINTENANCE_PLAYBOOK.md",
-    "skills/handbook/references/QUALITY_CHECKLIST.md",
-    "skills/handbook/references/SECTION_TYPES.md",
-    "skills/handbook/references/validation/NAV_VALIDATION.md",
-    "skills/handbook/templates/.gitignore",
-    "skills/handbook/templates/.nojekyll",
-    "skills/handbook/templates/base.html",
-    "skills/handbook/templates/chapter.html",
-    "skills/handbook/templates/course-overview.html",
-    "skills/handbook/templates/examples.html",
-    "skills/handbook/templates/index.html",
-    "skills/handbook/templates/instructor-guide.html",
-    "skills/handbook/templates/manual.html",
-    "skills/handbook/templates/quiz.html",
-    "skills/i18n-formatting/SKILL.md",
-    "skills/i18n-layout/SKILL.md",
-    "skills/i18n-locale-config/SKILL.md",
-    "skills/meeting-facilitation/SKILL.md",
-    "skills/project-review/SKILL.md",
-    "skills/refactoring/SKILL.md",
-    "skills/research-analysis/SKILL.md",
-    "skills/script-lifecycle-manager/SKILL.md",
-    "skills/security-scan/SKILL.md",
-    "skills/service-design/SKILL.md",
-    "skills/skill-lifecycle-manager/SKILL.md",
-    "skills/source-command-commit-push-pr/SKILL.md",
-    "skills/standup-synthesizer/SKILL.md",
-    "skills/swe-solve/SKILL.md",
-    "skills/sync/SKILL.md",
-    "skills/team-builder/SKILL.md",
-    "skills/test-driven-development/SKILL.md",
-    "skills/token-usage-lint/SKILL.md",
-    "skills/translate/SKILL.md",
-    "skills/ui-ux-design-intelligence/SKILL.md",
-    "skills/update-bun-packages/SKILL.md",
-    "skills/zod-contract-gate/SKILL.md",
-    "template-version.txt"
+    "template-version.txt",
+    ".agents/skills/finishing-a-development-branch/SKILL.md",
+    ".agents/skills/platform-command-lifecycle-manager/SKILL.md",
+    ".agents/skills/platform-skill-lifecycle-manager/SKILL.md",
+    ".claude/skills/finishing-a-development-branch/SKILL.md",
+    ".claude/skills/platform-command-lifecycle-manager/SKILL.md",
+    ".claude/skills/platform-skill-lifecycle-manager/SKILL.md",
+    ".codex/skills/finishing-a-development-branch/SKILL.md",
+    ".codex/skills/platform-command-lifecycle-manager/SKILL.md",
+    ".codex/skills/platform-skill-lifecycle-manager/SKILL.md",
+    ".gemini/skills/finishing-a-development-branch/SKILL.md",
+    ".gemini/skills/platform-command-lifecycle-manager/SKILL.md",
+    ".gemini/skills/platform-skill-lifecycle-manager/SKILL.md",
+    ".hermes/skills/finishing-a-development-branch/SKILL.md",
+    ".hermes/skills/platform-command-lifecycle-manager/SKILL.md",
+    ".hermes/skills/platform-skill-lifecycle-manager/SKILL.md",
+    "agents/automation-engineer.md",
+    "agents/contract-gate-engineer.md",
+    "agents/design-system-lead.md",
+    "docs/lifecycle/agents/automation-engineer.md",
+    "docs/lifecycle/agents/contract-gate-engineer.md",
+    "docs/lifecycle/agents/design-system-lead.md",
+    "skills/finishing-a-development-branch/SKILL.md",
+    "skills/platform-command-lifecycle-manager/SKILL.md",
+    "skills/platform-skill-lifecycle-manager/SKILL.md"
   ],
   "baselines": {
+    ".claude/settings.json": {
+      "hash": "03a1439fb0e9427479152e231d4d94e3729d6b3f4f6ff80d0445374f766324af",
+      "templateVersion": "0.30.0",
+      "blob": "298c94c8d0208da3ab52b6d3fc86eb306d2376e5"
+    },
+    ".githooks/commit-msg": {
+      "hash": "6375ca75a1fa6cf1547835b64f2b36c549b4faf4aa4aab0fccc4e88e06451f54",
+      "templateVersion": "0.30.0",
+      "blob": "50cb2456de764a433cc931410e07cbd3266f5515"
+    },
+    ".githooks/post-checkout": {
+      "hash": "53c0cb9125f5d772e128f49cd4d8f21a4ea196d1ec5af6557ff49a3a5484db96",
+      "templateVersion": "0.30.0",
+      "blob": "ebb3da65a2b5ab1a0b24934dafde7be54a953aed"
+    },
+    ".githooks/pre-commit": {
+      "hash": "737e7f7e55f1c3498308aa7f8c88313e21d6a4b7c54f64e6d82b54a96c7490a0",
+      "templateVersion": "0.30.0",
+      "blob": "c7a35399ef1e0d2ab43e42d703e17feef5279923"
+    },
+    ".githooks/pre-push": {
+      "hash": "1d30c52e9bc760e38fbb699c60f8aa1daed7f456a540356c7112a4932098cb95",
+      "templateVersion": "0.30.0",
+      "blob": "f140bd06c005fe4db9cfb9b8f9b9c666875e525f"
+    },
+    ".githooks/pre-rebase": {
+      "hash": "654ed0472185851cdc45d0d6e5062425a8ecd51b8ee13d00165004939ac34973",
+      "templateVersion": "0.30.0",
+      "blob": "33e6efac6aef611705b461350bf07d2713d0609e"
+    },
+    ".gitignore": {
+      "hash": "d8d276932a17ba50978e7def0a0a8db0b374f35524cd1e50927022ec1f576425",
+      "templateVersion": "0.30.0",
+      "blob": "1f9ebe631477bf2e532d66215be35019a87c806c"
+    },
+    "AGENTS.md": {
+      "hash": "2e360096636975f908c9ba88b4c99c238dde1489e15f585358d605c9aef0a150",
+      "templateVersion": "0.30.0",
+      "blob": "2be184808da20147131d038811b489c956349720"
+    },
+    "CLAUDE.md": {
+      "hash": "3acf4da0c84d16c73f2c258f23c985f1c80e50aae99d914cfc2570065b62865a",
+      "templateVersion": "0.30.0",
+      "blob": "1bafa0b182d18bc556eefe9b822bd125bc97b249"
+    },
+    "CODEX.md": {
+      "hash": "a97f02c0c20af9a0136854e8655bca22136c225f8d41eacd7690d8c40ac67f39",
+      "templateVersion": "0.30.0",
+      "blob": "f300e118dda28f457a0a8a46412c88f89e2800d1"
+    },
+    "GEMINI.md": {
+      "hash": "355e82ccf0696efb497d6df07e89f2c37d552fbee4f11d936d5b50d3e536942b",
+      "templateVersion": "0.30.0",
+      "blob": "952da797fad137655095b0e7fc8669fd2f857c19"
+    },
+    "HERMES.md": {
+      "hash": "99c0722c58dbc5640de6f486c85d4f934e8d318d31b76593ffb7f8d8423ae121",
+      "templateVersion": "0.30.0",
+      "blob": "a5e8ffc9a9b3a699e524d39815d2686865080505"
+    },
+    "agents/automation-engineer.md": {
+      "hash": "0cdff6f6439400114ddd590fff00f01ea96f3c2e47091c8f7ae8d14b10ea554a",
+      "templateVersion": "0.30.0",
+      "blob": "3d0107088cab9aedef71eef4c06089a16eb6abda"
+    },
+    "agents/contract-gate-engineer.md": {
+      "hash": "4d6cc2e7bbad8968987318a484c3b511c53c7f23dfbee9b78428552439a2f1d0",
+      "templateVersion": "0.30.0",
+      "blob": "51e2cd1523178757d81a95702070fbc644b6ede8"
+    },
+    "agents/design-system-lead.md": {
+      "hash": "9397774935c34456d63a233eabad10cad3eba175769387509a98c0761469755e",
+      "templateVersion": "0.30.0",
+      "blob": "a66068e3b45c67504a02c050bed82497bf9f7cd4"
+    },
+    "agents/pm.md": {
+      "hash": "79bd8d5ec1a7dd0bbc4ccd132c27bfe74a68309aa18c3b217fe70a21854306c2",
+      "templateVersion": "0.30.0",
+      "blob": "51ffa7ee26ac32786f76f6ae74490087cd942186"
+    },
+    "docs/co-develop.context.md": {
+      "hash": "09e70436860450b658861f831e39efc12a4a6cfb584798f0c63f7f5c2e2b6fd0",
+      "templateVersion": "0.30.0",
+      "blob": "dbc590b8b0d5af7f75cfd29d029181d560a48c58"
+    },
+    "docs/lifecycle/agents/automation-engineer.md": {
+      "hash": "c9385a85a1fea524a0690fed059d59ecaa69b72c197388a15df0a9842c610759",
+      "templateVersion": "0.30.0",
+      "blob": "59c97cdbaf2d5d3df14ccde29f3c297d84ee48c5"
+    },
+    "docs/lifecycle/agents/contract-gate-engineer.md": {
+      "hash": "c77ee691fa8654a0dde54bb9a8794f5be0857bfdd1d2e383bfd8c107ea2b03a6",
+      "templateVersion": "0.30.0",
+      "blob": "078b48b7ff1ad74c52195beb182633279229e60b"
+    },
+    "docs/lifecycle/agents/design-system-lead.md": {
+      "hash": "787eae1d14126494342b8c954e6404c502535a360423454962233fe0fa3fbd4d",
+      "templateVersion": "0.30.0",
+      "blob": "7ada33249f5664598a871f3f078b9ef2fc12fc20"
+    },
+    "docs/phase-definitions.md": {
+      "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
+      "templateVersion": "0.30.0",
+      "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
+    },
+    "docs/security.md": {
+      "hash": "6424d80604638ae56523d66a6a3447b3bb14ec249afb20d2fe70f75bca30f87d",
+      "templateVersion": "0.30.0",
+      "blob": "dc6dd2e84dd1ad63b77bbdde06e6ff63eeb2151e"
+    },
+    "docs/workspace-schema.json": {
+      "hash": "48a1f35440a561a1f06f28d638990bc44bf0e6798dba7a8ceb0b4685f4185220",
+      "templateVersion": "0.30.0",
+      "blob": "f279bfda4415a57e6a40072bfb9c263584ee7cb4"
+    },
+    "skills/finishing-a-development-branch/SKILL.md": {
+      "hash": "d12e2be7adcd46dbee73d9f71506fd0131b26e9df3db097466910d5d7a09e8bb",
+      "templateVersion": "0.30.0",
+      "blob": "bb147e403044c66d4f7195532470d88864002beb"
+    },
+    "skills/platform-command-lifecycle-manager/SKILL.md": {
+      "hash": "3ecf2e8f50d387d9598e6f6eb3bf1c68f9f57340657ae06a21f535998e973f79",
+      "templateVersion": "0.30.0",
+      "blob": "d9a8fa7bfbe180576baf9b252f6ed74dcf8d836c"
+    },
+    "skills/platform-skill-lifecycle-manager/SKILL.md": {
+      "hash": "21a658e70055cf4337929a2b14b1e15badcd032be914e5514e8226e2a33cc3b7",
+      "templateVersion": "0.30.0",
+      "blob": "6bf8fef6270c0403a8c4fe654306a84bc6683a61"
+    },
     ".agents/mcp.json": {
       "hash": "c476496f307e18aa8454e7b202e1ae24f67582f391cba7b9b323cf22de0f055a",
       "templateVersion": "0.30.0",
@@ -842,11 +189,6 @@
       "hash": "1dbf88ca08f3f5e745e0e7490b427c6de395ed9ed2f619e74d76ffad49f92cd5",
       "templateVersion": "0.30.0",
       "blob": "d2bc97ff3a3d1ff725d0fc9eb06b26376607c386"
-    },
-    ".claude/settings.json": {
-      "hash": "19f6e3073e68c0d434c1fb3fea7e1391738cb291b4e3d94f835d660a42bdbeee",
-      "templateVersion": "0.30.0",
-      "blob": "79a4059a1bb93081d4dfdcc90cda088d33fbc968"
     },
     ".claude/skills.json": {
       "hash": "c514710d97899e895bd333386ddc107db091cd39b50a4ca494d530b9d7a4e4d7",
@@ -888,31 +230,6 @@
       "templateVersion": "0.30.0",
       "blob": "cdae3cef38ccb52773c02b2e8a0cd642d803a260"
     },
-    ".githooks/commit-msg": {
-      "hash": "6375ca75a1fa6cf1547835b64f2b36c549b4faf4aa4aab0fccc4e88e06451f54",
-      "templateVersion": "0.30.0",
-      "blob": "50cb2456de764a433cc931410e07cbd3266f5515"
-    },
-    ".githooks/post-checkout": {
-      "hash": "53c0cb9125f5d772e128f49cd4d8f21a4ea196d1ec5af6557ff49a3a5484db96",
-      "templateVersion": "0.30.0",
-      "blob": "ebb3da65a2b5ab1a0b24934dafde7be54a953aed"
-    },
-    ".githooks/pre-commit": {
-      "hash": "737e7f7e55f1c3498308aa7f8c88313e21d6a4b7c54f64e6d82b54a96c7490a0",
-      "templateVersion": "0.30.0",
-      "blob": "c7a35399ef1e0d2ab43e42d703e17feef5279923"
-    },
-    ".githooks/pre-push": {
-      "hash": "1d30c52e9bc760e38fbb699c60f8aa1daed7f456a540356c7112a4932098cb95",
-      "templateVersion": "0.30.0",
-      "blob": "f140bd06c005fe4db9cfb9b8f9b9c666875e525f"
-    },
-    ".githooks/pre-rebase": {
-      "hash": "654ed0472185851cdc45d0d6e5062425a8ecd51b8ee13d00165004939ac34973",
-      "templateVersion": "0.30.0",
-      "blob": "33e6efac6aef611705b461350bf07d2713d0609e"
-    },
     ".github/CODEOWNERS": {
       "hash": "f76a7296cff3fb0ca0036d4eb37ae226bad112de76253ec7f3ce46052accc33f",
       "templateVersion": "0.30.0",
@@ -927,11 +244,6 @@
       "hash": "0b49e1c1ac524cdcabc9d80c00c56a2f68c9c45c97bef3db96d2450feefc9c74",
       "templateVersion": "0.30.0",
       "blob": "10ef26bd62e65e7e707b96294a09e1acc9baca6c"
-    },
-    ".gitignore": {
-      "hash": "d8d276932a17ba50978e7def0a0a8db0b374f35524cd1e50927022ec1f576425",
-      "templateVersion": "0.30.0",
-      "blob": "1f9ebe631477bf2e532d66215be35019a87c806c"
     },
     ".ignore": {
       "hash": "5b345696ac9daf0b07ce5b9c56d5ec914815e395286f4c9f9ac3ec8ec83bf507",
@@ -958,31 +270,6 @@
       "templateVersion": "0.30.0",
       "blob": "df31add08b51780f221b539b682f399f4e652721"
     },
-    "AGENTS.md": {
-      "hash": "42332ace14aa45ff1671ca04f6acb4cd3d8ba4b4bc8aa88279ba9dd2c8846fd3",
-      "templateVersion": "0.30.0",
-      "blob": "d27602602e294298ff9e2cfc3c202fded4f15b04"
-    },
-    "CLAUDE.md": {
-      "hash": "9deb3a93bc5abb56d7f9a130c19caa3e183014d13ed1516a69db3eea102680fa",
-      "templateVersion": "0.30.0",
-      "blob": "0349e008bb702504d2983e2a9c082c3cdd787c0e"
-    },
-    "CODEX.md": {
-      "hash": "cabb8c921042072e2c28546b60dafb1ea0389f4e5ce0d0dc6ec50e3dd305595e",
-      "templateVersion": "0.30.0",
-      "blob": "569952f7af38badc78b9f506c761e5c3b4c0b78e"
-    },
-    "GEMINI.md": {
-      "hash": "c53d399ab03aaca487599599a12f3bd29e2872ec8be98e27d7a4fbf2737ed9ab",
-      "templateVersion": "0.30.0",
-      "blob": "7a1a14e6fb3fd8cb9e83d0af42503097be9b1fe2"
-    },
-    "HERMES.md": {
-      "hash": "94334baabfb72bceef1664b95f34c5593987e8d6e577bf30a459fd2968cb232f",
-      "templateVersion": "0.30.0",
-      "blob": "72213e2e3bc712b8c6e09bed393e10de50186b4f"
-    },
     "PROMOTION_CHECKLIST.md": {
       "hash": "42c570239ce4ea8d83bf69d39cf3136b24b9c547f1cf5b50fae93b671b0e39c8",
       "templateVersion": "0.30.0",
@@ -1007,11 +294,6 @@
       "hash": "1ccd5feff8c801dfa11efff2e0afc195f962a5c344bed6ae627884ce61e68248",
       "templateVersion": "0.30.0",
       "blob": "57d24a23968eed6f6a220925e0bb261881879802"
-    },
-    "agents/pm.md": {
-      "hash": "61d37e79adb7465d8880bef335be5804b83043efb74b2cabdcc30cc495dbaa73",
-      "templateVersion": "0.30.0",
-      "blob": "1f52d6909f0bbb116fa716008c7753d702fba14c"
     },
     "agents/security-monitor.md": {
       "hash": "58e3eea825ac061d7b945039a3cc473c94176c9efadfec60afb1cb3de5bb3043",
@@ -1057,11 +339,6 @@
       "hash": "559d53f5a375376460b4aa978cf496d9bd82b5df09296cf2beccccdfa5669e09",
       "templateVersion": "0.30.0",
       "blob": "0ae4f6b27e76cab36940336935f401fd9449bd37"
-    },
-    "docs/co-develop.context.md": {
-      "hash": "4bbb8dbed2eb353c17299b6ebdb0df534efb9ef73d68d9a0746af140eef16cef",
-      "templateVersion": "0.30.0",
-      "blob": "ed340ecbd8b8e79b1925a1e190c075c160fcb39f"
     },
     "docs/components.template.md": {
       "hash": "aa879df56299d1d863eadf27342aa897d399cd86b159d5e4b296dfdae19c3524",
@@ -1373,11 +650,6 @@
       "templateVersion": "0.30.0",
       "blob": "7d3436769ad39d0f560a926cde0fa2ef519f2dbb"
     },
-    "docs/phase-definitions.md": {
-      "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
-      "templateVersion": "0.30.0",
-      "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
-    },
     "docs/privacy-design-checklist.md": {
       "hash": "df1e47b46dcb20cb08e1af6e1fe745f7faa9d9e978ae32e8fef26be3f2baa860",
       "templateVersion": "0.30.0",
@@ -1393,20 +665,10 @@
       "templateVersion": "0.30.0",
       "blob": "e28304f397df38d3d70b08c2503ea3701ab4c556"
     },
-    "docs/project.md": {
-      "hash": "b343540dd3861962744f08d88a5d2fafd027c62110d54a77326c80e49eb95d9d",
-      "templateVersion": "0.30.0",
-      "blob": "9bcc2790be70a58eea0f2858d4e66b6f03f67943"
-    },
     "docs/screen-patterns.template.md": {
       "hash": "d6e26c50f0adc30e22380899e242e4e5cdffce4911106e67a1869e7414c15ce5",
       "templateVersion": "0.30.0",
       "blob": "70fa921bd7350040f711afe09c9f3076f689a531"
-    },
-    "docs/security.md": {
-      "hash": "6424d80604638ae56523d66a6a3447b3bb14ec249afb20d2fe70f75bca30f87d",
-      "templateVersion": "0.30.0",
-      "blob": "dc6dd2e84dd1ad63b77bbdde06e6ff63eeb2151e"
     },
     "docs/skill-graph.overrides.json": {
       "hash": "84b66cdb801bb9228ba997cf0eea9462cc575fa1f2b8554248f77d40b30e6891",
@@ -1442,11 +704,6 @@
       "hash": "1c96540ade7d4eb54318e6e0d8572ef38fe0d752537f66bd0e63301cc839db7a",
       "templateVersion": "0.30.0",
       "blob": "23a0c259fcb4ce2f5126897c85afb464f910ba10"
-    },
-    "docs/workspace-schema.json": {
-      "hash": "81b65f77a54710c1aeabe13934a3c0a8117ad05be39add0cb724f840e0b1fda9",
-      "templateVersion": "0.30.0",
-      "blob": "8c8318c4dafe68cc2e8a730ab1adedf9283ac818"
     },
     "opencode.json": {
       "hash": "a57c683d641f1a68dd5a060b82c6f36d7ca2f8517f81e8505aaa98f96f075b55",
@@ -3240,7 +2497,7 @@
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
       "verdict": "EVOLVED_REGION",
-      "detail": "project-authored line-block (4 line(s)) after '### Optimal Interaction Guidelines' — preserved (WARN — port candidate: land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6))",
+      "detail": "project-authored line-block (5 line(s)) after '### Optimal Interaction Guidelines' — preserved (WARN — port candidate: land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6))",
       "severity": "WARN"
     },
     {
@@ -3248,7 +2505,7 @@
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
       "verdict": "EVOLVED_REGION",
-      "detail": "project-authored line-block (5 line(s)) after '#### Superpowers Plugin & Cost Optimization (3-Tier Strategy)' — preserved (WARN — port candidate: land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6))",
+      "detail": "project-authored line-block (4 line(s)) after '#### Superpowers Plugin & Cost Optimization (3-Tier Strategy)' — preserved (WARN — port candidate: land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6))",
       "severity": "WARN"
     },
     {
@@ -3383,9 +2640,57 @@
       "path": "CODEX.md",
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
+      "verdict": "REGION_IN_SYNC",
+      "detail": "104 of 105 out-of-zone lines byte-equal — in-sync regions carry no write channel; 2 divergent block(s) below",
+      "severity": "INFO"
+    },
+    {
+      "path": "CODEX.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "MERGE",
+      "verdict": "EVOLVED_REGION",
+      "detail": "project-authored line-block (1 line(s)) after '# CODEX.md' — preserved (WARN — port candidate: land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6))",
+      "severity": "WARN"
+    },
+    {
+      "path": "CODEX.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "MERGE",
+      "verdict": "TEMPLATE_AHEAD_REGION",
+      "detail": "template line-block (1 line(s)) absent from the project copy after '# CODEX.md' — template content the project never received, or a deliberate project deletion (WARN — never silently reverted; ERROR only when a write channel targets the span)",
+      "severity": "WARN"
+    },
+    {
+      "path": "CODEX.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "MERGE",
       "verdict": "MERGE",
       "detail": "managed-zone merge delivered (non-destructive union/insert)",
       "severity": "INFO"
+    },
+    {
+      "path": "HERMES.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "MERGE",
+      "verdict": "REGION_IN_SYNC",
+      "detail": "57 of 58 out-of-zone lines byte-equal — in-sync regions carry no write channel; 2 divergent block(s) below",
+      "severity": "INFO"
+    },
+    {
+      "path": "HERMES.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "MERGE",
+      "verdict": "EVOLVED_REGION",
+      "detail": "project-authored line-block (1 line(s)) after '# HERMES.md' — preserved (WARN — port candidate: land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6))",
+      "severity": "WARN"
+    },
+    {
+      "path": "HERMES.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "MERGE",
+      "verdict": "TEMPLATE_AHEAD_REGION",
+      "detail": "template line-block (1 line(s)) absent from the project copy after '# HERMES.md' — template content the project never received, or a deliberate project deletion (WARN — never silently reverted; ERROR only when a write channel targets the span)",
+      "severity": "WARN"
     },
     {
       "path": "HERMES.md",
@@ -3407,16 +2712,16 @@
       "path": "agents/pm.md",
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
-      "verdict": "MERGE",
-      "detail": "managed-zone merge delivered (non-destructive union/insert)",
+      "verdict": "TEMPLATE_DELTA",
+      "detail": "template-authoritative managed block restamped (template wins): WORKSPACE-MANAGED:PM agent body. Content outside this block is preserved during project upgrades. — project block diverged from the template and was restamped (333 line(s) → 333 line(s))",
       "severity": "INFO"
     },
     {
-      "path": ".github/workflows/ci.yml",
+      "path": "agents/pm.md",
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
       "verdict": "MERGE",
-      "detail": "ci.yml merge delivered — template-owned jobs authoritative, PROJECT-JOBS region preserved — MIGRATED PROJECT-JOBS: test",
+      "detail": "managed-zone merge delivered (non-destructive union/insert)",
       "severity": "INFO"
     },
     {
@@ -3671,8 +2976,24 @@
       "path": "AGENTS.md",
       "policy": "MERGE_MANAGED",
       "pass": "DOCS_MERGE",
+      "verdict": "TEMPLATE_DELTA",
+      "detail": "template-authoritative managed block restamped (template wins): COMMON-AGENTS — project block diverged from the template and was restamped (35 line(s) → 35 line(s))",
+      "severity": "INFO"
+    },
+    {
+      "path": "AGENTS.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "DOCS_MERGE",
       "verdict": "MERGE",
-      "detail": "managed-zone merge delivered (non-destructive union/insert)",
+      "detail": "managed-zone merge delivered (non-destructive union/insert) — MERGE_DROP: 1 project-authored line(s) dropped outside the project region (absent from the merged text, the template and every template revision) — review the diff and port or restore",
+      "severity": "WARN"
+    },
+    {
+      "path": "docs/co-develop.context.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "DOCS_MERGE",
+      "verdict": "TEMPLATE_DELTA",
+      "detail": "template-authoritative managed block restamped (template wins): DYNAMIC_SKILLS — project block diverged from the template and was restamped (6 line(s) → 2 line(s))",
       "severity": "INFO"
     },
     {
@@ -3680,31 +3001,20 @@
       "policy": "MERGE_MANAGED",
       "pass": "DOCS_MERGE",
       "verdict": "MERGE",
-      "detail": "managed-zone merge delivered (non-destructive union/insert)",
-      "severity": "INFO"
+      "detail": "managed-zone merge delivered (non-destructive union/insert) — MERGE_DROP: 4 project-authored line(s) dropped outside the project region (absent from the merged text, the template and every template revision) — review the diff and port or restore",
+      "severity": "WARN"
     },
     {
       "path": "docs/phase-definitions.md",
       "policy": "OVERWRITE",
       "pass": "DOCS_OVERWRITE",
-      "verdict": "NEW",
-      "detail": "delivered — project copy did not exist",
-      "severity": "INFO"
-    },
-    {
-      "path": ".claude/commands/security-check.md",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "UPDATE",
-      "detail": "hash-gated command delivery over the delivered baseline",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/commands/security-check.md",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
+      "verdict": "ADOPT",
+      "detail": "project copy already matches the template (in sync)",
+      "baseline": {
+        "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
+        "templateVersion": "0.30.0",
+        "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
+      },
       "severity": "INFO"
     },
     {
@@ -3724,1564 +3034,17 @@
       "severity": "INFO"
     },
     {
-      "path": "scripts/agent-create.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/agent-delete.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/agent-lifecycle-audit.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.9.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/agent-list.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/agent-verify.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/analyze-git-history.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/archive-memory.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/audit.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 2.70.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/bootstrap-stages.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/changelog-normalize.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/cleanup-completed-md.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/clear-pm-approval.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/compile-tokens.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/dependency-audit.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/design-lint.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 2.5.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/detect-backport.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/dev-sync.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.52.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/dispatch-parallel.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/dispatch-serial.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/dispatch.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/evidence-backport-scan.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.4.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/external-deps.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/gen-pr-body.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/generate-ide-rules.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/generate-raci.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/generate-skill-graph.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 2.0.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/generate-skill-lifecycle-records.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/generate-version-manifest.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.12.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/graph-delta-log.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/apply-handbook-theme.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/build-search-index.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-a11y.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-authoring.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-external-links.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-i18n-parity.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-labels.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-links.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-lint.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-search.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 2.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-spell.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-structure.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-symmetry.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/check-tables.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/deploy-handbook.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/extract-copycode.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/handbook-doctor.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/handbook-sync-audit.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/nav-utils.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/scaffold-handbook.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/update-footers.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/validate-handbook.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/handbook/validate-nav.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/agent-mechanical-date-bump.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/audit-hook-sweep.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/changelog-duplicates.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/commit-message.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/context-sections.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.8.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/design-lint-roots.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/extends-validator.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/gitleaks-merge.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/golden-reference-loader.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/hub-topology.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/ignored-tooling.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/l0-ref-policy.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/layer-filter.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.5.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/local-patch-scan.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/markers.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/memory-union-verify.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.5.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/merge-frontmatter.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.8.7",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/merge-state.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/mirror-hygiene.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/pm-md-parser.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/pre-commit-script-gate.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/registries/capability-registry.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/registries/validation-policy.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/registries/variant-type-registry.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/registry-append.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/resolve-pm-stub.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/rollback-partial-project.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/scaffold-markers.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.10.3",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/security-validator.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/skills-registry.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/spec-header-consistency.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/substitute-placeholders.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/template-utils.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/theme-token-policy.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/ticket-drift.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/upgrade-versions.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/variant-context.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/version-bump.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/hooks/agent-model-gate.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/hooks/codex-user-prompt-gate.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/hooks/delete-guard.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/hooks/gateguard-fact-force.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/hooks/pm-dispatch-gate.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/hooks/pm-role-bootstrap.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/hooks/post-write-lifecycle-check.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/hooks/pre-commit.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.14.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/hooks/pre-push.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.9.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/auth.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/ci-workflow-merge.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/constitution-scrub.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/context-md-schema.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/country-scoped-agents.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/dependency-guard.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/encoding-utils.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.4.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/env-sample.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/error-handling.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/external-deps.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/fleet.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/generator-manifest.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/git-aware-scan.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/git-env.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/git-status.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/hermetic-test-roots.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/hook-dedupe.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/language-guard.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/local-date.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/managed-block-merge.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.7.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/managed-block-parity.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/model-literal-patterns.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/package-merge.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/pipeline-state.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/platform-context.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/platform-delivery.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/platform-mirror-freshness.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/platform-skeleton-merge.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/platforms.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/post-delivery-verify.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/propagation-map-schema.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/repo-integrity.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/self-managed-tools.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/skill-graph-compat.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/skills-used.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/spec-landing.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/ssrf.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/template-vintage.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/trail-block-parity.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/upgrade-policy.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.46.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/variant-overlay-guard.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lib/workspace-hygiene.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lifecycle-sync-audit.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.22.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/lint-instructions.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/md-to-ooxml.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/migrate-quality-gates.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/normalize-registry-provenance.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/qa-gate.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/readme-lifecycle-audit.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/regenerate-agents-md.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.5.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/render-commands.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/render-pdf-deck.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/resolve-variants.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.3",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/retry-handler.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/route-audit-scan.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/setup-github-branch-protection.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/skill-lifecycle-audit.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.15.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/skill-session-review.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/spec-register.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.6.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/sync-agent-mirrors.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/sync-md.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.4.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/sync-skill-status.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/sync-skills.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.11.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/team-builder.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.5.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/test-runner.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.17.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/tests/apply-handbook-theme.test.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/tests/check-structure.test.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/tests/deploy-readme-patch.test.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/translate-readme.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/typecheck.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-agents.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.4.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-decisions.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-doc-folder.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.5.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-docs-links.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.6.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-md-language.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.16.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-model-registry.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 2.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-pm-extends.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 0.3.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-procedures.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-process.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-raci.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-skills.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.5.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-surface-registry.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-templates.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.86.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-variant-readiness.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/verify-agent-deliverables.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/verify-memory.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.3.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/verify-platform-lifecycle.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.6.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/verify-readme-sync.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.5.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/verify-scripts.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.15.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/verify-skill-graph.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 2.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/verify-skills.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.5.2",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/security-monitor.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "UPDATE",
-      "detail": "project copy carried no frontmatter version — template copy delivered",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/test-runner.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
       "path": "agents/architect.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/designer.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "UPDATE",
-      "detail": "project copy carried no frontmatter version — template copy delivered",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/code-writer.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.2.0",
-      "severity": "INFO"
+      "verdict": "CONFLICT",
+      "detail": "equal-version drift on project-evolved content — CONFLICT disposition: restore-to-canonical SKIPPED, project copy preserved",
+      "baseline": {
+        "hash": "463ba4c99d3d03816efb8a74bf6e82deb836e1aee6a206d4518e4e6da30739ae",
+        "templateVersion": "0.30.0",
+        "blob": "faec1cde31c79a709a0e7ca836b177dbf4c52c59"
+      },
+      "severity": "ERROR"
     },
     {
       "path": "agents/pm.md",
@@ -5292,35 +3055,32 @@
       "severity": "INFO"
     },
     {
-      "path": "agents/stack-setup.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.1",
-      "severity": "INFO"
-    },
-    {
       "path": "agents/i18n-specialist.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.1",
-      "severity": "INFO"
+      "verdict": "CONFLICT",
+      "detail": "equal-version drift on project-evolved content — CONFLICT disposition: restore-to-canonical SKIPPED, project copy preserved",
+      "baseline": {
+        "hash": "1ccd5feff8c801dfa11efff2e0afc195f962a5c344bed6ae627884ce61e68248",
+        "templateVersion": "0.30.0",
+        "blob": "57d24a23968eed6f6a220925e0bb261881879802"
+      },
+      "severity": "ERROR"
     },
     {
       "path": "agents/automation-engineer.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json agent registry — new-asset injection withheld",
+      "verdict": "NEW",
+      "detail": "delivered (none) → 1.1.0",
       "severity": "INFO"
     },
     {
       "path": "agents/design-system-lead.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json agent registry — new-asset injection withheld",
+      "verdict": "NEW",
+      "detail": "delivered (none) → 1.0.0",
       "severity": "INFO"
     },
     {
@@ -5335,8 +3095,8 @@
       "path": "agents/contract-gate-engineer.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json agent registry — new-asset injection withheld",
+      "verdict": "NEW",
+      "detail": "delivered (none) → 1.0.0",
       "severity": "INFO"
     },
     {
@@ -5383,344 +3143,148 @@
       "path": "skills/script-lifecycle-manager/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.2.2 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/explain-me/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.1 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
+      "verdict": "DRIFT_PRESERVE",
+      "detail": "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+      "baseline": {
+        "hash": "26e9d97b7ed0d93579faf301746a48f25f28f245bdd9ce3a5ebd2e4f966837ca",
+        "templateVersion": "0.30.0",
+        "blob": "f404d9b4be5a66d99b98ad07c10bb3285aa8ec9b"
+      },
+      "severity": "WARN"
     },
     {
       "path": "skills/k-opendata/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/team-builder/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
       "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.2.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/zod-contract-gate/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.3 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/service-design/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.1.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/source-command-commit-push-pr/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.3 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/skill-lifecycle-manager/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.5.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/ci-triage/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 0.2.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/i18n-formatting/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.1 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/project-review/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.3.2 (contract common_skill bypassed the allowlist)",
+      "detail": "whole skill directory delivered (none) → 1.2.3",
       "severity": "INFO"
     },
     {
       "path": "skills/k-kosis/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
+      "verdict": "NEW",
+      "detail": "whole skill directory delivered (none) → 1.0.3",
       "severity": "INFO"
     },
     {
       "path": "skills/translate/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.3 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
+      "verdict": "DRIFT_PRESERVE",
+      "detail": "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+      "baseline": {
+        "hash": "d090f099ff9da95c4e6838ea56356efa54b9fac49a5961948202522294dbe364",
+        "templateVersion": "0.30.0",
+        "blob": "c0c9b78dadb150d02856dab8e140320be8d43a57"
+      },
+      "severity": "WARN"
     },
     {
       "path": "skills/k-krx/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/delegate-to-hub/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
       "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.1 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/standup-synthesizer/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.1.0 (contract common_skill bypassed the allowlist)",
+      "detail": "whole skill directory delivered (none) → 1.0.3",
       "severity": "INFO"
     },
     {
       "path": "skills/platform-command-lifecycle-manager/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/token-usage-lint/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
       "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.1.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/gateguard/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.2 (contract common_skill bypassed the allowlist)",
+      "detail": "whole skill directory delivered (none) → 1.0.3",
       "severity": "INFO"
     },
     {
       "path": "skills/finishing-a-development-branch/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/i18n-audit/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "UNBASELINED_OVERWRITE",
-      "detail": "no delivery baseline + project content differs (unmarked — usually pre-policy template vintage) — delivered over the project copy; review the diff (pre-upgrade stash covers rollback)",
-      "severity": "WARN"
-    },
-    {
-      "path": "skills/i18n-audit/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "ADOPT",
-      "detail": "1.0.0 → 1.0.1 — version-gated whole-directory delivery over the delivered baseline",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/api-documentation/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
       "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.2 (contract common_skill bypassed the allowlist)",
+      "detail": "whole skill directory delivered (none) → 1.0.2",
       "severity": "INFO"
     },
     {
       "path": "skills/k-ecos/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
+      "verdict": "NEW",
+      "detail": "whole skill directory delivered (none) → 1.0.1",
       "severity": "INFO"
     },
     {
-      "path": "skills/handbook/SKILL.md",
+      "path": "skills/handbook/references/AUTHORING_GUIDELINES.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 0.6.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
+      "verdict": "DRIFT_PRESERVE",
+      "detail": "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+      "baseline": {
+        "hash": "899ca7499eceebff6b390aa52c457d0727279d0defd0c376e0e6f98713828218",
+        "templateVersion": "0.30.0",
+        "blob": "bf08b5b9e34107bd80b409c5d4fb386a5a20da4f"
+      },
+      "severity": "WARN"
     },
     {
       "path": "skills/k-dart/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/i18n-locale-config/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
       "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.1 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/security-scan/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.3.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/decision-record/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.1.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/handbook-sync-audit/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.5 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/meeting-facilitation/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.5.0 (contract common_skill bypassed the allowlist)",
+      "detail": "whole skill directory delivered (none) → 2.1.3",
       "severity": "INFO"
     },
     {
       "path": "skills/platform-skill-lifecycle-manager/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/research-analysis/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
       "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.2 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/accessibility-audit/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.1.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/design-foundation/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.1.1 (contract common_skill bypassed the allowlist)",
+      "detail": "whole skill directory delivered (none) → 1.0.3",
       "severity": "INFO"
     },
     {
       "path": "skills/agent-lifecycle-manager/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.4.0 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/ui-ux-design-intelligence/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.1 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/update-bun-packages/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.3.1 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
+      "verdict": "DRIFT_PRESERVE",
+      "detail": "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+      "baseline": {
+        "hash": "0da51de4050a7f0ee19a48feeba379a167006235151435ca1d8315d0009116dc",
+        "templateVersion": "0.30.0",
+        "blob": "f1545bc92b48b7427c4beea8343bb4db502444ca"
+      },
+      "severity": "WARN"
     },
     {
       "path": "skills/k-law/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
+      "verdict": "NEW",
+      "detail": "whole skill directory delivered (none) → 1.0.3",
+      "severity": "INFO"
+    },
+    {
+      "path": "skills/swe-solve/",
+      "policy": "PRESERVE",
+      "pass": "SYNC_IF_NEWER: skills/",
       "verdict": "SKIP",
-      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
+      "detail": "project-only skill — no template counterpart, preserved",
       "severity": "INFO"
     },
     {
-      "path": "skills/sync/SKILL.md",
-      "policy": "SYNC",
+      "path": "skills/test-driven-development/",
+      "policy": "PRESERVE",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.10.0 (contract common_skill bypassed the allowlist)",
+      "verdict": "SKIP",
+      "detail": "project-only skill — no template counterpart, preserved",
       "severity": "INFO"
     },
     {
-      "path": "skills/documentation-writing/SKILL.md",
-      "policy": "SYNC",
+      "path": "skills/code-review/",
+      "policy": "PRESERVE",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.3 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/i18n-layout/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.1.1 (contract common_skill bypassed the allowlist)",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/evidence-ledger/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.1.0 (contract common_skill bypassed the allowlist)",
+      "verdict": "SKIP",
+      "detail": "project-only skill — no template counterpart, preserved",
       "severity": "INFO"
     },
     {
@@ -5732,35 +3296,11 @@
       "severity": "INFO"
     },
     {
-      "path": "skills/swe-solve/SKILL.md",
-      "policy": "SYNC",
-      "pass": "VARIANT SKILLS",
-      "verdict": "NEW",
-      "detail": "variant skill directory delivered (none) → 1.1.1",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/test-driven-development/SKILL.md",
-      "policy": "SYNC",
-      "pass": "VARIANT SKILLS",
-      "verdict": "NEW",
-      "detail": "variant skill directory delivered (none) → 1.2.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/code-review/SKILL.md",
-      "policy": "SYNC",
-      "pass": "VARIANT SKILLS",
-      "verdict": "NEW",
-      "detail": "variant skill directory delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/refactoring/SKILL.md",
-      "policy": "SYNC",
-      "pass": "VARIANT SKILLS",
-      "verdict": "NEW",
-      "detail": "variant skill directory delivered (none) → 1.2.0",
+      "path": "skills/refactoring/",
+      "policy": "PRESERVE",
+      "pass": "SYNC_IF_NEWER: skills/",
+      "verdict": "SKIP",
+      "detail": "project-only skill — no template counterpart, preserved",
       "severity": "INFO"
     },
     {
@@ -5783,56 +3323,48 @@
       "path": "procedures/architecture-design/",
       "policy": "ADD_IF_MISSING",
       "pass": "PROCEDURES",
-      "verdict": "NEW",
-      "detail": "procedure entry seeded (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
       "severity": "INFO"
     },
     {
       "path": "procedures/security-release-retrospective/",
       "policy": "ADD_IF_MISSING",
       "pass": "PROCEDURES",
-      "verdict": "NEW",
-      "detail": "procedure entry seeded (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
       "severity": "INFO"
     },
     {
       "path": "procedures/technical-planning/",
       "policy": "ADD_IF_MISSING",
       "pass": "PROCEDURES",
-      "verdict": "NEW",
-      "detail": "procedure entry seeded (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
       "severity": "INFO"
     },
     {
       "path": "procedures/feature-implementation/",
       "policy": "ADD_IF_MISSING",
       "pass": "PROCEDURES",
-      "verdict": "NEW",
-      "detail": "procedure entry seeded (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
       "severity": "INFO"
     },
     {
       "path": "procedures/release-verification/",
       "policy": "ADD_IF_MISSING",
       "pass": "PROCEDURES",
-      "verdict": "NEW",
-      "detail": "procedure entry seeded (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
       "severity": "INFO"
     },
     {
       "path": "procedures/environment-bootstrap/",
       "policy": "ADD_IF_MISSING",
       "pass": "PROCEDURES",
-      "verdict": "NEW",
-      "detail": "procedure entry seeded (absent from the project)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/settings.json",
-      "policy": "JSON_MERGE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "MERGE",
-      "detail": "settings deep-merged — project-only entries preserved: mcpServers",
+      "verdict": "SEED_SKIP",
+      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
       "severity": "INFO"
     },
     {
@@ -5840,272 +3372,125 @@
       "policy": "JSON_MERGE",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "MERGE",
-      "detail": "settings deep-merged — 1 template hook entr(ies) dropped referencing paths absent from the project (trail-migration guard, U-20261031-009)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/stack-profile.json",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/handoff-spec_ko.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
+      "detail": "settings deep-merged — project-only entries preserved: mcpServers",
       "severity": "INFO"
     },
     {
       "path": "docs/specs/.gitkeep",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/skill-graph.overrides.json",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/benchmark-fixtures/ISSUE-001.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/benchmark-fixtures/README.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/benchmark-fixtures/ISSUE-003.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/benchmark-fixtures/ISSUE-002.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/security-monitor.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/test-runner.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/architect.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/designer.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/code-writer.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/pm.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/stack-setup.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/i18n-specialist.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/swe-solve.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/test-driven-development.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/code-review.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/refactoring.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/handoff-spec.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/user-guide.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/privacy-design-checklist.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/privacy-design-checklist_ko.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/user-guide_ko.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "PROMOTION_CHECKLIST.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/skills.json",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": ".mcp.json",
       "policy": "JSON_MERGE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "seeded (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".agents/skills.json",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": ".agents/mcp.json",
-      "policy": "JSON_MERGE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "seeded (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".claude/skills.json",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": ".ignore",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/screen-patterns.template.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
+      "verdict": "TOMBSTONED",
+      "detail": "project deleted a previously delivered file — delivery REFUSED (severity ERROR): confirm with --tombstone <path>, or restore the project copy and re-run",
+      "baseline": {
+        "hash": "c476496f307e18aa8454e7b202e1ae24f67582f391cba7b9b323cf22de0f055a",
+        "templateVersion": "0.30.0",
+        "blob": "8a0c10cf9546b0fbe990b71de02ce1187f114357"
+      },
+      "severity": "ERROR"
     },
     {
       "path": "docs/context.md",
@@ -6119,32 +3504,32 @@
       "path": "docs/specs/registry.json",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/workspace-schema.json",
       "policy": "SCHEMA_MERGE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "seeded (project copy absent)",
+      "verdict": "MERGE",
+      "detail": "schema merge — landed: —; preserved: —; landed template deltas: 0; template changes withheld (project-wins): 0",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/automation-engineer.md",
-      "policy": "CORRECTIVE",
+      "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SKIP",
-      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
+      "verdict": "NEW",
+      "detail": "workspace seed delivered (absent from the project)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/design-system-lead.md",
-      "policy": "CORRECTIVE",
+      "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SKIP",
-      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
+      "verdict": "NEW",
+      "detail": "workspace seed delivered (absent from the project)",
       "severity": "INFO"
     },
     {
@@ -6157,530 +3542,407 @@
     },
     {
       "path": "docs/lifecycle/agents/contract-gate-engineer.md",
-      "policy": "CORRECTIVE",
+      "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SKIP",
-      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
+      "verdict": "NEW",
+      "detail": "workspace seed delivered (absent from the project)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/k-law.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/zod-contract-gate.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/accessibility-audit.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/meeting-facilitation.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/skill-lifecycle-manager.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/i18n-formatting.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/security-scan.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/agent-lifecycle-manager.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/handbook-sync-audit.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/delegate-to-hub.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/k-krx.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/finishing-a-development-branch.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/token-usage-lint.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/platform-skill-lifecycle-manager.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/api-documentation.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/research-analysis.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/service-design.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/k-ecos.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/i18n-audit.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/script-lifecycle-manager.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/explain-me.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/update-bun-packages.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/source-command-commit-push-pr.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/i18n-locale-config.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/sync.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/project-review.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/translate.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/handbook.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/k-opendata.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/i18n-layout.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/ci-triage.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/gateguard.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/decision-record.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/k-kosis.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/platform-command-lifecycle-manager.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/k-dart.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/team-builder.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/documentation-writing.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/design-foundation.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/ui-ux-design-intelligence.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/evidence-ledger.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/skills/standup-synthesizer.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/README.template.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/README_ko.template.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/components.template.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/country-profiles.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/governance/agents/workflows.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/governance/agents/execution-plan-templates.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/design-tokens.template.css",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/design-foundation.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/procedure-schema-spec.md",
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/standards/llm-interaction-standard.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": ".editorconfig",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
+      "verdict": "EVOLVED_PRESERVE",
+      "detail": "project-evolved since delivery; template content unchanged since the baseline — EVOLVED_PRESERVE: delivery SKIPPED, project copy preserved, baseline kept (re-run with --disposition adopt-template[=glob] to take the template copy)",
+      "baseline": {
+        "hash": "0b1d6d858141615eac860b67d01d5b8eaac5b49acd8d8a28c6df60da709d30f0",
+        "templateVersion": "0.30.0",
+        "blob": "e28304f397df38d3d70b08c2503ea3701ab4c556"
+      },
+      "severity": "WARN"
     },
     {
       "path": ".codex/hooks.json",
       "policy": "ADD_IF_MISSING",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "add-if-missing seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project copy exists — add-if-missing seed withheld (project-owned config)",
       "severity": "INFO"
     },
     {
       "path": ".codex/config.toml",
       "policy": "ADD_IF_MISSING",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "add-if-missing seed delivered (absent from the project)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".github/CODEOWNERS",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": ".github/workflows/delete-merged-branches.yml",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "delivered — project copy absent",
-      "severity": "INFO"
-    },
-    {
-      "path": ".github/pull_request_template.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "UNBASELINED_OVERWRITE",
-      "detail": "no delivery baseline + project content differs (unmarked — usually pre-policy template vintage) — delivered over the project copy; review the diff (pre-upgrade stash covers rollback)",
-      "severity": "WARN"
-    },
-    {
-      "path": ".github/pull_request_template.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "ADOPT",
-      "detail": "(content changed) — version-gated delivery over the delivered baseline",
-      "severity": "INFO"
-    },
-    {
-      "path": "opencode.json",
-      "policy": "JSON_MERGE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "seeded (project copy absent)",
+      "verdict": "SEED_SKIP",
+      "detail": "project copy exists — add-if-missing seed withheld (project-owned config)",
       "severity": "INFO"
     },
     {
       "path": ".trail/README.md",
       "policy": "ADD_IF_MISSING",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "add-if-missing seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project copy exists — add-if-missing seed withheld (project-owned config)",
       "severity": "INFO"
     },
     {
       "path": ".trail/.gitignore",
       "policy": "ADD_IF_MISSING",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "add-if-missing seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project copy exists — add-if-missing seed withheld (project-owned config)",
       "severity": "INFO"
     },
     {
       "path": ".trail/hook.cjs",
       "policy": "ADD_IF_MISSING",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "add-if-missing seed delivered (absent from the project)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".mcp.json",
-      "policy": "CORRECTIVE",
-      "pass": "GRAFT_TRAIL_MCP",
-      "verdict": "SKIP",
-      "detail": "clean — no graft-era entries, trail present",
+      "verdict": "SEED_SKIP",
+      "detail": "project copy exists — add-if-missing seed withheld (project-owned config)",
       "severity": "INFO"
     },
     {
       "path": ".gemini/settings.json",
       "policy": "CORRECTIVE",
       "pass": "GRAFT_TRAIL_MCP",
-      "verdict": "UPDATE",
-      "detail": "trail entry injected (absent)",
+      "verdict": "SKIP",
+      "detail": "clean — no graft-era entries, trail present",
       "severity": "INFO"
     },
     {
@@ -6698,46 +3960,6 @@
       "verdict": "SKIP",
       "detail": "clean — no graft-era entries, trail present",
       "severity": "INFO"
-    },
-    {
-      "path": "docs/project.md",
-      "policy": "ADD_IF_MISSING",
-      "pass": "IDENTITY SEED",
-      "verdict": "NEW",
-      "detail": "identity seed rendered (absent from the project — AC4: existing files are never overwritten)",
-      "severity": "INFO"
-    },
-    {
-      "path": "external-deps.json",
-      "policy": "PROJECT_STATE",
-      "pass": "EXTERNAL DEPS",
-      "verdict": "NEW",
-      "detail": "template seed delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".env.sample",
-      "policy": "SYNC",
-      "pass": "ENV_SAMPLE SYNC",
-      "verdict": "UNBASELINED_OVERWRITE",
-      "detail": "no delivery baseline + project content differs (unmarked — usually pre-policy template vintage) — delivered over the project copy; review the diff (pre-upgrade stash covers rollback)",
-      "severity": "WARN"
-    },
-    {
-      "path": ".env.sample",
-      "policy": "SYNC",
-      "pass": "ENV_SAMPLE SYNC",
-      "verdict": "MERGE",
-      "detail": "country-aware merge delivered — template keys re-delivered, project-only keys preserved",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/security.md",
-      "policy": "OVERWRITE",
-      "pass": "DOCS_OVERWRITE",
-      "verdict": "UNBASELINED_OVERWRITE",
-      "detail": "no delivery baseline + project content differs (unmarked — usually pre-policy template vintage) — delivered over the project copy; review the diff (pre-upgrade stash covers rollback)",
-      "severity": "WARN"
     },
     {
       "path": "docs/security.md",
@@ -6745,6 +3967,11 @@
       "pass": "DOCS_OVERWRITE",
       "verdict": "ADOPT",
       "detail": "template copy delivered over the delivered baseline (version-gated)",
+      "baseline": {
+        "hash": "6424d80604638ae56523d66a6a3447b3bb14ec249afb20d2fe70f75bca30f87d",
+        "templateVersion": "0.30.0",
+        "blob": "dc6dd2e84dd1ad63b77bbdde06e6ff63eeb2151e"
+      },
       "severity": "INFO"
     },
     {
@@ -6762,39 +3989,45 @@
       "verdict": "SKIP",
       "detail": "preserve-listed — never modified by the upgrade",
       "severity": "INFO"
+    },
+    {
+      "path": "docs/README.md",
+      "policy": "PRESERVE",
+      "pass": "OVERWRITE",
+      "verdict": "SKIP",
+      "detail": "preserve-listed — never modified by the upgrade",
+      "severity": "INFO"
+    },
+    {
+      "path": "docs/README_ko.md",
+      "policy": "PRESERVE",
+      "pass": "OVERWRITE",
+      "verdict": "SKIP",
+      "detail": "preserve-listed — never modified by the upgrade",
+      "severity": "INFO"
     }
   ],
   "tombstones": {},
   "pendingBackport": [
     {
-      "path": ".env.sample",
-      "kind": "UNBASELINED",
-      "projectHash": "e0c0ce3612342c9296f85d3eab374b649ecc633530a1cbadda2d1ef9d65ef7bd",
-      "deliverableHash": "452b5b9bee150a83e14d13ef258f99e8ffa0daa1b8cb12b8e78720cc64ffb2a4",
+      "path": "agents/architect.md",
+      "kind": "CONFLICT",
+      "projectHash": "773b23aec3386de025a96d3d2ce5868f654cbe596e872fe56f86f567d4434041",
       "firstSeen": "2026-11-18",
       "firstSeenTemplateVersion": "0.30.0"
     },
     {
-      "path": ".github/pull_request_template.md",
-      "kind": "UNBASELINED",
-      "projectHash": "9b9ccc5e9388261ed8f85fe271b30b8cc3b336128158d65657474d3a9f7a0c1d",
-      "deliverableHash": "0f28a6bd5e911b5b4e40fa1be8d87b00edba1549f25491124648ce62b7073f83",
+      "path": "agents/i18n-specialist.md",
+      "kind": "CONFLICT",
+      "projectHash": "f06858bc82d3336add61aa311d579c13c88bf6d8fc1d462514db8cc7d0de18ea",
       "firstSeen": "2026-11-18",
       "firstSeenTemplateVersion": "0.30.0"
     },
     {
-      "path": "docs/security.md",
-      "kind": "UNBASELINED",
-      "projectHash": "1277c6d6e5673b88b1bedfbfeddb6ee56c57b4a46d6cccc685dd6695883516b3",
-      "deliverableHash": "6424d80604638ae56523d66a6a3447b3bb14ec249afb20d2fe70f75bca30f87d",
-      "firstSeen": "2026-11-18",
-      "firstSeenTemplateVersion": "0.30.0"
-    },
-    {
-      "path": "skills/i18n-audit/SKILL.md",
-      "kind": "UNBASELINED",
-      "projectHash": "960a77877a2f121db14e810bf00c2fabecbd17de7ba73e53635fee4c3d7b7197",
-      "deliverableHash": "41730c1f02d0ef289ca7146f8979df2f5bbb03ca08c1c7b746ed8ce966613fb3",
+      "path": "docs/procedure-schema-spec.md",
+      "kind": "EVOLVED_PRESERVE",
+      "projectHash": "17b58014379400793fccfdb6b1170ebbf6b142b95c9420c1894dccceaec8e444",
+      "deliverableHash": "0b1d6d858141615eac860b67d01d5b8eaac5b49acd8d8a28c6df60da709d30f0",
       "firstSeen": "2026-11-18",
       "firstSeenTemplateVersion": "0.30.0"
     }

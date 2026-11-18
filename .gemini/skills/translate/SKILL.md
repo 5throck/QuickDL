@@ -5,7 +5,7 @@ version: 1.0.3
 owner: pm
 status: active
 last_reviewed: 2026-11-08
-last_updated: 2026-08-24
+last_updated: 2026-11-18
 scope: common
 relates_to:
   - skill: documentation-writing

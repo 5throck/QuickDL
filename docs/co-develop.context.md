@@ -51,10 +51,6 @@
 <!-- Status: active | deprecated | experimental -->
 
 <!-- DYNAMIC_SKILLS_START -->
-| Skill | File | Trigger |
-|-------|------|---------|
-| `post-write-check` | [`skills/post-write-check/SKILL.md`](skills/post-write-check/SKILL.md) | After any Write/Edit to Python/JS files |
-| `i18n-audit` | [`skills/i18n-audit/SKILL.md`](skills/i18n-audit/SKILL.md) | After any locale file or i18n.py change |
 <!-- DYNAMIC_SKILLS_END -->
 
 > Lifecycle management: `bun scripts/skill-lifecycle-audit.ts`

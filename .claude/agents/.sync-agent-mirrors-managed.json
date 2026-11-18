@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "generated": [
+    "architect",
+    "automation-engineer",
+    "backend",
+    "code-writer",
+    "contract-gate-engineer",
+    "design-system-lead",
+    "designer",
+    "frontend",
+    "i18n",
+    "i18n-specialist",
+    "pm",
+    "qa",
+    "security",
+    "security-monitor",
+    "stack-setup",
+    "test-runner"
+  ]
+}

@@ -16,13 +16,26 @@
       ]
     },
     {
+      "id": "agent:root/automation-engineer",
+      "type": "agent",
+      "layer": "L3",
+      "name": "automation-engineer",
+      "scope": "root",
+      "capability": "automation-engineer",
+      "content_hash": "fc785c7ec9b1d201",
+      "version": "1.1.0",
+      "mirrors": [
+        "agents/automation-engineer.md"
+      ]
+    },
+    {
       "id": "agent:root/backend",
       "type": "agent",
       "layer": "L3",
       "name": "backend",
       "scope": "root",
       "capability": "backend",
-      "content_hash": "49a773167540439d",
+      "content_hash": "0d8f6c6ce71f2596",
       "version": null,
       "mirrors": [
         "agents/backend.md"
@@ -39,6 +52,32 @@
       "version": "1.2.0",
       "mirrors": [
         "agents/code-writer.md"
+      ]
+    },
+    {
+      "id": "agent:root/contract-gate-engineer",
+      "type": "agent",
+      "layer": "L3",
+      "name": "contract-gate-engineer",
+      "scope": "root",
+      "capability": "contract-gate-engineer",
+      "content_hash": "cb00bcc1577a8762",
+      "version": "1.0.0",
+      "mirrors": [
+        "agents/contract-gate-engineer.md"
+      ]
+    },
+    {
+      "id": "agent:root/design-system-lead",
+      "type": "agent",
+      "layer": "L3",
+      "name": "design-system-lead",
+      "scope": "root",
+      "capability": "design-system-lead",
+      "content_hash": "2ed6e482a494e676",
+      "version": "1.0.0",
+      "mirrors": [
+        "agents/design-system-lead.md"
       ]
     },
     {
@@ -61,7 +100,7 @@
       "name": "frontend",
       "scope": "root",
       "capability": "frontend",
-      "content_hash": "4020cbccc559d879",
+      "content_hash": "f2d523ed4cb66c80",
       "version": null,
       "mirrors": [
         "agents/frontend.md"
@@ -74,7 +113,7 @@
       "name": "i18n",
       "scope": "root",
       "capability": "i18n",
-      "content_hash": "25399ecbafea87d4",
+      "content_hash": "b64e18bcf4c617b2",
       "version": null,
       "mirrors": [
         "agents/i18n.md"
@@ -87,7 +126,7 @@
       "name": "i18n-specialist",
       "scope": "root",
       "capability": "i18n-specialist",
-      "content_hash": "cc75c4982c09c016",
+      "content_hash": "4075b166b82af8b5",
       "version": "1.1.1",
       "mirrors": [
         "agents/i18n-specialist.md"
@@ -100,7 +139,7 @@
       "name": "pm",
       "scope": "root",
       "capability": "pm",
-      "content_hash": "c293754c41b8169f",
+      "content_hash": "db45fa2fe10aa3af",
       "version": null,
       "mirrors": [
         "agents/pm.md"
@@ -113,7 +152,7 @@
       "name": "qa",
       "scope": "root",
       "capability": "qa",
-      "content_hash": "d9a8646eb1e40fa5",
+      "content_hash": "b75db712bfb4088d",
       "version": null,
       "mirrors": [
         "agents/qa.md"
@@ -126,7 +165,7 @@
       "name": "security",
       "scope": "root",
       "capability": "security",
-      "content_hash": "2847a77174d57574",
+      "content_hash": "002ec392d9bad956",
       "version": null,
       "mirrors": [
         "agents/security.md"
@@ -289,7 +328,12 @@
       "content_hash": "9e6da04e275eb51c",
       "version": "1.1.0",
       "mirrors": [
-        "skills/accessibility-audit/SKILL.md"
+        "skills/accessibility-audit/SKILL.md",
+        ".claude/skills/accessibility-audit/SKILL.md",
+        ".gemini/skills/accessibility-audit/SKILL.md",
+        ".agents/skills/accessibility-audit/SKILL.md",
+        ".codex/skills/accessibility-audit/SKILL.md",
+        ".hermes/skills/accessibility-audit/SKILL.md"
       ]
     },
     {
@@ -299,10 +343,15 @@
       "name": "agent-lifecycle-manager",
       "scope": "root",
       "capability": "agent-lifecycle-manager",
-      "content_hash": "230ce8c036a46601",
+      "content_hash": "02b12b1af951e5b8",
       "version": "1.4.0",
       "mirrors": [
-        "skills/agent-lifecycle-manager/SKILL.md"
+        "skills/agent-lifecycle-manager/SKILL.md",
+        ".claude/skills/agent-lifecycle-manager/SKILL.md",
+        ".gemini/skills/agent-lifecycle-manager/SKILL.md",
+        ".agents/skills/agent-lifecycle-manager/SKILL.md",
+        ".codex/skills/agent-lifecycle-manager/SKILL.md",
+        ".hermes/skills/agent-lifecycle-manager/SKILL.md"
       ]
     },
     {
@@ -315,7 +364,12 @@
       "content_hash": "e080e5852535bf67",
       "version": "1.0.2",
       "mirrors": [
-        "skills/api-documentation/SKILL.md"
+        "skills/api-documentation/SKILL.md",
+        ".claude/skills/api-documentation/SKILL.md",
+        ".gemini/skills/api-documentation/SKILL.md",
+        ".agents/skills/api-documentation/SKILL.md",
+        ".codex/skills/api-documentation/SKILL.md",
+        ".hermes/skills/api-documentation/SKILL.md"
       ]
     },
     {
@@ -328,7 +382,12 @@
       "content_hash": "c10cba25e7560168",
       "version": "0.2.0",
       "mirrors": [
-        "skills/ci-triage/SKILL.md"
+        "skills/ci-triage/SKILL.md",
+        ".claude/skills/ci-triage/SKILL.md",
+        ".gemini/skills/ci-triage/SKILL.md",
+        ".agents/skills/ci-triage/SKILL.md",
+        ".codex/skills/ci-triage/SKILL.md",
+        ".hermes/skills/ci-triage/SKILL.md"
       ]
     },
     {
@@ -341,7 +400,12 @@
       "content_hash": "ff7a3bd5a5db8752",
       "version": "1.1.0",
       "mirrors": [
-        "skills/code-review/SKILL.md"
+        "skills/code-review/SKILL.md",
+        ".claude/skills/code-review/SKILL.md",
+        ".gemini/skills/code-review/SKILL.md",
+        ".agents/skills/code-review/SKILL.md",
+        ".codex/skills/code-review/SKILL.md",
+        ".hermes/skills/code-review/SKILL.md"
       ]
     },
     {
@@ -354,7 +418,12 @@
       "content_hash": "af9dd89ccdeec7b2",
       "version": "1.1.0",
       "mirrors": [
-        "skills/decision-record/SKILL.md"
+        "skills/decision-record/SKILL.md",
+        ".claude/skills/decision-record/SKILL.md",
+        ".gemini/skills/decision-record/SKILL.md",
+        ".agents/skills/decision-record/SKILL.md",
+        ".codex/skills/decision-record/SKILL.md",
+        ".hermes/skills/decision-record/SKILL.md"
       ]
     },
     {
@@ -367,7 +436,12 @@
       "content_hash": "6a8d68b6e8a283da",
       "version": "1.0.1",
       "mirrors": [
-        "skills/delegate-to-hub/SKILL.md"
+        "skills/delegate-to-hub/SKILL.md",
+        ".claude/skills/delegate-to-hub/SKILL.md",
+        ".gemini/skills/delegate-to-hub/SKILL.md",
+        ".agents/skills/delegate-to-hub/SKILL.md",
+        ".codex/skills/delegate-to-hub/SKILL.md",
+        ".hermes/skills/delegate-to-hub/SKILL.md"
       ]
     },
     {
@@ -380,7 +454,12 @@
       "content_hash": "74fdd004a399497b",
       "version": "1.1.1",
       "mirrors": [
-        "skills/design-foundation/SKILL.md"
+        "skills/design-foundation/SKILL.md",
+        ".claude/skills/design-foundation/SKILL.md",
+        ".gemini/skills/design-foundation/SKILL.md",
+        ".agents/skills/design-foundation/SKILL.md",
+        ".codex/skills/design-foundation/SKILL.md",
+        ".hermes/skills/design-foundation/SKILL.md"
       ]
     },
     {
@@ -393,7 +472,12 @@
       "content_hash": "d0f7731ae22fc0ad",
       "version": "1.0.3",
       "mirrors": [
-        "skills/documentation-writing/SKILL.md"
+        "skills/documentation-writing/SKILL.md",
+        ".claude/skills/documentation-writing/SKILL.md",
+        ".gemini/skills/documentation-writing/SKILL.md",
+        ".agents/skills/documentation-writing/SKILL.md",
+        ".codex/skills/documentation-writing/SKILL.md",
+        ".hermes/skills/documentation-writing/SKILL.md"
       ]
     },
     {
@@ -406,7 +490,12 @@
       "content_hash": "8abe418bc3c78854",
       "version": "1.1.0",
       "mirrors": [
-        "skills/evidence-ledger/SKILL.md"
+        "skills/evidence-ledger/SKILL.md",
+        ".claude/skills/evidence-ledger/SKILL.md",
+        ".gemini/skills/evidence-ledger/SKILL.md",
+        ".agents/skills/evidence-ledger/SKILL.md",
+        ".codex/skills/evidence-ledger/SKILL.md",
+        ".hermes/skills/evidence-ledger/SKILL.md"
       ]
     },
     {
@@ -419,7 +508,30 @@
       "content_hash": "757f9b180ab5df7e",
       "version": "1.0.1",
       "mirrors": [
-        "skills/explain-me/SKILL.md"
+        "skills/explain-me/SKILL.md",
+        ".claude/skills/explain-me/SKILL.md",
+        ".gemini/skills/explain-me/SKILL.md",
+        ".agents/skills/explain-me/SKILL.md",
+        ".codex/skills/explain-me/SKILL.md",
+        ".hermes/skills/explain-me/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/finishing-a-development-branch",
+      "type": "skill",
+      "layer": "L3",
+      "name": "finishing-a-development-branch",
+      "scope": "root",
+      "capability": "finishing-a-development-branch",
+      "content_hash": "7aa95cd39dce01f1",
+      "version": "1.0.2",
+      "mirrors": [
+        "skills/finishing-a-development-branch/SKILL.md",
+        ".claude/skills/finishing-a-development-branch/SKILL.md",
+        ".gemini/skills/finishing-a-development-branch/SKILL.md",
+        ".agents/skills/finishing-a-development-branch/SKILL.md",
+        ".codex/skills/finishing-a-development-branch/SKILL.md",
+        ".hermes/skills/finishing-a-development-branch/SKILL.md"
       ]
     },
     {
@@ -432,7 +544,12 @@
       "content_hash": "bde1c264aec7b18c",
       "version": "1.0.2",
       "mirrors": [
-        "skills/gateguard/SKILL.md"
+        "skills/gateguard/SKILL.md",
+        ".claude/skills/gateguard/SKILL.md",
+        ".gemini/skills/gateguard/SKILL.md",
+        ".agents/skills/gateguard/SKILL.md",
+        ".codex/skills/gateguard/SKILL.md",
+        ".hermes/skills/gateguard/SKILL.md"
       ]
     },
     {
@@ -445,7 +562,12 @@
       "content_hash": "a9bd82eded8b1661",
       "version": "0.6.0",
       "mirrors": [
-        "skills/handbook/SKILL.md"
+        "skills/handbook/SKILL.md",
+        ".claude/skills/handbook/SKILL.md",
+        ".gemini/skills/handbook/SKILL.md",
+        ".agents/skills/handbook/SKILL.md",
+        ".codex/skills/handbook/SKILL.md",
+        ".hermes/skills/handbook/SKILL.md"
       ]
     },
     {
@@ -458,7 +580,12 @@
       "content_hash": "fc3909fb71e5d0a2",
       "version": "1.0.5",
       "mirrors": [
-        "skills/handbook-sync-audit/SKILL.md"
+        "skills/handbook-sync-audit/SKILL.md",
+        ".claude/skills/handbook-sync-audit/SKILL.md",
+        ".gemini/skills/handbook-sync-audit/SKILL.md",
+        ".agents/skills/handbook-sync-audit/SKILL.md",
+        ".codex/skills/handbook-sync-audit/SKILL.md",
+        ".hermes/skills/handbook-sync-audit/SKILL.md"
       ]
     },
     {
@@ -471,7 +598,12 @@
       "content_hash": "5485334c47dd7ef0",
       "version": "1.0.1",
       "mirrors": [
-        "skills/i18n-audit/SKILL.md"
+        "skills/i18n-audit/SKILL.md",
+        ".claude/skills/i18n-audit/SKILL.md",
+        ".gemini/skills/i18n-audit/SKILL.md",
+        ".agents/skills/i18n-audit/SKILL.md",
+        ".codex/skills/i18n-audit/SKILL.md",
+        ".hermes/skills/i18n-audit/SKILL.md"
       ]
     },
     {
@@ -484,7 +616,12 @@
       "content_hash": "4db7cf2ed408dd22",
       "version": "1.0.1",
       "mirrors": [
-        "skills/i18n-formatting/SKILL.md"
+        "skills/i18n-formatting/SKILL.md",
+        ".claude/skills/i18n-formatting/SKILL.md",
+        ".gemini/skills/i18n-formatting/SKILL.md",
+        ".agents/skills/i18n-formatting/SKILL.md",
+        ".codex/skills/i18n-formatting/SKILL.md",
+        ".hermes/skills/i18n-formatting/SKILL.md"
       ]
     },
     {
@@ -497,7 +634,12 @@
       "content_hash": "67b31c6f61b62452",
       "version": "1.1.1",
       "mirrors": [
-        "skills/i18n-layout/SKILL.md"
+        "skills/i18n-layout/SKILL.md",
+        ".claude/skills/i18n-layout/SKILL.md",
+        ".gemini/skills/i18n-layout/SKILL.md",
+        ".agents/skills/i18n-layout/SKILL.md",
+        ".codex/skills/i18n-layout/SKILL.md",
+        ".hermes/skills/i18n-layout/SKILL.md"
       ]
     },
     {
@@ -510,7 +652,12 @@
       "content_hash": "7e9e381d9fd82e21",
       "version": "1.0.1",
       "mirrors": [
-        "skills/i18n-locale-config/SKILL.md"
+        "skills/i18n-locale-config/SKILL.md",
+        ".claude/skills/i18n-locale-config/SKILL.md",
+        ".gemini/skills/i18n-locale-config/SKILL.md",
+        ".agents/skills/i18n-locale-config/SKILL.md",
+        ".codex/skills/i18n-locale-config/SKILL.md",
+        ".hermes/skills/i18n-locale-config/SKILL.md"
       ]
     },
     {
@@ -523,7 +670,48 @@
       "content_hash": "f4da9e5e2a11a853",
       "version": "1.5.0",
       "mirrors": [
-        "skills/meeting-facilitation/SKILL.md"
+        "skills/meeting-facilitation/SKILL.md",
+        ".claude/skills/meeting-facilitation/SKILL.md",
+        ".gemini/skills/meeting-facilitation/SKILL.md",
+        ".agents/skills/meeting-facilitation/SKILL.md",
+        ".codex/skills/meeting-facilitation/SKILL.md",
+        ".hermes/skills/meeting-facilitation/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/platform-command-lifecycle-manager",
+      "type": "skill",
+      "layer": "L3",
+      "name": "platform-command-lifecycle-manager",
+      "scope": "root",
+      "capability": "platform-command-lifecycle-manager",
+      "content_hash": "392bf490b9ef6b44",
+      "version": "1.0.3",
+      "mirrors": [
+        "skills/platform-command-lifecycle-manager/SKILL.md",
+        ".claude/skills/platform-command-lifecycle-manager/SKILL.md",
+        ".gemini/skills/platform-command-lifecycle-manager/SKILL.md",
+        ".agents/skills/platform-command-lifecycle-manager/SKILL.md",
+        ".codex/skills/platform-command-lifecycle-manager/SKILL.md",
+        ".hermes/skills/platform-command-lifecycle-manager/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/platform-skill-lifecycle-manager",
+      "type": "skill",
+      "layer": "L3",
+      "name": "platform-skill-lifecycle-manager",
+      "scope": "root",
+      "capability": "platform-skill-lifecycle-manager",
+      "content_hash": "08e425f43401cabc",
+      "version": "1.0.3",
+      "mirrors": [
+        "skills/platform-skill-lifecycle-manager/SKILL.md",
+        ".claude/skills/platform-skill-lifecycle-manager/SKILL.md",
+        ".gemini/skills/platform-skill-lifecycle-manager/SKILL.md",
+        ".agents/skills/platform-skill-lifecycle-manager/SKILL.md",
+        ".codex/skills/platform-skill-lifecycle-manager/SKILL.md",
+        ".hermes/skills/platform-skill-lifecycle-manager/SKILL.md"
       ]
     },
     {
@@ -533,8 +721,8 @@
       "name": "post-write-check",
       "scope": "root",
       "capability": "post-write-check",
-      "content_hash": "cc14385eae9848e0",
-      "version": "1.0.0",
+      "content_hash": "984beb975411646b",
+      "version": "1.1.0",
       "mirrors": [
         "skills/post-write-check/SKILL.md"
       ]
@@ -549,7 +737,12 @@
       "content_hash": "0193167933931b10",
       "version": "1.3.2",
       "mirrors": [
-        "skills/project-review/SKILL.md"
+        "skills/project-review/SKILL.md",
+        ".claude/skills/project-review/SKILL.md",
+        ".gemini/skills/project-review/SKILL.md",
+        ".agents/skills/project-review/SKILL.md",
+        ".codex/skills/project-review/SKILL.md",
+        ".hermes/skills/project-review/SKILL.md"
       ]
     },
     {
@@ -562,7 +755,12 @@
       "content_hash": "5f2a152153b459d8",
       "version": "1.2.0",
       "mirrors": [
-        "skills/refactoring/SKILL.md"
+        "skills/refactoring/SKILL.md",
+        ".claude/skills/refactoring/SKILL.md",
+        ".gemini/skills/refactoring/SKILL.md",
+        ".agents/skills/refactoring/SKILL.md",
+        ".codex/skills/refactoring/SKILL.md",
+        ".hermes/skills/refactoring/SKILL.md"
       ]
     },
     {
@@ -575,7 +773,12 @@
       "content_hash": "1e9a79fcdf108919",
       "version": "1.0.2",
       "mirrors": [
-        "skills/research-analysis/SKILL.md"
+        "skills/research-analysis/SKILL.md",
+        ".claude/skills/research-analysis/SKILL.md",
+        ".gemini/skills/research-analysis/SKILL.md",
+        ".agents/skills/research-analysis/SKILL.md",
+        ".codex/skills/research-analysis/SKILL.md",
+        ".hermes/skills/research-analysis/SKILL.md"
       ]
     },
     {
@@ -585,10 +788,15 @@
       "name": "script-lifecycle-manager",
       "scope": "root",
       "capability": "script-lifecycle-manager",
-      "content_hash": "ff4bf06dcbc99aac",
+      "content_hash": "2d1ec74f96265bc1",
       "version": "1.2.2",
       "mirrors": [
-        "skills/script-lifecycle-manager/SKILL.md"
+        "skills/script-lifecycle-manager/SKILL.md",
+        ".claude/skills/script-lifecycle-manager/SKILL.md",
+        ".gemini/skills/script-lifecycle-manager/SKILL.md",
+        ".agents/skills/script-lifecycle-manager/SKILL.md",
+        ".codex/skills/script-lifecycle-manager/SKILL.md",
+        ".hermes/skills/script-lifecycle-manager/SKILL.md"
       ]
     },
     {
@@ -601,7 +809,12 @@
       "content_hash": "6a70cb5e596dec68",
       "version": "1.3.0",
       "mirrors": [
-        "skills/security-scan/SKILL.md"
+        "skills/security-scan/SKILL.md",
+        ".claude/skills/security-scan/SKILL.md",
+        ".gemini/skills/security-scan/SKILL.md",
+        ".agents/skills/security-scan/SKILL.md",
+        ".codex/skills/security-scan/SKILL.md",
+        ".hermes/skills/security-scan/SKILL.md"
       ]
     },
     {
@@ -614,7 +827,12 @@
       "content_hash": "771b77446626ad51",
       "version": "1.1.0",
       "mirrors": [
-        "skills/service-design/SKILL.md"
+        "skills/service-design/SKILL.md",
+        ".claude/skills/service-design/SKILL.md",
+        ".gemini/skills/service-design/SKILL.md",
+        ".agents/skills/service-design/SKILL.md",
+        ".codex/skills/service-design/SKILL.md",
+        ".hermes/skills/service-design/SKILL.md"
       ]
     },
     {
@@ -627,7 +845,12 @@
       "content_hash": "883308f6fa2d77b7",
       "version": "1.5.0",
       "mirrors": [
-        "skills/skill-lifecycle-manager/SKILL.md"
+        "skills/skill-lifecycle-manager/SKILL.md",
+        ".claude/skills/skill-lifecycle-manager/SKILL.md",
+        ".gemini/skills/skill-lifecycle-manager/SKILL.md",
+        ".agents/skills/skill-lifecycle-manager/SKILL.md",
+        ".codex/skills/skill-lifecycle-manager/SKILL.md",
+        ".hermes/skills/skill-lifecycle-manager/SKILL.md"
       ]
     },
     {
@@ -640,7 +863,12 @@
       "content_hash": "4fa915cd81a96c7b",
       "version": "1.0.3",
       "mirrors": [
-        "skills/source-command-commit-push-pr/SKILL.md"
+        "skills/source-command-commit-push-pr/SKILL.md",
+        ".claude/skills/source-command-commit-push-pr/SKILL.md",
+        ".gemini/skills/source-command-commit-push-pr/SKILL.md",
+        ".agents/skills/source-command-commit-push-pr/SKILL.md",
+        ".codex/skills/source-command-commit-push-pr/SKILL.md",
+        ".hermes/skills/source-command-commit-push-pr/SKILL.md"
       ]
     },
     {
@@ -653,7 +881,12 @@
       "content_hash": "78faf9d2096937e5",
       "version": "1.1.0",
       "mirrors": [
-        "skills/standup-synthesizer/SKILL.md"
+        "skills/standup-synthesizer/SKILL.md",
+        ".claude/skills/standup-synthesizer/SKILL.md",
+        ".gemini/skills/standup-synthesizer/SKILL.md",
+        ".agents/skills/standup-synthesizer/SKILL.md",
+        ".codex/skills/standup-synthesizer/SKILL.md",
+        ".hermes/skills/standup-synthesizer/SKILL.md"
       ]
     },
     {
@@ -666,7 +899,12 @@
       "content_hash": "3f74840de807cc09",
       "version": "1.1.1",
       "mirrors": [
-        "skills/swe-solve/SKILL.md"
+        "skills/swe-solve/SKILL.md",
+        ".claude/skills/swe-solve/SKILL.md",
+        ".gemini/skills/swe-solve/SKILL.md",
+        ".agents/skills/swe-solve/SKILL.md",
+        ".codex/skills/swe-solve/SKILL.md",
+        ".hermes/skills/swe-solve/SKILL.md"
       ]
     },
     {
@@ -679,7 +917,12 @@
       "content_hash": "80a9c66a71aac4f1",
       "version": "1.10.0",
       "mirrors": [
-        "skills/sync/SKILL.md"
+        "skills/sync/SKILL.md",
+        ".claude/skills/sync/SKILL.md",
+        ".gemini/skills/sync/SKILL.md",
+        ".agents/skills/sync/SKILL.md",
+        ".codex/skills/sync/SKILL.md",
+        ".hermes/skills/sync/SKILL.md"
       ]
     },
     {
@@ -692,7 +935,12 @@
       "content_hash": "c375e7fd2ba21e93",
       "version": "1.2.0",
       "mirrors": [
-        "skills/team-builder/SKILL.md"
+        "skills/team-builder/SKILL.md",
+        ".claude/skills/team-builder/SKILL.md",
+        ".gemini/skills/team-builder/SKILL.md",
+        ".agents/skills/team-builder/SKILL.md",
+        ".codex/skills/team-builder/SKILL.md",
+        ".hermes/skills/team-builder/SKILL.md"
       ]
     },
     {
@@ -705,7 +953,12 @@
       "content_hash": "e19f762943c56644",
       "version": "1.2.0",
       "mirrors": [
-        "skills/test-driven-development/SKILL.md"
+        "skills/test-driven-development/SKILL.md",
+        ".claude/skills/test-driven-development/SKILL.md",
+        ".gemini/skills/test-driven-development/SKILL.md",
+        ".agents/skills/test-driven-development/SKILL.md",
+        ".codex/skills/test-driven-development/SKILL.md",
+        ".hermes/skills/test-driven-development/SKILL.md"
       ]
     },
     {
@@ -718,7 +971,12 @@
       "content_hash": "e7762c79dcc9a7f2",
       "version": "1.1.0",
       "mirrors": [
-        "skills/token-usage-lint/SKILL.md"
+        "skills/token-usage-lint/SKILL.md",
+        ".claude/skills/token-usage-lint/SKILL.md",
+        ".gemini/skills/token-usage-lint/SKILL.md",
+        ".agents/skills/token-usage-lint/SKILL.md",
+        ".codex/skills/token-usage-lint/SKILL.md",
+        ".hermes/skills/token-usage-lint/SKILL.md"
       ]
     },
     {
@@ -731,7 +989,12 @@
       "content_hash": "130763d32d8932dc",
       "version": "1.0.3",
       "mirrors": [
-        "skills/translate/SKILL.md"
+        "skills/translate/SKILL.md",
+        ".claude/skills/translate/SKILL.md",
+        ".gemini/skills/translate/SKILL.md",
+        ".agents/skills/translate/SKILL.md",
+        ".codex/skills/translate/SKILL.md",
+        ".hermes/skills/translate/SKILL.md"
       ]
     },
     {
@@ -744,7 +1007,12 @@
       "content_hash": "584f569c20014122",
       "version": "1.0.1",
       "mirrors": [
-        "skills/ui-ux-design-intelligence/SKILL.md"
+        "skills/ui-ux-design-intelligence/SKILL.md",
+        ".claude/skills/ui-ux-design-intelligence/SKILL.md",
+        ".gemini/skills/ui-ux-design-intelligence/SKILL.md",
+        ".agents/skills/ui-ux-design-intelligence/SKILL.md",
+        ".codex/skills/ui-ux-design-intelligence/SKILL.md",
+        ".hermes/skills/ui-ux-design-intelligence/SKILL.md"
       ]
     },
     {
@@ -757,7 +1025,12 @@
       "content_hash": "d051c963862b0514",
       "version": "1.3.1",
       "mirrors": [
-        "skills/update-bun-packages/SKILL.md"
+        "skills/update-bun-packages/SKILL.md",
+        ".claude/skills/update-bun-packages/SKILL.md",
+        ".gemini/skills/update-bun-packages/SKILL.md",
+        ".agents/skills/update-bun-packages/SKILL.md",
+        ".codex/skills/update-bun-packages/SKILL.md",
+        ".hermes/skills/update-bun-packages/SKILL.md"
       ]
     },
     {
@@ -770,7 +1043,12 @@
       "content_hash": "11e4c739d4dfeedc",
       "version": "1.0.3",
       "mirrors": [
-        "skills/zod-contract-gate/SKILL.md"
+        "skills/zod-contract-gate/SKILL.md",
+        ".claude/skills/zod-contract-gate/SKILL.md",
+        ".gemini/skills/zod-contract-gate/SKILL.md",
+        ".agents/skills/zod-contract-gate/SKILL.md",
+        ".codex/skills/zod-contract-gate/SKILL.md",
+        ".hermes/skills/zod-contract-gate/SKILL.md"
       ]
     }
   ],
@@ -783,8 +1061,62 @@
     },
     {
       "type": "references",
+      "from": "agent:root/automation-engineer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/automation-engineer",
+      "to": "skill:root/sync",
+      "source": "prose"
+    },
+    {
+      "type": "references",
       "from": "agent:root/code-writer",
       "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/contract-gate-engineer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/contract-gate-engineer",
+      "to": "skill:root/zod-contract-gate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/design-system-lead",
+      "to": "skill:root/accessibility-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/design-system-lead",
+      "to": "skill:root/design-foundation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/design-system-lead",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/design-system-lead",
+      "to": "skill:root/token-usage-lint",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/design-system-lead",
+      "to": "skill:root/ui-ux-design-intelligence",
       "source": "prose"
     },
     {
@@ -1190,6 +1522,17 @@
       "source": "prose"
     },
     {
+      "type": "used_by",
+      "from": "skill:root/ci-triage",
+      "to": "agent:root/automation-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/automation-engineer.md",
+        "field": "required_skills",
+        "index": 2
+      }
+    },
+    {
       "type": "references",
       "from": "skill:root/ci-triage",
       "to": "skill:root/project-review",
@@ -1259,6 +1602,17 @@
       "from": "skill:root/delegate-to-hub",
       "to": "skill:root/sync",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/design-foundation",
+      "to": "agent:root/design-system-lead",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/design-system-lead.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "composes_with",
@@ -1342,6 +1696,17 @@
       "from": "skill:root/evidence-ledger",
       "to": "skill:root/decision-record",
       "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/gateguard",
+      "to": "agent:root/automation-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/automation-engineer.md",
+        "field": "required_skills",
+        "index": 1
+      }
     },
     {
       "type": "references",
@@ -1536,6 +1901,17 @@
       }
     },
     {
+      "type": "used_by",
+      "from": "skill:root/script-lifecycle-manager",
+      "to": "agent:root/automation-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/automation-engineer.md",
+        "field": "required_skills",
+        "index": 3
+      }
+    },
+    {
       "type": "references",
       "from": "skill:root/security-scan",
       "to": "skill:root/update-bun-packages",
@@ -1597,6 +1973,17 @@
       "from": "skill:root/swe-solve",
       "to": "phase:root/4",
       "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/sync",
+      "to": "agent:root/automation-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/automation-engineer.md",
+        "field": "required_skills",
+        "index": 0
+      }
     },
     {
       "type": "references",
@@ -1675,6 +2062,17 @@
       "provenance": {
         "file": "skills/ui-ux-design-intelligence/SKILL.md",
         "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/zod-contract-gate",
+      "to": "agent:root/contract-gate-engineer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/contract-gate-engineer.md",
+        "field": "required_skills",
         "index": 0
       }
     }

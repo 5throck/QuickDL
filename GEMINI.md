@@ -69,7 +69,7 @@ Enter Planning Mode for complex tasks or architectural modifications. Leverage t
 *Path: `<appDataDir>\brain\<session-id>\task.md`*
 - **Purpose**: Running TODO list to track development progress dynamically.
 - **Metadata**: `ArtifactType: "task"`.
-- **Syntax**: `- [ ]` uncompleted 쨌 `- [/]` in progress 쨌 `- [x]` completed.
+- **Syntax**: `- [ ]` uncompleted, `- [/]` in progress, `- [x]` completed.
 
 #### 3. `walkthrough.md`
 *Path: `<appDataDir>\brain\<session-id>\walkthrough.md`*
@@ -107,7 +107,7 @@ Interact with spawned agents via their unique `conversationID`.
 **Reactive Wakeup**: Do not poll in a loop —simply yield execution and the platform wakes you automatically when an agent replies or a background task completes.
 
 ### Response Language
-- All **conversational** replies —**Korean (?쒓뎅—** by default.
+- All **conversational** replies — Korean by default (the user's preferred conversation language).
 - All code, config, commit messages, PR titles, branch names —**English only**.
 
 ### Optimal Interaction Guidelines
@@ -130,11 +130,7 @@ The PM agent MUST leverage the **`superpowers`** plugin (e.g., `subagent-driven-
 After completing a task, manually run the sync pipeline:
 
 ```bash
-# bash (macOS/Linux)
-bash scripts/dev-sync.sh "feat: description"
-
-# PowerShell (Windows)
-.\scripts\dev-sync.ps1 "feat: description"
+bun scripts/dev-sync.ts "feat: description"
 ```
 
 Always append to AI-generated commit messages:
@@ -152,12 +148,12 @@ Instead, emulate them by reading the `.md` file and executing the described scri
 
 | Equivalent to | Run instead |
 |---------------|------------|
-| `/sync "feat: ..."` | `bash scripts/dev-sync.sh "feat: ..."` |
+| `/sync "feat: ..."` | `bun scripts/dev-sync.ts "feat: ..."` |
 | `/memlog "summary"` | Manually append `## Session ??summary` to `memory/YYYY-MM-DD.md` |
 | `/changelog "..."` | Manually add entry to `CHANGELOG.md [Unreleased]` |
 | `/new-task "name"` | Manually append task block to `memory/YYYY-MM-DD.md` |
-| `/new-project "name"` | `bash scripts/new-project.sh "<name>"` (macOS/Linux) 쨌 `.\scripts\new-project.ps1 "<name>"` (Windows) |
-| `/post-write` | `bash scripts/audit.sh` (macOS/Linux) 쨌 `.\scripts\audit.ps1` (Windows) |
+| `/new-project "name"` | `bun scripts/new-project.ts "<name>"` |
+| `/post-write` | `bun scripts/audit.ts --skip-memory` |
 
 ---
 
@@ -207,8 +203,8 @@ lang_reason: legal # legal | source-material | proper-noun
 ```
 *(Not available for: context.md, CLAUDE.md, GEMINI.md, CODEX.md, AGENTS.md, or any variant context.md)*
 
-#### Korean Plain-Language Preference (`순우리말`-First)
-When writing Korean documentation or Korean translation output, prefer native Korean words (`순우리말`) over loanwords (`외래어`) whenever a natural, widely-understood native equivalent exists — e.g. prefer `만들기` over `크리에이션`, `알림` over `노티피케이션`. Loanwords effectively settled in Korean (`컴퓨터`, `데이터`, `소프트웨어`, `파일`) and established technical terms remain permitted; clarity takes precedence over forced nativization. New Korean content applies this immediately; existing Korean documents are nativized incrementally (touched sections only, no bulk rewrites).
+#### Korean Plain-Language Preference (native-Korean-words-first)
+When writing Korean documentation or Korean translation output, prefer native Korean words over Sino-Korean loanwords whenever a natural, widely-understood native equivalent exists (examples: prefer the native verb meaning 'to make' over a creation-loanword; prefer the native word meaning 'notification' over its loanword). Loanwords effectively settled in Korean (computer, data, software, file equivalents) and established technical terms remain permitted; clarity takes precedence over forced nativization. New Korean content applies this immediately; existing Korean documents are nativized incrementally (touched sections only, no bulk rewrites).
 <!-- COMMON-GEMINI:END -->
 
 ### 5. Agent Dispatch Rules

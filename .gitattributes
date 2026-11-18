@@ -42,4 +42,6 @@ CHANGELOG.md merge=union
 memory/*.md merge=union
 docs/VERSION_MANIFEST.md merge=union
 scripts/README.md merge=union
+
+# Preserved from this project's prior .gitattributes (not in the current template):
 docs/context.md merge=ours

@@ -168,8 +168,8 @@ QuickDL/
 │   ├── test_verification.py      # verification gate tests (pytest, mocked)
 │   └── test_env.py               # Dependency check
 ├── scripts/
-│   ├── audit.sh / audit.ps1        # Quality gate
-│   └── dev-sync.sh / dev-sync.ps1  # PR pipeline
+│   ├── audit.ts                    # Quality gate (workspace standard)
+│   └── dev-sync.ts                 # PR pipeline (workspace standard)
 └── docs/context.md         # Project context for AI tools
 ```
 
@@ -179,7 +179,7 @@ QuickDL/
 
 ```bash
 pytest tests/ -v        # All 111 tests
-bash scripts/audit.sh   # Quality gate (CHANGELOG, i18n parity, broken links)
+bun scripts/audit.ts --skip-memory   # Quality gate (workspace standard)
 ```
 
 ---

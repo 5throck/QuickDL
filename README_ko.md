@@ -1,3 +1,9 @@
+---
+lang: ko
+lang_reason: source-material
+sync_version: 1
+---
+
 # QuickDL
 
 데스크톱 앱, 시스템 트레이, 웹 UI, CLI를 갖춘 경량 YouTube 영상 다운로더입니다.
@@ -171,8 +177,8 @@ QuickDL/
 │   ├── test_verification.py      # 검증 게이트 테스트 (pytest, 목)
 │   └── test_env.py               # 의존성 확인
 ├── scripts/
-│   ├── audit.sh / audit.ps1        # 품질 게이트
-│   └── dev-sync.sh / dev-sync.ps1  # PR 파이프라인
+│   ├── audit.ts                    # 품질 게이트 (워크스페이스 표준)
+│   └── dev-sync.ts                 # PR 파이프라인 (워크스페이스 표준)
 └── docs/context.md         # AI 도구용 프로젝트 컨텍스트
 ```
 
@@ -182,7 +188,7 @@ QuickDL/
 
 ```bash
 pytest tests/ -v        # 전체 111개 테스트
-bash scripts/audit.sh   # 품질 게이트 (CHANGELOG, i18n 키 동기화, 링크 검사)
+bun scripts/audit.ts --skip-memory   # 품질 게이트 (워크스페이스 표준)
 ```
 
 ---

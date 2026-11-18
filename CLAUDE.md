@@ -28,7 +28,7 @@ At the start of every Claude Code session, run this checklist:
 
 Both the CLI and the Desktop App share the same `.claude/settings.json` and slash commands.
 
-> **Hook limitation**: `PostToolUse` hooks defined in `.claude/settings.json` do **not** fire in the Desktop App. After any Write/Edit, run `bash scripts/audit.sh` manually before committing.
+> **Hook limitation**: `PostToolUse` hooks defined in `.claude/settings.json` do **not** fire in the Desktop App. After any Write/Edit, run `bun scripts/audit.ts --skip-memory` manually before committing.
 
 > **Recommended split**: Use CLI for automated workflows (hook-driven audit, multi-step tasks). Use Desktop App for PR monitoring and visual review.
 
@@ -46,15 +46,15 @@ Both files are loaded automatically by Claude Code.
 
 ## Hooks
 
-A `PostToolUse` hook fires after every `Write` or `Edit` call and runs `scripts/sync-md.sh`, which delegates to `scripts/audit.sh`.
+A `PostToolUse` hook fires after every `Write` or `Edit` call and runs `bun scripts/hooks/post-write-lifecycle-check.ts` (workspace standard).
 
 | Environment | Hook fires? | Action if not |
 |-------------|:-----------:|---------------|
 | Claude Code CLI | —| Automatic |
-| Claude Code Desktop App | —| Run `bash scripts/audit.sh` manually |
-| Gemini CLI | —| Run `bash scripts/audit.sh` manually |
+| Claude Code Desktop App | —| Run `bun scripts/audit.ts --skip-memory` manually |
+| Gemini CLI | —| Run `bun scripts/audit.ts --skip-memory` manually |
 
-`audit.sh` checks: CHANGELOG.md existence 쨌 locale key parity 쨌 absolute path detection 쨌 broken markdown links 쨌 `.sh`/`.ps1` script pairing.
+`bun scripts/audit.ts --skip-memory` checks: documentation audit, docs manifest, broken markdown links, language policy, skill/agent/script registries (the full workspace gate suite).
 
 ---
 
@@ -100,13 +100,13 @@ git config core.hooksPath .githooks
 | Hook | Trigger | Action |
 |------|---------|--------|
 | `.githooks/pre-commit` | Every commit | Blocks if `CHANGELOG.md` not staged |
-| `.githooks/pre-push` | Every push | Runs `audit.sh`; aborts on failure |
+| `.githooks/pre-push` | Every push | Runs `bun scripts/audit.ts`; aborts on failure |
 
 ---
 
 ## Git
 
-Follow conventions in [`docs/context.md 짠 Git Conventions`](docs/context.md#git-conventions).
+Follow conventions in [docs/context.md — Git Conventions](docs/context.md#git-conventions).
 Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 Co-Authored-By: Gemini <noreply@google.com>`
 

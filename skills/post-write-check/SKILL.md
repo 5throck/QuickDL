@@ -4,8 +4,12 @@ description: >
   Use after ANY Write or Edit operation on QuickDL source files. Enforces the
   mandatory quality gate: audit → pytest → test_app. Trigger automatically
   after every code change, or manually when hooks are unavailable.
-version: 1.0.0
+version: 1.1.0
+last_reviewed: 2026-11-19
+status: active
+owner: qa
 ---
+scope: variant
 
 > ⚠️ **Desktop App / Gemini CLI**: `PostToolUse` hooks may not fire automatically.
 > Run `/post-write` manually after every Write or Edit in those environments.

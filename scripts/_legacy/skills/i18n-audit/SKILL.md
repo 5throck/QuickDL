@@ -5,8 +5,10 @@ description: >
   or when i18n.py changes. Verifies all 16 locale files have identical keys to
   en.json (baseline), checks SUPPORTED set in i18n.py, and issues a Parity Certificate.
 version: 1.0.0
+last_reviewed: 2026-11-19
+status: active
+owner: i18n-specialist
 ---
-
 # i18n Audit & Synchronization Protocol
 
 **Role**: i18n Expert (`agents/i18n.md`) — mandatory after any locale or i18n.py change.

@@ -13,15 +13,16 @@
 | `root/accessibility-audit` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/agent-lifecycle-manager` | L3 | 1.4.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L3 | 1.0.2 | — | — | — | — | — |
-| `root/ci-triage` | L3 | 0.2.0 | — | — | — | — | — |
+| `root/ci-triage` | L3 | 0.2.0 | root/automation-engineer | — | — | — | — |
 | `root/code-review` | L3 | 1.1.0 | root/code-writer | root/phase 4 | root/refactoring (composes_with) | — | — |
 | `root/decision-record` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/delegate-to-hub` | L3 | 1.0.1 | — | — | — | — | — |
-| `root/design-foundation` | L3 | 1.1.1 | — | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
+| `root/design-foundation` | L3 | 1.1.1 | root/design-system-lead | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
 | `root/documentation-writing` | L3 | 1.0.3 | — | — | root/team-builder (composes_with) | — | — |
 | `root/evidence-ledger` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/explain-me` | L3 | 1.0.1 | — | — | — | — | — |
-| `root/gateguard` | L3 | 1.0.2 | — | — | — | — | — |
+| `root/finishing-a-development-branch` | L3 | 1.0.2 | — | — | — | — | — |
+| `root/gateguard` | L3 | 1.0.2 | root/automation-engineer | — | — | — | — |
 | `root/handbook` | L3 | 0.6.0 | — | — | — | — | — |
 | `root/handbook-sync-audit` | L3 | 1.0.5 | — | — | — | — | — |
 | `root/i18n-audit` | L3 | 1.0.1 | root/i18n-specialist | — | — | — | — |
@@ -29,25 +30,27 @@
 | `root/i18n-layout` | L3 | 1.1.1 | root/i18n-specialist | — | — | — | — |
 | `root/i18n-locale-config` | L3 | 1.0.1 | root/i18n-specialist | — | — | — | — |
 | `root/meeting-facilitation` | L3 | 1.5.0 | — | — | — | — | — |
-| `root/post-write-check` | L3 | 1.0.0 | — | — | — | — | — |
+| `root/platform-command-lifecycle-manager` | L3 | 1.0.3 | — | — | — | — | — |
+| `root/platform-skill-lifecycle-manager` | L3 | 1.0.3 | — | — | — | — | — |
+| `root/post-write-check` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/project-review` | L3 | 1.3.2 | — | — | — | — | — |
 | `root/refactoring` | L3 | 1.2.0 | root/code-writer | root/phase 4 | root/code-review (composes_with) | — | — |
 | `root/research-analysis` | L3 | 1.0.2 | — | — | root/documentation-writing (enables) | — | — |
-| `root/script-lifecycle-manager` | L3 | 1.2.2 | — | — | — | — | — |
+| `root/script-lifecycle-manager` | L3 | 1.2.2 | root/automation-engineer | — | — | — | — |
 | `root/security-scan` | L3 | 1.3.0 | — | — | — | — | — |
 | `root/service-design` | L3 | 1.1.0 | — | — | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
 | `root/skill-lifecycle-manager` | L3 | 1.5.0 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
 | `root/source-command-commit-push-pr` | L3 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/swe-solve` | L3 | 1.1.1 | — | root/phase 4 | — | — | — |
-| `root/sync` | L3 | 1.10.0 | — | — | — | — | — |
+| `root/sync` | L3 | 1.10.0 | root/automation-engineer | — | — | — | — |
 | `root/team-builder` | L3 | 1.2.0 | — | — | — | — | — |
 | `root/test-driven-development` | L3 | 1.2.0 | root/test-runner | root/phase 4 | root/code-review (follows) | — | — |
 | `root/token-usage-lint` | L3 | 1.1.0 | — | — | root/ui-ux-design-intelligence (follows) | — | — |
 | `root/translate` | L3 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/ui-ux-design-intelligence` | L3 | 1.0.1 | — | — | root/documentation-writing (follows) | — | — |
 | `root/update-bun-packages` | L3 | 1.3.1 | — | — | — | — | — |
-| `root/zod-contract-gate` | L3 | 1.0.3 | — | — | — | — | — |
+| `root/zod-contract-gate` | L3 | 1.0.3 | root/contract-gate-engineer | — | — | — | — |
 
 ## Lifecycle Phase Grouping
 
@@ -97,11 +100,11 @@ None — every capability has a single content hash.
 | Type | Count | Nodes |
 |------|-------|-------|
 | agent | 5 | root/backend, root/frontend, root/i18n, root/qa, root/security |
-| skill | 6 | root/api-documentation, root/explain-me, root/gateguard, root/source-command-commit-push-pr, root/standup-synthesizer, root/zod-contract-gate |
+| skill | 7 | root/api-documentation, root/explain-me, root/finishing-a-development-branch, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer |
 
 ## Skills Without `used_by` (G6)
 
-31 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+28 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -117,4 +120,4 @@ Inferred from procedure steps that cite the skill and are owned via `step_by_age
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-19), window 90 days. Skill nodes with usage: 0.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (0): —
-- **unused** (0 sessions in 90 days) (38): root/accessibility-audit, root/agent-lifecycle-manager, root/api-documentation, root/ci-triage, root/code-review, root/decision-record, root/delegate-to-hub, root/design-foundation, root/documentation-writing, root/evidence-ledger, root/explain-me, root/gateguard, root/handbook, root/handbook-sync-audit, root/i18n-audit, root/i18n-formatting, root/i18n-layout, root/i18n-locale-config, root/meeting-facilitation, root/post-write-check, root/project-review, root/refactoring, root/research-analysis, root/script-lifecycle-manager, root/security-scan, root/service-design, root/skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/swe-solve, root/sync, root/team-builder, root/test-driven-development, root/token-usage-lint, root/translate, root/ui-ux-design-intelligence, root/update-bun-packages, root/zod-contract-gate
+- **unused** (0 sessions in 90 days) (41): root/accessibility-audit, root/agent-lifecycle-manager, root/api-documentation, root/ci-triage, root/code-review, root/decision-record, root/delegate-to-hub, root/design-foundation, root/documentation-writing, root/evidence-ledger, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/handbook, root/handbook-sync-audit, root/i18n-audit, root/i18n-formatting, root/i18n-layout, root/i18n-locale-config, root/meeting-facilitation, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/post-write-check, root/project-review, root/refactoring, root/research-analysis, root/script-lifecycle-manager, root/security-scan, root/service-design, root/skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/swe-solve, root/sync, root/team-builder, root/test-driven-development, root/token-usage-lint, root/translate, root/ui-ux-design-intelligence, root/update-bun-packages … and 1 more
