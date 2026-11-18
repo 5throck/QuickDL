@@ -11,3 +11,4 @@
 | [2026-10-30](2026-10-30.md) | feat: third co-deck round — caption coverage gate (`--require-caption-coverage`), sidecar cleaning pipeline (tag-strip/rolling-dedup/overlap-clip), swap/retire provenance (`--swap`, `retired[]`) — 111 tests pass, i18n 78-key parity |
 | [2026-11-16](2026-11-16.md) | chore: relicense QuickDL from AGPL-3.0 to MIT |
 | [2026-11-17](2026-11-17.md) | fix: strip UTF-8 BOM from 8 text files (docs, agent guides, ps1 scripts, .gitattributes) |
+| [2026-11-19](2026-11-19.md) | chore: sync session memory log (2026-11-17) |
