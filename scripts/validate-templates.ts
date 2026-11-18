@@ -1,0 +1,9404 @@
+#!/usr/bin/env bun
+/**
+ * Template Lifecycle Validation Script
+ * @version 1.86.0
+ *
+ * v1.86.0 (2026-11-18, spec docs/designs/2026-11-17-sync-auto-detection-design.md §5.1,
+ *          DEC-20261117-06; detection batch PR-C, T-20261118-001): new check `sync-detection` —
+ *          a variant.json `syncDetection` block (optional top-level key, absent = OFF per the
+ *          §5.1 gate ruling) is shape-checked wherever a variant.json is read: template
+ *          variants (Check 2 loop, B-07 arm) and delivered Projects/<name>/variant.json
+ *          (checkProjectSyncDetectionGates, the fleet-wide sibling of the ADR-0091 R3
+ *          country_config check). The shape ruling is reused verbatim from
+ *          parseSyncDetection (scripts/detect-backport.ts v1.0.0 — the SSOT the detector
+ *          itself runs, so the validator and the runtime gate can never diverge): non-object
+ *          block, non-boolean/missing `enabled`, `max_tickets_per_sync` outside 1..5 or
+ *          non-integer, and `retired_tokens` not an array of strings each FAIL loudly with a
+ *          clear message — a silently ignored misconfigured gate would defeat the opt-in
+ *          (detector treats a malformed block as OFF + WARN; the validator owns the FAIL).
+ *          A present-and-valid block passes; the absent key is a no-op (every project starts
+ *          OFF by omission). schema registration pin: the block is declared in
+ *          docs/workspace-schema.json variant_extensions._shared.syncDetection and its
+ *          hand-maintained L1 pair templates/common/docs/workspace-schema.json.
+ * v1.85.0 (2026-11-17, design docs/designs/2026-11-17-template-lifecycle-batch-design.md §4.2,
+ *          DEC-20261117-05; T-20261116-004 batch PR-5): `variant-common-shadow` gains the
+ *          `zone-override` allowlist class (O-9 Option A — checker-side, no delivery change).
+ *          For an entry { class: "zone-override", zones: [...] } both sides of the byte comparison
+ *          have their managed-zone content (VARIANT-ROLE-BOUNDARY in docs/governance/agents/
+ *          workflows.md — markers follow the shared `<!-- <zone>-START/END -->` convention of
+ *          helpers/scaffold-markers.ts / the docs-zone generator propagate-to-templates.ts B-A10)
+ *          replaced with an empty span BEFORE comparing: an in-zone-only delta normalizes
+ *          byte-equal and goes silent; divergence reaching outside the zones reports
+ *          `shadow-out-of-zone-drift` (WARN). Two structural assertions join the same check:
+ *          `shadow-common-zone-dirty` (common's zone is missing or carries content — zone content
+ *          belongs to variants; the canonical empty form is the B-A10 placeholder,
+ *          CANONICAL_EMPTY_ZONE_CONTENT) and `shadow-zone-nested-markers` (variant zone content
+ *          nests a managed marker — no nested merge semantics for docs zones). A zone-override
+ *          path missing its markers on either side fail-closes as out-of-zone drift. The `tracked`
+ *          class and its commonSha256 guard are unchanged. computeShadowSet takes the parsed
+ *          allowlist entries as a new optional 4th arg; classifyShadows takes the variant dirs as
+ *          a new optional 4th arg (variant-side zone reads); pure helpers
+ *          zoneMarkers/stripManagedZones/extractZoneContent/CANONICAL_EMPTY_ZONE_CONTENT exported.
+ *          The co-learning workflows.md allowlist entry converts tracked → zone-override in the
+ *          same PR (atomic switch, design §4.3); the template copy itself stays untouched. Version
+ *          takes 1.85.0 because v1.84.0 was consumed by DEC-20261117-07 (this design's §4.2
+ *          originally reserved it).
+ * v1.84.1 (2026-11-17, design docs/designs/2026-11-17-new-project-precheck-argv-design.md §3.1, T-20261117-009):
+ *          delete the two unconditional `TRACE mirror-check` / `TRACE verdict` console.log calls (since cd8a3e496)
+ *          that polluted stdout (260 lines, even with --json). No check semantics change; the classifier is now
+ *          pinned by a table test instead. (Design PR-5 zone-override work still takes v1.85.0.)
+ * v1.84.0 (2026-11-17, DEC-20261117-07, design docs/designs/2026-11-17-template-lifecycle-batch-design.md
+ *          Amendment 1; T-20261116-003 lifecycle PR-4): CV-02 gains a narrow convergence exemption — a
+ *          templates/co-<variant>/<rel> candidate whose head bytes are IDENTICAL to its common twin
+ *          templates/common/<rel> no longer fails, because "equal version ⇒ same content" is then true
+ *          again and the unbumped-edit hazard cannot occur. Absent or divergent twin still fails. No other
+ *          check changes. (Design PR-5 zone-override work now takes v1.85.0.)
+ * @version 1.83.0
+ *
+ * v1.83.0 (2026-11-16, design docs/designs/2026-11-16-ticket-batch-dev-sync-upgrade-drift-design.md §4, T-20261114-012):
+ *          new WARN-only check `variant-common-shadow` — a templates/co-* file that shadows a templates/common
+ *          file (same relative path, bytes differ after LF normalization) must be declared in the root-only
+ *          docs/templates/variant-shadow-allowlist.json (variant-owned | tracked + commonSha256). Reports
+ *          shadow-undeclared (one WARN per variant), shadow-common-moved, shadow-allowlist-stale. Never fails.
+ * @version 1.82.0
+ *
+ * v1.82.0 (2026-11-14, spec docs/designs/2026-11-14-consult-output-destination-and-constitution-refs-ruling.md
+ *          Wave B pin, U-20261113-009): new WARN arm `agents-md-output-destination-pin` — every template
+ *          AGENTS.md §7 must carry the Output Destination Mapping marker phrase ("Output Destination
+ *          Mapping in the project context doc"), the two-tier deliverable-routing sentence from the
+ *          consult-output-destination ruling. §7 is variant-body content with no propagation mechanism;
+ *          without the pin the 16-file wave can silently rot (agents-md-destructive-file-ops-pin precedent).
+ * @version 1.81.0
+ *
+ * v1.81.0 (2026-11-13, merge of parallel v1.80.0 waves U-20261112-013 + U-20261112-010): version consolidation — content unchanged from the two v1.80.0 notes below.
+ * v1.80.0 (2026-11-13, U-20261112-013): new check `hook-command-targets` — every
+ *          script-file target extracted from hook `command` strings in template
+ *          platform settings (common + every variant: .claude/settings.json,
+ *          .gemini/settings.json, .codex/hooks.json) must exist in the effective
+ *          template tree (the variant dir, else the templates/common fallback —
+ *          hooks are delivered by both layers). Resolves ${VAR}/ and $(...)/
+ *          prefixes; targets on upgrade-policy's TRAIL_RETIRED_SEEDS are skipped
+ *          (the graft-era seeds are deliberately deleted and their hook references
+ *          re-pointed by hook-dedupe — a retained reference is not a template
+ *          defect). Fail-on-missing: a dangling hook target ships a broken
+ *          session to every scaffold (the deleting-.trail/hook.cjs class passed
+ *          audit, parity and CI before this arm). Pure primitives
+ *          collectHookCommands / extractHookScriptTargets exported for tests.
+ *
+ * v1.80.0 (2026-11-13, U-20261112-010, design
+ *          docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-010): TB-01 arm widened —
+ *          (1) HERMES.md/CODEX.md trail parity (templates/common seed == variant copy where the
+ *          variant carries the file); (2) graft-era block detection (Error) in every instruction
+ *          file (AGENTS/CLAUDE/GEMINI/CODEX/HERMES) across templates/common + every variant — the
+ *          2026-11-08 fleet standard missed the 15 variant HERMES.md copies and
+ *          co-architect/CODEX.md, and the tool-owned block sits outside every managed zone so
+ *          nothing else saw the drift. Primitives: lib/trail-block-parity.ts v1.1.0.
+ * v1.79.1 (2026-11-12, design docs/designs/2026-11-12-sync-ownership-and-common-automation-engineer-design.md
+ *          D2/D5, AE-1): VA-02 WORKSPACE_ROOT_AGENTS drops automation-engineer, which becomes a
+ *          common agent (Medium) and may appear in variant AGENTS.md rows.
+ *
+ * v1.79.0 (2026-11-12, U-20261112-005 PR-1, design
+ *          docs/designs/2026-11-12-skill-lifecycle-record-delivery-design.md §4.6, D6/D10/D11):
+ *          new check SLR (skill lifecycle record coverage, parity, leak, owner) — evaluated by
+ *          generate-skill-lifecycle-records.ts evaluateSlr and gated by
+ *          scripts/skill-record-enforcement.json: enforce:false (the shipped state) reports WARN
+ *          lines only and never fails; enforce:true makes every finding an error. One line per
+ *          (rule, variant). Pure core unit-pinned by tests/unit/validate-templates-skill-records.test.ts.
+ *
+ * v1.78.0 (2026-11-11, DEC-20261111-01 PR-D, design
+ *          docs/designs/2026-11-11-upgrade-overwrite-protection-design.md §4.8 V1):
+ *          new blocking check CV-02 `same-version-content-change` — a modified
+ *          templates/** file (.ts/.mjs @version, SKILL.md/agents frontmatter version,
+ *          doc inline footer version) whose bytes differ from the base (CV02_BASE, else
+ *          merge-base HEAD origin/main, else HEAD) while its version is unchanged.
+ *
+ * v1.77.0 (2026-11-11, T-20261110-012 Scope C2 — DEC-20261110-04 PR-3, design
+ *          docs/designs/2026-11-10-delivery-gating-hardening-design.md §4 C-E):
+ *          new blocking check CV-01 `common-script-version` — every .ts under
+ *          templates/common/scripts/ (tests included) carries an @version header;
+ *          an unversioned common script can never pass upgrade-project's
+ *          SYNC_IF_NEWER gate. Named CV-01 because B-10 is the variant
+ *          scripts-layout check.
+ *
+ * v1.76.1 (2026-11-11, U-20261111-001 from co-deck, spec
+ *          docs/designs/2026-11-11-co-deck-upstream-fixes-design.md §U-001): drop the
+ *          module top-level `templates/ directory not found` guard and its
+ *          import-time process.exit(1). In a project (L3) root without templates/
+ *          that exit preempted main()'s own "not applicable" skip, so the direct
+ *          run exited 1 instead of 0. main() is now the only absence handler.
+ *          Also carries the graft-mcp-surfaces pattern extension (.agents/mcp.json
+ *          surface, enabledMcpjsonServers list entries, graft Bash/MCP permissions).
+ *
+ * v1.76.0 (2026-11-08, spec docs/designs/2026-11-08-graft-mcp-corrective-pass-design.md
+ *          R2, T-20261108-010): new check `graft-mcp-surfaces` — every template MCP
+ *          surface (common + each co-* dir: .gemini/settings.json, .codex/config.toml,
+ *          opencode.json, .mcp.json, .claude/settings.json) must carry ZERO graft-era
+ *          registrations (a `graft` server key, a [mcp_servers.graft] block, a graft
+ *          command, or an @nanonets/graft argv). The 2026-11-08 flip (#1927) emptied
+ *          these; this check pins it — a template re-introducing a graft registration
+ *          fails validation instead of silently shipping to scaffolds and JSON_MERGE
+ *          deliveries. Renaming-documentation prose (CODEX.md, design docs) is not
+ *          scanned.
+ *
+ * v1.75.0 (2026-11-08, spec docs/designs/2026-11-08-trail-fleet-standard-design.md
+ *          §5.4 — DEC-20261108-01 R1/R3): new arm `trail-block-parity` (TB-01) —
+ *          the AGENTS.md trail marker block (`trail:start/end`) is pinned across
+ *          the template tree: root (tool-written reference) == templates/common
+ *          (canonical L1 seed) == every variant, byte-identical after line
+ *          normalization. Error on template missing/duplicate/diverged; WARN on
+ *          root divergence (root's block is tool-owned — reconcileWiring
+ *          re-appends it, so a vendor text update lands at root first and the
+ *          WARN names the re-sync instead of fighting upsertSection). The block
+ *          sits outside every COMMON-zoned / WORKSPACE-MANAGED zone, so the pre-arm
+ *          state (2 of 16 template files, unvalidated) was invisible drift.
+ *          Primitives: scripts/lib/trail-block-parity.ts (new, unit-tested).
+ * v1.74.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+ *          §5.4 E2 + Addendum, DEC-20261107-02, T-20261107-005): new arm
+ *          `external-dep-license` — every external-deps.json seed (common +
+ *          co-*) is strictly parsed (schema v1/v2, R3 collisions) and gated:
+ *          license deny / undeclared / GPL-without-decision FAIL,
+ *          review-without-decision WARN; a NEW entry off external/<id> FAIL
+ *          (installed → WARN); adapter not delivered by the variant/common
+ *          tree FAIL; excluded component named on a template install surface
+ *          FAIL. Verdicts come from lib/external-deps.ts v1.1.0 (single policy
+ *          constant).
+ *
+ * v1.73.0 (2026-11-07, spec docs/designs/2026-11-07-fleet-membership-ssot-design.md
+ *          §5/§6.1, DEC-20261107-01): fleet membership SSOT —
+ *          checkProjectIdentityPlaceholders (A8) iterates actual fleet
+ *          members from lib/fleet.ts listFleetProjects() (Projects/co-*
+ *          minus the docs/fleet-membership.json exclusions) instead of
+ *          sweeping every Projects/* directory (co-abap-plugin was
+ *          previously swept with no co- filter at all — intended semantic
+ *          alignment per design §6.1). Malformed registry → FAIL row
+ *          (fail-closed). checkProjectCountryConfigDeclarations (A7)
+ *          unchanged — the variant.json gate already scopes out
+ *          non-member projects.
+ *
+ * v1.72.0 (2026-11-07, design docs/designs/2026-11-07-external-deps-machinery-design.md
+ *          D4 — implements the upstream external-dependency machinery): new FAIL arm
+ *          `external-dep-vendoring` — if any external-deps.json manifest
+ *          install_dir path exists as a real directory (or any file below one)
+ *          inside templates/common or a templates/co-* tree, validation FAILS.
+ *          This is the vendoring guard: the fastest way to detect a
+ *          `external/ppt-master/` accidentally committed into a template —
+ *          external code is cloned at scaffold time into a gitignored
+ *          project-local directory and never vendors into a template. Variant
+ *          promotion inherits the guard (it runs through this validation).
+ *          Detection core: scripts/lib/external-deps.ts v1.0.0
+ *          (findVendoredInstallDirs + extractInstallDirsLoose, loose parse so
+ *          the guard works on legacy/interim manifest shapes too).
+ *
+ * v1.71.0 (2026-11-05, design docs/designs/2026-11-04-project-loss-hardening-design
+ *          §5.4 / T-20261104-004 item 4): new WARN arm `agents-md-destructive-file-ops-pin`
+ *          — every template AGENTS.md §7 (templates/common + every co-* variant) must
+ *          carry the "Destructive File Operations" baseline bullet (the 2026-11-04
+ *          `rm -rf Projects` incident lesson: never recursive-delete a workspace path
+ *          that does or could contain .git children; dry-run list the resolved target
+ *          first; the ALLOW_RECURSIVE_DELETE=1 escape is for reviewed scripted cases only).
+ *          A missing §7 section or a missing marker phrase warns, so the multi-file §7
+ *          propagation wave cannot silently rot (design §5.4: PM-04b checks only the
+ *          COMMON-AGENTS marker zone — §7 variant parity was not machine-checked before).
+ *          Severity: WARN per design — visibility pin, no FAIL promotion.
+ *
+ * v1.70.0 (2026-11-01, spec docs/designs/2026-11-01-hub-consolidation-design.md
+ *          §2.4 Phase 1): additive hub_topology validator legs — new check
+ *          `checkHubTopology()` fired from main() after checkWorkspaceSchema(),
+ *          backed by the shared helpers/hub-topology.ts v1.0.0 (one derivation
+ *          shared with audit.ts's hub-resolve checker and hub-promotion.ts):
+ *          (1) hub-topology-shape — the registry section itself (enums, entry
+ *          shape, semver versions, hub capability refs) fail-closed;
+ *          (2) hub-dup-unregistered — a non-common skill/agent present in >1
+ *          variant templates must appear in hub_topology.entries or the
+ *          declared known_unregistered_duplicates soak (WARN; retire by
+ *          promotion batches B-D) — anything else FAILs; L1-common assets
+ *          (docs/templates/common-contract.json common_skills/common_agents)
+ *          are excluded because common delivery is inheritance, not
+ *          duplication; (3) hub-identity-clobber — a variant-identity entry's
+ *          asset must not exist in any foreign variant template (the PR #61
+ *          clobber class); (4) hub-consumer-min-version — a variant.json
+ *          hub.consumes {domain, minimum_version} resolved against registry
+ *          entries FAILs when the canonical is older than the declared
+ *          minimum (vacuously green while entries[] is empty). With the
+ *          registry landed empty + the 20-row pre-registry duplicate soak
+ *          declared, the battery stays green today and the legs activate as
+ *          batches B-D land entries.
+ *
+ * v1.69.0 (2026-11-01, T-20261101-003 — spec
+ *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+ *          §R2.2): MM-01 LITERAL alternation retires the retained
+ *          `gpt-5\.6-(?:sol|terra|luna)` alternatives — the L3 tier-vocabulary
+ *          convergence window closed 2026-11-01 (all 16 projects at 0.26.0,
+ *          0 gpt-5.6 literals in delivered md surfaces), so the old ids now
+ *          FAIL loudly outside managed sections instead of being tolerated.
+ *          The generalized Codex family arm `gpt-\d+(?:\.\d+)?-` in
+ *          lib/model-literal-patterns.ts (Check MM / sync side) is unchanged.
+ *          No other check changes.
+ *
+ * v1.68.0 (2026-11-01, spec docs/designs/2026-10-31-template-security-hardening-design.md
+ *          Addendum 2026-11-01): new WARN arm `gemini-execution-policy-floor`, run inside
+ *          the VA-04 platform settings parity pass — a variant gemini overlay's
+ *          `terminal.executionPolicy` must not rank weaker than common's
+ *          (Off > Manual > Auto ordering). The overlay wins over common in the effective
+ *          template tree, so a weak overlay silently defeats the common hardening floor
+ *          (observed: the 2026-10-31 wave reached only the overlay-less project, and
+ *          co-security's overlay re-regressed its hardened Manual policy to Auto).
+ *          Missing/unknown values skip (shared-key loop and schema checks own those);
+ *          at-or-above-floor values pass. Severity: WARN per ADR-0055 soak.
+ *
+ * v1.67.0 (2026-10-31, T-20261031-005 — spec
+ *          docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+ *          §R2.2 surface 6): MM-01 LITERAL alternation gains the GPT-6.x ids
+ *          (`gpt-6\.1-(?:sol|terra)` + `gpt-6-luna`) so the codex column
+ *          rebase keeps matching; the `gpt-5\.6` alternatives were KEPT through
+ *          the L3 convergence window — delivered-side stragglers kept FAILing
+ *          loudly (visible, not silent) until their upgrade visit normalized
+ *          them (retired 2026-11-01 post-convergence, T-20261101-003, in
+ *          v1.69.0). No other check changes.
+ *
+ * v1.66.0 (2026-10-31, U-20261029-004 — spec
+ *          docs/designs/2026-10-31-variant-generators-design.md §6.3):
+ *          additive generator-manifest arm — when a variant template declares
+ *          `scripts/<variant>/generators.json`, validate it through the shared
+ *          loader library (lib/generator-manifest.ts: strict parse, name
+ *          uniqueness, array-form command with `bun` as argv[0],
+ *          outputs/sources project-relative and traversal-free, size caps,
+ *          script-path existence + symlink containment against the variant
+ *          root). Absent file → no check (the manifest is project-authored
+ *          and optional; absence must never become a template-validation
+ *          failure for existing variants). Runs beside Check B-10 in the
+ *          stable-variant loop as check id 'generator-manifest'.
+ *
+ * v1.65.0 (2026-10-29, U-20261028-014 — spec
+ *          docs/designs/2026-10-29-owner-decision-batch-design.md §2):
+ *          variant-designlint shape check (Check 2) — when a template's
+ *          variant.json declares a `designLint` block it must be
+ *          { enabled: boolean (required), scanRoots?: string[],
+ *          allowlist?: string[] } (same rule as audit.ts's gate via
+ *          helpers/design-lint-roots.ts v1.1.0 validateDesignLintOverride;
+ *          restated inline — this validator does not import audit helpers).
+ *          Absent block stays valid (the override is opt-in per variant).
+ *
+ * v1.64.0 (2026-10-28, spec docs/designs/2026-10-28-platform-agent-mirror-design.md,
+ *          DEC-20261028-06 §4.1): WS-01 Check 8 — platform_surfaces registry
+ *          shape check. The docs/workspace-schema.json capability block must:
+ *          be present; carry exactly the validate-model-registry.ts PLATFORMS
+ *          platform set; give every agents/skills/commands/hooks row a boolean
+ *          `supported`; carry an `evidence` string on every supported:false row;
+ *          and stay in lockstep with scripts/sync-agent-mirrors.ts
+ *          PLATFORM_AGENT_ADAPTERS (supported agents rows ↔ adapters, both
+ *          directions). Imports the two consumers — both L0+L1 delivered, so
+ *          the L1 twin's import closure holds.
+ *
+ * v1.63.0 (2026-10-28, spec 2026-10-28-l0-only-governance-doc-cleanup,
+ *          DEC-20261028-05): the workspace-schema.json L0↔L1 parity checks
+ *          (schema-hash-parity / ws-schema-l1-parity) normalize the SINGLE
+ *          sanctioned L1 divergence — the L1 copy drops the stale
+ *          context.md rootAllowlist entry (no scaffolded project carries
+ *          that file, §7.5 non-propagation) and records
+ *          _notes.root_allowlist_divergence. The pair is hand-maintained
+ *          (ADR-0069 — no propagation domain covers it; the T-20261026-017
+ *          "delivered by propagation" premise was wrong). Any divergence
+ *          beyond that documented delta still fails both checks.
+ * v1.62.0 (2026-10-27, T-20261027-002): new ERROR check C-CM-06 — forward
+ *          path-existence for every declared common_commands/common_platform_skills
+ *          *_source path: a '.'-prefixed value must resolve under templates/common/
+ *          (13 of 154 declarations pointed at non-existent mirrors — .md vs .toml
+ *          gemini commands, .agents/commands without an L1 mirror — while carrying
+ *          propagated_to_common:true; the contract-path check makes that fail
+ *          mechanically next time). Non-'.' values are exclusion prose records
+ *          (gateguard precedent) and skip.
+ * v1.61.0 (2026-10-27, T-20261027-001): new Error arm `agent-quality-recursive` —
+ *          recursive scan of every templates/<common|co-*>/agents/ tree (covers
+ *          co-safety's nested agents/domains/** and agents/_shared/** layout):
+ *          (a) exactly one scalar `tier: high|medium|low` per non-README,
+ *          non-underscore, non-extends agent file (ADR-0102; map form, invalid
+ *          scalar, or missing declaration FAILs — extends stubs skip, their tier
+ *          resolves via the chain in roster-tier-consistency); (b) body
+ *          completeness via validate-agents.ts agentBodyCompletenessFinding
+ *          (>= 40 non-empty body lines, >= 4 `## ` sections). Closes the gap
+ *          where 37 map-form tier files + 23 stub-quality bodies under co-safety's
+ *          nested trees survived every flat-scan gate until the nightly scaffold
+ *          E2E caught them (validate-agents.ts is a project-cwd flat scan; Check
+ *          3-4 enforces only the 2-section bar).
+ *
+ * v1.60.0 (2026-10-26, ADR-0102 / T-20261026-018, user ruling 2): WS-01
+ *          Check 4 (agents/*.md tier frontmatter vs schema `agent_tiers`) is
+ *          RETIRED — `agent_tiers` is removed from docs/workspace-schema.json
+ *          and the agent file's scalar `tier:` declaration is the single
+ *          source (tier-declaration validity moved to
+ *          validate-model-registry v2 per design
+ *          docs/designs/2026-10-26-model-registry-platform-coverage-design.md
+ *          §7). The ws-schema-missing hint no longer names agent_tiers.
+ *          WS-01 Checks 0–3 (L1 parity, pm_owned, phase definitions,
+ *          constitution phase count) are unchanged.
+ *
+ * v1.59.0 (2026-10-26, T-20261026-011, spec
+ *          docs/designs/2026-10-26-project-review-remediation-design.md D4):
+ *          new Error arm `l1-import-closure` (IC-01) — every static relative
+ *          import (import/export ... from './…'/'../…', plus side-effect
+ *          import './…') in every .ts under templates/common/scripts/
+ *          (recursive; `_`-prefixed fixture files/dirs and node_modules
+ *          excluded per registry convention) must resolve Bun-style (exact
+ *          path, then +.ts, then /index.ts) to an existing file WITHIN that
+ *          tree. Closes the A1 gap: every standing gate evaluates the L0
+ *          copy where the import resolves, so the 2026-10-25 broken pair
+ *          (L1-delivered scripts importing the L0-only
+ *          lib/platform-skeleton-merge.ts) shipped through every gate
+ *          unnoticed. Workspace-root-only — delivered copies self-skip via
+ *          existsSync (check-upgrade-coverage convention); fix policy per
+ *          ADR-0073 Amendment 4: deliver the module (leaf pure-module class)
+ *          or drop the import (engine class stays L0-only).
+ *
+ * v1.58.0 (2026-10-25, spec docs/designs/2026-10-25-managed-platform-skeleton-design.md,
+ *          ADR-0101): new Error arm `skeleton-registry` (SK-01) — every
+ *          MANAGED_SKELETON_SECTIONS heading (lib/platform-skeleton-merge.ts)
+ *          must exist in templates/common/{CLAUDE,GEMINI}.md exactly once,
+ *          OUTSIDE all COMMON-* zones, in registry order, with unique section
+ *          numbers in the template's out-of-zone skeleton. Guards the
+ *          template-side SSOT of the upgrade MERGE pass's new out-of-zone
+ *          skeleton delivery (template rot must fail at L0 before any
+ *          release, not degrade the nightly wave into ANCHOR NOT FOUND skips).
+ *
+ * v1.57.0 (2026-10-14, T-20261014-001): P-02 root↔common commands parity is
+ *          STEM-normalized and toml-aware — the .gemini/commands dirs were
+ *          converted to .toml, so the bare .endsWith('.md') filters made both
+ *          legs empty and the parity passed vacuously. Both sides now list
+ *          .md/.toml, compare stems, and keep the new-project workspace-only
+ *          special case (gemini-parity: skip).
+ *
+ * v1.55.0 (2026-10-11, T-20261011-002): checkVariantPackageContract crash fix —
+ *          the per-variant verdict re-parsed templates/common/package.json
+ *          UNGUARDED, so an unparseable common manifest crashed the whole
+ *          validator at the first variant (triage destroyed, remaining variants
+ *          unchecked). The common parse is now cached once; a failed parse
+ *          early-returns per variant with the recorded 'common' fail only.
+ *
+ * v1.54.0 (2026-10-09, T-20261009-002, design docs/designs/2026-10-09-scaffold-package-merge-and-baseline-surfacing-design.md D2):
+ *          new VA-08 scaffold-package-contract — common package.json retains the Tier 2 trio
+ *          (audit/dev-sync/sync-md); every variant package.json parses and simulates the
+ *          v1.35.0 scaffold merge into a trio-superset. Complements the nightly E2E
+ *          (Test 11) whose conclusion review-baseline battery #8 now surfaces.
+ * v1.53.0 (2026-10-08, skill-graph v2 E2, design docs/designs/2026-10-08-skill-graph-v2-scoped-identity-design.md §7):
+ *          new WARN arm `skill-graph-version-drift` — reads docs/skill-graph.json through the compat
+ *          loader and reports skill capabilities whose scoped nodes share a version but differ in
+ *          content hash (the version no longer identifies the content), using the same helper as
+ *          verify-skill-graph.ts (lib/skill-graph-compat.ts findCapabilityDivergence). WARN only.
+ *
+ * v1.52.0 (2026-10-08, T-20261007-015 urgent): variant-mirror-parity gains the
+ *          inVariant stale-copy arm — a variant-owned mirror SKILL.md older than
+ *          its skills/ SSOT now FAILS (the co-deck html-build 1.5.0-vs-1.6.0
+ *          class passed every gate because the inVariant arm hit `continue`);
+ *          VA07_MIRROR_DIRS gains `.hermes` (existence-guarded per variant) so
+ *          the version-sync check covers all five platform mirrors; the
+ *          platform-mirror-freshness pass message says five.
+ * v1.50.5 (2026-10-03, design 2026-10-03-validator-warning-fixes-design):
+ *          repoint size-budget Fix string to HERMES.md "Hermes Platform Mechanics" +
+ *          context.md §11; v1.50.4 (2026-10-02): pointer-integrity strips the
+ *          #anchor fragment before the file existence check — anchored references
+ *          misclassified as post-scaffold-only WARNs.
+ * v1.50.3 (2026-10-02): C-SK-02 allowedWithExtends gains `tier` and `model` — the PM
+ *          Tier Semantics fields (design 2026-09-29) are documented optional fields that the
+ *          11 variant pm.md extends-stubs legitimately carry; the WARNs were schema lag.
+ *
+ * v1.50.2: When templates/common is absent (variant or project context), main() returns 0 and reports "not applicable" in JSON and text modes.
+ * v1.48.0 → v1.49.0 (2026-09-28, sound-synth orphan-mirror follow-up — spec
+ *         docs/designs/2026-09-28-sound-synth-orphan-mirror-cleanup-design.md
+ *         §5 blind-spot note): B-11 widened from the canonical templates/common/
+ *         skills/ tree to the five platform mirrors (.claude/.gemini/.agents/
+ *         .codex/.hermes/skills) via variantScopedSkillLeaks (pure, exported) —
+ *         the 2026-09-06-class sound-synth orphans survived in exactly those
+ *         mirrors (l2_propagate:false copies contradicting the variant-overlay
+ *         re-delivery) because the original check never scanned them. Severity
+ *         stays fail (a mirror leak actively breaks the nightly scaffold E2E's
+ *         Test 26 delivery parity). Day-one green: 0 leaks across the common
+ *         tree post-cleanup (PR #1162).
+ * v1.46.1 (2026-09-26, ADR-0090 program closure — design Addendum 3): the
+ *         size-budget arm's WARN message and header note record the user
+ *         decision that the W4 FAIL promotion is cancelled and the budget
+ *         stays a WARN-level visibility metric permanently.
+ * v1.46.0 (2026-09-26, ADR-0090 W0): two WARN-stage arms precede the AGENTS.md
+ *         thin-dispatcher restructure — `agents-md-size-budget` (every
+ *         AGENTS.md ≤15,000 chars at L0/L1/L2; per user decision 2026-09-26
+ *         (design Addendum 3) this stays a WARN-level visibility metric — the
+ *         W4 FAIL promotion is cancelled) and
+ *         `agents-md-pointer-integrity` (markdown references to
+ *         docs/governance/*.md, docs/constitution/*.md and the layer's
+ *         context.md must resolve on disk; multi-base resolution: workspace
+ *         root, templates/common, layer dir). Vacuous until W1 populates
+ *         pointers — by design (C: validators precede restructuring).
+ * v1.44.0 → v1.45.0 (2026-09-25, registry & platform-policy completeness batch
+ *          — spec docs/designs/2026-09-25-registry-policy-completeness-design.md,
+ *          W5/R5.6): new VA-08 skill-registry-sync check — one cross-surface
+ *          pass over every skill registry table (root Workspace Skills rows,
+ *          root Variant-Exclusive catalog, common scaffold seed, curated
+ *          variant registries) via collectWorkspaceRegistryFindings
+ *          (skills-registry helper v1.2.0), asserting rows match the SKILL.md
+ *          frontmatter they document. Wired once in the main flow next to the
+ *          mirror-parity checks. Severity: WARN per ADR-0055 soak.
+ *          TODO(promotion): flip VA-08 findings to fail when
+ *          tickets/governance/T-20260925-007.yaml promotes (not_before 2026-10-09).
+ * v1.43.0 → v1.44.0 (2026-09-25, registry & platform-policy completeness batch
+ *          — spec docs/designs/2026-09-25-registry-policy-completeness-design.md,
+ *          R3): new VA-07 variant-mirror version-sync check (verifier-expansion
+ *          §17.1 advisory A1 follow-up) — collectMirrorVersionMismatches (pure,
+ *          exported) compares SKILL.md frontmatter versions across a variant's
+ *          .claude/.gemini/.agents/.codex mirror skills (present in >= 2
+ *          mirrors; missing version is a finding), cross-checks curated
+ *          skills/SKILLS.md registry rows where they exist (mirror-only
+ *          adapted copies skipped), honors the VA-03 mirror-parity: skip /
+ *          gemini-parity: skip vocabulary, and is wired beside VA-03 in the
+ *          stable-variant loop. Severity: WARN soak per ADR-0055 — promotion
+ *          ticket T-20260925-006 (not_before 2026-10-09, separate from
+ *          T-20260925-002 whose enumerated scope stays intact). Day-one green:
+ *          0 mismatches across the 13-variant fleet.
+ * v1.42.0 → v1.43.0 (2026-09-25, inventory decisions batch — spec
+ *          docs/designs/2026-09-25-inventory-decisions-batch-design.md,
+ *          T-20260924-002 R1.3-R1.5): C-CM-04 platform-skills sweep consumes
+ *          the contract's new common_platform_skill_exclusions section (five
+ *          documented exclusions: create-variant/promote-variant/simulate-
+ *          pipeline L0-only, graft claude-only, sound-synth variant-scoped);
+ *          a stale exclusion (dir gone from every mirror tree) FAILs;
+ *          PLATFORM_SOURCE_KEYS gains codex_source (C-CM-03b now verifies
+ *          .codex mirror-copy version parity for all 22 entries); the
+ *          exemptSkills build uses variant_scoped_skills VALUES (skill names)
+ *          instead of keys (variant names), aligning with C-CM-05 semantics.
+ *          Pure helpers exported for unit test: collectSchemaExemptSkills,
+ *          unlistedPlatformSkillDirs, stalePlatformSkillExclusions.
+ * v1.41.0 → v1.42.0 (2026-09-25, variant hygiene batch — spec
+ *          docs/designs/2026-09-25-variant-hygiene-batch-design.md, R4):
+ *          new `variant-agent-references` check (T-20260924-007c) — every
+ *          agent reference in templates/co-<v>/AGENTS.md and the variant
+ *          scripts tree (agents/<name>.md path refs +
+ *          backtick `<name>` agent mentions) must resolve at
+ *          templates/<v>/agents/, templates/common/agents/, or the workspace
+ *          root agents/. Catches the stack setup phantom class (10 variant
+ *          AGENTS.md copies + co-abap setup.ts shipped guidance naming an
+ *          agent the variant never had). Pure cores exported for unit test
+ *          (T-004 convention): classifyAgentReference (resolution decision,
+ *          explicit AGENT_REFERENCE_EXEMPT escape hatch) +
+ *          extractAgentReferenceCandidates (path/backtick extraction with
+ *          line numbers). Wired next to WS-05a in the per-variant loop.
+ *          Severity: WARN per ADR-0055 soak — dated WARN->FAIL promotion
+ *          ticket filed at implementation (see the PR).
+ * v1.41.0 (2026-09-25, platform verifier expansion — spec
+ *          docs/designs/2026-09-25-verifier-platform-expansion-design.md,
+ *          sites 3a-3e/3g + R6): command checks gain the .codex/prompts mapping
+ *          leg (C-CM-04 codex coverage derived from `source` per Ruling K;
+ *          .agents/commands excluded per Finding D); C-CM-04 platform-skills
+ *          sweep iterates all four mirror trees; VA-03 becomes 4-mirror parity
+ *          with the skip marker generalized (mirror-parity: skip, gemini-parity:
+ *          skip accepted as legacy alias); P-01b gains an existsSync-guarded
+ *          CODEX.md leg; new mirror-hygiene check (mirrors carry only skill
+ *          directories). Net-new coverage soaks in WARN per ADR-0055.
+ * v1.39.0 (2026-09-24, scaffold identity overview — spec
+ *          docs/designs/2026-09-24-scaffold-identity-overview-design.md):
+ *          new `project-identity-placeholder` — fleet-level, WARN-only sweep of
+ *          every delivered Projects/<name>/docs/ pair, reusing audit.ts's
+ *          live-placeholder regex family (no new marker vocabulary): a project
+ *          docs/project.md still carrying the TODO(project-overview) identity
+ *          fallback, or a docs/context.md still carrying literal template
+ *          placeholders (pre-2.13 residue), warns until the project team fills
+ *          the identity seed. The regrowth-prevention sibling of
+ *          T-20260924-004/007 for the identity class; per-project counterpart
+ *          lives in audit.ts v2.41.0.
+ *
+ * v1.38.1 (2026-09-23, 2026-09-23-upgrade-engine-l0-only-completion-design):
+ *          C-SK-02 allowedWithExtends gains `description` — the persona-integrity
+ *          field (validate-agents 1.3.2) required on extends-stubs whose extends
+ *          cannot resolve in project layout; the 2026-09-23 fleet repair inlined
+ *          the base persona's description into all 13 variant pm.md stubs.
+ *
+ * v1.38.0 (ADR-0077 twin parity): new VA-06 cross-twin common section parity — the
+ *           three instruction twins (CLAUDE/GEMINI/CODEX at root and templates/common)
+ *           must each carry the shared policy anchors (Language Policy, Execution Plan
+ *           Boilerplate, 3-Tier Cost Optimization, Error Recovery, Windows, Git & PR).
+ *           Catches a policy section landed on two twins but never ported to the third
+ *           (the 2026-09 CODEX.md Language Policy gap VA-05 cannot see).
+ *
+ * v1.36.0 (ADR-0081 fleet sweep / T-20260919-001): new `common-agents-parity`
+ *           (PM-04b) — every variant templates/co-<v>/AGENTS.md must carry the
+ *           COMMON-AGENTS:START/END marker-inject zone with normalized content
+ *           identical to templates/common/AGENTS.md's. Closes the PM-04 gap:
+ *           the keyed WORKSPACE-MANAGED extraction never covered the key-less
+ *           COMMON-AGENTS zone, so all 13 variant blocks went stale (missing
+ *           the ADR-0080 authority section) while the validator stayed green —
+ *           discovered during the 2026-09-19 fleet sweep. Primitives:
+ *           lib/managed-block-parity.ts 1.2.0 (extractCommonAgentsBlock,
+ *           compareCommonAgentsBlock). Severity: Error.
+ *
+ * v1.35.0 (2026-09-17-governance-backlog-batch-design.md): T-20260917-009.
+ *          WS-07 now derives its forbidden-file list from the upgrade-policy
+ *          SCAFFOLD_COMMON_OWNED_FILES classification instead of hard-coding
+ *          docs/context.md — the same SSOT new-project's variant overlay
+ *          skips, so a new common-owned file is enforced and skipped
+ *          atomically (design T-005 acceptance).
+ *
+ * v1.34.0 (2026-09-17-governance-backlog-batch-design.md): T-20260917-001.
+ *          `managed-block-parity` (PM-04) now enforces common→variant parity
+ *          over every MERGE_MANAGED file (lib/upgrade-policy.ts SSOT export)
+ *          whose common copy carries keyed WORKSPACE-MANAGED blocks — was
+ *          AGENTS.md only while upgrade MERGE unions CLAUDE.md, GEMINI.md,
+ *          .gitignore, and agents/pm.md too (project-review finding #3: same
+ *          silent-drift class everywhere else). Per-file absence policy: a
+ *          variant AGENTS.md must exist (unchanged); any other MERGE_MANAGED
+ *          file may be absent — the scaffold lays down the common copy and
+ *          the variant overlay never fires (co-hr/co-safety ship no
+ *          .gitignore by design). A variant agents/pm.md extends-stub
+ *          delivers the common body through stub resolution (new-project
+ *          §2.3b), so stubs are exempt from marker-wrapped parity
+ *          (isExtendsStub, lib/managed-block-parity.ts v1.1.0).
+ *
+ * Validates template variants for structural integrity.
+ * Follows the same pattern as agent-lifecycle-audit.ts
+ *
+ * Usage:
+ *   bun scripts/validate-templates.ts
+ *   bun scripts/validate-templates.ts --variant co-develop
+ *   bun scripts/validate-templates.ts --json
+ *
+ * v1.33.0 (2026-09-16-template-tree-infra-consistency-design.md):
+ *          T-20260916-001 + T-20260916-008. (1) Every templates/ enumeration
+ *          site now skips transient E2E fixture dirs via the shared
+ *          isTransientTestFixture predicate (helpers/scaffold-markers.ts) —
+ *          defense in depth so a validator running while
+ *          test-l3-to-variant-promotion stages fixtures under templates/
+ *          can neither pollute docs/templates/VERSION_REGISTRY.json via
+ *          B-07 nor fail on fixture-shaped variants. (2) New standing
+ *          check `platform-mirror-freshness` — every skill present in BOTH
+ *          a templates/common/.{claude,gemini,agents,codex}/skills mirror
+ *          and the skills/ SSOT must carry the same version (pure logic in
+ *          lib/platform-mirror-freshness.ts); T-008 found upgrade-project
+ *          stale at 1.4.1 in three mirrors because the propagator's
+ *          claude/gemini/agents scope-skip did not apply to codex.
+ *
+ * v1.32.0 (2026-09-16-scaffold-fresh-audit-remediation-design.md): T-20260916-009
+ *          + T-20260916-010. New `managed-block-parity` — every
+ *          `<!-- WORKSPACE-MANAGED: <key> -->…<!-- /WORKSPACE-MANAGED -->`
+ *          block present in templates/common/AGENTS.md must exist, wrapped,
+ *          in EVERY templates/co-* variant AGENTS.md with content parity
+ *          (set-of-normalized-contents per key; duplicates are legitimate —
+ *          common itself carries two tier-model-mapping blocks). Missing key,
+ *          missing wrapped copy, or divergent content = Error with fix hint.
+ *          This closes the T-009 delivery-channel gap: §3.6 sits outside the
+ *          COMMON-AGENTS marker-inject zone, so a stale unwrapped variant
+ *          block silently scaffolded a 2-model §3.6 into every fresh project
+ *          (40 audit FAILs in the 2026-09-16 co-develop scaffold test). New
+ *          `variant-version-manifest` — variant templates must NOT ship
+ *          docs/VERSION_MANIFEST.md; the stub class is retired and the full
+ *          manifest is scaffold/upgrade-owned (new-project §7.8 generation,
+ *          upgrade-project post-upgrade regeneration, upgrade-policy
+ *          REGENERATED_FILES). T-010 root cause: the stub tripped both the
+ *          skills↔manifest parity check (37 FAILs) and the --check drift gate
+ *          in the fresh scaffold's own audit, while co-abap/co-price shipped
+ *          no stub at all — inconsistent either way.
+ *
+ * v1.31.0 (2026-09-16-propagation-target-derivation-design.md): T-20260915-005
+ *          (M8). New `propagation-targets` (PM-03) — the hand-maintained
+ *          propagation target lists can no longer silently miss the next new
+ *          variant. For every marker-inject domain in propagation-map.json the
+ *          domain is classified structurally by its target-file shape:
+ *          variant-scoped (target_file absent → basename-of-source default, or
+ *          carries {variant}) must satisfy target_variants ⊎ exclude_variants
+ *          ≡ the actual templates/co-* directory set, disjoint (new optional
+ *          per-domain exclude_variants field declares deliberate non-targets;
+ *          distinct from PM-02's excluded_variants = adjudicated divergent
+ *          copies); fixed-target domains (fixed relative target_file, e.g.
+ *          constitution-context → docs/context.md) are validated against their
+ *          own declared shape — every listed target must be an existing
+ *          template directory carrying the resolved target file.
+ *          docs/templates/common.lifecycle.json propagatedTo must also equal
+ *          the derived co-* set in both directions. All violations are
+ *          Errors with fix hints naming the exact JSON pointer.
+ *
+ * v1.30.0 (2026-09-16-scaffold-delivery-validation-design.md): Wave 2
+ *          scaffolder-validation batch T-20260915-002 (C3) + T-20260915-010
+ *          (H12). New `scaffold-marker-source` — every (marker, source
+ *          template) pair declared in helpers/scaffold-markers.ts
+ *          SCAFFOLD_MARKER_SOURCES must exist in its source file; a marker
+ *          referenced by the scaffolders but absent from its source template
+ *          is the C3 silent-no-op class (the graft-block injection once
+ *          searched a renamed marker and silently appended nothing). New
+ *          `pm-extends-stub-body` — every variant templates/co-<slug>
+ *          agents/pm.md declaring `extends:` must carry the canonical stub
+ *          body (empty or the canonicalPmStubBody sentence); a non-canonical
+ *          body is real variant content that scaffold-time resolution
+ *          silently discards (H12; the matching scaffold-time WARN lives in
+ *          new-project.ts §2.3b).
+ *
+ * v1.29.0 (2026-09-16-registry-version-parity-hardening-design.md): validator-
+ *          hardening batch T-20260915-013 (H10) + T-20260915-001 (H8). New
+ *          C-CM-03b — contract common_platform_skills version parity: each
+ *          entry's contract version must equal the SKILL.md frontmatter version
+ *          of the propagated copy under templates/common/<platform>/skills/ for
+ *          every declared platform tree (Check H in verify-platform-lifecycle.ts
+ *          is exists-only), and a skill double-registered in common_skills AND
+ *          common_platform_skills must carry the same version in both sections
+ *          (9 skills are double-registered). The C-CM-04 reverse coverage sweep
+ *          now also covers the templates/common/.gemini/skills/ tree (previously
+ *          .claude-only). checkL0L1ScriptParity gains l0-l1-scripts-registry-
+ *          version — for every script name registered in BOTH SCRIPTS.md
+ *          registries the Version cells must be identical (the L1 registry is
+ *          hand-maintained and excluded from content parity, so its Version
+ *          cells went stale across three bump rounds; reconciled in PR #929).
+ *
+ * v1.27.0 (2026-09-15-agent-metadata-drift-check-design.md): new C-CM-03a —
+ *          contract common_agents versions must match templates/common/agents/
+ *          frontmatter (agent counterpart of the C-CM-03 skills version check),
+ *          so an agent version bump can no longer leave common-contract.json
+ *          silently stale.
+ *
+ * v1.25.0 (T-20260912-014 / T-20260912-019): manifest reverse reconciliation —
+ *          exists→declared direction added for script_manifest.local (files under
+ *          the variant's scripts/<variant>/ top level not declared → WARN, grace
+ *          window before a later FAIL decision) and for agents[] (top-level
+ *          agents/*.md not declared → WARN; agents/domains/ and agents/_shared/
+ *          trees are out of scope — they are indexed via the variant's AGENTS.md,
+ *          matching resolve-variants.ts's top-level scan semantics). L0/L1 script
+ *          parity now also covers .json files (propagation-map.json's L1 copy was
+ *          skipped by the old .ts/.md-only filter while the scrub bug of
+ *          T-20260912-005 silently corrupted it). scrubConstitutionRefs now
+ *          imported from the shared scripts/lib/constitution-scrub.ts (also fixes
+ *          the L1 mirror's dangling import of the L0-only propagate-to-templates).
+ *          main() returns the exit code; process.exit only at the import.meta.main
+ *          call site, so the module is import-safe.
+ */
+
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, type Dirent } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
+
+const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
+  try {
+    const out = execFileSync("git", ["ls-files", "--cached", "--", "templates/"], { encoding: "utf-8" }).trim();
+    const dirs = new Set<string>();
+    if (!out) return dirs;
+    for (const line of out.split("\n")) {
+      const m = line.match(/^templates\/(co-[^/]+)\//);
+      if (m) dirs.add(m[1]);
+    }
+    return dirs;
+  } catch {
+    return null;
+  }
+})();
+
+function isCoVariantTracked(name: string): boolean {
+  if (!_TRACKED_CO_VARIANTS) return true;
+  return _TRACKED_CO_VARIANTS.has(name);
+}
+import { join, dirname, resolve, basename, relative, isAbsolute } from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import { load } from "js-yaml";
+import { parseSkillRegistryRows, collectWorkspaceRegistryFindings } from "./helpers/skills-registry.ts";
+import {
+  getScriptLayer,
+  getSkillLayer,
+  includeScriptInL1,
+  parseScriptLayers,
+  parseSkillLayers,
+} from "./helpers/layer-filter.ts";
+import { isTransientTestFixture } from "./helpers/scaffold-markers.ts";
+import { scanMirrorHygiene } from "./helpers/mirror-hygiene.ts";
+import {
+  loadHubTopology,
+  validateHubTopologyShape,
+  findCrossVariantDuplicates,
+  checkUnregisteredDuplicates,
+  checkVariantIdentity,
+  checkConsumerMinimumVersions,
+  loadConsumingVariants,
+} from "./helpers/hub-topology.ts";
+import { agentBodyCompletenessFinding } from "./validate-agents.ts";
+import { collectMirrorFreshnessDrift, PLATFORM_MIRROR_DIRS } from "./lib/platform-mirror-freshness.ts";
+import {
+  validatePropagationMap,
+  deriveCoVariantDirs,
+  markerInjectTargetScope,
+  auditVariantScopedTargets,
+  auditFixedTargets,
+} from "./lib/propagation-map-schema.ts";
+import { scrubConstitutionRefs } from "./lib/constitution-scrub.ts";
+import {
+  evaluateSlr,
+  fsTree as slrFsTree,
+  parseEnforcementFlag,
+  parseOwnerMap,
+  slrIssues,
+} from "./generate-skill-lifecycle-records.ts";
+import { PLATFORMS } from "./validate-model-registry.ts";
+import { PLATFORM_AGENT_ADAPTERS } from "./sync-agent-mirrors.ts";
+import { loadSkillGraph, findCapabilityDivergence } from "./lib/skill-graph-compat.ts";
+import { parseSyncDetection } from "./detect-backport.ts";
+import { listFleetProjects } from "./lib/fleet.ts";
+import { evaluateScaffoldPackageContract } from "./lib/package-merge.ts";
+import { parseGeneratorManifest, validateManifestAgainstRoot } from "./lib/generator-manifest.ts";
+import {
+  extractInstallDirsLoose,
+  findVendoredInstallDirs,
+  parseExternalDepsManifest,
+  evaluateLicensePolicy,
+  evaluateInstallDirConvention,
+  scanExcludedComponents,
+  type ExternalDepsManifest,
+} from "./lib/external-deps.ts";
+import {
+  extractKeyedBlocks,
+  compareKeyedBlocks,
+  isExtendsStub,
+  extractCommonAgentsBlock,
+  compareCommonAgentsBlock,
+} from "./lib/managed-block-parity.ts";
+import { extractTrailBlock, compareTrailBlock, countGraftBlocks } from "./lib/trail-block-parity.ts";
+import { MANAGED_SKELETON_SECTIONS, validateSkeletonRegistry } from "./lib/platform-skeleton-merge.ts";
+import { MERGE_MANAGED_FILES, SCAFFOLD_COMMON_OWNED_FILES, TRAIL_RETIRED_SEEDS } from "./lib/upgrade-policy.ts";
+import { SCAFFOLD_MARKER_SOURCES, isCanonicalPmStubBody } from "./helpers/scaffold-markers.ts";
+
+interface VariantManifest {
+  name: string;
+  description: string;
+  status: "stable" | "planned" | "deprecated" | "draft" | "beta";
+  version?: string;
+}
+
+interface VariantContract {
+  version: string;
+  required: string[];
+  optional: string[];
+  context_file_pattern: string;
+}
+
+interface ValidationIssue {
+  level: "error" | "warning";
+  variant: string;
+  check: string;
+  message: string;
+  fix?: string;
+}
+
+/** Non-failing, explicitly reasoned exemptions (v1.84.0 CV-02 convergence; reported in JSON too). */
+interface ValidationExemption {
+  check: string;
+  message: string;
+}
+
+interface ValidationResult {
+  variantsScanned: number;
+  errors: ValidationIssue[];
+  warnings: ValidationIssue[];
+  summary: string;
+}
+
+const colors = {
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  green: "\x1b[32m",
+  cyan: "\x1b[36m",
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
+};
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, "..");
+const TEMPLATES_DIR = join(ROOT, "templates");
+
+// No import-time guard for a missing templates/ (U-20261111-001): project (L3)
+// roots carry no templates/ tree, and main() already skips cleanly with exit 0
+// ("not applicable: no templates/common"). An import-time process.exit(1) here
+// preempted that skip and made every project review baseline fail falsely.
+
+const args = process.argv.slice(2);
+const JSON_MODE = args.includes("--json");
+const variantArg = (() => {
+  const idx = args.indexOf("--variant");
+  return idx !== -1 ? args[idx + 1] : "all";
+})();
+
+const issues: ValidationIssue[] = [];
+const exemptions: ValidationExemption[] = [];
+
+/** v1.76.0 (R2, graft-mcp-corrective-pass-design): every template MCP surface
+ * carries ZERO graft-era registrations — pins the 2026-11-08 mcpServers flip
+ * (PR #1927). Renaming-documentation prose is not scanned. */
+function checkGraftMcpSurfaces(): void {
+  const GRAFT_PATTERNS = [
+    /"graft"\s*:/,
+    /\[mcp_servers\.graft\]/,
+    /"command"\s*:\s*"graft"/,
+    /@nanonets\/graft/,
+    /"graft"\s*[,\]]/, // enabledMcpjsonServers-style list entry
+    /Bash\((?:npx )?graft(?:-dev)?:/, // graft-era Bash permissions
+    /mcp__graft__graft_/, // graft-era MCP tool permissions
+  ];
+  const SURFACES = [
+    ".gemini/settings.json",
+    ".codex/config.toml",
+    "opencode.json",
+    ".mcp.json",
+    ".agents/mcp.json",
+    ".claude/settings.json",
+  ];
+  const dirs = [{ label: "common", dir: join(TEMPLATES_DIR, "common") }];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith("co-"))
+        dirs.push({ label: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
+    }
+  }
+  let scanned = 0;
+  for (const { label, dir } of dirs) {
+    for (const surf of SURFACES) {
+      const abs = join(dir, surf);
+      if (!existsSync(abs)) continue;
+      scanned++;
+      const text = readFileSync(abs, "utf-8");
+      const hit = GRAFT_PATTERNS.find((re) => re.test(text));
+      if (hit) {
+        fail(
+          label,
+          "graft-mcp-surfaces",
+          `${abs} carries a graft-era MCP registration (matched ${hit}) — the mcpServers flip (PR #1927, spec docs/designs/2026-11-08-graft-mcp-corrective-pass-design.md) requires trail-era entries only`,
+          'Remove the graft server entry / block and ensure the trail entry (command "trail", args ["mcp"]) — see the corrective-pass design R1',
+        );
+      }
+    }
+  }
+  if (scanned === 0) pass("graft-mcp-surfaces: no template MCP surfaces found — vacuous pass");
+  else if (!JSON_MODE)
+    pass(`graft-mcp-surfaces: ${scanned} template MCP surface(s) carry zero graft-era registrations`);
+}
+
+// ── U-20261112-013: hook-command-target existence (v1.80.0) ──────────────────
+
+/**
+ * Recursively collect every string value under a `command` key (pure, exported
+ * for tests). Structure-agnostic on purpose: Claude settings wrap hooks in
+ * matcher groups, Gemini mixes flat and wrapped shapes, Codex hooks.json nests
+ * differently — walking for "command" strings covers all three without
+ * structural assumptions.
+ */
+export function collectHookCommands(node: unknown, out: string[] = []): string[] {
+  if (typeof node === "string") return out;
+  if (Array.isArray(node)) {
+    for (const child of node) collectHookCommands(child, out);
+    return out;
+  }
+  if (node && typeof node === "object") {
+    for (const [key, value] of Object.entries(node as Record<string, unknown>)) {
+      if (key === "command" && typeof value === "string") out.push(value);
+      else collectHookCommands(value, out);
+    }
+  }
+  return out;
+}
+
+/**
+ * Extract template-relative script-file targets from one hook command string
+ * (pure, exported for tests). Only script-file targets (.ts/.cjs/.mjs/.js) are
+ * extracted — bare commands like `git config core.hooksPath .githooks` carry no
+ * checkable file target. Recognized prefixes:
+ *  - `node "${CLAUDE_PROJECT_DIR:-.}/.trail/hook.cjs"`  → `.trail/hook.cjs`
+ *  - `bun "$(git rev-parse --show-toplevel)/scripts/hooks/x.ts"` → `scripts/hooks/x.ts`
+ *  - `bun scripts/sync-md.ts` → `scripts/sync-md.ts`
+ */
+export function extractHookScriptTargets(command: string): string[] {
+  const targets: string[] = [];
+  const re = /(?:\$\{[^}]*\}|\$\([^)]*\))?\/?((?:[A-Za-z0-9_@.\-]+\/)*[A-Za-z0-9_@.\-]+\.(?:ts|cjs|mjs|js))/g;
+  let m: RegExpExecArray | null = re.exec(command);
+  while (m !== null) {
+    // Normalize the captured path (leading "./", double slashes) to a
+    // template-relative form.
+    const path = m[1].replace(/^\.\//, "").replace(/\/\//g, "/");
+    if (path && !targets.includes(path)) targets.push(path);
+    m = re.exec(command);
+  }
+  return targets;
+}
+
+/**
+ * v1.80.0 (U-20261112-013): every hook `command` script target in the template
+ * platform settings surfaces must exist in the effective template tree — the
+ * variant dir first, then the templates/common fallback (hooks are delivered
+ * from both layers). Fail-on-missing: a dangling target (the deleting-
+ * `.trail/hook.cjs` class) passed audit, platform parity and CI before this
+ * arm. TRAIL_RETIRED_SEEDS targets are skipped: the graft-era seeds are
+ * deliberately deleted by upgrade-policy and their hook references re-pointed
+ * by the hook-dedupe normalize, so a retained reference is not a template
+ * defect (every variant template still carries them pending that normalize).
+ */
+function checkHookCommandTargets(): void {
+  const SURFACES = [".claude/settings.json", ".gemini/settings.json", ".codex/hooks.json"];
+  const dirs = [{ label: "common", dir: join(TEMPLATES_DIR, "common") }];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith("co-"))
+        dirs.push({ label: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
+    }
+  }
+  const retiredSeeds = new Set<string>(TRAIL_RETIRED_SEEDS);
+  let checked = 0;
+  let missing = 0;
+  for (const { label, dir } of dirs) {
+    for (const surf of SURFACES) {
+      const abs = join(dir, surf);
+      if (!existsSync(abs)) continue;
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(readFileSync(abs, "utf-8"));
+      } catch {
+        fail(label, "hook-command-targets", `${abs} is not valid JSON — hook command targets cannot be verified`);
+        continue;
+      }
+      for (const command of collectHookCommands(parsed)) {
+        for (const target of extractHookScriptTargets(command)) {
+          if (retiredSeeds.has(target) || retiredSeeds.has(`/${target}`)) continue;
+          const variantCopy = join(dir, target);
+          const commonCopy = join(TEMPLATES_DIR, "common", target);
+          if (existsSync(variantCopy) || existsSync(commonCopy)) {
+            checked++;
+            continue;
+          }
+          fail(
+            label,
+            "hook-command-targets",
+            `${surf} hook command references \`${target}\` but the file exists neither in templates/${label}/ nor templates/common/ — the hook would fail at runtime in every scaffold`,
+            `Restore \`${target}\` to the template tree or re-point the hook in ${surf}`,
+          );
+          missing++;
+        }
+      }
+    }
+  }
+  if (checked === 0 && missing === 0) {
+    pass("hook-command-targets: no hook command targets found in template settings — vacuous pass");
+  } else if (checked > 0 && !JSON_MODE) {
+    pass(`hook-command-targets: ${checked} hook command target(s) resolve in the effective template tree`);
+  }
+}
+
+function pass(msg: string) {
+  if (!JSON_MODE) console.log(`${colors.green}[PASS]${colors.reset} ${msg}`);
+}
+
+function reportExemption(check: string, msg: string) {
+  exemptions.push({ check, message: msg });
+  if (!JSON_MODE) console.log(`${colors.dim}[EXEMPT]${colors.reset} ${msg}`);
+}
+
+function fail(variant: string, check: string, msg: string, fix?: string) {
+  issues.push({ level: "error", variant, check, message: msg, fix });
+  if (!JSON_MODE) {
+    console.log(`${colors.red}[FAIL]${colors.reset} ${msg}`);
+    if (fix) console.log(`       ${colors.dim}Fix: ${fix}${colors.reset}`);
+  }
+}
+
+// VA-08 (T-20261009-002, design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D2):
+// the scaffold package contract — templates/common/package.json retains the Tier 2 trio
+// (audit, dev-sync, sync-md) and every variant package.json (optional since v1.35.0
+// scaffold-time merge) parses and merges into a trio-superset. Static simulation of the
+// new-project.ts §2 merge; the runtime guarantee is the nightly E2E (surfaced by
+// review-baseline battery #8).
+let packageContractCommonChecked = false;
+let packageContractCommon: { scripts?: unknown } | null = null;
+function checkVariantPackageContract(variant: string): void {
+  if (!packageContractCommonChecked) {
+    packageContractCommonChecked = true;
+    try {
+      const parsed = JSON.parse(readFileSync(join("templates", "common", "package.json"), "utf8")) as {
+        scripts?: unknown;
+      };
+      const commonVerdict = evaluateScaffoldPackageContract(parsed, null);
+      packageContractCommon = parsed;
+      if (!commonVerdict.ok) {
+        fail(
+          "common",
+          "scaffold-package-contract",
+          `scaffold package contract violated: ${commonVerdict.reason}`,
+          "Restore the Tier 2 scripts — templates/common/package.json is the SSOT every project package.json is generated from",
+        );
+      }
+    } catch (err) {
+      packageContractCommon = null;
+      fail(
+        "common",
+        "scaffold-package-contract",
+        `templates/common/package.json unparseable: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
+  }
+  // T-20261011-002: when the common parse already failed, the 'common' fail is
+  // recorded and per-variant evaluation is impossible (nothing to merge from).
+  // The old code re-parsed the same unparseable file unguarded at the first
+  // variant — SyntaxError crashed the whole validator, destroying triage.
+  if (packageContractCommon === null) return;
+  const commonPkg = packageContractCommon;
+  const variantPkgPath = join("templates", variant, "package.json");
+  let variantPkg: { scripts?: unknown } | null = null;
+  if (existsSync(variantPkgPath)) {
+    try {
+      variantPkg = JSON.parse(readFileSync(variantPkgPath, "utf8"));
+    } catch (err) {
+      fail(
+        variant,
+        "scaffold-package-contract",
+        `templates/${variant}/package.json is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
+        "Fix or remove the variant package.json — scaffolds merge it over the generated one (variant wins per key)",
+      );
+      return;
+    }
+  }
+  const verdict = evaluateScaffoldPackageContract(commonPkg, variantPkg);
+  if (!verdict.ok) {
+    fail(
+      variant,
+      "scaffold-package-contract",
+      `scaffold package contract violated: ${verdict.reason}`,
+      "See design 2026-10-09-scaffold-package-merge-and-baseline-surfacing D2 — the scaffold merges common ∪ variant (variant wins per key)",
+    );
+  }
+}
+
+function warn(variant: string, check: string, msg: string, fix?: string) {
+  issues.push({ level: "warning", variant, check, message: msg, fix });
+  if (!JSON_MODE) {
+    console.log(`${colors.yellow}[WARN]${colors.reset} ${msg}`);
+    if (fix) console.log(`       ${colors.dim}Fix: ${fix}${colors.reset}`);
+  }
+}
+
+// D-04: Governance policy loaded from lifecycle-governance.json
+interface GovernanceDomain {
+  applicable: boolean;
+  tool?: string;
+  mandatory?: boolean;
+  currentStatus?: string;
+}
+interface GovernanceLayer {
+  orchestrator: string | null;
+  domains: Record<string, GovernanceDomain>;
+}
+interface GovernancePolicy {
+  version: string;
+  layers: Record<string, GovernanceLayer>;
+  variantValidationPolicy: {
+    mandatoryBeforeProjectCreation: string[];
+    warningOnly: string[];
+  };
+}
+
+let governance: GovernancePolicy | null = null;
+function loadGovernance(): void {
+  const govPath = join(ROOT, "docs", "templates", "lifecycle-governance.json");
+  if (!existsSync(govPath)) return;
+  try {
+    governance = JSON.parse(readFileSync(govPath, "utf-8")) as GovernancePolicy;
+  } catch {
+    // governance stays null — checks will proceed without policy enforcement
+  }
+}
+
+function isMandatory(domain: string): boolean {
+  if (!governance) return true; // default to mandatory if governance file missing
+  const variantLayer = governance.layers["templates-variants"];
+  if (!variantLayer) return true;
+  const d = variantLayer.domains[domain];
+  if (!d || !d.applicable) return false;
+  return d.mandatory ?? true;
+}
+
+// Check D-04: Governance policy + common.lifecycle.json
+function checkGovernance(): void {
+  if (!JSON_MODE) console.log("\n=== Check D-04: Lifecycle governance ===");
+  const govPath = join(ROOT, "docs", "templates", "lifecycle-governance.json");
+  if (!existsSync(govPath)) {
+    warn(
+      "common",
+      "governance-missing",
+      "docs/templates/lifecycle-governance.json not found",
+      "Create lifecycle-governance.json per D-01 action item",
+    );
+    return;
+  }
+  pass("docs/templates/lifecycle-governance.json: present");
+
+  const commonLcPath = join(ROOT, "docs", "templates", "common.lifecycle.json");
+  if (!existsSync(commonLcPath)) {
+    warn(
+      "common",
+      "common-lifecycle-missing",
+      "docs/templates/common.lifecycle.json not found",
+      "Create common.lifecycle.json per D-03 action item",
+    );
+  } else {
+    try {
+      const lc = JSON.parse(readFileSync(commonLcPath, "utf-8")) as Record<string, unknown>;
+      if (!lc.version || !lc.status || !lc.propagatedTo) {
+        warn(
+          "common",
+          "common-lifecycle-schema",
+          "common.lifecycle.json missing required fields: version, status, propagatedTo",
+        );
+      } else {
+        pass(
+          `docs/templates/common.lifecycle.json: v${lc.version} (${lc.status}), propagated to ${(lc.propagatedTo as string[]).length} variant(s)`,
+        );
+      }
+    } catch {
+      fail("common", "common-lifecycle-invalid", "docs/templates/common.lifecycle.json is not valid JSON");
+    }
+  }
+
+  if (governance && !JSON_MODE) {
+    const policy = governance.variantValidationPolicy;
+    console.log(
+      `       ${colors.dim}Mandatory domains: ${policy.mandatoryBeforeProjectCreation.join(", ")}${colors.reset}`,
+    );
+    console.log(`       ${colors.dim}Warning-only domains: ${policy.warningOnly.join(", ")}${colors.reset}`);
+  }
+}
+
+// Check 0: templates/common/
+function checkCommon(): void {
+  if (!JSON_MODE) console.log("\n=== Check 0: templates/common/ ===");
+  const commonDir = join(TEMPLATES_DIR, "common");
+  if (!existsSync(commonDir)) {
+    fail(
+      "root",
+      "common-dir",
+      "templates/common/ directory not found",
+      "Create templates/common/ with shared infrastructure",
+    );
+    return;
+  }
+
+  // Check required subdirectories
+  const requiredDirs = [".githooks", ".github", "scripts", "docs", "memory", "skills"];
+  for (const dir of requiredDirs) {
+    const dirPath = join(commonDir, dir);
+    if (!existsSync(dirPath)) {
+      fail(
+        "common",
+        "common-structure",
+        `templates/common/${dir}/ not found`,
+        `Create templates/common/${dir}/ directory`,
+      );
+    }
+  }
+
+  pass("templates/common/ exists with required subdirectories");
+
+  // Check forbidden files — files that must NOT exist in templates/common/
+  const forbiddenFiles = ["CONSTITUTION.md", "node_modules", ".venv", ".bun", "dist", "build"];
+  const presentForbidden = forbiddenFiles.filter((f) => existsSync(join(commonDir, f)));
+  if (presentForbidden.length > 0) {
+    for (const f of presentForbidden) {
+      fail(
+        "common",
+        "forbidden-file",
+        `templates/common/${f} must not exist — workspace-level file must not be copied to L2 projects. Delete it from templates/common/.`,
+      );
+    }
+  } else {
+    pass("templates/common/ blocklist: no forbidden files present");
+  }
+
+  // Check A-13: removed because it contradicts AGENTS.md rule that owner does not need to exist in the current project.
+  const commonSkillsDir = join(commonDir, "skills");
+
+  // Check B-07: workspace-only skills (scope: workspace in SKILL.md) must not exist in templates/common/skills/
+  const l0SkillsDir = join(dirname(import.meta.path), "..", "skills");
+  const SKILLS_FORBIDDEN_IN_COMMON: string[] = [];
+  if (existsSync(l0SkillsDir)) {
+    for (const skillName of readdirSync(l0SkillsDir)) {
+      const skillMd = join(l0SkillsDir, skillName, "SKILL.md");
+      if (existsSync(skillMd)) {
+        const content = readFileSync(skillMd, "utf-8");
+        const scopeMatch = content.match(/^scope:\s*(\S+)/m);
+        if (scopeMatch?.[1] === "workspace") {
+          SKILLS_FORBIDDEN_IN_COMMON.push(skillName);
+        }
+      }
+    }
+  }
+  if (existsSync(commonSkillsDir)) {
+    const presentForbiddenSkills = SKILLS_FORBIDDEN_IN_COMMON.filter((s) => existsSync(join(commonSkillsDir, s)));
+    if (presentForbiddenSkills.length > 0) {
+      for (const s of presentForbiddenSkills) {
+        fail(
+          "common",
+          "forbidden-skill-in-common",
+          `templates/common/skills/${s} must not exist — workspace-only skill (scope: workspace) must not be copied to L2 projects`,
+          `Delete templates/common/skills/${s}/`,
+        );
+      }
+    } else {
+      pass("templates/common/ skills blocklist: no forbidden workspace-only skills present");
+    }
+  }
+}
+
+// Check 1: templates/VERSION
+function checkVersion(): void {
+  if (!JSON_MODE) console.log("\n=== Check 1: templates/VERSION ===");
+  const versionFile = join(TEMPLATES_DIR, "VERSION");
+  if (!existsSync(versionFile)) {
+    fail("root", "VERSION", "templates/VERSION file missing", "Create templates/VERSION with semver (e.g. 0.4.0)");
+    return;
+  }
+  const version = readFileSync(versionFile, "utf-8").trim();
+  if (!/^\d+\.\d+\.\d+$/.test(version)) {
+    fail("root", "VERSION", `templates/VERSION has invalid semver: "${version}"`, "Use format X.Y.Z");
+    return;
+  }
+  pass(`templates/VERSION: ${version}`);
+}
+
+// B-05: last_verified per profile file, collected across variants for divergence checking
+const countryProfileVerified = new Map<string, Array<{ variant: string; date: string }>>();
+
+// B-05 addendum: cross-variant country-profile freshness — same <CC>.md diverging
+// across variants means one template's profile drifted ahead of the others.
+function checkCountryProfileDivergence(): void {
+  if (!JSON_MODE) console.log("\n=== Check B-05: cross-variant country-profile freshness ===");
+  for (const [code, entries] of countryProfileVerified) {
+    const distinctDates = new Set(entries.map((e) => e.date));
+    if (entries.length > 1 && distinctDates.size > 1) {
+      const detail = entries
+        .slice()
+        .sort((a, b) => (a.date === b.date ? a.variant.localeCompare(b.variant) : a.date < b.date ? 1 : -1))
+        .map((e) => `${e.variant} ${e.date}`)
+        .join(", ");
+      warn(
+        "common",
+        "country-config",
+        `${code}.md last_verified diverges across ${entries.length} variants: ${detail}. Realign during the next freshness pass.`,
+      );
+    }
+  }
+}
+
+// ── B-03r / B-03a: exists→declared reverse reconciliation helpers (T-20260912-014) ──
+
+/** File extensions treated as invokable scripts for manifest reconciliation. */
+const SCRIPT_FILE_RE = /\.(ts|mjs|cjs|js|sh|ps1)$/;
+
+/**
+ * Find script files present at the TOP LEVEL of the variant's own scripts/
+ * namespace (scripts/<variant>/) that are not declared in variant.json
+ * script_manifest.local.
+ *
+ * Scope decision: top level only. Nested lib/ and tests/ support trees are
+ * registered in the variant's own scripts/<variant>/SCRIPTS.md registry, not in
+ * script_manifest.local — that manifest lists directly-invokable CLI scripts
+ * (that is what Check V version-tracks), and co-deck's lib/tests trees predate
+ * this check with exactly that split. SCRIPTS.md itself is excluded.
+ */
+export function findUndeclaredScripts(variantDir: string, declaredPaths: string[]): string[] {
+  const variantName = basename(variantDir);
+  const nsDir = join(variantDir, "scripts", variantName);
+  if (!existsSync(nsDir)) return [];
+  const declared = new Set(declaredPaths.map((p) => p.replace(/\\/g, "/")));
+  const undeclared: string[] = [];
+  for (const f of readdirSync(nsDir)) {
+    const full = join(nsDir, f);
+    if (!statSync(full).isFile()) continue;
+    if (f === "SCRIPTS.md" || !SCRIPT_FILE_RE.test(f)) continue;
+    const rel = `scripts/${variantName}/${f}`;
+    if (!declared.has(rel)) undeclared.push(rel);
+  }
+  return undeclared.sort();
+}
+
+/**
+ * Find top-level agents/*.md files that are not declared in variant.json
+ * agents[]. README files are excluded; nested agents/domains/ and
+ * agents/_shared/ trees are out of scope (indexed via the variant's AGENTS.md —
+ * the schema's agents[] entries use flat "agents/<name>.md" paths and
+ * resolve-variants.ts scans the same top level).
+ */
+export function findUndeclaredAgents(variantDir: string, declared: Array<{ name?: string; file?: string }>): string[] {
+  const agentsDir = join(variantDir, "agents");
+  if (!existsSync(agentsDir)) return [];
+  const declaredNames = new Set(declared.map((a) => (a.name ?? "").replace(/\\/g, "/").toLowerCase()));
+  const declaredFiles = new Set(declared.map((a) => (a.file ?? "").replace(/\\/g, "/").toLowerCase()));
+  const undeclared: string[] = [];
+  for (const f of readdirSync(agentsDir)) {
+    const full = join(agentsDir, f);
+    if (!statSync(full).isFile() || !f.endsWith(".md")) continue;
+    if (f.startsWith("README")) continue;
+    const name = f.replace(/\.md$/, "");
+    if (declaredNames.has(name.toLowerCase()) || declaredFiles.has(`agents/${f}`.toLowerCase())) continue;
+    undeclared.push(`agents/${f}`);
+  }
+  return undeclared.sort();
+}
+
+// Check 2: variant.json in each variant dir
+function checkVariantManifests(): Map<string, VariantManifest> {
+  if (!JSON_MODE) console.log("\n=== Check 2: variant.json manifests ===");
+  const manifests = new Map<string, VariantManifest>();
+
+  if (!existsSync(TEMPLATES_DIR)) {
+    fail("root", "variant-dirs", "templates/ directory not found");
+    return manifests;
+  }
+
+  const entries = readdirSync(TEMPLATES_DIR);
+  const variantDirs = entries.filter((e) => {
+    if (isTransientTestFixture(e)) return false; // E2E staging dirs under templates/ (T-20260916-001)
+    const fullPath = join(TEMPLATES_DIR, e);
+    return (
+      statSync(fullPath).isDirectory() &&
+      !e.startsWith(".") &&
+      e !== "common" &&
+      (e.startsWith("co-") ? isCoVariantTracked(e) : true)
+    );
+  });
+
+  if (variantDirs.length === 0) {
+    fail("root", "variant-dirs", "No variant directories found in templates/");
+    return manifests;
+  }
+
+  for (const dir of variantDirs) {
+    if (variantArg !== "all" && dir !== variantArg) continue;
+
+    const manifestPath = join(TEMPLATES_DIR, dir, "variant.json");
+    if (!existsSync(manifestPath)) {
+      fail(
+        dir,
+        "variant-json",
+        `templates/${dir}/variant.json missing`,
+        `Create variant.json with name, description, status fields`,
+      );
+      continue;
+    }
+
+    try {
+      const raw = JSON.parse(readFileSync(manifestPath, "utf-8")) as Record<string, unknown>;
+      const requiredFields = ["name", "description", "status"];
+      const missing = requiredFields.filter((f) => !(f in raw));
+
+      if (missing.length > 0) {
+        fail(dir, "variant-json", `templates/${dir}/variant.json missing fields: ${missing.join(", ")}`);
+        continue;
+      }
+
+      const validStatuses = ["stable", "planned", "deprecated", "draft", "beta"];
+      if (!validStatuses.includes(raw.status as string)) {
+        fail(
+          dir,
+          "variant-json",
+          `templates/${dir}/variant.json has invalid status: "${raw.status}"`,
+          `Use: stable | planned | deprecated | draft | beta`,
+        );
+        continue;
+      }
+
+      // B-02: Lifecycle field validation
+      const lifecycle = raw.lifecycle as Record<string, unknown> | undefined;
+      if (!lifecycle) {
+        fail(dir, "variant-lifecycle", `templates/${dir}/variant.json missing 'lifecycle' object`);
+      } else {
+        if (!lifecycle.statusSince) {
+          fail(
+            dir,
+            "variant-lifecycle",
+            `templates/${dir}/variant.json lifecycle.statusSince is missing`,
+            `Add "statusSince": "YYYY-MM-DD" to lifecycle object`,
+          );
+        }
+        if (!lifecycle.lastTransition) {
+          fail(
+            dir,
+            "variant-lifecycle",
+            `templates/${dir}/variant.json lifecycle.lastTransition is missing`,
+            `Add "lastTransition": "... → ... on YYYY-MM-DD" to lifecycle object`,
+          );
+        }
+        if (lifecycle.statusSince && lifecycle.lastTransition) {
+          pass(`templates/${dir}/variant.json lifecycle fields OK (statusSince, lastTransition)`);
+        }
+      }
+
+      // B-04 (ADR-0091 R3, T-20260927-002): uniform country_config declaration —
+      // adopting or not, every variant.json declares the mechanism
+      // ({ profiles_dir: "docs/countries", supported: [], default: null } for
+      // non-adopting variants); divergence by omission is eliminated.
+      const cc = raw.country_config as Record<string, unknown> | undefined;
+      if (!cc || typeof cc !== "object" || Array.isArray(cc)) {
+        fail(
+          dir,
+          "country-config",
+          `templates/${dir}/variant.json missing 'country_config' (ADR-0091 R3 uniform declaration)`,
+          `Add "country_config": { "profiles_dir": "docs/countries", "supported": [], "default": null } (empty supported = non-adopting)`,
+        );
+      } else {
+        let ccOk = true;
+        if (cc.profiles_dir !== "docs/countries") {
+          fail(
+            dir,
+            "country-config",
+            `country_config.profiles_dir must be "docs/countries", got ${JSON.stringify(cc.profiles_dir)}`,
+          );
+          ccOk = false;
+        }
+        if (!Array.isArray(cc.supported)) {
+          fail(dir, "country-config", `country_config.supported must be an array (empty for non-adopting variants)`);
+          ccOk = false;
+        }
+        if (cc.default !== null) {
+          fail(
+            dir,
+            "country-config",
+            `country_config.default must be null (country-profiles rule; ADR-0091 R2)`,
+            `Set "default": null — the active country is selected per-project via docs/countries/ACTIVE.md`,
+          );
+          ccOk = false;
+        }
+        if (ccOk) pass(`templates/${dir}/variant.json country_config declaration OK (ADR-0091 R3)`);
+      }
+
+      // B-05 (U-20261028-014): variant.json `designLint` block shape check —
+      // the per-variant override audit.ts's design-lint gate consumes. Same
+      // rule as helpers/design-lint-roots.ts validateDesignLintOverride,
+      // restated inline. Absent block = valid (opt-in per variant).
+      const designLint = raw.designLint;
+      if (designLint !== undefined) {
+        let dlOk = true;
+        if (designLint === null || typeof designLint !== "object" || Array.isArray(designLint)) {
+          fail(
+            dir,
+            "variant-designlint",
+            `templates/${dir}/variant.json designLint must be an object with a required boolean "enabled" (got ${designLint === null ? "null" : Array.isArray(designLint) ? "array" : typeof designLint})`,
+          );
+          dlOk = false;
+        } else {
+          const dl = designLint as Record<string, unknown>;
+          if (typeof dl.enabled !== "boolean") {
+            fail(
+              dir,
+              "variant-designlint",
+              `templates/${dir}/variant.json designLint.enabled must be a boolean (got ${JSON.stringify(dl.enabled ?? null)})`,
+            );
+            dlOk = false;
+          }
+          for (const key of ["scanRoots", "allowlist"] as const) {
+            if (
+              dl[key] !== undefined &&
+              (!Array.isArray(dl[key]) || !(dl[key] as unknown[]).every((x) => typeof x === "string"))
+            ) {
+              fail(
+                dir,
+                "variant-designlint",
+                `templates/${dir}/variant.json designLint.${key} must be an array of strings (got ${JSON.stringify(dl[key])})`,
+              );
+              dlOk = false;
+            }
+          }
+        }
+        if (dlOk) pass(`templates/${dir}/variant.json designLint override shape OK (U-20261028-014)`);
+      }
+
+      // B-03: script_manifest path existence check
+      const scriptManifest = raw.script_manifest as { local?: Array<{ name: string; path: string }> } | undefined;
+      if (scriptManifest?.local && Array.isArray(scriptManifest.local)) {
+        for (const entry of scriptManifest.local) {
+          const scriptPath = join(TEMPLATES_DIR, dir, entry.path);
+          if (!existsSync(scriptPath)) {
+            fail(
+              dir,
+              "script-manifest",
+              `script_manifest.local "${entry.name}": path not found: ${entry.path}`,
+              `Create the script at templates/${dir}/${entry.path} or remove the entry from variant.json`,
+            );
+          } else {
+            pass(`templates/${dir}/variant.json script_manifest.local["${entry.name}"] → ${entry.path} ✓`);
+          }
+        }
+      }
+
+      // B-03r: exists→declared reverse reconciliation (T-20260912-014).
+      // A script dropped into the variant's own scripts/<variant>/ namespace must
+      // be declared in script_manifest.local, or downstream consumers (Check V
+      // version tracking, scaffolding injection) silently miss it.
+      const undeclaredScripts = findUndeclaredScripts(
+        join(TEMPLATES_DIR, dir),
+        (scriptManifest?.local ?? []).map((e) => e.path),
+      );
+      for (const rel of undeclaredScripts) {
+        warn(
+          dir,
+          "script-manifest-reverse",
+          `templates/${dir}/${rel} exists but is not declared in variant.json script_manifest.local`,
+          `Add {"name": "${basename(rel).replace(/\.[^.]+$/, "")}", "path": "${rel}"} to script_manifest.local — grace window: WARN now, promotion to FAIL is a pending follow-up decision`,
+        );
+      }
+
+      // B-03a: agents exists→declared reverse reconciliation (T-20260912-014).
+      // Top-level agents/*.md files must appear in variant.json agents[] — that
+      // array is the machine-readable roster (schema docs/templates/variant.schema.json;
+      // resolve-variants.ts scans the same top level). Nested agents/domains/ and
+      // agents/_shared/ trees are intentionally out of scope: they are indexed via
+      // the variant's AGENTS.md, not the flat agents[] roster.
+      const declaredAgents = (raw.agents as Array<{ name?: string; file?: string }> | undefined) ?? [];
+      const undeclaredAgents = findUndeclaredAgents(join(TEMPLATES_DIR, dir), declaredAgents);
+      for (const rel of undeclaredAgents) {
+        warn(
+          dir,
+          "agent-manifest-reverse",
+          `templates/${dir}/${rel} exists but is not declared in variant.json agents[]`,
+          `Add {"name": "${basename(rel).replace(/\.md$/, "")}", "file": "${rel}"} to agents — top-level roster only (domains/_shared trees are indexed via AGENTS.md); grace window: WARN now, promotion to FAIL is a pending follow-up decision`,
+        );
+      }
+
+      // B-04: theme_manifest CSS file existence check
+      // D3 tolerance (2026-10-05 co-deck remediation design): theme_manifest
+      // carries EITHER the retired shape (available: style names + default)
+      // OR the migrated shape (themes[]/styles[]/default_theme/default_style).
+      // Both are checked for on-disk CSS; a manifest may not mix the two
+      // lists' semantics (available[] holds styles, themes[] holds themes).
+      const themeManifest = raw.theme_manifest as
+        | {
+            base_css?: string;
+            themes_dir?: string;
+            styles_dir?: string;
+            overrides_dir?: string;
+            available?: string[];
+            themes?: string[];
+            styles?: string[];
+          }
+        | undefined;
+      if (themeManifest) {
+        if (themeManifest.base_css) {
+          const baseCssPath = join(TEMPLATES_DIR, dir, themeManifest.base_css);
+          if (!existsSync(baseCssPath)) {
+            fail(
+              dir,
+              "theme-manifest",
+              `theme_manifest.base_css not found: ${themeManifest.base_css}`,
+              `Create the file at templates/${dir}/${themeManifest.base_css}`,
+            );
+          } else {
+            pass(`templates/${dir}/variant.json theme_manifest.base_css → ${themeManifest.base_css} ✓`);
+          }
+        }
+        if (themeManifest.overrides_dir && Array.isArray(themeManifest.available)) {
+          for (const theme of themeManifest.available) {
+            // Two supported on-disk layouts for theme override CSS:
+            //   flat:   <overrides_dir>/<theme>.css
+            //   nested: <overrides_dir>/<theme>/style.css  (e.g. co-deck's shared styles/ pool)
+            const flatRelPath = `${themeManifest.overrides_dir}/${theme}.css`;
+            const nestedRelPath = `${themeManifest.overrides_dir}/${theme}/style.css`;
+            const flatCssPath = join(TEMPLATES_DIR, dir, themeManifest.overrides_dir, `${theme}.css`);
+            const nestedCssPath = join(TEMPLATES_DIR, dir, themeManifest.overrides_dir, theme, "style.css");
+            if (existsSync(flatCssPath)) {
+              pass(`templates/${dir}/variant.json theme_manifest["${theme}"] → ${flatRelPath} ✓`);
+            } else if (existsSync(nestedCssPath)) {
+              pass(`templates/${dir}/variant.json theme_manifest["${theme}"] → ${nestedRelPath} ✓`);
+            } else {
+              fail(
+                dir,
+                "theme-manifest",
+                `theme_manifest theme "${theme}": CSS not found: ${flatRelPath} or ${nestedRelPath}`,
+                `Create the file at templates/${dir}/${flatRelPath} (flat layout) or templates/${dir}/${nestedRelPath} (nested layout)`,
+              );
+            }
+          }
+        }
+        // D3 migrated shape: themes[] and styles[] resolve under their
+        // declared base dir, tolerating both key conventions (a *_dir that is
+        // the html-themes ROOT — co-deck: themes live at <root>/themes/<t>/ —
+        // and one that points straight at the entries), nested or flat.
+        // overrides_dir is the fallback base when the dedicated dirs are not
+        // declared (keeps old-shape templates byte-identical in behavior).
+        if (Array.isArray(themeManifest.themes)) {
+          const base = themeManifest.themes_dir ?? themeManifest.overrides_dir;
+          for (const theme of themeManifest.themes) {
+            if (typeof theme !== "string" || !base) continue;
+            const candidates = [
+              `${base}/themes/${theme}/theme.css`,
+              `${base}/${theme}/theme.css`,
+              `${base}/${theme}.css`,
+            ];
+            const hit = candidates.find((c) => existsSync(join(TEMPLATES_DIR, dir, c)));
+            if (hit) {
+              pass(`templates/${dir}/variant.json theme_manifest.themes["${theme}"] → ${hit} ✓`);
+            } else {
+              fail(
+                dir,
+                "theme-manifest",
+                `theme_manifest.themes "${theme}": CSS not found (${candidates.join(" | ")})`,
+                `Create theme.css at one of templates/${dir}/${candidates.join(" or templates/" + dir + "/")}`,
+              );
+            }
+          }
+        }
+        if (Array.isArray(themeManifest.styles)) {
+          const base = themeManifest.styles_dir ?? themeManifest.overrides_dir;
+          for (const style of themeManifest.styles) {
+            if (typeof style !== "string" || !base) continue;
+            const candidates = [
+              `${base}/${style}/style.css`,
+              `${base}/styles/${style}/style.css`,
+              `${base}/${style}.css`,
+            ];
+            const hit = candidates.find((c) => existsSync(join(TEMPLATES_DIR, dir, c)));
+            if (hit) {
+              pass(`templates/${dir}/variant.json theme_manifest.styles["${style}"] → ${hit} ✓`);
+            } else {
+              fail(
+                dir,
+                "theme-manifest",
+                `theme_manifest.styles "${style}": CSS not found (${candidates.join(" | ")})`,
+                `Create style.css at one of templates/${dir}/${candidates.join(" or templates/" + dir + "/")}`,
+              );
+            }
+          }
+        }
+      }
+
+      // B-05: country_config validation
+      const countryConfig = raw.country_config as
+        | {
+            profiles_dir?: string;
+            supported?: string[];
+            default?: string | null;
+          }
+        | undefined;
+
+      if (countryConfig) {
+        // Check required fields
+        if (!countryConfig.profiles_dir || countryConfig.profiles_dir.trim() === "") {
+          fail(dir, "country-config", `templates/${dir}/variant.json country_config.profiles_dir is missing or empty`);
+        }
+        // T-20260927-002 (ADR-0091 R3): an EMPTY supported array is now the
+        // canonical non-adopting declaration — divergence by omission is what
+        // B-04 above eliminates. Only a MALFORMED value fails here; the
+        // adopting-path profile-file checks run for each declared code.
+        if (!countryConfig.supported || !Array.isArray(countryConfig.supported)) {
+          fail(
+            dir,
+            "country-config",
+            `templates/${dir}/variant.json country_config.supported is missing or not an array (use [] for non-adopting variants)`,
+          );
+        } else {
+          // Check each supported code has a profile file
+          for (const code of countryConfig.supported) {
+            if (!/^[A-Z]{2,4}$/.test(code)) {
+              fail(
+                dir,
+                "country-config",
+                `templates/${dir}/variant.json country_config.supported contains invalid code: '${code}'. Pattern: ^[A-Z]{2,4}$`,
+              );
+              continue;
+            }
+            // fail() above is not a `never` guard, so profiles_dir may still be undefined
+            // here at runtime (join then throws) — cast documents the intent without
+            // changing that behavior.
+            const profilePath = join(TEMPLATES_DIR, dir, countryConfig.profiles_dir as string, `${code}.md`);
+            if (!existsSync(profilePath)) {
+              fail(
+                dir,
+                "country-config",
+                `templates/${dir}/variant.json country_config.supported includes '${code}' but profile file missing: ${countryConfig.profiles_dir}/${code}.md`,
+              );
+            } else {
+              // Validate profile frontmatter
+              try {
+                const profileContent = readFileSync(profilePath, "utf-8");
+                const frontmatter = parseFrontmatter(profileContent);
+                const requiredFields = ["code", "name", "status", "last_verified"];
+                const missing = requiredFields.filter((f) => !frontmatter[f]);
+                if (missing.length > 0) {
+                  fail(
+                    dir,
+                    "country-config",
+                    `templates/${dir}/${countryConfig.profiles_dir}/${code}.md missing frontmatter fields: ${missing.join(", ")}`,
+                  );
+                } else {
+                  // Check code matches filename
+                  const codeMatch = profileContent.match(/^code:\s*([A-Z]{2,4})/m);
+                  if (!codeMatch || codeMatch[1] !== code) {
+                    fail(
+                      dir,
+                      "country-config",
+                      `templates/${dir}/${countryConfig.profiles_dir}/${code}.md frontmatter code doesn't match filename`,
+                    );
+                  }
+                  // Check status value (must be one of: active, draft, stale)
+                  const statusMatch = profileContent.match(/^status:\s*(\S+)/m);
+                  if (!statusMatch || !["active", "draft", "stale"].includes(statusMatch[1])) {
+                    fail(
+                      dir,
+                      "country-config",
+                      `templates/${dir}/${countryConfig.profiles_dir}/${code}.md status must be one of: active, draft, stale (found: '${statusMatch ? statusMatch[1] : "missing"}')`,
+                    );
+                  }
+                  // Check last_verified age (WARN if > 12 months)
+                  const lastVerifiedMatch = profileContent.match(/^last_verified:\s*(\d{4}-\d{2}-\d{2})/m);
+                  if (lastVerifiedMatch) {
+                    const lastVerified = new Date(lastVerifiedMatch[1]);
+                    const monthsSince = (Date.now() - lastVerified.getTime()) / (30 * 24 * 60 * 60 * 1000);
+                    if (monthsSince > 12) {
+                      warn(
+                        dir,
+                        "country-config",
+                        `templates/${dir}/${countryConfig.profiles_dir}/${code}.md last_verified is older than 12 months (${lastVerifiedMatch[1]}). Consider reviewing.`,
+                      );
+                      // Auto-stale: an 'active' profile past the 12-month line should move to 'stale'
+                      if (statusMatch?.[1] === "active") {
+                        warn(
+                          dir,
+                          "country-config",
+                          `templates/${dir}/${countryConfig.profiles_dir}/${code}.md status is 'active' but last_verified (${lastVerifiedMatch[1]}) is older than 12 months. Set status: stale until re-verified (stale profiles stay loadable and are flagged at Phase 0 intake).`,
+                        );
+                      }
+                    }
+                    // Collect for the cross-variant divergence check
+                    const seen = countryProfileVerified.get(code) ?? [];
+                    seen.push({ variant: dir, date: lastVerifiedMatch[1] });
+                    countryProfileVerified.set(code, seen);
+                  }
+                }
+              } catch (e) {
+                fail(
+                  dir,
+                  "country-config",
+                  `templates/${dir}/${countryConfig.profiles_dir}/${code}.md has unparseable frontmatter`,
+                );
+              }
+            }
+          }
+        }
+        // Check default is null (region-neutral is required)
+        if (countryConfig.default !== null && countryConfig.default !== undefined) {
+          warn(
+            dir,
+            "country-config",
+            `templates/${dir}/variant.json country_config.default is '${countryConfig.default}'. Policy requires region-neutral (null).`,
+          );
+        }
+      }
+
+      // B-07: syncDetection shape check (spec docs/designs/2026-11-17-sync-auto-detection-design.md
+      // §5.1, DEC-20261117-06 — detection batch PR-C). Optional top-level key, absent = OFF;
+      // a malformed block FAILs loudly (the detector itself treats one as OFF + WARN — the
+      // validator owns the FAIL so a misconfigured gate can never be silently ignored).
+      checkVariantSyncDetectionBlock(dir, raw);
+
+      // Check if docs/countries/*.md exists but no country_config declared
+      const countriesDir = join(TEMPLATES_DIR, dir, "docs", "countries");
+      if (!countryConfig && existsSync(countriesDir)) {
+        const profiles = readdirSync(countriesDir).filter((f) => f.endsWith(".md") && f !== "ACTIVE.md");
+        if (profiles.length > 0) {
+          warn(
+            dir,
+            "country-config",
+            `templates/${dir}/docs/countries/ contains ${profiles.length} profile(s) but variant.json has no country_config declared.`,
+          );
+        }
+      }
+
+      // Advisory: check if description appears jurisdiction-anchored
+      if (countryConfig && raw.description) {
+        const jurisdictionTerms = /korea|korean|한국|대한민국/i;
+        if (jurisdictionTerms.test(String(raw.description))) {
+          warn(
+            dir,
+            "country-config",
+            `templates/${dir}/variant.json description appears jurisdiction-anchored (contains Korea/Korean/한국/대한민국). Consider region-neutral description with country-specific details in profiles.`,
+          );
+        }
+      }
+
+      // Registry integrity: check country_scoped_assets skills exist in common
+      const schemaPath = join(ROOT, "docs", "workspace-schema.json");
+      if (existsSync(schemaPath)) {
+        try {
+          const schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as Record<string, unknown>;
+          const countryScoped = schema.country_scoped_assets as
+            | {
+                skills?: Record<string, string>;
+                scripts?: Record<string, string>;
+              }
+            | undefined;
+
+          if (countryScoped?.skills) {
+            for (const [skillName, scopedCountry] of Object.entries(countryScoped.skills)) {
+              const commonSkillPath = join(TEMPLATES_DIR, "common", "skills", skillName);
+              if (!existsSync(commonSkillPath)) {
+                fail(
+                  "root",
+                  "country-scoped-assets",
+                  `Registry lists skill '${skillName}' as ${scopedCountry}-scoped but it's missing from templates/common/skills/`,
+                );
+              }
+            }
+          }
+
+          // For variants without KR in country_config.supported, warn if agents reference scoped skills
+          if (countryConfig?.supported && !countryConfig.supported.includes("KR")) {
+            const agentsDir = join(TEMPLATES_DIR, dir, "agents");
+            if (existsSync(agentsDir)) {
+              for (const agentFile of readdirSync(agentsDir)) {
+                if (agentFile.endsWith(".md")) {
+                  const agentPath = join(agentsDir, agentFile);
+                  const agentContent = readFileSync(agentPath, "utf-8");
+                  const agentFrontmatter = parseFrontmatter(agentContent);
+                  if (agentFrontmatter.required_skills) {
+                    const requiredSkillsMatch = agentContent.match(/^required_skills:\s*\[(.*?)\]/m);
+                    if (requiredSkillsMatch) {
+                      const requiredSkills = requiredSkillsMatch[1]
+                        .split(",")
+                        .map((s) => s.trim().replace(/['"]/g, ""));
+                      for (const skill of requiredSkills) {
+                        if (Object.keys(countryScoped?.skills || {}).includes(skill)) {
+                          const scopedCountry = countryScoped?.skills?.[skill] || "unknown";
+                          warn(
+                            dir,
+                            "country-config",
+                            `templates/${dir}/agents/${agentFile} required_skills includes scoped skill '${skill}' but variant does not support ` +
+                              scopedCountry +
+                              `. Reference will be dangling after prune.`,
+                          );
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          // Schema read error - silently skip registry check
+        }
+      }
+
+      // T-20261026-017: hash-parity — the L1 copy of workspace-schema.json must
+      // match the L0 root copy so the project-side gates read the same contract
+      // as the workspace gate. 2026-10-28-l0-only-governance-doc-cleanup
+      // (DEC-20261028-05): the pair is hand-maintained (ADR-0069 — no
+      // propagation domain covers it; the original "delivered by propagation"
+      // premise was wrong) and INTENTIONALLY diverges in exactly one documented
+      // delta: the L1 copy drops the stale context.md rootAllowlist entry
+      // (no scaffolded project carries that file, §7.5 non-propagation) and
+      // carries the _notes.root_allowlist_divergence record. The comparison
+      // normalizes that sanctioned delta; ANY other divergence still fails.
+      const l1SchemaPath = join(TEMPLATES_DIR, "common", "docs", "workspace-schema.json");
+      if (existsSync(schemaPath) && existsSync(l1SchemaPath)) {
+        try {
+          const rootCanon = canonicalWsSchemaForParity(readFileSync(schemaPath, "utf-8"), "root");
+          const l1Canon = canonicalWsSchemaForParity(readFileSync(l1SchemaPath, "utf-8"), "l1");
+          if (rootCanon !== l1Canon) {
+            fail(
+              "root",
+              "schema-hash-parity",
+              `docs/workspace-schema.json and templates/common/docs/workspace-schema.json diverge beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist entry + _notes.root_allowlist_divergence, DEC-20261028-05) — reconcile the hand-maintained pair deliberately, do not blind-copy.`,
+            );
+          }
+        } catch {
+          fail(
+            "root",
+            "schema-hash-parity",
+            `docs/workspace-schema.json or templates/common/docs/workspace-schema.json is not valid JSON.`,
+          );
+        }
+      }
+
+      // B-06: env registry integrity checks against templates/common/.env.sample
+      const envSamplePath = join(TEMPLATES_DIR, "common", ".env.sample");
+      if (existsSync(schemaPath) && existsSync(envSamplePath)) {
+        try {
+          const schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as Record<string, unknown>;
+          const countryScoped = schema.country_scoped_assets as
+            | {
+                env?: Record<string, string>;
+              }
+            | undefined;
+
+          if (countryScoped?.env) {
+            const envContent = readFileSync(envSamplePath, "utf-8");
+            const lines = envContent.split("\n");
+
+            // Track state for parsing marker blocks
+            const openMarkers = new Map<number, string>(); // line number -> CODE
+            const closeMarkers = new Map<number, string>(); // line number -> CODE
+            const blocks: Array<{ startLine: number; endLine: number; code: string }> = [];
+            let currentBlock: { startLine: number; code: string } | null = null;
+
+            // First pass: identify all markers and blocks
+            for (let i = 0; i < lines.length; i++) {
+              const line = lines[i];
+              const openMatch = line.match(/^# >>>\s*country-scoped:([A-Z]{2,4})/);
+              const closeMatch = line.match(/^# <<<\s*country-scoped:([A-Z]{2,4})/);
+
+              if (openMatch) {
+                const code = openMatch[1];
+                openMarkers.set(i, code);
+                if (currentBlock !== null) {
+                  fail(
+                    "root",
+                    "env-integrity",
+                    `templates/common/.env.sample has nested opening marker at line ${i + 1} without closing previous block at line ${currentBlock.startLine + 1}.`,
+                  );
+                }
+                currentBlock = { startLine: i, code };
+              } else if (closeMatch) {
+                const code = closeMatch[1];
+                closeMarkers.set(i, code);
+                if (currentBlock === null) {
+                  fail(
+                    "root",
+                    "env-integrity",
+                    `templates/common/.env.sample has closing marker at line ${i + 1} without matching opening marker.`,
+                  );
+                } else if (currentBlock.code !== code) {
+                  fail(
+                    "root",
+                    "env-integrity",
+                    `templates/common/.env.sample marker mismatch: block opened with '${currentBlock.code}' at line ${currentBlock.startLine + 1} but closed with '${code}' at line ${i + 1}.`,
+                  );
+                } else {
+                  blocks.push({ startLine: currentBlock.startLine, endLine: i, code: currentBlock.code });
+                  currentBlock = null;
+                }
+              }
+            }
+
+            // Check for unclosed block
+            if (currentBlock !== null) {
+              fail(
+                "root",
+                "env-integrity",
+                `templates/common/.env.sample has unclosed block starting at line ${currentBlock.startLine + 1} with code '${currentBlock.code}'. Missing closing marker.`,
+              );
+            }
+
+            // E2: validate balanced markers
+            if (openMarkers.size !== closeMarkers.size) {
+              fail(
+                "root",
+                "env-integrity",
+                `templates/common/.env.sample has ${openMarkers.size} opening markers but ${closeMarkers.size} closing markers. Each opening must have a matching closing marker.`,
+              );
+            }
+
+            // E1: check every registered env key appears in a matching block
+            const registeredKeys = new Set(Object.keys(countryScoped.env));
+            const foundKeys = new Set<string>();
+
+            for (const block of blocks) {
+              const blockCode = block.code;
+              const blockLines = lines.slice(block.startLine, block.endLine + 1);
+              const blockText = blockLines.join("\n");
+
+              // Find KEY= patterns in this block
+              const keyMatches = blockText.match(/^([A-Z_]+)=/gm);
+              if (keyMatches) {
+                for (const match of keyMatches) {
+                  const key = match.replace("=", "");
+                  foundKeys.add(key);
+
+                  // E3: check key is registered
+                  if (!registeredKeys.has(key)) {
+                    fail(
+                      "root",
+                      "env-integrity",
+                      `templates/common/.env.sample contains unregistered env key '${key}' in ${blockCode}-scoped block (lines ${block.startLine + 1}-${block.endLine + 1}). Register it in workspace-schema.json country_scoped_assets.env.`,
+                    );
+                  } else {
+                    // E3: check block code matches registered country
+                    const registeredCountry = countryScoped.env![key];
+                    if (registeredCountry !== blockCode) {
+                      fail(
+                        "root",
+                        "env-integrity",
+                        `templates/common/.env.sample key '${key}' is in ${blockCode}-scoped block but registered as ${registeredCountry}-scoped in workspace-schema.json. Mismatch at lines ${block.startLine + 1}-${block.endLine + 1}.`,
+                      );
+                    }
+                  }
+                }
+              }
+            }
+
+            // E1: check every registered key was found
+            for (const key of registeredKeys) {
+              if (!foundKeys.has(key)) {
+                fail(
+                  "root",
+                  "env-integrity",
+                  `Registry env key '${key}' (registered as ${countryScoped.env![key]}) does not appear in templates/common/.env.sample. Add ${key}= inside a # >>> country-scoped:${countryScoped.env![key]} marker block.`,
+                );
+              }
+            }
+          }
+        } catch (e) {
+          // Schema/env read error - silently skip
+        }
+      }
+
+      manifests.set(dir, raw as unknown as VariantManifest);
+      pass(`templates/${dir}/variant.json: status=${raw.status}`);
+    } catch (e) {
+      fail(dir, "variant-json", `templates/${dir}/variant.json is not valid JSON`);
+    }
+  }
+
+  return manifests;
+}
+
+// Normalize content: strip BOM and normalize line endings
+function normalizeContent(raw: string): string {
+  return raw
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
+}
+
+// Parse frontmatter fields from markdown (handles BOM, CRLF, multi-line values, YAML blocks, @resolved-from: header)
+function parseFrontmatter(rawContent: string): Record<string, true> {
+  // Strip @resolved-from: comment line (L1-B Phase marker) before parsing
+  const strippedContent = rawContent.replace(/^# @resolved-from:.*\n/, "");
+  const content = normalizeContent(strippedContent);
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  const fields: Record<string, true> = {};
+  for (const line of match[1].split("\n")) {
+    const colonIdx = line.indexOf(":");
+    if (colonIdx === -1) continue;
+    const key = line.slice(0, colonIdx).trim();
+    // Only top-level keys (no leading spaces, no list items)
+    if (key && !key.startsWith(" ") && !key.startsWith("-")) fields[key] = true;
+  }
+  return fields;
+}
+
+/**
+ * Resolve extends pattern in frontmatter
+ * If file has "extends: path/to/skeleton.md", read skeleton and merge frontmatters
+ * @param filePath - Absolute path to the variant file
+ * @param frontmatter - Parsed frontmatter fields from the variant file
+ * @returns Merged frontmatter fields (skeleton + variant overrides)
+ */
+
+function getResolvedContent(filePath: string): string {
+  const rawContent = readFileSync(filePath, "utf-8");
+  let fullContent = rawContent;
+  // Strip @resolved-from: comment line before matching frontmatter
+  const stripped = rawContent.replace(/^# @resolved-from:.*\n/, "");
+  const match = stripped.match(/^---\n([\s\S]*?)\n---/);
+  if (match) {
+    try {
+      const yamlObj = load(match[1]) as Record<string, unknown>;
+      if (yamlObj.extends) {
+        const skeletonPath = resolve(dirname(filePath), String(yamlObj.extends));
+        if (existsSync(skeletonPath)) {
+          fullContent += "\n" + getResolvedContent(skeletonPath);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return fullContent;
+}
+
+function getResolvedYaml(filePath: string): Record<string, unknown> {
+  const rawContent = readFileSync(filePath, "utf-8");
+  // Strip @resolved-from: comment line before matching frontmatter
+  const stripped = rawContent.replace(/^# @resolved-from:.*\n/, "");
+  const match = stripped.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return {};
+  try {
+    const yamlObj = load(match[1]) as Record<string, unknown>;
+    if (yamlObj.extends) {
+      const skeletonPath = resolve(dirname(filePath), String(yamlObj.extends));
+      if (existsSync(skeletonPath)) {
+        const skeletonYaml = getResolvedYaml(skeletonPath);
+        return { ...skeletonYaml, ...yamlObj };
+      }
+    }
+    return yamlObj;
+  } catch {
+    return {};
+  }
+}
+
+function resolveExtends(filePath: string, frontmatter: Record<string, true>): Record<string, true> {
+  if (!frontmatter.extends) {
+    return frontmatter; // No extends, return as-is
+  }
+
+  // Extract the extends path from the raw content (we need the actual path string, not just 'true')
+  const rawContent = readFileSync(filePath, "utf-8");
+  const content = normalizeContent(rawContent);
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return frontmatter;
+
+  // Parse the extends value from YAML
+  let extendsPath: string | undefined;
+  try {
+    const yamlObj = load(match[1]) as Record<string, unknown>;
+    extendsPath = yamlObj.extends as string | undefined;
+  } catch {
+    return frontmatter; // Invalid YAML, return original
+  }
+
+  if (!extendsPath) return frontmatter;
+
+  // Resolve skeleton path relative to current file
+  const skeletonPath = resolve(dirname(filePath), extendsPath);
+
+  try {
+    if (!existsSync(skeletonPath)) {
+      console.warn(`[WARN] Skeleton file not found: ${skeletonPath}`);
+      return frontmatter;
+    }
+
+    const skeletonContent = readFileSync(skeletonPath, "utf-8");
+    const skeletonMatch = skeletonContent.match(/^---\n([\s\S]*?)\n---/);
+
+    if (!skeletonMatch) {
+      // No frontmatter in skeleton, return variant frontmatter
+      return frontmatter;
+    }
+
+    const skeletonFrontmatter = parseFrontmatter(skeletonContent);
+
+    // Recursively resolve the skeleton's extends chain
+    const resolvedSkeleton = resolveExtends(skeletonPath, skeletonFrontmatter);
+
+    // Merge: skeleton base + variant overrides (variant takes precedence)
+    const merged = { ...resolvedSkeleton };
+    for (const key of Object.keys(frontmatter)) {
+      if (key !== "extends") {
+        merged[key] = frontmatter[key];
+      }
+    }
+
+    return merged;
+  } catch (error) {
+    console.warn(`[WARN] Failed to resolve extends: ${skeletonPath}`, error);
+    return frontmatter; // Fallback to original
+  }
+}
+
+// Check 3 & 4: Agent frontmatter and required sections
+function checkAgents(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 3-4: Agent files in ${variant} ===`);
+  const agentsDir = join(TEMPLATES_DIR, variant, "agents");
+  if (!existsSync(agentsDir)) {
+    warn(variant, "agents-dir", `templates/${variant}/agents/ directory not found`);
+    return;
+  }
+
+  const agentFiles = readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
+  if (agentFiles.length === 0) {
+    warn(variant, "agents-empty", `No agent .md files found in templates/${variant}/agents/`);
+    return;
+  }
+
+  // Check for required agents/README.md and agents/README_ko.md (per VARIANT_CONTRACT.md)
+  for (const readmeFile of ["README.md", "README_ko.md"]) {
+    const readmePath = join(agentsDir, readmeFile);
+    if (!existsSync(readmePath)) {
+      fail(
+        variant,
+        `agents-readme-missing`,
+        `templates/${variant}/agents/${readmeFile} not found`,
+        `Create agents/${readmeFile} with agent roster table`,
+      );
+    } else {
+      pass(`${variant}/agents/${readmeFile}: present`);
+    }
+  }
+
+  const requiredFrontmatter = ["name", "status", "tier", "description", "examples"];
+  const validAgentStatuses = ["active", "deprecated", "experimental"];
+  // PM uses "Meeting Facilitation" (facilitator role); all others use "Meeting Participation"
+  const MEETING_SECTIONS = ["## Meeting Participation", "## Meeting Facilitation"];
+  const DISPATCH_SECTION = "## Dispatch Protocol";
+
+  // Only check actual agent definition files (skip README, handoff-spec, and similar docs)
+  const agentDefinitionFiles = agentFiles.filter((f) => !f.startsWith("README") && !f.startsWith("handoff-spec"));
+
+  for (const file of agentDefinitionFiles) {
+    const filePath = join(agentsDir, file);
+    const rawContent = readFileSync(filePath, "utf-8");
+    const content = normalizeContent(rawContent);
+    const fields = parseFrontmatter(rawContent);
+
+    // Resolve extends pattern - merge skeleton frontmatter with variant frontmatter
+    const resolvedFields = resolveExtends(filePath, fields);
+
+    // Check frontmatter (field must exist as a key, value can be empty/block)
+    const missingFields = requiredFrontmatter.filter((f) => !(f in resolvedFields));
+    if (missingFields.length > 0) {
+      fail(
+        variant,
+        "agent-frontmatter",
+        `agents/${file}: missing frontmatter: ${missingFields.join(", ")}`,
+        `Add missing fields to YAML frontmatter. Required: ${requiredFrontmatter.join(", ")}`,
+      );
+    } else {
+      // Validate status enum value (extract actual value from resolved content)
+      let statusVal = "";
+      const resolvedYaml = getResolvedYaml(filePath);
+      statusVal = (resolvedYaml.status as string) ?? "";
+
+      if (!validAgentStatuses.includes(statusVal)) {
+        fail(
+          variant,
+          "agent-status-invalid",
+          `agents/${file}: invalid status value '${statusVal}' (allowed: ${validAgentStatuses.join(" | ")})`,
+          `Set status to one of: ${validAgentStatuses.join(", ")}`,
+        );
+      } else {
+        pass(`agents/${file}: frontmatter OK`);
+      }
+    }
+
+    // Check required sections
+    // For additive overrides, invariant sections may be missing from variant file (provided by skeleton)
+    const agentName = file.replace(".md", "");
+    const variantJsonForAgent = join(TEMPLATES_DIR, variant, "variant.json");
+    let agentOverrideType = "replacement";
+    if (existsSync(variantJsonForAgent)) {
+      try {
+        const vj = JSON.parse(readFileSync(variantJsonForAgent, "utf-8"));
+        agentOverrideType = vj.agent_overrides?.[agentName]?.type ?? "replacement";
+      } catch {
+        /* keep default */
+      }
+    }
+    const commonAgentPath = join(TEMPLATES_DIR, "common", "agents", file);
+    const commonAgentContent = existsSync(commonAgentPath)
+      ? normalizeContent(readFileSync(commonAgentPath, "utf-8"))
+      : "";
+
+    const fullResolvedContent = getResolvedContent(filePath);
+
+    // Detect pure YAML-skeleton pm.md (extends: pattern, no body content — ADR-0033)
+    // In this pattern, Dispatch Protocol lives in AGENTS.md §3, so section checks are exempt.
+    const isYamlSkeletonPm = file === "pm.md" && rawContent.trim().match(/^---[\s\S]*?---\s*$/) !== null;
+    // Detect resolved pm.md (pre-resolved by resolve-variants.ts L1-B Phase)
+    // Resolved files also have Dispatch Protocol in AGENTS.md §3, so section checks are exempt.
+    const isResolvedPm = file === "pm.md" && rawContent.startsWith("# @resolved-from:");
+
+    // Section is "present" if in variant file OR (additive override AND in skeleton) OR recursively inherited via extends
+    const hasMeetingSection =
+      isYamlSkeletonPm ||
+      isResolvedPm ||
+      MEETING_SECTIONS.some(
+        (s) =>
+          content.includes(s) ||
+          (agentOverrideType === "additive" && commonAgentContent.includes(s)) ||
+          fullResolvedContent.includes(s),
+      );
+    const hasDispatchSection =
+      isYamlSkeletonPm ||
+      isResolvedPm ||
+      content.includes(DISPATCH_SECTION) ||
+      (agentOverrideType === "additive" && commonAgentContent.includes(DISPATCH_SECTION)) ||
+      fullResolvedContent.includes(DISPATCH_SECTION);
+    const missingSections: string[] = [];
+    if (!hasMeetingSection) missingSections.push("## Meeting Participation (or ## Meeting Facilitation)");
+    if (!hasDispatchSection) missingSections.push(DISPATCH_SECTION);
+
+    if (missingSections.length > 0) {
+      fail(variant, "agent-sections", `agents/${file}: missing sections: ${missingSections.join(", ")}`);
+    } else {
+      pass(`agents/${file}: required sections OK`);
+    }
+  }
+}
+
+// Check 5: AGENTS.md roster vs actual files
+function checkAgentsRoster(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 5: AGENTS.md roster in ${variant} ===`);
+  const agentsMdPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
+  const agentsDir = join(TEMPLATES_DIR, variant, "agents");
+
+  if (!existsSync(agentsMdPath)) {
+    fail(variant, "agents-roster", `templates/${variant}/AGENTS.md not found`);
+    return;
+  }
+  if (!existsSync(agentsDir)) return;
+
+  const agentsMd = readFileSync(agentsMdPath, "utf-8");
+  const registeredFiles = new Set<string>();
+  for (const match of agentsMd.matchAll(/\[([^\]]+)\]\(agents\/([^)]+)\.md\)/g)) {
+    registeredFiles.add(`${match[2]}.md`);
+  }
+
+  // Exclude documentation files (README, handoff-spec) from roster check
+  const actualFiles = new Set(
+    readdirSync(agentsDir).filter((f) => f.endsWith(".md") && !f.startsWith("README") && !f.startsWith("handoff-spec")),
+  );
+
+  // Also consider agents inherited from templates/common/agents/ as "present"
+  const commonAgentsDir = join(TEMPLATES_DIR, "common", "agents");
+  const commonAgentFiles = existsSync(commonAgentsDir)
+    ? new Set(
+        readdirSync(commonAgentsDir).filter((f) => f.endsWith(".md") && !f.startsWith("_") && !f.startsWith("README")),
+      )
+    : new Set<string>();
+  const allAvailableFiles = new Set([...actualFiles, ...commonAgentFiles]);
+
+  const orphaned = [...actualFiles].filter((f) => !registeredFiles.has(f));
+  const missing = [...registeredFiles].filter((f) => !allAvailableFiles.has(f));
+
+  if (orphaned.length > 0) {
+    warn(
+      variant,
+      "agents-roster",
+      `Orphaned agent files (not in AGENTS.md): ${orphaned.join(", ")}`,
+      "Add to AGENTS.md roster table",
+    );
+  }
+  if (missing.length > 0) {
+    warn(
+      variant,
+      "agents-roster",
+      `AGENTS.md references missing files: ${missing.join(", ")}`,
+      "Create the agent file or remove from AGENTS.md",
+    );
+  }
+  if (orphaned.length === 0 && missing.length === 0) {
+    pass(`${variant}/AGENTS.md roster matches filesystem (${actualFiles.size} agents)`);
+  }
+}
+
+// Check 6: commands structure — shared in common/, variant-specific only in variants
+// Command surfaces (spec 2026-09-25-verifier-platform-expansion-design site 3a):
+// .claude/commands and .gemini/commands are 1:1 mirrors (modulo gemini-parity:
+// skip); .codex/prompts is the codex mapping of the same SSOT (ADR-0077 D4).
+// .agents/commands is EXCLUDED — L0-resident by design, consumed by the
+// Antigravity CLI at the workspace root (spec
+// docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
+// T-20260925-003); recorded exclusion, not a silent skip.
+const COMMAND_SURFACES: ReadonlyArray<readonly [string, string]> = [
+  [".claude", "commands"],
+  [".gemini", "commands"],
+  [".codex", "prompts"],
+];
+/** Net-new surfaces soaking in WARN (ADR-0055); promotion ticket flips to fail. */
+const SOAK_COMMAND_SURFACES = new Set([".codex/prompts"]);
+
+function checkCommands(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 6: commands in ${variant} ===`);
+
+  const allSharedCommands = [
+    "changelog.md",
+    "commit-push-pr.md",
+    "gateguard.md",
+    "memlog.md",
+    "new-task.md",
+    "project-review.md",
+    "sync.md",
+  ];
+
+  if (variant === "common") {
+    // common/ must have all shared commands in every command surface
+    for (const [platform, leaf] of COMMAND_SURFACES) {
+      const commandsDir = join(TEMPLATES_DIR, "common", platform, leaf);
+      if (!existsSync(commandsDir)) {
+        fail("common", "commands-dir", `templates/common/${platform}/${leaf}/ not found`);
+        continue;
+      }
+      const soak = SOAK_COMMAND_SURFACES.has(`${platform}/${leaf}`);
+      const emit = soak ? warn : fail;
+      for (const cmd of allSharedCommands) {
+        // Gemini custom commands are TOML-only (T-20261013-009 phase 2): the
+        // .gemini surface stores `<name>.toml` rendered from the .claude SSOT.
+        const expected = platform === ".gemini" ? cmd.replace(/\.md$/, ".toml") : cmd;
+        if (!existsSync(join(commandsDir, expected))) {
+          emit("common", "command-missing", `${platform}/${leaf}/${expected} not found in common/`);
+        }
+      }
+      pass(
+        `common/${platform}/${leaf}: ${allSharedCommands.length} shared commands OK${soak ? " (soak: WARN until promotion)" : ""}`,
+      );
+    }
+    return;
+  }
+
+  // Variants must NOT have shared commands (inherited from common/ via new-project.sh overlay)
+  // Only security-check.md is allowed as a variant-specific command
+  const allowedVariantCommands = new Set(["security-check.md"]);
+  for (const [platform, leaf] of COMMAND_SURFACES) {
+    const commandsDir = join(TEMPLATES_DIR, variant, platform, leaf);
+    if (!existsSync(commandsDir)) continue;
+    const soak = SOAK_COMMAND_SURFACES.has(`${platform}/${leaf}`);
+    const emit = soak ? warn : fail;
+    const files = readdirSync(commandsDir);
+    const unexpected = files.filter((f) => !allowedVariantCommands.has(f));
+    if (unexpected.length > 0) {
+      emit(
+        variant,
+        "command-duplicate",
+        `${platform}/${leaf}/ contains shared commands that belong in common/ only: ${unexpected.join(", ")}`,
+      );
+    } else {
+      pass(`${variant}/${platform}/${leaf}: OK (${files.length} variant-specific file(s))`);
+    }
+  }
+}
+
+// Check 7: scripts and .githooks parity — removed (dead code after ADR-0036 TypeScript migration)
+
+// Check 8: shared file sync warning — removed (meeting command retired 2026-09-26, spec 2026-09-26-meeting-command-retirement)
+
+// Check 11: README presence in stable variants
+function checkReadmePresence(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 11: README presence in ${variant} ===`);
+
+  const readmePath = join(TEMPLATES_DIR, variant, "README.md");
+  const readmeKoPath = join(TEMPLATES_DIR, variant, "README_ko.md");
+
+  const readmeExists = existsSync(readmePath);
+  const readmeKoExists = existsSync(readmeKoPath);
+
+  if (!readmeExists) {
+    fail(
+      variant,
+      "readme-presence",
+      `templates/${variant}/README.md is missing`,
+      `Create README.md with a content_hash: frontmatter field`,
+    );
+  }
+  if (!readmeKoExists) {
+    fail(
+      variant,
+      "readme-presence",
+      `templates/${variant}/README_ko.md is missing`,
+      `Create README_ko.md with a translated_from_hash: frontmatter field`,
+    );
+  }
+
+  if (readmeExists && readmeKoExists) {
+    pass(`${variant}/README.md and README_ko.md both present`);
+  }
+
+  // Warn if frontmatter hash fields are missing
+  if (readmeExists) {
+    const readmeFields = parseFrontmatter(readFileSync(readmePath, "utf-8"));
+    if (!("content_hash" in readmeFields)) {
+      warn(
+        variant,
+        "readme-frontmatter",
+        `templates/${variant}/README.md is missing 'content_hash:' frontmatter field`,
+        `Add 'content_hash: <hash>' to the README.md frontmatter`,
+      );
+    }
+  }
+  if (readmeKoExists) {
+    const readmeKoFields = parseFrontmatter(readFileSync(readmeKoPath, "utf-8"));
+    if (!("translated_from_hash" in readmeKoFields)) {
+      warn(
+        variant,
+        "readme-frontmatter",
+        `templates/${variant}/README_ko.md is missing 'translated_from_hash:' frontmatter field`,
+        `Add 'translated_from_hash: <hash>' to the README_ko.md frontmatter`,
+      );
+    }
+  }
+}
+
+// Check 9: docs/context.md sync and broken paths
+function checkContextSync(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 9: docs/context.md sync and paths in ${variant} ===`);
+  const agentsMdPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
+  const contextMdPath = join(TEMPLATES_DIR, variant, "docs", `${variant}.context.md`);
+
+  if (!existsSync(agentsMdPath) || !existsSync(contextMdPath)) {
+    if (existsSync(agentsMdPath) && !existsSync(contextMdPath)) {
+      warn(
+        variant,
+        "context-missing",
+        `templates/${variant}/docs/${variant}.context.md not found — variant contract declares this as Required`,
+        `Create docs/${variant}.context.md`,
+      );
+    }
+    return;
+  }
+
+  const agentsMd = readFileSync(agentsMdPath, "utf-8");
+  const contextMd = readFileSync(contextMdPath, "utf-8");
+
+  // Check for broken paths in AGENTS.md
+  if (agentsMd.includes("../common/skills/")) {
+    fail(variant, "broken-paths", `AGENTS.md contains broken '../common/skills/' paths`, `Change to 'skills/'`);
+  }
+
+  // Find all skills in AGENTS.md
+  const skillRegex = /`([a-zA-Z0-9-./_]+\/SKILL\.md)`/g;
+  const expectedSkills = new Set<string>();
+  for (const match of agentsMd.matchAll(skillRegex)) {
+    expectedSkills.add(match[1]);
+  }
+
+  // Every skill AGENTS.md references must resolve to a real skill dir —
+  // variant-local skills/, inherited templates/common/skills/ (inherits_common-
+  // aware), or one of the variant's platform mirrors. Replaces the retired
+  // hardcoded agent-lifecycle-manager expectation (T-20261005-015): that skill
+  // is L0-only and does not ship in templates; variants declare the
+  // platform-lifecycle-manager pair instead.
+  let commonSkillsAllowed = true;
+  try {
+    const vjson = JSON.parse(readFileSync(join(TEMPLATES_DIR, variant, "variant.json"), "utf-8")) as {
+      inherits_common?: unknown;
+    };
+    commonSkillsAllowed = vjson.inherits_common !== false;
+  } catch {
+    /* unparseable/absent variant.json: default to common-allowed */
+  }
+  const skillHomeBases = [
+    join(TEMPLATES_DIR, variant, "skills"),
+    ...(commonSkillsAllowed ? [join(TEMPLATES_DIR, "common", "skills")] : []),
+    ...PLATFORM_MIRROR_DIRS.map((m) => join(TEMPLATES_DIR, variant, m, "skills")),
+  ];
+  const unresolvedSkillRefs: string[] = [];
+  for (const ref of expectedSkills) {
+    const name = ref.split("/").slice(-2, -1)[0] ?? ref;
+    if (skillHomeBases.some((base) => existsSync(join(base, name, "SKILL.md")))) continue;
+    unresolvedSkillRefs.push(ref);
+  }
+  if (unresolvedSkillRefs.length > 0) {
+    fail(
+      variant,
+      "phantom-skill-ref",
+      `AGENTS.md references skills that resolve to no skill dir: ${unresolvedSkillRefs.join(", ")}`,
+      "Fix the path (variant skills/, templates/common/skills/, or a platform mirror) or remove the reference",
+    );
+  } else if (expectedSkills.size > 0) {
+    pass(`${variant}/AGENTS.md skill references resolve (${expectedSkills.size} referenced)`);
+  }
+
+  // If DYNAMIC_SKILLS markers are present, inject-skills.ts handles sync at scaffold time — skip static check
+  if (contextMd.includes("<!-- DYNAMIC_SKILLS_START -->")) {
+    pass(`${variant}/docs/context.md uses DYNAMIC_SKILLS injection (runtime sync via inject-skills.ts)`);
+    return;
+  }
+
+  // Check if they are all in contextMd
+  const missingSkills: string[] = [];
+  for (const skill of expectedSkills) {
+    if (!contextMd.includes(skill)) {
+      missingSkills.push(skill);
+    }
+  }
+
+  if (missingSkills.length > 0) {
+    fail(
+      variant,
+      "context-sync",
+      `docs/context.md is missing skills defined in AGENTS.md: ${missingSkills.join(", ")}`,
+      "Sync the ## Skills table in docs/context.md with AGENTS.md",
+    );
+  } else {
+    pass(`${variant}/docs/context.md has all ${expectedSkills.size} skills from AGENTS.md`);
+  }
+}
+
+// Check 10: Root vs Template Alignment (L0 vs L1 Sync)
+function checkL0L1ScriptParity() {
+  const L0_SCRIPTS = join(ROOT, "scripts");
+  const L1_SCRIPTS = join(ROOT, "templates", "common", "scripts");
+
+  if (!existsSync(L1_SCRIPTS) || !existsSync(L0_SCRIPTS)) return;
+
+  // Build the parity list dynamically from scripts/SCRIPTS.md.
+  // Any script whose `layer` column is exactly "common" must exist in both
+  // scripts/ (workspace root) and templates/common/scripts/.
+  // To add a new script to the check, register it in SCRIPTS.md with layer=common.
+  const scriptsRegistryPath = join(ROOT, "scripts", "SCRIPTS.md");
+  const commonScripts = new Set<string>();
+
+  if (existsSync(scriptsRegistryPath)) {
+    const registryContent = readFileSync(scriptsRegistryPath, "utf-8");
+    // Parse the markdown table rows between ## Registry and the next ## header.
+    // Column order: script | source | version | status | removal-date | security-advisory | layer | pair
+    const registrySection = registryContent.split(/^## /m).find((s) => s.startsWith("Registry"));
+    if (registrySection) {
+      for (const line of registrySection.split("\n")) {
+        // Match table data rows (start with |, not separator rows with dashes)
+        const match = line.match(/^\|\s*`([^`]+)`\s*\|(?:[^|]*\|){4}[^|]*\|\s*common\s*\|/);
+        if (match) {
+          commonScripts.add(match[1].trim());
+        }
+      }
+    }
+  }
+
+  // Glob-based fallback: files present in BOTH directories that are not
+  // explicitly marked L0-only in SCRIPTS.md. This catches unregistered common
+  // files without pulling in intentionally diverged L0-only scripts.
+  const l0OnlyScripts = new Set<string>();
+  if (existsSync(scriptsRegistryPath)) {
+    const registryContent = readFileSync(scriptsRegistryPath, "utf-8");
+    const registrySection = registryContent.split(/^## /m).find((s) => s.startsWith("Registry"));
+    if (registrySection) {
+      for (const line of registrySection.split("\n")) {
+        const match = line.match(/^\|\s*`([^`]+)`\s*\|(?:[^|]*\|){4}[^|]*\|\s*L0-only\s*\|/);
+        if (match) l0OnlyScripts.add(match[1].trim());
+      }
+    }
+  }
+  const l0Files = new Set(readdirSync(L0_SCRIPTS).filter((f) => !statSync(join(L0_SCRIPTS, f)).isDirectory()));
+  const l1Files = new Set(readdirSync(L1_SCRIPTS).filter((f) => !statSync(join(L1_SCRIPTS, f)).isDirectory()));
+  // Exclude registry/documentation files — SCRIPTS.md is intentionally a per-layer subset
+  const registryFiles = new Set(["SCRIPTS.md"]);
+  const filesInBoth = [...l1Files].filter((f) => l0Files.has(f) && !l0OnlyScripts.has(f) && !registryFiles.has(f));
+  for (const f of filesInBoth) {
+    commonScripts.add(f);
+  }
+
+  const normalize = (str: string) => str.replace(/\r\n/g, "\n");
+
+  for (const script of commonScripts) {
+    // Skip helper sub-paths and non-file entries that may appear in the registry
+    if (script.includes("/")) continue;
+    // Scripts, docs, and data files are parity-checked; other extensions are not propagated
+    if (!script.endsWith(".ts") && !script.endsWith(".md") && !script.endsWith(".json")) continue;
+
+    const l1Path = join(L1_SCRIPTS, script);
+    const l0Path = join(L0_SCRIPTS, script);
+
+    if (existsSync(l1Path) && existsSync(l0Path)) {
+      let l1Content: string, l0Content: string;
+      try {
+        l1Content = readFileSync(l1Path, "utf-8");
+        l0Content = readFileSync(l0Path, "utf-8");
+      } catch (err) {
+        warn(
+          "common",
+          "l0-l1-script-parity",
+          `Failed to read ${script} in L0 or L1: ${err}`,
+          `Check file permissions or OS file locks.`,
+        );
+        continue;
+      }
+
+      // L1 files have context.md refs scrubbed to context.md (comment-only for code files —
+      // see propagate-to-templates.ts's scrubConstitutionRefs); normalize L0 the same way before comparison.
+      const l0Normalized = scrubConstitutionRefs(normalize(l0Content), l0Path, l1Path);
+      if (normalize(l1Content) !== l0Normalized) {
+        fail(
+          "common",
+          "l0-l1-script-parity",
+          `Script ${script} differs between L0 (root) and L1 (templates/common).`,
+          `Backport L0 changes to L1 or update L0 to match L1.`,
+        );
+      } else {
+        pass(`Script ${script} is in sync between L0 and L1`);
+      }
+    }
+  }
+
+  // T-20260915-001 (finding H8): SCRIPTS.md registry version parity. The L1
+  // registry is hand-maintained and intentionally excluded from the content
+  // parity above (registryFiles), so its Version cells could go stale vs L0
+  // across bump rounds — five feature scripts drifted over three consecutive
+  // rounds before the manual PR #929 reconciliation, invisible to every gate.
+  // For every script name registered in BOTH registries the Version cells must
+  // be identical; a mismatch is an Error. Row presence differences (a name in
+  // only one registry) are verify-scripts.ts's ghost/unregistered scope, not
+  // parity's.
+  const l1RegistryPath = join(L1_SCRIPTS, "SCRIPTS.md");
+  if (existsSync(scriptsRegistryPath) && existsSync(l1RegistryPath)) {
+    let l0Rows: Map<string, ScriptsRegistryRow> | null = null;
+    let l1Rows: Map<string, ScriptsRegistryRow> | null = null;
+    try {
+      l0Rows = parseScriptsMdRegistry(readFileSync(scriptsRegistryPath, "utf-8"));
+      l1Rows = parseScriptsMdRegistry(readFileSync(l1RegistryPath, "utf-8"));
+    } catch (err) {
+      warn(
+        "common",
+        "l0-l1-scripts-registry-version",
+        `Failed to read a SCRIPTS.md registry: ${err}`,
+        `Check file permissions or OS file locks.`,
+      );
+    }
+    if (l0Rows && l1Rows) {
+      for (const [name, l0Row] of l0Rows) {
+        const l1Row = l1Rows.get(name);
+        if (!l1Row) continue; // name present in only one registry — out of parity scope
+        if (!l0Row.version || !l1Row.version) {
+          fail(
+            "common",
+            "l0-l1-scripts-registry-version",
+            `SCRIPTS.md registry row '${name}' has an empty Version cell (L0=${l0Row.version || "<empty>"}, L1=${l1Row.version || "<empty>"})`,
+            `Set the Version cell in both SCRIPTS.md registries (the frontmatter/@version of the script is the source)`,
+          );
+        } else if (l0Row.version !== l1Row.version) {
+          fail(
+            "common",
+            "l0-l1-scripts-registry-version",
+            `SCRIPTS.md registry version mismatch for '${name}': L0=${l0Row.version}, L1=${l1Row.version}`,
+            `Update the templates/common/scripts/SCRIPTS.md row to ${l0Row.version} (the L1 registry is hand-maintained)`,
+          );
+        } else {
+          pass(`SCRIPTS.md registry version parity OK for '${name}' (${l0Row.version})`);
+        }
+      }
+    }
+  }
+
+  // Recursively check subdirectories: helpers/, hooks/ (WARN on diff/missing), lib/ (ERROR on diff/missing)
+  const subdirs = [
+    { name: "helpers", level: "warn" as const },
+    { name: "hooks", level: "warn" as const },
+    { name: "lib", level: "error" as const },
+  ];
+
+  for (const { name: subdir, level } of subdirs) {
+    const l0SubDir = join(L0_SCRIPTS, subdir);
+    const l1SubDir = join(L1_SCRIPTS, subdir);
+
+    if (!existsSync(l0SubDir)) continue; // subdir doesn't exist in L0 — skip
+
+    const l0SubFiles = readdirSync(l0SubDir).filter(
+      (f) => f.endsWith(".ts") && !statSync(join(l0SubDir, f)).isDirectory(),
+    );
+
+    for (const file of l0SubFiles) {
+      const l0FilePath = join(l0SubDir, file);
+      const l1FilePath = join(l1SubDir, file);
+
+      if (!existsSync(l1SubDir) || !existsSync(l1FilePath)) {
+        // File exists in L0 subdir but not in L1 subdir
+        // If the script is classified L0-only, absence from L1 is correct — skip
+        if (!includeScriptInL1(file)) continue;
+        const msg = `scripts/${subdir}/${file} exists in L0 but is missing from templates/common/scripts/${subdir}/`;
+        const fix = `Copy scripts/${subdir}/${file} to templates/common/scripts/${subdir}/${file}`;
+        if (level === "error") {
+          fail("common", "l0-l1-subdir-parity", msg, fix);
+        } else {
+          warn("common", "l0-l1-subdir-parity", msg, fix);
+        }
+        continue;
+      }
+
+      let l0Content: string, l1Content: string;
+      try {
+        l0Content = readFileSync(l0FilePath, "utf-8");
+        l1Content = readFileSync(l1FilePath, "utf-8");
+      } catch (err) {
+        warn(
+          "common",
+          "l0-l1-subdir-parity",
+          `Failed to read scripts/${subdir}/${file} in L0 or L1: ${err}`,
+          `Check file permissions or OS file locks.`,
+        );
+        continue;
+      }
+
+      // L1 files have context.md refs scrubbed to context.md (comment-only for code files —
+      // see propagate-to-templates.ts's scrubConstitutionRefs); normalize L0 the same way before comparison.
+      const l0Normalized = scrubConstitutionRefs(normalize(l0Content), l0FilePath, l1FilePath);
+      if (l0Normalized !== normalize(l1Content)) {
+        const msg = `scripts/${subdir}/${file} content differs between L0 (root) and L1 (templates/common/scripts/${subdir}/).`;
+        const fix = `Backport L0 changes to templates/common/scripts/${subdir}/${file} or update L0 to match L1.`;
+        if (level === "error") {
+          fail("common", "l0-l1-subdir-parity", msg, fix);
+        } else {
+          warn("common", "l0-l1-subdir-parity", msg, fix);
+        }
+      } else {
+        pass(`Script ${subdir}/${file} is in sync between L0 and L1`);
+      }
+    }
+  }
+}
+
+// Check P-01: Platform Documentation Parity and Template Sync
+function checkPlatformDocumentationParity(): void {
+  if (!JSON_MODE) console.log("\n=== Check P-01: Platform Documentation Parity ===");
+
+  const claudePath = join(ROOT, "CLAUDE.md");
+  const geminiPath = join(ROOT, "GEMINI.md");
+
+  if (!existsSync(claudePath) || !existsSync(geminiPath)) return;
+
+  const extractSections = (content: string) => {
+    const matches = content.matchAll(/^#{2,4} (.+)$/gm);
+    return new Set(Array.from(matches).map((m) => m[1].trim().replace(/^\d+\.\s*/, "")));
+  };
+
+  const claudeSections = extractSections(readFileSync(claudePath, "utf-8"));
+  const geminiSections = extractSections(readFileSync(geminiPath, "utf-8"));
+
+  // Parity between root CLAUDE.md and root GEMINI.md
+  const ignoreParity = [
+    "Claude Code-Specific Behaviors",
+    "Project-Specific Gemini Settings",
+    "Tool Name Mapping & Safeguards",
+    "Native Antigravity 2.0 Features",
+    "Git & PR Additions (Claude Code)",
+    "Git & PR Additions (Gemini)",
+    "Gemini-Specific & Antigravity Workflows",
+    "Active Antigravity Tool Suite Mapping & Safeguards",
+    "Planning Mode & Artifact Specifications",
+    "Subagent Instantiation & Async Orchestration",
+    "Automated Hooks",
+    "Native Slash Commands",
+    "MCP Configurations & Absolute Resolving",
+    "Native Sub-agents",
+    "Native Plan Mode",
+    "Task Tracking",
+    "Custom Command Error Recovery",
+    "Windows Platform Requirement",
+    "Language Policy for Documentation",
+    "Agent Dispatch Rules",
+    "Lifecycle Management Rules",
+    "Security & Hook Configuration",
+    "Git Commit Policy",
+    "Executing Project Commands",
+    "Pre-PR Security Gate",
+    "Model Selection Override",
+    "Security Engagement Rules",
+    "Surgical Multi-Replace Offset Safeguard",
+    "Windows Terminal & Code Page Safeguard",
+    "Grep Search 50-Match Cap Safeguard",
+    "implementation_plan.md",
+    "task.md",
+    "walkthrough.md",
+    "Define Subagent",
+    "Invoke Subagent",
+    "Communication",
+    "Phase 4 Execution Loop",
+    "Mandatory Execution Plan Display",
+    "Specialist Agent List",
+    "Superpowers Plugin & Cost Optimization",
+    "Agent Teams (Experimental)",
+    "Agent Teams vs. Antigravity Agent Manager",
+    "Antigravity Agent Manager",
+    "Antigravity Parallel Agent Workflow",
+    "GEMINI.md Equivalent Settings",
+    "Antigravity-Specific Dispatch",
+    "Skill Resolution Priority",
+    "Claude Code-Specific Dispatch",
+    "Workspace & Template Boundary Policy",
+  ];
+
+  const isIgnored = (s: string) => ignoreParity.some((ignore) => s.includes(ignore));
+
+  const missingInClaude = [...geminiSections].filter((s) => !claudeSections.has(s) && !isIgnored(s));
+  const missingInGemini = [...claudeSections].filter((s) => !geminiSections.has(s) && !isIgnored(s));
+
+  if (missingInClaude.length > 0) {
+    fail(
+      "root",
+      "platform-parity",
+      `CLAUDE.md is missing sections present in GEMINI.md: ${missingInClaude.join(", ")}`,
+    );
+  }
+  if (missingInGemini.length > 0) {
+    fail(
+      "root",
+      "platform-parity",
+      `GEMINI.md is missing sections present in CLAUDE.md: ${missingInGemini.join(", ")}`,
+    );
+  }
+  if (missingInClaude.length === 0 && missingInGemini.length === 0) {
+    pass("Platform parity: CLAUDE.md and GEMINI.md section parity OK");
+  }
+
+  // Sync check: Root vs Templates
+  const templatesDir = readdirSync(TEMPLATES_DIR);
+  for (const tpl of templatesDir) {
+    if (tpl === "common" || tpl.startsWith(".")) continue;
+    if (isTransientTestFixture(tpl)) continue; // E2E staging dirs (T-20260916-001)
+    if (tpl.startsWith("co-") && !isCoVariantTracked(tpl)) continue;
+    const tplPath = join(TEMPLATES_DIR, tpl);
+    if (!statSync(tplPath).isDirectory()) continue;
+
+    for (const doc of ["CLAUDE.md", "GEMINI.md"]) {
+      const rootDoc = join(ROOT, doc);
+      const variantDoc = join(tplPath, doc);
+      if (!existsSync(rootDoc) || !existsSync(variantDoc)) continue;
+
+      const rootSecs = extractSections(readFileSync(rootDoc, "utf-8"));
+      const variantSecs = extractSections(readFileSync(variantDoc, "utf-8"));
+
+      const missingInVariant = [...rootSecs].filter((s) => !variantSecs.has(s) && !isIgnored(s));
+
+      if (missingInVariant.length > 0) {
+        fail(
+          tpl,
+          "template-sync",
+          `templates/${tpl}/${doc} is missing sections from root ${doc}: ${missingInVariant.join(", ")}`,
+        );
+      }
+    }
+  }
+
+  // P-01b: Variant CLAUDE.md <-> GEMINI.md Specialist Agent List content parity
+  if (!JSON_MODE) console.log("\n=== Check P-01b: Variant Specialist Agent List Parity ===");
+  const extractAgentList = (content: string): string => {
+    const match = content.match(/####\s*Specialist Agent List[\s\S]*?(?=\n###|\n##|\n---|\Z)/);
+    return match ? match[0].trim() : "";
+  };
+  for (const tpl of templatesDir) {
+    if (tpl === "common" || tpl.startsWith(".")) continue;
+    const tplPath = join(TEMPLATES_DIR, tpl);
+    if (!statSync(tplPath).isDirectory()) continue;
+    const claudeVariant = join(tplPath, "CLAUDE.md");
+    const geminiVariant = join(tplPath, "GEMINI.md");
+    if (!existsSync(claudeVariant) || !existsSync(geminiVariant)) continue;
+    const claudeList = extractAgentList(readFileSync(claudeVariant, "utf-8"));
+    const geminiList = extractAgentList(readFileSync(geminiVariant, "utf-8"));
+    if (claudeList && geminiList && claudeList !== geminiList) {
+      fail(
+        tpl,
+        "agent-list-parity",
+        `templates/${tpl}/CLAUDE.md and GEMINI.md have different Specialist Agent List content`,
+        "Apply identical §5 changes to both files",
+      );
+    } else if (claudeList || geminiList) {
+      pass(`${tpl}: Specialist Agent List parity OK`);
+    }
+
+    // P-01b codex leg (spec site 3g): when a variant carries CODEX.md, its
+    // Specialist Agent List must match too. existsSync-guarded — no variant
+    // carries CODEX.md today (no-op), future-proof when one does.
+    // Net-new coverage soaking in WARN — TODO(promotion): flip to fail.
+    const codexVariant = join(tplPath, "CODEX.md");
+    if (claudeList && existsSync(codexVariant)) {
+      const codexList = extractAgentList(readFileSync(codexVariant, "utf-8"));
+      if (codexList && codexList !== claudeList) {
+        warn(
+          tpl,
+          "agent-list-parity",
+          `templates/${tpl}/CODEX.md has different Specialist Agent List content from CLAUDE.md (soak: WARN until promotion)`,
+          "Apply identical §5 changes to CLAUDE.md and CODEX.md",
+        );
+      } else if (codexList) {
+        pass(`${tpl}: Specialist Agent List parity OK (CODEX.md)`);
+      }
+    }
+  }
+}
+
+// Check P-02: Root .claude/commands/ and .gemini/commands/ must be mirrored in templates/common/
+// Exception: new-project.md has gemini-parity: skip, so it only needs to be in .claude/commands/
+function checkRootCommonCommandsParity(): void {
+  if (!JSON_MODE) console.log("\n=== Check P-02: Root ↔ Common Commands Parity ===");
+
+  const pairs = [
+    {
+      rootDir: join(ROOT, ".claude", "commands"),
+      commonDir: join(TEMPLATES_DIR, "common", ".claude", "commands"),
+      label: ".claude/commands",
+    },
+    {
+      rootDir: join(ROOT, ".gemini", "commands"),
+      commonDir: join(TEMPLATES_DIR, "common", ".gemini", "commands"),
+      label: ".gemini/commands",
+    },
+  ];
+
+  // T-20261014-001: extension-aware — the .gemini/commands dirs were converted
+  // to .toml, so legs filter by STEM (name without .md/.toml) on both sides.
+  // A bare .endsWith('.md') made both toml-only legs empty and the parity pass
+  // vacuously.
+  const commandStems = (dir: string): string[] =>
+    existsSync(dir)
+      ? readdirSync(dir)
+          .filter((f) => f.endsWith(".md") || f.endsWith(".toml"))
+          .map((f) => f.replace(/\.(md|toml)$/, ""))
+      : [];
+
+  for (const { rootDir, commonDir, label } of pairs) {
+    if (!existsSync(rootDir)) continue;
+    const rootStems = new Set(commandStems(rootDir));
+    const commonStems = new Set(commandStems(commonDir));
+
+    // Special case: new-project has gemini-parity: skip
+    // It should exist in .claude/commands/ but NOT in .gemini/commands/
+    const workspaceOnlyCmd = "new-project";
+    const isGemini = label.includes(".gemini");
+
+    // Filter out the workspace-only command when checking parity
+    // new-project is workspace-only and should NOT be in common/
+    const filesToCheck = [...rootStems].filter((f) => f !== workspaceOnlyCmd);
+
+    const missing = filesToCheck.filter((f) => !commonStems.has(f));
+    if (missing.length > 0) {
+      fail(
+        "root",
+        "command-parity",
+        `Root ${label}/ has files not mirrored in templates/common/${label}/: ${missing.join(", ")}`,
+        `Copy missing files to templates/common/${label}/`,
+      );
+    } else {
+      // Verify that new-project is NOT in .gemini/commands/
+      if (isGemini && rootStems.has(workspaceOnlyCmd)) {
+        fail(
+          "root",
+          "command-parity",
+          `Root ${label}/ contains ${workspaceOnlyCmd} but it has gemini-parity: skip — remove from ${label}`,
+          `Remove ${workspaceOnlyCmd} from ${label} (it should only exist in .claude/commands/)`,
+        );
+      } else {
+        pass(`Root ↔ common ${label} parity OK (${rootStems.size} command(s))`);
+      }
+    }
+  }
+}
+
+// Recursively collect skill directories under a skills/ root, returning paths
+// relative to skillsDir (e.g. "change-control" for a flat layout, or
+// "domains/industry/gmp/change-control" for a nested layout like co-safety's).
+// A directory is a "skill" the moment it contains a direct SKILL.md; category
+// directories (daily/, domains/, investigation/, emergency/, _meta/, etc.)
+// have no SKILL.md of their own and are walked into instead of flagged.
+function collectSkillDirs(dir: string, skillsDir: string): string[] {
+  const results: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    if (entry === "_archive" || entry === "local" || entry === "external" || entry.startsWith("_")) continue;
+    const fullPath = join(dir, entry);
+    if (!statSync(fullPath).isDirectory()) continue;
+    if (existsSync(join(fullPath, "SKILL.md"))) {
+      results.push(fullPath.slice(skillsDir.length + 1).replace(/\\/g, "/"));
+    } else {
+      results.push(...collectSkillDirs(fullPath, skillsDir));
+    }
+  }
+  return results;
+}
+
+// Check B-09: Per-variant skill lifecycle (presence-driven)
+function checkVariantSkills(variant: string): void {
+  const skillsDir = join(TEMPLATES_DIR, variant, "skills");
+  if (!existsSync(skillsDir)) {
+    pass(`${variant}/skills/: not present (OK — skill lifecycle check not applicable)`);
+    return;
+  }
+
+  if (!JSON_MODE) console.log(`\n=== Check B-09: Skill lifecycle in ${variant} ===`);
+
+  const dirs = collectSkillDirs(skillsDir, skillsDir);
+
+  if (dirs.length === 0) {
+    warn(variant, "skill-lifecycle", `${variant}/skills/ exists but contains no skill directories`);
+    return;
+  }
+
+  let missingSkillMd = 0;
+  let deprecatedCount = 0;
+  for (const skillName of dirs) {
+    const skillMd = join(skillsDir, skillName, "SKILL.md");
+    if (!existsSync(skillMd)) {
+      fail(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/${skillName}/SKILL.md missing`,
+        `Create SKILL.md with required frontmatter`,
+      );
+      missingSkillMd++;
+      continue;
+    }
+    const content = readFileSync(skillMd, "utf-8");
+    const fields = parseFrontmatter(content);
+    if (!("name" in fields) || !("description" in fields)) {
+      fail(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/${skillName}/SKILL.md missing required frontmatter (name, description)`,
+      );
+    }
+    // Scope field required (CONSTITUTION §6.2)
+    if (!("scope" in fields)) {
+      fail(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/${skillName}/SKILL.md missing required frontmatter (scope)`,
+        `Add 'scope: ${variant}' (variant-exclusive) or 'scope: common'`,
+      );
+    }
+    // Version must be full semver X.Y.Z (2-part versions break tooling that compares versions)
+    const verLine = content.split("\n").find((l) => l.startsWith("version:"));
+    const verVal = verLine
+      ? verLine
+          .slice(verLine.indexOf(":") + 1)
+          .trim()
+          .replace(/^["']|["']$/g, "")
+      : "";
+    if (verVal && !/^\d+\.\d+\.\d+$/.test(verVal)) {
+      fail(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/${skillName}/SKILL.md version is not semver: '${verVal}'`,
+        `Use X.Y.Z (e.g. 'version: 1.0.0')`,
+      );
+    }
+    // Per-skill README.md/README_ko.md requirement retired 2026-08-29 (DEC-20260829-01):
+    // SKILL.md is the authoritative, machine-consumed definition; per-skill READMEs
+    // were seeded boilerplate and are no longer gated.
+    if ("status" in fields) {
+      const statusLine = content.split("\n").find((l) => l.startsWith("status:"));
+      const statusVal = statusLine ? statusLine.slice(statusLine.indexOf(":") + 1).trim() : "";
+      if (statusVal === "deprecated") deprecatedCount++;
+    }
+  }
+
+  if (missingSkillMd === 0) {
+    if (deprecatedCount > 0) {
+      warn(
+        variant,
+        "skill-lifecycle",
+        `${variant}/skills/: ${deprecatedCount} deprecated skill(s) — remove before stable promotion`,
+      );
+    } else {
+      pass(`${variant}/skills/: ${dirs.length} skill(s) OK, no deprecated`);
+    }
+  }
+}
+
+// Check B-10: scripts/<variant>/ layout convention (optional-to-have, mandatory-to-be-correct).
+// A variant template MAY carry variant-specific scripts under scripts/<variant>/; when present:
+//   - the subfolder must be named after the template's own variant (no foreign-variant or
+//     generic nested script folders),
+//   - no nested scripts/ recursion (scripts/<variant>/scripts/…),
+//   - every .ts inside carries an @version header and is registered in the variant's
+//     scripts/SCRIPTS.md registry when that registry exists.
+// Adopted 2026-08-28 (docs/designs/2026-08-28-skill-hygiene-and-conventions-design.md).
+// v1.66.0 (U-20261029-004 — spec docs/designs/2026-10-31-variant-generators-design.md
+// §6.3): additive generator-manifest arm — when a variant template declares
+// scripts/<variant>/generators.json, validate shape + containment through the
+// shared loader library (strict parse, name uniqueness, array-form command
+// with `bun` as argv[0], outputs/sources project-relative and traversal-free,
+// size caps, script-path existence + symlink containment against the variant
+// root). Absent file → no check (the manifest is project-authored and
+// optional; absence must never become a template-validation failure).
+function checkVariantGeneratorManifest(variant: string): void {
+  const manifestPath = join(TEMPLATES_DIR, variant, "scripts", variant, "generators.json");
+  if (!existsSync(manifestPath)) return; // absent = skip cleanly
+  const variantRoot = join(TEMPLATES_DIR, variant);
+  let content: string;
+  try {
+    content = readFileSync(manifestPath, "utf-8");
+  } catch (err) {
+    fail(
+      variant,
+      "generator-manifest",
+      `templates/${variant}/scripts/${variant}/generators.json unreadable: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return;
+  }
+  const parsed = parseGeneratorManifest(content);
+  if (!parsed.ok) {
+    fail(
+      variant,
+      "generator-manifest",
+      `templates/${variant}/scripts/${variant}/generators.json: ${parsed.error}`,
+      'See the "Declared generators" section in docs/guides/creating-a-variant.md',
+    );
+    return;
+  }
+  const rootErrors = validateManifestAgainstRoot(variantRoot, parsed.manifest);
+  for (const e of rootErrors) {
+    fail(
+      variant,
+      "generator-manifest",
+      `templates/${variant}/scripts/${variant}/generators.json: ${e}`,
+      "Command scripts and outputs must be project-relative, traversal-free, and resolve inside the variant root",
+    );
+  }
+  if (rootErrors.length === 0) {
+    pass(
+      `templates/${variant}/scripts/${variant}/generators.json: valid (${parsed.manifest.generators.length} generator(s))`,
+    );
+  }
+}
+
+function checkVariantScriptsLayout(variant: string): void {
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, "scripts", variant);
+  if (!existsSync(variantScriptsDir)) {
+    pass(`${variant}/scripts/${variant}/: not present (OK — layout convention optional)`);
+    return;
+  }
+  if (!JSON_MODE) console.log(`\n=== Check B-10: scripts/${variant}/ layout in ${variant} ===`);
+  let layoutErrors = 0;
+  // 1. No foreign-variant or generic nested script folders next to scripts/<variant>/
+  const scriptsRoot = join(TEMPLATES_DIR, variant, "scripts");
+  for (const e of readdirSync(scriptsRoot, { withFileTypes: true })) {
+    if (!e.isDirectory()) continue;
+    if (
+      e.name === variant ||
+      e.name === "helpers" ||
+      e.name === "hooks" ||
+      e.name === "lib" ||
+      e.name === "node_modules" ||
+      e.name.startsWith(".")
+    )
+      continue;
+    if (existsSync(join(scriptsRoot, e.name, "scripts"))) {
+      fail(
+        variant,
+        "scripts-layout",
+        `${variant}/scripts/${e.name}/ contains a nested scripts/ directory — recursion forbidden`,
+      );
+      layoutErrors++;
+    } else if (/^co-/.test(e.name)) {
+      fail(
+        variant,
+        "scripts-layout",
+        `${variant}/scripts/${e.name}/ is a foreign-variant script folder`,
+        `Move to templates/${e.name}/scripts/${e.name}/ or delete`,
+      );
+      layoutErrors++;
+    }
+  }
+  // 2. No recursion inside scripts/<variant>/
+  if (existsSync(join(variantScriptsDir, "scripts"))) {
+    fail(variant, "scripts-layout", `${variant}/scripts/${variant}/scripts/ nested recursion forbidden`);
+    layoutErrors++;
+  }
+  // 3. Registry coverage (when the variant ships its own SCRIPTS.md next to the folder)
+  const regPath = join(variantScriptsDir, "SCRIPTS.md");
+  if (existsSync(regPath)) {
+    const regContent = readFileSync(regPath, "utf-8");
+    const walk = (dir: string): void => {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        const p = join(dir, e.name);
+        if (e.isDirectory()) {
+          walk(p);
+          continue;
+        }
+        if (!e.name.endsWith(".ts")) continue;
+        const rel = p.slice(variantScriptsDir.length + 1).replace(/\\/g, "/");
+        if (!regContent.includes(`\`${rel}\``) && !regContent.includes(`\`${e.name}\``)) {
+          fail(
+            variant,
+            "scripts-layout",
+            `${variant}/scripts/${variant}/${rel} not registered in scripts/${variant}/SCRIPTS.md`,
+          );
+          layoutErrors++;
+        }
+      }
+    };
+    walk(variantScriptsDir);
+  }
+  if (layoutErrors === 0) {
+    pass(`${variant}/scripts/${variant}/: layout convention OK`);
+  }
+}
+
+// Check CV-01 (v1.77.0; T-20261110-012 Scope C2, DEC-20261110-04 PR-3): every
+// .ts under templates/common/scripts/ (tests included) carries an @version
+// header. upgrade-project's SYNC_IF_NEWER gate cannot deliver an unversioned
+// script (it records UNVERSIONED_SKIP), so a missing header silently freezes
+// every project copy. Blocking from day one (census 2026-11-10: 0 of 183
+// unversioned). Same detection as helpers/upgrade-versions.ts extractScriptVersion.
+function checkCommonScriptVersions(): void {
+  const root = join(TEMPLATES_DIR, "common", "scripts");
+  if (!existsSync(root)) return;
+  if (!JSON_MODE) console.log("\n=== Check CV-01: @version on every templates/common/scripts/**/*.ts ===");
+  const missing: string[] = [];
+  let scanned = 0;
+  const walk = (dir: string): void => {
+    for (const e of readdirSync(dir, { withFileTypes: true })) {
+      if (e.name.startsWith(".") || e.name === "node_modules") continue;
+      const p = join(dir, e.name);
+      if (e.isDirectory()) {
+        walk(p);
+        continue;
+      }
+      if (!e.name.endsWith(".ts")) continue;
+      scanned++;
+      if (!/@version\s+\d+\.\d+\.\d+/.test(readFileSync(p, "utf-8"))) {
+        missing.push(p.slice(root.length + 1).replace(/\\/g, "/"));
+      }
+    }
+  };
+  walk(root);
+  if (missing.length > 0) {
+    for (const rel of missing) {
+      fail(
+        "common",
+        "common-script-version",
+        `templates/common/scripts/${rel} has no @version header — upgrade-project cannot deliver it (UNVERSIONED_SKIP); add \`// @version X.Y.Z\` at the L0 source`,
+      );
+    }
+  } else {
+    pass(`templates/common/scripts/: all ${scanned} .ts file(s) carry @version`);
+  }
+}
+
+// Check CV-02 (v1.78.0; DEC-20261111-01, design docs/designs/2026-11-11-upgrade-overwrite-protection-design.md
+// §4.8 V1): same-version-content-change. A changed templates/** file that carries a
+// version must bump it — upgrade-project treats an equal version as "same content", so
+// an unbumped edit is either never delivered or clobbers project copies by hash.
+// Universe: modified tracked files with a version — .ts/.mjs (@version), SKILL.md and
+// agents/*.md (frontmatter version), docs with an inline `*<name> version: N.M` footer.
+// Base: env CV02_BASE, else merge-base HEAD origin/main, else HEAD. Added/deleted/renamed
+// files are out of scope. Convergence exemption (v1.84.0, DEC-20261117-07): a candidate
+// whose head is byte-identical to its common twin templates/common/<rel> is exempt — the
+// copy IS the source, so equal version ⇒ same content holds again. Otherwise no exemption
+// (format sweeps bump the patch version).
+export function extractCv02Version(relPath: string, content: string): string | undefined {
+  const name = basename(relPath);
+  if (/\.(ts|mjs)$/.test(name)) return content.match(/@version\s+(\d+\.\d+\.\d+)/)?.[1];
+  if (name === "SKILL.md" || /(^|\/)agents\/[^/]+\.md$/.test(relPath)) return extractFrontmatterVersion(content);
+  if (name.endsWith(".md")) {
+    const esc = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return content.match(new RegExp(`\\*${esc}\\s+version:\\s*(\\d+\\.\\d+)`, "m"))?.[1];
+  }
+  return undefined;
+}
+
+export interface SameVersionChange {
+  path: string;
+  version: string;
+}
+
+/** Pure core: files whose bytes differ while the extracted version is equal. */
+export function findSameVersionContentChanges(
+  files: Array<{ path: string; base: string; head: string }>,
+): SameVersionChange[] {
+  const out: SameVersionChange[] = [];
+  for (const f of files) {
+    if (f.base === f.head) continue;
+    const bv = extractCv02Version(f.path, f.base);
+    const hv = extractCv02Version(f.path, f.head);
+    if (bv !== undefined && bv === hv) out.push({ path: f.path, version: hv });
+  }
+  return out;
+}
+
+export interface Cv02ConvergenceInput {
+  change: SameVersionChange;
+  /** Working-tree content of the candidate. */
+  head: string;
+  /** Content of the candidate's common twin (templates/common/<rel>), or null when absent. */
+  common: string | null;
+}
+
+export interface Cv02Partition {
+  /** Candidates that stay failures (no twin, or twin content differs). */
+  failing: SameVersionChange[];
+  /** Candidates that converged to their common source and are exempt. */
+  converged: SameVersionChange[];
+}
+
+/**
+ * Pure core (v1.84.0, DEC-20261117-07): split CV-02 candidates by convergence to the
+ * common source. A variant copy whose head is byte-identical to templates/common/<rel>
+ * no longer trips CV-02's hazard: upgrade-project's "equal version ⇒ same content" is
+ * then TRUE, so the unbumped edit cannot be silently skipped or hash-clobber project
+ * copies. A missing or divergent twin is NOT exempt (the original protection holds).
+ */
+export function partitionCv02Converged(inputs: Cv02ConvergenceInput[]): Cv02Partition {
+  const out: Cv02Partition = { failing: [], converged: [] };
+  for (const i of inputs) {
+    if (i.common !== null && i.head === i.common) out.converged.push(i.change);
+    else out.failing.push(i.change);
+  }
+  return out;
+}
+
+/** CV-02 twin lookup: templates/co-<variant>/<rel> → templates/common/<rel> (POSIX repo-relative). */
+export function cv02CommonTwinPath(candidatePath: string): string | null {
+  const m = /^templates\/(co-[^/]+)\/(.+)$/.exec(candidatePath);
+  // String concat, not join(): join() emits backslashes on Windows while the candidate
+  // path (git output) and this lookup are always POSIX repo-relative.
+  return m ? `templates/common/${m[2]}` : null;
+}
+
+function checkSameVersionContentChange(): void {
+  if (!JSON_MODE) console.log("\n=== Check CV-02: same-version-content-change under templates/** ===");
+  const git = (args: string[]): string | null => {
+    const r = spawnSync("git", args, { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+    return r.status === 0 ? r.stdout : null;
+  };
+  let base = process.env.CV02_BASE?.trim() || "";
+  if (!base) base = git(["merge-base", "HEAD", "origin/main"])?.trim() || "HEAD";
+  const names = git(["diff", "--name-only", "--no-renames", "--diff-filter=M", base, "--", "templates"]);
+  if (names === null) {
+    pass(`CV-02: cannot diff against base '${base}' — vacuous pass`);
+    return;
+  }
+  const files: Array<{ path: string; base: string; head: string }> = [];
+  for (const rel of names.split("\n").filter(Boolean)) {
+    if (!/\.(ts|mjs|md)$/.test(rel)) continue;
+    const abs = join(ROOT, rel);
+    const baseContent = git(["show", `${base}:${rel}`]);
+    if (baseContent === null || !existsSync(abs)) continue;
+    files.push({ path: rel, base: baseContent, head: readFileSync(abs, "utf-8") });
+  }
+  const bad = findSameVersionContentChanges(files);
+  if (bad.length === 0) {
+    pass(
+      `CV-02: ${files.length} changed versioned-candidate file(s) vs ${base.slice(0, 12)} — no same-version content change`,
+    );
+    return;
+  }
+  // v1.84.0 (DEC-20261117-07): convergence exemption — a candidate byte-identical to its
+  // common twin is the source itself, so an equal version now truthfully means equal content.
+  const headByPath = new Map(files.map((f) => [f.path, f.head]));
+  const inputs: Cv02ConvergenceInput[] = bad.map((change) => {
+    const twinRel = cv02CommonTwinPath(change.path);
+    const twinAbs = twinRel ? join(ROOT, twinRel) : null;
+    const common = twinAbs && existsSync(twinAbs) ? readFileSync(twinAbs, "utf-8") : null;
+    return { change, head: headByPath.get(change.path) ?? "", common };
+  });
+  const { failing, converged } = partitionCv02Converged(inputs);
+  for (const c of converged) {
+    reportExemption("cv02-converged-to-common", `CV-02: ${c.path} converged to common source (re-sync) — exempt`);
+  }
+  if (failing.length === 0) {
+    pass(
+      `CV-02: ${bad.length} same-version candidate(s) vs ${base.slice(0, 12)} converged to their common source — exempt`,
+    );
+    return;
+  }
+  for (const b of failing) {
+    fail(
+      "common",
+      "same-version-content-change",
+      `${b.path} content changed vs ${base.slice(0, 12)} but version is still ${b.version} — upgrade-project cannot tell old from new; bump the version`,
+      "Bump the @version / frontmatter version / inline footer version (format sweeps bump the patch)",
+    );
+  }
+}
+
+// Check SLR (v1.79.0; U-20261112-005, design 2026-11-12-skill-lifecycle-record-delivery-design §4.6):
+// every delivered skill has a lifecycle record, generated records reproduce byte for byte, records
+// carry no L0-internal reference, and every skill resolves an existing owner. The flag file
+// scripts/skill-record-enforcement.json decides WARN (enforce:false) versus FAIL (enforce:true).
+function checkSkillLifecycleRecords(): void {
+  if (!JSON_MODE) console.log("\n=== Check SLR: skill lifecycle record coverage, parity, leak, owner ===");
+  if (!existsSync(join(TEMPLATES_DIR, "common"))) {
+    pass("SLR: no templates/common — not applicable");
+    return;
+  }
+  const readOpt = (rel: string): string | null => {
+    const p = join(ROOT, rel);
+    return existsSync(p) ? readFileSync(p, "utf-8") : null;
+  };
+  let enforce = false;
+  let ownerMap: Record<string, string> = {};
+  try {
+    enforce = parseEnforcementFlag(readOpt("scripts/skill-record-enforcement.json")).enforce;
+    ownerMap = parseOwnerMap(readOpt("scripts/data/skill-owner-map.json"));
+  } catch (e) {
+    fail(
+      "common",
+      "skill-record-config",
+      `SLR: cannot read scripts/skill-record-enforcement.json or scripts/data/skill-owner-map.json: ${(e as Error).message}`,
+    );
+    return;
+  }
+  const { findings, checkedSkills } = evaluateSlr(slrFsTree(ROOT), ownerMap);
+  const issues = slrIssues(findings, enforce);
+  if (issues.length === 0) {
+    pass(`SLR: ${checkedSkills} skill(s) — coverage, parity, leak and owner all clean`);
+    return;
+  }
+  for (const i of issues) {
+    if (i.level === "error") fail(i.variant, i.check, i.message, i.fix);
+    else warn(i.variant, i.check, `${i.message} [report-only: enforce=false]`, i.fix);
+  }
+}
+
+// Check B-11: variant_scoped_skills must not leak into templates/common — the
+// canonical skills/ tree AND the five platform mirrors (v1.49.0; registry:
+// docs/workspace-schema.json variant_scoped_skills — see the sound-synth leak
+// of 2026-08-06 that reached 10 of 11 projects via common-promotion + upgrade,
+// and its 2026-09-27 orphan-mirror recurrence that broke the nightly scaffold
+// E2E's Test 26 precisely because the platform mirrors were never scanned).
+function checkVariantScopedSkillLeak(): void {
+  if (!JSON_MODE)
+    console.log(
+      `\n=== Check B-11: variant-scoped skills must not live in templates/common (canonical + platform mirrors) ===`,
+    );
+  const schemaPath = join(ROOT, "docs", "workspace-schema.json");
+  if (!existsSync(schemaPath)) {
+    warn("root", "B-11", "docs/workspace-schema.json not found — variant_scoped_skills check skipped");
+    return;
+  }
+  const schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
+  const map = schema?.variant_scoped_skills || {};
+  const skillNames = new Set<string>();
+  const ownerBySkill = new Map<string, string>();
+  for (const [ownerVariant, skills] of Object.entries(map as Record<string, string[]>)) {
+    if (ownerVariant === "description" || !Array.isArray(skills)) continue;
+    for (const skill of skills as string[]) {
+      skillNames.add(skill);
+      ownerBySkill.set(skill, ownerVariant);
+    }
+  }
+  const leaks = variantScopedSkillLeaks(join(TEMPLATES_DIR, "common"), skillNames);
+  for (const leak of leaks) {
+    const skill = leak.split("/").pop()!;
+    fail(
+      "root",
+      "B-11",
+      `variant-exclusive skill '${skill}' (owner: ${ownerBySkill.get(skill)}) exists in templates/common/${leak}/`,
+      `Delete templates/common/${leak}/ — mirror copies of a variant-scoped skill contradict its variant-overlay re-delivery at scaffold time and break delivery-derivation parity (the 2026-09-27 sound-synth orphan class)`,
+    );
+  }
+  if (leaks.length === 0) pass("templates/common (skills/ + 5 platform mirrors): no variant-scoped skill leaks");
+}
+
+// Check: external-dep-vendoring (v1.72.0, design
+// docs/designs/2026-11-07-external-deps-machinery-design.md D4) — the vendoring
+// guard. The fastest way to detect a
+// `external/ppt-master/` accidentally committed into a template tree: if
+// ANY manifest install_dir path exists as a real directory (or any file below
+// one) inside templates/common or templates/<variant>, FAIL. External code is
+// cloned at scaffold time into a gitignored project-local directory — it never
+// vendors into a template. Variant promotion inherits the guard because it runs
+// through this validation.
+function checkExternalDepVendoring(): void {
+  if (!JSON_MODE)
+    console.log("\n=== Check external-dep-vendoring: no manifest install_dir vendored into a template tree (D4) ===");
+  // Union of every declared install_dir (common seed + all variant seeds) — a
+  // superset is the safe direction for a guard.
+  const installDirs = new Set<string>();
+  const seeds: Array<{ variant: string; path: string }> = [
+    { variant: "common", path: join(TEMPLATES_DIR, "common", "external-deps.json") },
+  ];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith("co-")) {
+        seeds.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, "external-deps.json") });
+      }
+    }
+  }
+  for (const seed of seeds) {
+    if (!existsSync(seed.path)) continue;
+    try {
+      for (const dir of extractInstallDirsLoose(readFileSync(seed.path, "utf-8"))) installDirs.add(dir);
+    } catch {
+      /* unreadable seed — the strict manifest validation owns that failure */
+    }
+  }
+  if (installDirs.size === 0) {
+    pass("external-dep-vendoring: no external-deps seeds declare install_dirs (guard vacuous)");
+    return;
+  }
+  let totalHits = 0;
+  for (const tplDir of [
+    join(TEMPLATES_DIR, "common"),
+    ...seeds.filter((s) => s.variant !== "common").map((s) => join(TEMPLATES_DIR, s.variant)),
+  ]) {
+    const hits = findVendoredInstallDirs(tplDir, [...installDirs]);
+    for (const hit of hits) {
+      totalHits++;
+      fail(
+        "root",
+        "external-dep-vendoring",
+        `template tree ${tplDir} contains a vendored external-dependency path: ${hit}/`,
+        `Delete ${join(tplDir, hit)} — external code is cloned at scaffold time into the gitignored project-local install_dir (design 2026-11-07-external-deps-machinery D4); it never vendors into a template`,
+      );
+    }
+  }
+  if (totalHits === 0) {
+    pass(
+      `external-dep-vendoring: no install_dir path vendored in templates/common or any co-* template (${installDirs.size} declared dir(s))`,
+    );
+  }
+}
+
+// Check: external-dep-license (v1.74.0, design
+// docs/designs/2026-11-07-external-deps-standard-design.md §5.4 E2 + Addendum,
+// DEC-20261107-02) — every external-deps.json seed (templates/common + each
+// templates/co-*) is gated the moment it changes: strict parse (schema v1/v2,
+// R3 install_dir collisions) FAIL; license policy deny / undeclared /
+// GPL-without-decision FAIL, review-without-decision WARN; R3 convention — a
+// NEW entry (no recorded commit) off external/<id> FAIL, an installed one
+// WARN; the adapter must exist in the variant (or common) tree FAIL; the
+// excluded components must stay off the template's own install surfaces (V5,
+// heuristic) FAIL. All verdicts come from scripts/lib/external-deps.ts — one
+// policy constant, no copy here.
+function checkExternalDepLicense(): void {
+  if (!JSON_MODE)
+    console.log(
+      "\n=== Check external-dep-license: seed manifests pass the license policy + coupling contract (standard §5.4 E2) ===",
+    );
+  const seeds: Array<{ variant: string; dir: string }> = [{ variant: "common", dir: join(TEMPLATES_DIR, "common") }];
+  if (existsSync(TEMPLATES_DIR)) {
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (entry.isDirectory() && entry.name.startsWith("co-"))
+        seeds.push({ variant: entry.name, dir: join(TEMPLATES_DIR, entry.name) });
+    }
+  }
+  let checked = 0;
+  let entries = 0;
+  let problems = 0;
+  for (const seed of seeds) {
+    const manifestPath = join(seed.dir, "external-deps.json");
+    if (!existsSync(manifestPath)) continue;
+    checked++;
+    let manifest: ExternalDepsManifest;
+    try {
+      manifest = parseExternalDepsManifest(
+        readFileSync(manifestPath, "utf-8"),
+        `templates/${seed.variant}/external-deps.json`,
+      );
+    } catch (err) {
+      problems++;
+      fail(
+        seed.variant,
+        "external-dep-license",
+        (err as Error).message,
+        "Fix the seed to schema v2 (standard §5.2) — the loader in scripts/lib/external-deps.ts is the schema SSOT",
+      );
+      continue;
+    }
+    if (manifest.schema_version === 1 && manifest.dependencies.length > 0) {
+      problems++;
+      fail(
+        seed.variant,
+        "external-dep-license",
+        `templates/${seed.variant}/external-deps.json is schema v1 with dependencies — license undeclared`,
+        "Bump the seed to schema_version 2 and declare license / usage / adapter per entry (standard §5.2)",
+      );
+    }
+    for (const dep of manifest.dependencies) {
+      entries++;
+      const lic = evaluateLicensePolicy(dep);
+      if (lic.severity === "fail") {
+        problems++;
+        fail(
+          seed.variant,
+          "external-dep-license",
+          `templates/${seed.variant}: ${lic.message}`,
+          "Only a reviewed change to EXTERNAL_DEP_LICENSE_POLICY (L1 release + decision record) can admit a deny-class dependency; GPL used as a separate process needs license_decision",
+        );
+      } else if (lic.severity === "warn")
+        warn(seed.variant, "external-dep-license", `templates/${seed.variant}: ${lic.message}`);
+      const conv = evaluateInstallDirConvention(dep);
+      if (conv.severity === "fail") {
+        problems++;
+        fail(
+          seed.variant,
+          "external-dep-license",
+          `templates/${seed.variant}: ${conv.message}`,
+          `Use install_dir "external/${dep.id}" (R3, DEC-20261107-02)`,
+        );
+      } else if (conv.severity === "warn")
+        warn(seed.variant, "external-dep-license", `templates/${seed.variant}: ${conv.message}`);
+      if (
+        dep.adapter &&
+        !existsSync(join(seed.dir, dep.adapter)) &&
+        !existsSync(join(TEMPLATES_DIR, "common", dep.adapter))
+      ) {
+        problems++;
+        fail(
+          seed.variant,
+          "external-dep-license",
+          `templates/${seed.variant}: ${dep.id}: adapter ${dep.adapter} is not delivered by the variant or common tree`,
+          "The single coupling file named in the seed must ship with the template (standard §5.2)",
+        );
+      }
+      for (const hit of scanExcludedComponents(dep, seed.dir)) {
+        problems++;
+        fail(
+          seed.variant,
+          "external-dep-license",
+          `templates/${seed.variant}: ${dep.id}: excluded component ${hit.component} is named on install surface ${hit.file} (heuristic name match)`,
+          "Remove the excluded component from the install surface — it must never be installed (standard §5.3 V5)",
+        );
+      }
+    }
+  }
+  if (problems === 0)
+    pass(
+      `external-dep-license: ${checked} seed manifest(s), ${entries} entr${entries === 1 ? "y" : "ies"} — license policy, R3 convention, adapter delivery, and exclusions all clean`,
+    );
+}
+
+// Check: platform-mirror-freshness — L1 platform skill mirrors must carry the
+// SSOT version (T-20260916-008). upgrade-project sat at 1.4.1 in the
+// claude/gemini/agents mirrors while skills/ moved to 1.5.0 because the
+// propagator skipped workspace-scoped skills for exactly three of the four
+// platform domains. With all four domains propagating uniformly (the T-008
+// fix) this arm fails if any mirror copy of an SSOT skill ever diverges again.
+function checkPlatformMirrorFreshness(): void {
+  if (!JSON_MODE)
+    console.log("\n=== Check platform-mirror-freshness: L1 platform skill mirrors carry SSOT versions ===");
+  const ssotSkillsDir = join(ROOT, "skills");
+  const commonDir = join(TEMPLATES_DIR, "common");
+  if (!existsSync(ssotSkillsDir) || !existsSync(commonDir)) {
+    if (!JSON_MODE) pass("platform-mirror-freshness: skills/ or templates/common/ missing — nothing to compare");
+    return;
+  }
+  const drift = collectMirrorFreshnessDrift({ ssotSkillsDir, commonDir, mirrorDirs: PLATFORM_MIRROR_DIRS });
+  if (drift.length === 0) {
+    pass("platform-mirror-freshness: all five platform skill mirrors carry SSOT versions");
+    return;
+  }
+  for (const d of drift) {
+    fail(
+      "common",
+      "platform-mirror-freshness",
+      `templates/common/${d.mirror}/${d.skill}/SKILL.md version ${d.mirrorVersion} != skills/${d.skill} SSOT version ${d.ssotVersion}`,
+      `Re-run propagate-to-templates.ts --apply (domain mirror for ${d.mirror}); if it stays stale, check the propagator's platform-skills domain handling`,
+    );
+  }
+}
+
+// Check: variant-mirror-parity — a variant template's four platform skill mirrors
+// should carry exactly (variant skills/ minus mirror:false|security-gate skills) ∪
+// (common skills/ minus flagged skills). T-20260921-009, review H-3. Two failure
+// classes, both WARN (heal = delete the stray directory; sync-skills never prunes):
+//   1. stale mirror entry — a mirrored skill that is absent from both trees, or
+//      whose owning tree flags it mirror:false / security-gate:true (it must never
+//      be mirrored; the pre-flag .claude/.gemini copies of co-safety's 52
+//      agent-dispatched skills are the live example)
+//   2. unmirrored variant skill — a variant skill WITHOUT the flags missing from a
+//      mirror (four-mirror parity, ADR-0077 W1)
+function checkVariantMirrorParity(): void {
+  if (!JSON_MODE)
+    console.log(
+      "\n=== Check variant-mirror-parity: variant platform skill mirrors carry exactly the mirrorable set ===",
+    );
+  const variantsDir = TEMPLATES_DIR;
+  const neverMirror = (skillMd: string): boolean => {
+    try {
+      const content = readFileSync(skillMd, "utf-8");
+      return /^mirror:\s*false\b/m.test(content) || /^security-gate:\s*true\b/m.test(content);
+    } catch {
+      return false; // unreadable — treat as mirrorable rather than guess
+    }
+  };
+  const listSkillDirs = (dir: string): Set<string> =>
+    new Set(
+      existsSync(dir)
+        ? readdirSync(dir, { withFileTypes: true })
+            .filter((e) => e.isDirectory() && existsSync(join(dir, e.name, "SKILL.md")))
+            .map((e) => e.name)
+        : [],
+    );
+  let checked = 0;
+  let warnings = 0;
+  let errors = 0;
+  if (!existsSync(variantsDir)) return;
+
+  // T-20260924-004 pre-pass: fleet-wide mirror census for peer counting —
+  // which variants' platform mirrors carry each skill.
+  const mirrorCarriers = new Map<string, Set<string>>();
+  const readFmVersion = (skillMd: string): string | null => {
+    try {
+      const fm = readFileSync(skillMd, "utf-8").match(/^---\n([\s\S]*?)\n---/);
+      if (!fm) return null;
+      const v = fm[1].match(/^version:\s*["']?(\d+\.\d+\.\d+)/m);
+      return v ? v[1] : null;
+    } catch {
+      return null;
+    }
+  };
+  const commonSkillVersions = new Map<string, string>();
+  for (const name of listSkillDirs(join(TEMPLATES_DIR, "common", "skills"))) {
+    const v = readFmVersion(join(TEMPLATES_DIR, "common", "skills", name, "SKILL.md"));
+    if (v !== null) commonSkillVersions.set(name, v);
+  }
+  for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
+    for (const mirror of PLATFORM_MIRROR_DIRS) {
+      for (const name of listSkillDirs(join(variantsDir, entry.name, mirror))) {
+        if (!mirrorCarriers.has(name)) mirrorCarriers.set(name, new Set());
+        mirrorCarriers.get(name)!.add(entry.name);
+      }
+    }
+  }
+  const semverOlder = (a: string, b: string): boolean => {
+    const pa = a.split(".").map(Number);
+    const pb = b.split(".").map(Number);
+    for (let i = 0; i < 3; i++) {
+      const d = (pa[i] || 0) - (pb[i] || 0);
+      if (d !== 0) return d < 0;
+    }
+    return false;
+  };
+
+  for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
+    const vdir = join(variantsDir, entry.name);
+    const vSkills = join(vdir, "skills");
+    if (!existsSync(vSkills)) continue;
+    checked++;
+    const variantSkills = listSkillDirs(vSkills);
+    const commonSkills = listSkillDirs(join(TEMPLATES_DIR, "common", "skills"));
+    for (const mirror of PLATFORM_MIRROR_DIRS) {
+      const mirrorDir = join(vdir, mirror);
+      for (const name of listSkillDirs(mirrorDir)) {
+        const inVariant = variantSkills.has(name);
+        const inCommon = commonSkills.has(name);
+        const flagged =
+          (inVariant && neverMirror(join(vSkills, name, "SKILL.md"))) ||
+          (!inVariant && inCommon && neverMirror(join(TEMPLATES_DIR, "common", "skills", name, "SKILL.md")));
+        if ((inVariant || inCommon) && !flagged) {
+          // T-20260924-004: stale variant platform-mirror copy of a COMMON
+          // skill without variant declaration/SSOT and with no peer carrying
+          // it — the D1/D2 drift class must not regrow silently.
+          if (!inVariant && inCommon) {
+            const mirrorVersion = readFmVersion(join(mirrorDir, name, "SKILL.md"));
+            const commonVersion = commonSkillVersions.get(name) ?? null;
+            const peerCount = (mirrorCarriers.get(name)?.size ?? 1) - 1;
+            const verdict = classifyVariantMirrorCopy({
+              inVariant,
+              inCommon,
+              flagged,
+              mirrorVersion,
+              commonVersion,
+              peerCount,
+            });
+            if (verdict === "fail-stale-orphan") {
+              fail(
+                entry.name,
+                "variant-mirror-parity",
+                `${mirror}/${name}/ is a stale platform-mirror copy of common skill "${name}" (mirror v${mirrorVersion} vs common v${commonVersion}) with no variant declaration, no skills/ SSOT copy, and no peer carrying it — regrown D1/D2-class drift`,
+                `Delete templates/${entry.name}/${mirror}/${name}/ (stale copy of common v${commonVersion}) or declare the variant-specific copy in variant.json`,
+              );
+              errors++;
+              continue;
+            }
+          } else if (inVariant) {
+            // T-20261007-015: a variant-owned mirror copy must carry the SSOT's
+            // version. The co-deck html-build class (mirror 1.5.0 vs skills/
+            // SSOT 1.6.0) passed every gate because this arm hit `continue`
+            // without any comparison — mirrors survive upgrades untouched, so
+            // drift here means a hand-edit bypassed the SSOT.
+            const ssotVersion = readFmVersion(join(vSkills, name, "SKILL.md"));
+            const mirrorVersion = readFmVersion(join(mirrorDir, name, "SKILL.md"));
+            if (ssotVersion && mirrorVersion && semverOlder(mirrorVersion, ssotVersion)) {
+              fail(
+                entry.name,
+                "variant-mirror-parity",
+                `${mirror}/${name}/ is a stale platform-mirror copy of variant-owned skill "${name}" (mirror v${mirrorVersion} vs skills/ SSOT v${ssotVersion})`,
+                `Byte-copy templates/${entry.name}/skills/${name}/SKILL.md over templates/${entry.name}/${mirror}/${name}/SKILL.md (or re-run sync-skills for ${entry.name})`,
+              );
+              errors++;
+              continue;
+            }
+          }
+          continue;
+        }
+        warn(
+          entry.name,
+          "variant-mirror-parity",
+          `${mirror}/${name}/ must not be mirrored — ${flagged ? "the owning skill is flagged mirror:false/security-gate:true" : "absent from both the variant and the common skills/ tree"}`,
+          `Delete templates/${entry.name}/${mirror}/${name}/ (sync-skills never prunes; it will not be resurrected while the flag stands)`,
+        );
+        warnings++;
+      }
+      for (const name of variantSkills) {
+        if (variantSkills.has(name) && neverMirror(join(vSkills, name, "SKILL.md"))) continue;
+        if (!existsSync(join(vdir, mirror, name, "SKILL.md"))) {
+          warn(
+            entry.name,
+            "variant-mirror-parity",
+            `${mirror}/${name}/ missing — mirrorable variant skill not mirrored to ${mirror}`,
+            `Run bun scripts/sync-skills.ts --all-variants (or --dir templates/${entry.name}) to heal`,
+          );
+          warnings++;
+        }
+      }
+    }
+  }
+  if (!JSON_MODE) {
+    if (checked === 0) console.log("  (no variant templates with a skills/ tree found)");
+    else if (warnings === 0)
+      console.log(`  ✓ ${checked} variant template(s): platform mirrors carry exactly the mirrorable set`);
+  }
+}
+
+// T-20260924-004: classify a variant platform-mirror copy of a skill against
+// its owning trees — pure decision core for checkVariantMirrorParity so the
+// stale-orphan arm is unit-testable (positive fixture must FAIL, clean
+// fixture must PASS; the convention from the 09-22 detector review).
+export type VariantMirrorCopyVerdict = "ok" | "warn-undeclared" | "fail-stale-orphan";
+export function classifyVariantMirrorCopy(opts: {
+  inVariant: boolean;
+  inCommon: boolean;
+  flagged: boolean;
+  mirrorVersion: string | null;
+  commonVersion: string | null;
+  peerCount: number; // other variants whose mirrors carry the same skill
+}): VariantMirrorCopyVerdict {
+  const { inVariant, inCommon, flagged } = opts;
+  // Owning-tree flagged skills must not be mirrored.
+  if (flagged) return "warn-undeclared";
+  // T-20260924-004: stale variant platform-mirror copy of a COMMON skill —
+  // older than the common SSOT, absent from the variant skills/ tree, not
+  // declared in variant.json, and carried by no peer variant → regrown
+  // D1/D2-class drift. Fail so it cannot regrow silently.
+  if (
+    !inVariant &&
+    inCommon &&
+    opts.mirrorVersion !== null &&
+    opts.commonVersion !== null &&
+    opts.mirrorVersion !== opts.commonVersion &&
+    opts.peerCount === 0
+  ) {
+    return "fail-stale-orphan";
+  }
+  // Same-version undecorated copies (uniform baseline set) or peer-shared
+  // mirrors stay at the pre-existing WARN level; variant skills mirrored to
+  // their own platform dirs are correct.
+  return "ok";
+}
+
+// Check: roster-tier-consistency (T-20260921-020, validator-hardening) — an
+// AGENTS.md roster row's Tier cell must match the referenced agent's effective
+// frontmatter tier (resolving the extends chain: variant stub → common → root;
+// scalar `tier:` or per-platform map, `claude` value), and must not ELEVATE
+// above the L0 baseline tier for agents that exist at the root (AGENTS.md §3.5
+// Tier Ceiling Rule) unless the variant agent frontmatter declares
+// `tier_ceiling_exempt: <reason>`. Live instance: PM was downgraded to Medium
+// at the root on 2026-09-15 but all 13 variant rosters kept High until
+// 2026-09-21 — hand-maintained rosters drift silently, so the machine owns it now.
+const TIER_RANK: Record<string, number> = { low: 0, medium: 1, high: 2 };
+
+function readFrontmatterTier(fmPath: string): string | null {
+  if (!existsSync(fmPath)) return null;
+  let fm: string;
+  try {
+    const m = readFileSync(fmPath, "utf-8").match(/^---\n([\s\S]*?)\n---/);
+    if (!m) return null;
+    fm = m[1];
+  } catch {
+    return null;
+  }
+  const scalar = fm.match(/^tier:\s*(\S+)\s*$/m);
+  if (scalar) return scalar[1].toLowerCase();
+  const map = fm.match(/^tier:\s*$[\s\S]*?^\s{2}claude:\s*(\S+)/m);
+  return map ? map[1].toLowerCase() : null;
+}
+
+function resolveTierViaExtends(fmPath: string, depth = 0): string | null {
+  if (depth > 3 || !existsSync(fmPath)) return null;
+  const direct = readFrontmatterTier(fmPath);
+  if (direct) return direct;
+  let content: string;
+  try {
+    content = readFileSync(fmPath, "utf-8");
+  } catch {
+    return null;
+  }
+  const ext = content.match(/^extends:\s*(\S+)\s*$/m);
+  if (!ext) return null;
+  return resolveTierViaExtends(join(dirname(fmPath), ext[1]), depth + 1);
+}
+
+function rosterTierRows(agentsMd: string): Array<{ name: string; tier: string; line: number }> {
+  const out: Array<{ name: string; tier: string; line: number }> = [];
+  let lines: string[] = [];
+  try {
+    lines = readFileSync(agentsMd, "utf-8").split("\n");
+  } catch {
+    return out;
+  }
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim().startsWith("|") || !line.includes("agents/")) continue;
+    const cells = line
+      .trim()
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map((c) => c.trim());
+    for (let j = 0; j < cells.length; j++) {
+      const m = cells[j].match(/agents\/([A-Za-z0-9_-]+)\.md/);
+      if (!m) continue;
+      const next = (cells[j + 1] ?? "").replace(/\*\*/g, "").trim().toLowerCase();
+      if (/^(high|medium|low)$/.test(next)) out.push({ name: m[1], tier: next, line: i + 1 });
+      break; // the first agent-file cell in the row owns the tier cell
+    }
+  }
+  return out;
+}
+
+function checkRosterTierConsistency(): void {
+  if (!JSON_MODE)
+    console.log(
+      "\n=== Check roster-tier-consistency: AGENTS.md roster tiers match resolved agent frontmatter tiers ===",
+    );
+  let checked = 0;
+
+  // 1. Workspace root self-check (AGENTS.md vs agents/*.md frontmatter)
+  for (const row of rosterTierRows(join(ROOT, "AGENTS.md"))) {
+    const resolved = resolveTierViaExtends(join(ROOT, "agents", `${row.name}.md`));
+    if (resolved && resolved !== row.tier) {
+      fail(
+        "common",
+        "roster-tier-consistency",
+        `AGENTS.md roster row for agents/${row.name}.md says ${row.tier} but agents/${row.name}.md frontmatter resolves to ${resolved}`,
+        "Update the roster row or the agent frontmatter — hand-maintained rosters drift silently (PM 2026-09-15 instance)",
+      );
+    }
+    checked++;
+  }
+
+  // 2. Variant templates: roster tier vs extends-chain resolution + L0 tier ceiling
+  if (!existsSync(TEMPLATES_DIR)) return;
+  for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
+    const vdir = join(TEMPLATES_DIR, entry.name);
+    const agentsMd = join(vdir, "AGENTS.md");
+    if (!existsSync(agentsMd)) continue;
+    for (const row of rosterTierRows(agentsMd)) {
+      checked++;
+      let resolved =
+        resolveTierViaExtends(join(vdir, "agents", `${row.name}.md`)) ??
+        resolveTierViaExtends(join(TEMPLATES_DIR, "common", "agents", `${row.name}.md`)) ??
+        resolveTierViaExtends(join(ROOT, "agents", `${row.name}.md`));
+      if (resolved && resolved !== row.tier) {
+        fail(
+          entry.name,
+          "roster-tier-consistency",
+          `AGENTS.md:${row.line} roster row for agents/${row.name}.md says ${row.tier} but the agent resolves to ${resolved} via the extends chain`,
+          `Update the roster row (or the agent frontmatter) — every scaffold inherits this table`,
+        );
+      }
+      const baseline = resolveTierViaExtends(join(ROOT, "agents", `${row.name}.md`));
+      if (baseline && resolved && TIER_RANK[resolved] > TIER_RANK[baseline]) {
+        const vAgent = join(vdir, "agents", `${row.name}.md`);
+        const exempt = existsSync(vAgent) && /^tier_ceiling_exempt:\s*\S/m.test(readFileSync(vAgent, "utf-8"));
+        if (!exempt) {
+          fail(
+            entry.name,
+            "roster-tier-consistency",
+            `agents/${row.name}.md resolves to ${resolved}, above the L0 baseline ${baseline} (AGENTS.md §3.5 Tier Ceiling Rule)`,
+            `Lower the tier to the L0 baseline, or declare \`tier_ceiling_exempt: <reason>\` in the variant agent frontmatter`,
+          );
+        }
+      }
+    }
+  }
+  if (!JSON_MODE && checked > 0) console.log(`  ✓ ${checked} roster row(s) checked`);
+}
+
+// Check: agent-quality-recursive (T-20261027-001) — the agent stub/tier quality gate
+// must cover NESTED template agent trees (co-safety's agents/domains/** and
+// agents/_shared/**). The delivered validate-agents.ts is a project-cwd FLAT scan
+// of agents/, and Check 3-4 above scans only the flat agents/ dir with the
+// 2-section bar — so 37 map-form tier files plus 23 stub-quality bodies under
+// co-safety's nested trees survived every shipped gate until the nightly scaffold
+// E2E caught them 4 days late (run 40281594489). This check recursively scans every
+// templates/<common|co-*>/agents/**/*.md and enforces, per non-README, non-underscore
+// file: exactly one scalar `tier: high|medium|low` (ADR-0102 — map form, invalid
+// scalar, or missing declaration FAILs), and body completeness via validate-agents.ts
+// agentBodyCompletenessFinding (>= 40 non-empty body lines, >= 4 `## ` sections).
+// Extends stubs skip both (their tier resolves via the chain — covered by
+// roster-tier-consistency — and their bodies hydrate at scaffold).
+function checkAgentQualityRecursive(): void {
+  if (!JSON_MODE)
+    console.log(
+      "\n=== Check agent-quality-recursive: nested template agent trees carry scalar tier + full bodies (ADR-0102 + agentBodyCompletenessFinding) ===",
+    );
+  if (!existsSync(TEMPLATES_DIR)) return;
+  let checked = 0;
+  let findings = 0;
+  for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (entry.name !== "common" && !entry.name.startsWith("co-")) continue;
+    const agentsDir = join(TEMPLATES_DIR, entry.name, "agents");
+    if (!existsSync(agentsDir)) continue;
+    // readdirSync recursive types as string | Buffer — coerce (entries are path strings)
+    for (const rawRel of readdirSync(agentsDir, { recursive: true })) {
+      const rel = String(rawRel);
+      if (!rel.endsWith(".md")) continue;
+      const base = rel.split("/").pop() ?? rel;
+      if (/^README(_\w+)?\.md$/.test(base) || base.startsWith("_")) continue;
+      const content = readFileSync(join(agentsDir, rel), "utf-8").replace(/\r\n/g, "\n");
+      const fm = content.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
+      if (/^extends:/m.test(fm)) continue; // extends stub: chain-resolved tier, scaffold-hydrated body
+      checked++;
+      const relPath = `agents/${rel}`;
+      if (/^tier:\s*\n\s{2}\w/m.test(fm)) {
+        fail(
+          entry.name,
+          "agent-quality-recursive",
+          `${relPath}: legacy map-form tier block — ADR-0102 requires one scalar \`tier: high|medium|low\``,
+          "Replace the per-platform tier block with a single scalar `tier:` line (consensus rule: uniform value, else the claude value)",
+        );
+        findings++;
+      } else {
+        const scalar = fm.match(/^tier:\s*(\S+)\s*$/m);
+        if (scalar) {
+          const value = scalar[1].toLowerCase();
+          if (!["high", "medium", "low"].includes(value)) {
+            fail(
+              entry.name,
+              "agent-quality-recursive",
+              `${relPath}: invalid tier value '${scalar[1]}' (allowed: high | medium | low)`,
+              "Set the scalar `tier:` line to high, medium, or low",
+            );
+            findings++;
+          }
+        } else {
+          fail(
+            entry.name,
+            "agent-quality-recursive",
+            `${relPath}: missing tier declaration — ADR-0102 requires a scalar \`tier: high|medium|low\``,
+            "Add a scalar `tier:` line to the frontmatter",
+          );
+          findings++;
+        }
+      }
+      const bodyFinding = agentBodyCompletenessFinding(content);
+      if (bodyFinding) {
+        fail(
+          entry.name,
+          "agent-quality-recursive",
+          `${relPath}: ${bodyFinding}`,
+          "Rewrite the definition body to the canonical section standard (co-newbiz PR #731 is the worked example)",
+        );
+        findings++;
+      }
+    }
+  }
+  if (!JSON_MODE && checked > 0) console.log(`  ✓ ${checked} agent file(s) scanned, ${findings} finding(s)`);
+}
+
+// Check B-12: L0/L1 style neutrality — variant-owned design identity literals
+// (palette hex/rgb()/hsl() colors, typeface names harvested from variant
+// tokens.json files) must not appear in L0 governance text or L1 normative
+// docs. Encodes the ADR-0064 "Foundation ≠ Design System" doctrine and the
+// ADR-0066 prohibition on hard-coding project styles into L0/L1 as a
+// machine check. Inline escape hatch: `<!-- neutrality-exempt: <reason> -->`
+// on the offending line (e.g. quoting a variant value inside a NON-normative
+// reference note).
+function checkStyleNeutrality() {
+  if (!JSON_MODE) console.log(`\n=== Check B-12: L0/L1 style neutrality (variant identity literals) ===`);
+  const TEMPLATES_DIR = join(ROOT, "templates");
+  const GENERIC_FONT_TOKENS = new Set([
+    "system-ui",
+    "sans-serif",
+    "serif",
+    "monospace",
+    "cursive",
+    "fantasy",
+    "ui-sans-serif",
+    "ui-serif",
+    "ui-monospace",
+    "ui-rounded",
+  ]);
+
+  // 1. Harvest variant-owned identity literals from every variant tokens.json.
+  const identity = new Map<string, string>(); // literal -> owning variant
+  const variantsDir = join(TEMPLATES_DIR);
+  if (existsSync(variantsDir)) {
+    for (const entry of readdirSync(variantsDir, { withFileTypes: true })) {
+      if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
+      const tokensPath = join(variantsDir, entry.name, "tokens.json");
+      if (!existsSync(tokensPath)) continue;
+      let tokens: unknown;
+      try {
+        tokens = JSON.parse(readFileSync(tokensPath, "utf-8"));
+      } catch {
+        continue; // invalid JSON is another check's problem
+      }
+      const addLiteral = (raw: string) => {
+        const literal = raw.trim();
+        if (literal.length < 3) return;
+        if (!identity.has(literal)) identity.set(literal, entry.name);
+      };
+      const walk = (node: unknown) => {
+        if (typeof node === "string") {
+          for (const m of node.matchAll(/#[0-9a-fA-F]{3,8}\b/g)) addLiteral(m[0].toLowerCase());
+          for (const m of node.matchAll(/\b(?:rgba?|hsla?)\([^)]*\)/g)) addLiteral(m[0].replace(/\s+/g, " "));
+          // typeface identity: first family of a comma-separated font stack
+          // (single-word values like "monospace" are generic; require a stack or
+          // a Capitalized name to avoid harvesting arbitrary strings)
+          const first = node
+            .split(",")[0]
+            .trim()
+            .replace(/^["']|["']$/g, "");
+          const isStack = node.includes(",");
+          const isCapitalizedName = /^[A-Z]/.test(first) && first.split(" ").length <= 3;
+          if (isStack || isCapitalizedName) {
+            if (!GENERIC_FONT_TOKENS.has(first.toLowerCase())) addLiteral(first);
+          }
+        } else if (Array.isArray(node)) {
+          node.forEach(walk);
+        } else if (typeof node === "object" && node !== null) {
+          for (const val of Object.values(node as Record<string, unknown>)) walk(val);
+        }
+      };
+      walk(tokens);
+    }
+  }
+
+  if (identity.size === 0) {
+    pass("L0/L1 style neutrality: no variant tokens.json found — nothing to cross-check");
+    return;
+  }
+
+  // 2. Normative L0 governance text + L1 normative docs.
+  const normativeFiles: string[] = ["CONSTITUTION.md", "AGENTS.md", "CLAUDE.md", "GEMINI.md"];
+  for (const dir of [join(ROOT, "docs", "constitution"), join(ROOT, "docs", "governance")]) {
+    if (existsSync(dir)) {
+      for (const f of readdirSync(dir, { withFileTypes: true })) {
+        if (f.isFile() && f.name.endsWith(".md")) normativeFiles.push(join(dir, f.name));
+      }
+    }
+  }
+  const commonDocs = join(TEMPLATES_DIR, "common", "docs");
+  if (existsSync(commonDocs)) {
+    const walkDocs = (dir: string) => {
+      for (const f of readdirSync(dir, { withFileTypes: true })) {
+        if (f.isDirectory()) walkDocs(join(dir, f.name));
+        else if (f.name.endsWith(".md") || f.name.endsWith(".css")) normativeFiles.push(join(dir, f.name));
+      }
+    };
+    walkDocs(commonDocs);
+  }
+  for (const base of ["skills", join(TEMPLATES_DIR, "common", "skills")]) {
+    const dir = join(ROOT, base);
+    if (existsSync(dir)) {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (entry.isDirectory()) {
+          const skillMd = join(dir, entry.name, "SKILL.md");
+          if (existsSync(skillMd)) normativeFiles.push(skillMd);
+        }
+      }
+    }
+  }
+
+  // 3. Scan (line-scoped; hex compared case-insensitively).
+  let violations = 0;
+  for (const file of normativeFiles) {
+    let content = "";
+    try {
+      content = readFileSync(file, "utf-8");
+    } catch {
+      continue;
+    }
+    const rel = relative(ROOT, file) || file;
+    const lines = content.split(/\r?\n/);
+    lines.forEach((line, idx) => {
+      if (line.includes("neutrality-exempt:")) return;
+      for (const [literal, owner] of identity) {
+        const matched = literal.startsWith("#")
+          ? line.toLowerCase().includes(literal.toLowerCase())
+          : new RegExp(`(?<![\\w-])${literal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?![\\w-])`).test(line);
+        if (matched) {
+          violations++;
+          fail(
+            "root",
+            "B-12",
+            `variant identity literal "${literal}" (${owner}) in normative L0/L1 file ${rel}:${idx + 1}`,
+            `Remove the variant-specific value or annotate the line with <!-- neutrality-exempt: <reason> --> (L0/L1 must stay style/pattern-neutral per ADR-0064/0066)`,
+          );
+        }
+      }
+    });
+  }
+  if (violations === 0) {
+    pass(
+      `L0/L1 style neutrality: no variant identity literals in ${normativeFiles.length} normative file(s) (${identity.size} harvested literals)`,
+    );
+  }
+}
+
+// Check 11: Variant Contract compliance
+function checkVariantContract(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check 11: Variant Contract compliance in ${variant} ===`);
+
+  try {
+    const contractPath = join(ROOT, "docs", "templates", "variant-contract.json");
+    if (!existsSync(contractPath)) {
+      fail(
+        "root",
+        "variant-contract-missing",
+        "docs/templates/variant-contract.json not found",
+        "Create variant-contract.json with version, required, optional fields",
+      );
+      return;
+    }
+
+    const contractRaw = readFileSync(contractPath, "utf-8");
+    let contract: VariantContract;
+
+    try {
+      contract = JSON.parse(contractRaw) as VariantContract;
+    } catch (parseError) {
+      fail(
+        "root",
+        "variant-contract-invalid",
+        "docs/templates/variant-contract.json is not valid JSON",
+        "Fix JSON syntax",
+      );
+      return;
+    }
+
+    const variantDir = join(TEMPLATES_DIR, variant);
+    const missingFiles: string[] = [];
+
+    const commonDir = join(TEMPLATES_DIR, "common");
+    for (const requiredPattern of contract.required) {
+      const requiredFile = requiredPattern.replaceAll("{variant}", variant);
+      const filePath = join(variantDir, requiredFile);
+      const commonFilePath = join(commonDir, requiredFile);
+      // A required file is satisfied if it exists in the variant OR in templates/common/
+      // (common-inherited files are copied to the project by new-project.sh)
+      if (!existsSync(filePath) && !existsSync(commonFilePath)) {
+        missingFiles.push(requiredFile);
+      }
+    }
+
+    if (missingFiles.length > 0) {
+      fail(
+        variant,
+        "variant-contract",
+        `Variant Contract FAILED — missing ${missingFiles.length} required files:\n     - ${missingFiles.join("\n     - ")}`,
+      );
+    } else {
+      pass(
+        `${variant}: Variant Contract satisfied (${contract.required.length}/${contract.required.length} required files present)`,
+      );
+    }
+  } catch (error) {
+    fail(
+      "root",
+      "variant-contract-error",
+      `Failed to check Variant Contract: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+}
+
+// Check B-03: security-gate: true skills must NOT be in .claude/skills/
+function checkSecurityGateSkills(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check B-03: security-gate skill placement in ${variant} ===`);
+
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, ".claude", "skills");
+  if (!existsSync(claudeSkillsDir)) {
+    pass(`${variant}/.claude/skills/: not present (OK — security-gate check not applicable)`);
+    return;
+  }
+
+  const skillDirs = readdirSync(claudeSkillsDir).filter((d) => statSync(join(claudeSkillsDir, d)).isDirectory());
+
+  let violations = 0;
+  for (const skillName of skillDirs) {
+    const skillMdPath = join(claudeSkillsDir, skillName, "SKILL.md");
+    if (!existsSync(skillMdPath)) continue;
+
+    const rawContent = readFileSync(skillMdPath, "utf-8");
+    const fields = parseFrontmatter(rawContent);
+
+    if ("security-gate" in fields) {
+      // Check if value is true
+      const content = normalizeContent(rawContent);
+      const match = content.match(/^---\n([\s\S]*?)\n---/);
+      if (match) {
+        const fmText = match[1];
+        const sgLine = fmText.split("\n").find((l) => l.startsWith("security-gate:"));
+        const sgValue = sgLine ? sgLine.slice(sgLine.indexOf(":") + 1).trim() : "";
+        if (sgValue === "true") {
+          fail(
+            variant,
+            "security-gate-placement",
+            `${variant}/.claude/skills/${skillName}/SKILL.md has security-gate: true but is in .claude/skills/ (Claude Code-only). Move to skills/ (platform-neutral).`,
+            `Move skills/${skillName}/ out of .claude/skills/ into the top-level skills/ directory`,
+          );
+          violations++;
+        }
+      }
+    }
+  }
+
+  if (violations === 0) {
+    pass(`${variant}/.claude/skills/: no security-gate: true skills found (OK)`);
+  }
+}
+
+// B-07: Sync scan results back to VERSION_REGISTRY.json
+function updateVersionRegistry(manifests: Map<string, VariantManifest>): void {
+  const registryPath = join(ROOT, "docs", "templates", "VERSION_REGISTRY.json");
+  if (!existsSync(registryPath)) return;
+
+  let registry: Record<string, unknown>;
+  try {
+    registry = JSON.parse(readFileSync(registryPath, "utf-8")) as Record<string, unknown>;
+  } catch {
+    return;
+  }
+
+  const variants = (registry.variants ?? {}) as Record<string, Record<string, unknown>>;
+  let changed = false;
+  const today = new Date().toISOString().slice(0, 10);
+
+  for (const [name, manifest] of manifests) {
+    const existing = variants[name] ?? {};
+    const newStatus = manifest.status;
+    const newVersion = manifest.version ?? existing.latest ?? "0.0.0";
+
+    if (existing.status !== newStatus || existing.latest !== newVersion) {
+      variants[name] = {
+        ...existing,
+        latest: newVersion,
+        status: newStatus,
+        released: existing.released ?? today,
+        security_advisories: existing.security_advisories ?? [],
+        migration_guides: existing.migration_guides ?? [],
+      };
+      changed = true;
+      if (!JSON_MODE) pass(`VERSION_REGISTRY.json: ${name} synced (status=${newStatus}, version=${newVersion})`);
+    }
+  }
+
+  if (changed) {
+    registry.variants = variants;
+    registry.last_updated = today;
+    writeFileSync(registryPath, JSON.stringify(registry, null, 2) + "\n", "utf-8");
+    if (!JSON_MODE) pass(`VERSION_REGISTRY.json updated (last_updated=${today})`);
+  } else {
+    if (!JSON_MODE) pass("VERSION_REGISTRY.json already up-to-date");
+  }
+}
+
+// B-08: Check for deprecated agents/skills in variant and warn about version bump
+function checkDeprecatedVersionBump(variant: string, manifest: VariantManifest): void {
+  const agentsDir = join(TEMPLATES_DIR, variant, "agents");
+  const skillsDir = join(TEMPLATES_DIR, variant, "skills");
+
+  let deprecatedAgents = 0;
+  let deprecatedSkills = 0;
+
+  if (existsSync(agentsDir)) {
+    for (const file of readdirSync(agentsDir).filter((f) => f.endsWith(".md") && !f.startsWith("README"))) {
+      const content = readFileSync(join(agentsDir, file), "utf-8");
+      const statusLine = content.split("\n").find((l) => l.startsWith("status:"));
+      if (statusLine && statusLine.includes("deprecated")) deprecatedAgents++;
+    }
+  }
+
+  if (existsSync(skillsDir)) {
+    for (const d of readdirSync(skillsDir).filter(
+      (d) => d !== "_archive" && statSync(join(skillsDir, d)).isDirectory(),
+    )) {
+      const skillMd = join(skillsDir, d, "SKILL.md");
+      if (!existsSync(skillMd)) continue;
+      const content = readFileSync(skillMd, "utf-8");
+      const statusLine = content.split("\n").find((l) => l.startsWith("status:"));
+      if (statusLine && statusLine.includes("deprecated")) deprecatedSkills++;
+    }
+  }
+
+  if (deprecatedAgents > 0 || deprecatedSkills > 0) {
+    const currentVersion = manifest.version ?? "0.0.0";
+    const parts = currentVersion.split(".").map(Number);
+    const bumpedVersion = `${parts[0]}.${parts[1]}.${(parts[2] ?? 0) + 1}`;
+    warn(
+      variant,
+      "deprecated-version-bump",
+      `${variant} has ${deprecatedAgents} deprecated agent(s) and ${deprecatedSkills} deprecated skill(s) — consider bumping patch version ${currentVersion} → ${bumpedVersion}`,
+      `Update version in templates/${variant}/variant.json and VERSION_REGISTRY.json to ${bumpedVersion}`,
+    );
+  }
+}
+
+// Check WS-01: workspace-schema.json consistency
+/**
+ * Canonical form of workspace-schema.json for L0↔L1 parity comparison, with
+ * the SINGLE sanctioned L1 divergence normalized away (spec
+ * 2026-10-28-l0-only-governance-doc-cleanup, DEC-20261028-05):
+ *   - level 'root': drop 'context.md' from rootAllowlist.files (the L1
+ *     copy legitimately lacks it — no scaffolded project carries that file);
+ *   - level 'l1': drop the _notes.root_allowlist_divergence record (L0 keeps
+ *     its own rootAllowlist entry for the audit.ts stray-root check, so it
+ *     does not carry the divergence note).
+ * After normalization the two copies must be semantically identical — any
+ * OTHER divergence is real drift and still fails both parity checks.
+ */
+function canonicalWsSchemaForParity(raw: string, level: "root" | "l1"): string {
+  const obj = JSON.parse(raw) as Record<string, unknown>;
+  const clone = JSON.parse(JSON.stringify(obj)) as {
+    rootAllowlist?: { files?: string[] };
+    _notes?: Record<string, unknown>;
+  };
+  if (level === "root") {
+    const files = clone.rootAllowlist?.files;
+    if (Array.isArray(files)) {
+      const idx = files.indexOf("CONSTITUTION.md");
+      if (idx !== -1) files.splice(idx, 1);
+    }
+  } else {
+    if (clone._notes) delete clone._notes.root_allowlist_divergence;
+  }
+  const canon = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.map(canon);
+    if (v && typeof v === "object") {
+      return Object.keys(v as Record<string, unknown>)
+        .sort()
+        .reduce<Record<string, unknown>>((acc, k) => {
+          acc[k] = canon((v as Record<string, unknown>)[k]);
+          return acc;
+        }, {});
+    }
+    return v;
+  };
+  return JSON.stringify(canon(clone));
+}
+
+function checkWorkspaceSchema(): void {
+  if (!JSON_MODE) console.log("\n=== Check WS-01: workspace-schema.json consistency ===");
+
+  const schemaPath = join(ROOT, "docs", "workspace-schema.json");
+  if (!existsSync(schemaPath)) {
+    warn(
+      "root",
+      "ws-schema-missing",
+      "workspace-schema.json not found at docs/",
+      "Create docs/workspace-schema.json with workflow.phases and models",
+    );
+    return;
+  }
+
+  let schema: Record<string, unknown>;
+  try {
+    schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as Record<string, unknown>;
+  } catch {
+    fail("root", "ws-schema-invalid", "workspace-schema.json is not valid JSON");
+    return;
+  }
+
+  pass("workspace-schema.json: present and valid JSON");
+
+  // --- WS-01 Check 0: L0↔L1 parity (root vs templates/common/docs copy) ---
+  // The docs propagation domain is disabled (ADR-0069), so nothing else keeps the L1
+  // copy in sync. Scaffold reads the L1 copy at project creation; a stale copy ships
+  // wrong country/variant registries into new projects (found by the 2026-09-08
+  // project review — validator-hardening pilot).
+  // 2026-10-28-l0-only-governance-doc-cleanup (DEC-20261028-05): the pair is
+  // hand-maintained and intentionally diverges in one documented delta (L1 drops
+  // the stale context.md rootAllowlist entry and records
+  // _notes.root_allowlist_divergence). canonicalWsSchemaForParity normalizes that
+  // sanctioned delta; any OTHER key divergence still fails below.
+  const l1SchemaPath = join(ROOT, "templates", "common", "docs", "workspace-schema.json");
+  if (!existsSync(l1SchemaPath)) {
+    fail(
+      "root",
+      "ws-schema-l1-missing",
+      "templates/common/docs/workspace-schema.json not found — scaffold reads the L1 copy; re-sync: cp docs/workspace-schema.json templates/common/docs/workspace-schema.json",
+    );
+  } else {
+    try {
+      const rootCanon = canonicalWsSchemaForParity(readFileSync(schemaPath, "utf-8"), "root");
+      const l1Canon = canonicalWsSchemaForParity(readFileSync(l1SchemaPath, "utf-8"), "l1");
+      const rootObj = JSON.parse(rootCanon) as Record<string, unknown>;
+      const l1Obj = JSON.parse(l1Canon) as Record<string, unknown>;
+      const rootKeys = new Set(Object.keys(rootObj));
+      const l1Keys = new Set(Object.keys(l1Obj));
+      const diverged: string[] = [];
+      for (const k of new Set([...rootKeys, ...l1Keys])) {
+        if (JSON.stringify(rootObj[k]) !== JSON.stringify(l1Obj[k])) diverged.push(k);
+      }
+      if (diverged.length > 0) {
+        fail(
+          "root",
+          "ws-schema-l1-parity",
+          `templates/common/docs/workspace-schema.json diverged from root beyond the sanctioned L1 delta (CONSTITUTION.md rootAllowlist entry + _notes.root_allowlist_divergence, DEC-20261028-05) on key(s): ${diverged.join(", ")} — reconcile the hand-maintained pair deliberately, do not blind-copy.`,
+        );
+      } else {
+        pass(
+          "workspace-schema.json L1 parity: templates/common copy matches root (modulo the sanctioned DEC-20261028-05 delta)",
+        );
+      }
+    } catch {
+      fail(
+        "root",
+        "ws-schema-l1-invalid",
+        "templates/common/docs/workspace-schema.json is not valid JSON — re-sync from docs/workspace-schema.json",
+      );
+    }
+  }
+
+  // --- WS-01 Check 8: platform_surfaces capability registry (design
+  //     docs/designs/2026-10-28-platform-agent-mirror-design.md §4.1,
+  //     DEC-20261028-06). The registry's shape is validated here and its
+  //     enforced (agents) rows are cross-checked against the generator's
+  //     adapters: every supported:true agents row MUST have a
+  //     PLATFORM_AGENT_ADAPTERS entry and every adapter MUST name a supported
+  //     row (the coverage guard re-asserts this before any per-file work; this
+  //     closes the loop at L0), and every supported:false row carries an
+  //     evidence string so the matrix cannot rot back to oral tradition. The
+  //     platform set is pinned to validate-model-registry.ts PLATFORMS — one
+  //     platform vocabulary.
+  {
+    const psBlock = schema.platform_surfaces as
+      | { platforms?: Record<string, Record<string, { supported?: unknown; evidence?: unknown }>> }
+      | undefined;
+    if (!psBlock || typeof psBlock !== "object" || !psBlock.platforms) {
+      fail(
+        "root",
+        "ws-platform-surfaces-missing",
+        "workspace-schema.json is missing the platform_surfaces block — the capability registry is the generator's contract",
+        "Restore the block per docs/designs/2026-10-28-platform-agent-mirror-design.md §4.1",
+      );
+    } else {
+      const psRows = psBlock.platforms;
+      const registryPlatforms = Object.keys(psRows).sort();
+      const pinnedPlatforms = [...PLATFORMS].sort();
+      if (JSON.stringify(registryPlatforms) !== JSON.stringify(pinnedPlatforms)) {
+        fail(
+          "root",
+          "ws-platform-surfaces-set",
+          `platform_surfaces platform set [${registryPlatforms.join(", ")}] does not match validate-model-registry.ts PLATFORMS [${pinnedPlatforms.join(", ")}] — one platform vocabulary only`,
+          "Add or remove registry rows to match PLATFORMS",
+        );
+      }
+      const supportedAgentsPlatforms = new Set<string>();
+      let shapeProblems = 0;
+      for (const [platform, row] of Object.entries(psRows)) {
+        for (const surface of ["agents", "skills", "commands", "hooks"]) {
+          const cap = row?.[surface];
+          if (!cap || typeof cap !== "object" || typeof cap.supported !== "boolean") {
+            fail(
+              "root",
+              "ws-platform-surfaces-shape",
+              `platform_surfaces.platforms.${platform}.${surface} is missing a boolean "supported"`,
+              "Give every surface row a boolean supported flag",
+            );
+            shapeProblems += 1;
+            continue;
+          }
+          if (cap.supported === false && !(typeof cap.evidence === "string" && cap.evidence.trim() !== "")) {
+            fail(
+              "root",
+              "ws-platform-surfaces-evidence",
+              `platform_surfaces.platforms.${platform}.${surface} is supported:false without an "evidence" string`,
+              "Record WHY the surface is unsupported (an unsupported row without evidence FAILs — design §4.1)",
+            );
+            shapeProblems += 1;
+          }
+        }
+        if (row?.agents?.supported === true) supportedAgentsPlatforms.add(platform);
+      }
+      for (const platform of supportedAgentsPlatforms) {
+        if (!PLATFORM_AGENT_ADAPTERS[platform]) {
+          fail(
+            "root",
+            "ws-platform-surfaces-adapter",
+            `platform_surfaces marks platforms.${platform}.agents supported:true but scripts/sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS has no '${platform}' adapter`,
+            "Add the adapter, or set the row to supported:false with evidence",
+          );
+        }
+      }
+      for (const platform of Object.keys(PLATFORM_AGENT_ADAPTERS)) {
+        if (!supportedAgentsPlatforms.has(platform)) {
+          fail(
+            "root",
+            "ws-platform-surfaces-adapter",
+            `sync-agent-mirrors.ts PLATFORM_AGENT_ADAPTERS has a '${platform}' adapter naming no agents.supported:true registry row`,
+            "Remove the adapter, or flip the registry row deliberately",
+          );
+        }
+      }
+      if (shapeProblems === 0) {
+        pass(
+          `platform_surfaces registry: ${registryPlatforms.length} platform row(s) well-formed, ${supportedAgentsPlatforms.size} agents-capable (adapters in lockstep)`,
+        );
+      }
+    }
+  }
+
+  const workflow = schema.workflow as Record<string, unknown> | undefined;
+  const phases = workflow?.phases as Record<string, unknown> | undefined;
+
+  if (!phases) {
+    fail("root", "ws-schema-structure", "workspace-schema.json missing workflow.phases");
+    return;
+  }
+
+  const schemaPmOwned = (phases.pm_owned as string[] | undefined) ?? [];
+  const schemaCanonical = (phases.canonical as string[] | undefined) ?? [];
+  const schemaCount = phases.count as number | undefined;
+
+  // --- WS-01 Check 1: agents/pm.md Can Lead Phases vs schema pm_owned ---
+  const pmMdPath = join(ROOT, "agents", "pm.md");
+  if (!existsSync(pmMdPath)) {
+    warn("root", "ws-01-pm-missing", "agents/pm.md not found — skipping PM phase check");
+  } else {
+    const pmContent = readFileSync(pmMdPath, "utf-8");
+    const phaseLineMatch = pmContent.match(/\*{0,2}Can Lead Phases\*{0,2}\s*:\s*\[([^\]]+)\]/);
+    if (!phaseLineMatch) {
+      warn("root", "ws-01-pm-phases", "agents/pm.md: Can Lead Phases line not found");
+    } else {
+      const pmPhases = phaseLineMatch[1].split(",").map((s) => s.trim().replace(/"/g, "").replace(/'/g, ""));
+      const pmSorted = [...pmPhases].sort();
+      const schemaSorted = [...schemaPmOwned].sort();
+      if (JSON.stringify(pmSorted) === JSON.stringify(schemaSorted)) {
+        pass(`agents/pm.md: Can Lead Phases [${pmPhases.join(", ")}] matches schema pm_owned`);
+      } else {
+        fail(
+          "root",
+          "ws-01-pm-phases",
+          `[FAIL] agents/pm.md: Can Lead Phases [${pmPhases.join(", ")}] does not match workspace-schema.json pm_owned [${schemaPmOwned.join(", ")}]`,
+          "Update Can Lead Phases in agents/pm.md or pm_owned in workspace-schema.json",
+        );
+      }
+    }
+  }
+
+  // --- WS-01 Check 2: templates/common/docs/phase-definitions.md canonical phases ---
+  const phaseDefPath = join(ROOT, "templates", "common", "docs", "phase-definitions.md");
+  if (!existsSync(phaseDefPath)) {
+    warn(
+      "root",
+      "ws-01-phase-defs-missing",
+      "templates/common/docs/phase-definitions.md not found — skipping canonical phase check",
+    );
+  } else {
+    const phaseDefContent = readFileSync(phaseDefPath, "utf-8");
+    // Extract phase identifiers from Phase Overview table rows (first column)
+    const tableRowRegex = /^\|\s*([0-9][0-9-]*)\s*\|/gm;
+    const foundPhases = new Set<string>();
+    for (const m of phaseDefContent.matchAll(tableRowRegex)) {
+      foundPhases.add(m[1].trim());
+    }
+    const missingFromDoc = schemaCanonical.filter((p) => !foundPhases.has(p));
+    if (missingFromDoc.length === 0) {
+      pass(`templates/common/docs/phase-definitions.md: all ${schemaCanonical.length} canonical phases present`);
+    } else {
+      for (const missing of missingFromDoc) {
+        fail(
+          "root",
+          "ws-01-phase-defs",
+          `[FAIL] phase-definitions.md: missing phase "${missing}" from canonical list`,
+          `Add phase "${missing}" to the Phase Overview table in templates/common/docs/phase-definitions.md`,
+        );
+      }
+    }
+  }
+
+  // --- WS-01 Check 3: docs/constitution/05-multi-agent-architecture.md phase count ---
+  const constitutionPath = join(ROOT, "docs", "constitution", "05-multi-agent-architecture.md");
+  if (!existsSync(constitutionPath)) {
+    warn(
+      "root",
+      "ws-01-constitution-missing",
+      "docs/constitution/05-multi-agent-architecture.md not found — skipping phase count check",
+    );
+  } else {
+    const constitutionContent = readFileSync(constitutionPath, "utf-8");
+    // Find §5.4 section (including heading line) and look for "N phases" or "N-phase" pattern
+    const section54Match = constitutionContent.match(/(#{1,4}\s*5\.4[^\n]*\n[\s\S]*?)(?=\n#{1,4}\s*5\.\d|$)/);
+    const searchContent = section54Match ? section54Match[1] : constitutionContent;
+    const phaseCountMatch = searchContent.match(/(\d+)[- ]phase/i) ?? searchContent.match(/(\d+)\s+phases/i);
+    if (!phaseCountMatch) {
+      warn(
+        "root",
+        "ws-01-constitution-count",
+        "constitution §5.4: phase count pattern not found (may be stated differently) — manual review recommended",
+      );
+    } else {
+      const declaredCount = parseInt(phaseCountMatch[1], 10);
+      if (declaredCount === schemaCount) {
+        pass(
+          `docs/constitution/05-multi-agent-architecture.md §5.4: declares ${declaredCount} phases — matches schema`,
+        );
+      } else {
+        fail(
+          "root",
+          "ws-01-constitution-count",
+          `[FAIL] constitution §5.4: declares ${declaredCount} phases, schema requires ${schemaCount}`,
+          `Update phase count in docs/constitution/05-multi-agent-architecture.md §5.4 or workspace-schema.json workflow.phases.count`,
+        );
+      }
+    }
+  }
+
+  // --- WS-01 Check 4: RETIRED (v1.60.0, ADR-0102 / user ruling 2) ---
+  // agents/*.md tier frontmatter vs schema `agent_tiers` no longer applies:
+  // agent_tiers is removed from the schema and the agent file's scalar
+  // `tier:` declaration is the single source. Tier-declaration validity is
+  // validate-model-registry v2's job (L0 missing-tier = FAIL there);
+  // cross-surface parity is lifecycle-sync-audit Check F.
+}
+
+// Check WS-02: common-contract.json compliance (C-CM-01, C-CM-02, C-SK-01, C-AG-01, C-AG-02, WS-02)
+// ── Pure helpers exported for unit tests (C-CM-03b / l0-l1-scripts-registry-version) ──
+// Kept side-effect-free so tests/unit can import them without triggering the
+// variant-scan battery (validate-templates.ts only runs checks under import.meta.main).
+
+// Platform-tree source keys declared on common_platform_skills entries → the
+// platform directory the propagated copy lives under under templates/common/.
+// codex_source (T-20260924-002, spec 2026-09-25-inventory-decisions-batch-design
+// R1.4): the .codex mirror was previously invisible to C-CM-03b — a version bump
+// on a .codex copy drifted silently. All 22 listed skills carry .codex copies.
+const PLATFORM_SOURCE_KEYS: Readonly<Record<string, string>> = {
+  claude_source: ".claude",
+  gemini_source: ".gemini",
+  agents_source: ".agents",
+  codex_source: ".codex",
+};
+
+/** Map a common_platform_skills entry's declared *_source keys to platform tree dirs. */
+export function declaredPlatformTrees(entry: Record<string, unknown>): string[] {
+  return Object.keys(PLATFORM_SOURCE_KEYS)
+    .filter((k) => typeof entry[k] === "string" && (entry[k] as string).length > 0)
+    .map((k) => PLATFORM_SOURCE_KEYS[k]);
+}
+
+/** SKILL.md frontmatter `version:` extraction — same pattern as C-CM-03/03a. */
+export function extractFrontmatterVersion(content: string): string | undefined {
+  return content.match(/^version:\s*"?([0-9][0-9.]*)"?/m)?.[1];
+}
+
+export type VersionParityIssueKind = "missing-contract-version" | "missing-artifact-version" | "mismatch";
+
+/**
+ * Three-branch parity comparison shared by C-CM-03/03a/03b semantics: a
+ * missing version on either side is a failure (never a silent skip — the M5
+ * direction), and unequal versions are a mismatch.
+ */
+export function versionParityIssue(
+  contractVersion: string | undefined,
+  artifactVersion: string | undefined,
+): VersionParityIssueKind | null {
+  if (!contractVersion) return "missing-contract-version";
+  if (!artifactVersion) return "missing-artifact-version";
+  return contractVersion !== artifactVersion ? "mismatch" : null;
+}
+
+/**
+ * Exempt-skill set for the C-CM-04 exists→listed sweeps, built from
+ * docs/workspace-schema.json. country_scoped_assets.skills is keyed by skill
+ * name; variant_scoped_skills is keyed by VARIANT NAME with skill names as
+ * VALUES — the values are the exempt set. This matches C-CM-05 semantics
+ * (T-20260924-002 R1.5: the pre-1.43 build exempted the variant-scoped KEYS —
+ * variant names, not skill names — a latent inconsistency).
+ */
+export function collectSchemaExemptSkills(schema: {
+  country_scoped_assets?: { skills?: Record<string, unknown> };
+  variant_scoped_skills?: Record<string, string[]>;
+}): Set<string> {
+  return new Set([
+    ...Object.keys(schema.country_scoped_assets?.skills ?? {}),
+    ...Object.values(schema.variant_scoped_skills ?? {}).flat(),
+  ]);
+}
+
+/**
+ * C-CM-04 platform-skills sweep core (pure): from a mirror tree's skill-dir
+ * names (directories carrying a SKILL.md), return those covered by neither the
+ * contract listings (common_skills + common_platform_skills) nor the
+ * schema-exempt / contract-excluded sets.
+ */
+export function unlistedPlatformSkillDirs(
+  dirNames: readonly string[],
+  listed: ReadonlySet<string>,
+  exempt: ReadonlySet<string>,
+  excluded: ReadonlySet<string>,
+): string[] {
+  return dirNames.filter((e) => !listed.has(e) && !exempt.has(e) && !excluded.has(e));
+}
+
+/**
+ * C-CM-04 contract-exclusion anti-drift (pure): an exclusion naming a skill
+ * dir that exists in NO mirror tree is stale — the directory was deleted, so
+ * the exclusion record must go too (same direction as the C-CM-05
+ * SINGLE_PLATFORM_EXCEPTIONS stale rule).
+ */
+export function stalePlatformSkillExclusions(exclusions: Iterable<string>, existingNames: Iterable<string>): string[] {
+  const live = new Set(existingNames);
+  return [...exclusions].filter((name) => !live.has(name));
+}
+
+/**
+ * B-11 variant-scoped leak core (pure): return the common-relative locations
+ * where a variant-scoped skill (SSOT: templates/co-<variant>/skills/, registry:
+ * workspace-schema.json variant_scoped_skills) leaks into the common tree —
+ * the canonical skills/ tree AND the five platform mirrors alike. The 2026-09-06
+ * sound-synth orphans survived precisely in the platform mirrors because the
+ * original B-11 scanned only the canonical tree (fixed v1.49.0).
+ */
+export function variantScopedSkillLeaks(
+  commonDir: string,
+  variantScopedSkills: Iterable<string>,
+  mirrorDirs: readonly string[] = PLATFORM_MIRROR_DIRS,
+): string[] {
+  const leaks: string[] = [];
+  for (const skill of variantScopedSkills) {
+    if (existsSync(join(commonDir, "skills", skill, "SKILL.md"))) {
+      leaks.push(`skills/${skill}`);
+    }
+    for (const mirror of mirrorDirs) {
+      if (existsSync(join(commonDir, mirror, skill, "SKILL.md"))) {
+        leaks.push(`${mirror}/${skill}`);
+      }
+    }
+  }
+  return leaks.sort();
+}
+
+// ── Hub topology registry legs (v1.70.0; design
+//    docs/designs/2026-11-01-hub-consolidation-design.md §2.4) ──────────────
+// Four arms over docs/workspace-schema.json hub_topology, backed by the
+// shared helpers/hub-topology.ts (one derivation also feeding audit.ts's
+// hub-resolve checker and hub-promotion.ts). Absent file/section skips
+// cleanly (legacy checkouts); a present registry is fail-closed. The checks
+// are vacuously green with an empty entries[] array and activate as the
+// Phase 1 promotion batches B-D land registry rows.
+function checkHubTopology(): void {
+  if (!JSON_MODE)
+    console.log("\n=== Check hub-topology: hub_topology registry legs (hub-consolidation design §2.4) ===");
+  const loaded = loadHubTopology(ROOT);
+  if (!loaded.ok) {
+    if (loaded.error === "absent-file" || loaded.error === "absent-section") {
+      pass("hub_topology: registry absent (legacy checkout) — hub legs skip cleanly");
+      return;
+    }
+    fail("root", "hub-topology-shape", loaded.error ?? "hub_topology unreadable");
+    return;
+  }
+  const topology = loaded.topology!;
+
+  // Leg 0 — registry shape (fail-closed per §2.4: bad enums, missing fields,
+  // non-semver versions, unknown capability keys all FAIL)
+  const shapeErrors = validateHubTopologyShape(topology);
+  for (const e of shapeErrors) {
+    fail(
+      "root",
+      "hub-topology-shape",
+      `hub_topology: ${e}`,
+      "Fix docs/workspace-schema.json hub_topology — reconcile the hand-maintained root + L1 pair in the same commit",
+    );
+  }
+  if (shapeErrors.length === 0) pass("hub-topology-shape: registry shape valid");
+
+  // Leg 1 — unregistered cross-variant duplication (design §2.4 leg 1):
+  // L1-common assets are excluded (common delivery is inheritance, not
+  // duplication); declared soak rows WARN; everything else FAILs.
+  const dupLeg = checkUnregisteredDuplicates(topology, findCrossVariantDuplicates(ROOT));
+  for (const f of dupLeg.fails) fail("root", "hub-dup-unregistered", f);
+  for (const w of dupLeg.warns) warn("root", "hub-dup-unregistered", w);
+  for (const p of dupLeg.passes) pass(`hub-dup-unregistered: ${p}`);
+
+  // Leg 2 — variant-identity unauthorized promotion (design §2.4 leg 2):
+  // identity assets may not exist in foreign variant templates.
+  const identityLeg = checkVariantIdentity(topology, ROOT);
+  for (const f of identityLeg.fails) fail("root", "hub-identity-clobber", f);
+  for (const w of identityLeg.warns) warn("root", "hub-identity-clobber", w);
+  for (const p of identityLeg.passes) pass(`hub-identity-clobber: ${p}`);
+
+  // Leg 3 — consumer minimum_version (design §2.4 leg 3): variant.json
+  // hub.consumes resolved against registry entries; vacuously green while
+  // entries[] is empty.
+  const consumerLeg = checkConsumerMinimumVersions(topology, loadConsumingVariants(ROOT));
+  for (const f of consumerLeg.fails) fail("root", "hub-consumer-min-version", f);
+  for (const w of consumerLeg.warns) warn("root", "hub-consumer-min-version", w);
+  for (const p of consumerLeg.passes) pass(`hub-consumer-min-version: ${p}`);
+}
+
+export interface ScriptsRegistryRow {
+  name: string;
+  version: string;
+}
+
+/**
+ * Parse a SCRIPTS.md `## Registry` table into name → row (name + Version cell).
+ * Column order: script | source | version | status | removal-date |
+ * security-advisory | layer | pair. Only the section whose heading is exactly
+ * "Registry" is parsed — L0 SCRIPTS.md also carries a "Registry Scope" prose
+ * section that must not match (its content has no table rows, but an
+ * startsWith-based finder would stop there and silently return an empty set).
+ */
+export function parseScriptsMdRegistry(content: string): Map<string, ScriptsRegistryRow> {
+  const rows = new Map<string, ScriptsRegistryRow>();
+  const registrySection = content.split(/^## /m).find((s) => s.split("\n")[0].trim() === "Registry");
+  if (!registrySection) return rows;
+  for (const line of registrySection.split("\n")) {
+    // Data rows start with a backticked name cell; header/separator rows never do.
+    const match = line.match(/^\|\s*`([^`]+)`\s*\|/);
+    if (!match) continue;
+    const cells = line
+      .trim()
+      .replace(/^\|/, "")
+      .replace(/\|$/, "")
+      .split("|")
+      .map((c) => c.trim());
+    const name = match[1].trim();
+    const version = cells.length >= 3 ? cells[2].replace(/`/g, "").trim() : "";
+    rows.set(name, { name, version });
+  }
+  return rows;
+}
+
+function checkCommonContract(): void {
+  if (!JSON_MODE) console.log("\n=== Check WS-02: common-contract.json compliance ===");
+
+  const contractPath = join(ROOT, "docs", "templates", "common-contract.json");
+  if (!existsSync(contractPath)) {
+    warn(
+      "common",
+      "common-contract-missing",
+      "docs/templates/common-contract.json not found",
+      "Create common-contract.json with common_agents and common_skills",
+    );
+    return;
+  }
+
+  let contract: Record<string, unknown>;
+  try {
+    contract = JSON.parse(readFileSync(contractPath, "utf-8")) as Record<string, unknown>;
+  } catch {
+    fail("common", "common-contract-invalid", "docs/templates/common-contract.json is not valid JSON");
+    return;
+  }
+
+  const commonSkills = Object.keys((contract.common_skills as Record<string, unknown>) ?? {});
+  const commonAgents = Object.keys((contract.common_agents as Record<string, unknown>) ?? {});
+
+  const variantDirs = readdirSync(TEMPLATES_DIR).filter((e) => {
+    if (isTransientTestFixture(e)) return false; // E2E staging dirs (T-20260916-001)
+    const fullPath = join(TEMPLATES_DIR, e);
+    try {
+      return statSync(fullPath).isDirectory() && !e.startsWith(".") && e !== "common";
+    } catch {
+      return false;
+    }
+  });
+
+  // C-CM-01 (ERROR): common/skills/ matches common-contract.json
+  for (const skillName of commonSkills) {
+    const skillPath = join(TEMPLATES_DIR, "common", "skills", skillName, "SKILL.md");
+    if (!existsSync(skillPath)) {
+      fail(
+        "common",
+        "C-CM-01",
+        `common-contract.json lists common skill '${skillName}' but templates/common/skills/${skillName}/SKILL.md is missing`,
+        `Create templates/common/skills/${skillName}/SKILL.md`,
+      );
+    } else {
+      pass(`C-CM-01: common skill '${skillName}' → SKILL.md present`);
+    }
+  }
+
+  // C-CM-03 (ERROR): contract common_skills versions must match templates/common/skills/ frontmatter
+  // (added 2026-08-29 after the sync 1.0.0-vs-1.2.2 stale-entry find; DEC-20260829-02 follow-up)
+  for (const [skillName, entry] of Object.entries(
+    contract.common_skills as Record<string, { version?: string; source?: string }>,
+  )) {
+    const skillPath = join(TEMPLATES_DIR, "common", "skills", skillName, "SKILL.md");
+    if (!existsSync(skillPath)) continue; // C-CM-01 already flagged this
+    const fmVersion = extractFrontmatterVersion(readFileSync(skillPath, "utf-8"));
+    const contractVersion = entry.version;
+    if (!contractVersion) {
+      fail(
+        "common",
+        "C-CM-03",
+        `common-contract.json entry '${skillName}' has no version`,
+        `Set "version" to the SKILL.md frontmatter version (${fmVersion ?? "X.Y.Z"})`,
+      );
+    } else if (!fmVersion) {
+      // M5 (2026-09-15 project review): a contract version with no comparable
+      // frontmatter version skipped the check silently — one deleted frontmatter
+      // line would reintroduce the exact drift this check exists to catch.
+      fail(
+        "common",
+        "C-CM-03",
+        `common-contract.json declares version ${contractVersion} for '${skillName}' but SKILL.md frontmatter has no version field`,
+        `Restore "version: ${contractVersion}" to the SKILL.md frontmatter`,
+      );
+    } else if (contractVersion !== fmVersion) {
+      fail(
+        "common",
+        "C-CM-03",
+        `common-contract.json version mismatch for '${skillName}': contract=${contractVersion}, SKILL.md=${fmVersion}`,
+        `Update common-contract.json "version" to ${fmVersion}`,
+      );
+    }
+  }
+
+  // C-CM-02 (ERROR): common/agents/ matches common-contract.json
+  for (const agentName of commonAgents) {
+    const agentPath = join(TEMPLATES_DIR, "common", "agents", `${agentName}.md`);
+    if (!existsSync(agentPath)) {
+      fail(
+        "common",
+        "C-CM-02",
+        `common-contract.json lists common agent '${agentName}' but templates/common/agents/${agentName}.md is missing`,
+        `Create templates/common/agents/${agentName}.md`,
+      );
+    } else {
+      pass(`C-CM-02: common agent '${agentName}' → agent file present`);
+    }
+  }
+
+  // C-CM-03a (ERROR): contract common_agents versions must match templates/common/agents/
+  // frontmatter — the agent counterpart of C-CM-03 (skills). Without this, a tier/metadata
+  // change that bumps an agent's version leaves the contract entry silently stale
+  // (2026-09-15-agent-metadata-drift-check-design.md).
+  for (const [agentName, entry] of Object.entries(
+    contract.common_agents as Record<string, { version?: string; source?: string }>,
+  )) {
+    const agentPath = join(TEMPLATES_DIR, "common", "agents", `${agentName}.md`);
+    if (!existsSync(agentPath)) continue; // C-CM-02 already flagged this
+    const fmVersion = extractFrontmatterVersion(readFileSync(agentPath, "utf-8"));
+    const contractVersion = entry.version;
+    if (!contractVersion) {
+      fail(
+        "common",
+        "C-CM-03a",
+        `common-contract.json entry '${agentName}' has no version`,
+        `Set "version" to the agent frontmatter version (${fmVersion ?? "X.Y.Z"})`,
+      );
+    } else if (!fmVersion) {
+      fail(
+        "common",
+        "C-CM-03a",
+        `common-contract.json declares version ${contractVersion} for '${agentName}' but the agent frontmatter has no version field`,
+        `Restore "version: ${contractVersion}" to the agent frontmatter`,
+      );
+    } else if (contractVersion !== fmVersion) {
+      fail(
+        "common",
+        "C-CM-03a",
+        `common-contract.json version mismatch for '${agentName}': contract=${contractVersion}, agent frontmatter=${fmVersion}`,
+        `Update common-contract.json "version" to ${fmVersion}`,
+      );
+    }
+  }
+
+  // C-CM-03b (ERROR): contract common_platform_skills version parity
+  // (T-20260915-013, finding H10). Check H (verify-platform-lifecycle.ts) only
+  // proves the propagated platform-tree copies EXIST; a version bump on either
+  // side of the propagation edge was invisible. Two arms:
+  //   (a) each entry's contract version must equal the SKILL.md frontmatter
+  //       version of the propagated copy under templates/common/<platform>/skills/
+  //       for every declared platform tree (claude_source → .claude,
+  //       gemini_source → .gemini, agents_source → .agents). A missing copy or a
+  //       missing version on either side is a failure, not a silent skip (same
+  //       direction as the 1.28.0 M5 fix: unverifiable parity must fail loud).
+  //   (b) a skill listed in BOTH common_skills and common_platform_skills must
+  //       carry the SAME version in both sections (9 skills are double-registered).
+  const platformSkillEntries = Object.entries(
+    (contract.common_platform_skills ?? {}) as Record<string, { version?: string }>,
+  );
+  const commonSkillEntries = (contract.common_skills ?? {}) as Record<string, { version?: string }>;
+  for (const [skillName, entry] of platformSkillEntries) {
+    const platforms = declaredPlatformTrees(entry as Record<string, unknown>);
+    if (platforms.length === 0) {
+      fail(
+        "common",
+        "C-CM-03b",
+        `common-contract.json platform skill '${skillName}' declares no platform source key (claude_source/gemini_source/agents_source/codex_source)`,
+        `Add the *_source key(s) for the platform tree(s) that carry '${skillName}'`,
+      );
+    }
+    for (const platform of platforms) {
+      const copyPath = join(TEMPLATES_DIR, "common", platform, "skills", skillName, "SKILL.md");
+      if (!existsSync(copyPath)) {
+        fail(
+          "common",
+          "C-CM-03b",
+          `common-contract.json platform skill '${skillName}' has no propagated copy at templates/common/${platform}/skills/ — version parity unverifiable`,
+          `Propagate the skill to templates/common/${platform}/skills/ (platform-skill-lifecycle-manager skill)`,
+        );
+        continue;
+      }
+      const fmVersion = extractFrontmatterVersion(readFileSync(copyPath, "utf-8"));
+      const issue = versionParityIssue(entry.version, fmVersion);
+      if (issue === "missing-contract-version") {
+        fail(
+          "common",
+          "C-CM-03b",
+          `common-contract.json platform skill '${skillName}' has no version`,
+          `Set "version" to the templates/common/${platform}/skills/ SKILL.md frontmatter version (${fmVersion ?? "X.Y.Z"})`,
+        );
+      } else if (issue === "missing-artifact-version") {
+        fail(
+          "common",
+          "C-CM-03b",
+          `common-contract.json declares version ${entry.version} for platform skill '${skillName}' but templates/common/${platform}/skills/ SKILL.md has no version field`,
+          `Restore "version: ${entry.version}" to the SKILL.md frontmatter`,
+        );
+      } else if (issue === "mismatch") {
+        fail(
+          "common",
+          "C-CM-03b",
+          `common-contract.json version mismatch for platform skill '${skillName}' (${platform}): contract=${entry.version}, SKILL.md=${fmVersion}`,
+          `Update common-contract.json "version" to ${fmVersion}`,
+        );
+      } else {
+        pass(
+          `C-CM-03b: platform skill '${skillName}' (${platform}) version ${entry.version} matches the propagated copy`,
+        );
+      }
+    }
+    const commonEntry = commonSkillEntries[skillName];
+    if (commonEntry?.version && entry.version && commonEntry.version !== entry.version) {
+      fail(
+        "common",
+        "C-CM-03b",
+        `platform skill '${skillName}' is double-registered with divergent versions: common_skills=${commonEntry.version}, common_platform_skills=${entry.version}`,
+        `Align the two common-contract.json entries for '${skillName}' to the SKILL.md frontmatter version`,
+      );
+    }
+  }
+
+  // C-CM-04 (ERROR): reverse exists-to-listed coverage for common_commands
+  // (T-20260910-019). The forward direction (listed → file exists) is covered by
+  // verify-platform-lifecycle Check G; this catches the drift direction the
+  // 2026-09-10 review found (M12): a command added to templates/common that the
+  // contract never declares — scaffolding propagates it, governance is blind to it.
+  const contractCommands = contract.common_commands as
+    | Record<string, { source?: string; gemini_source?: string }>
+    | undefined;
+  if (contractCommands) {
+    // Codex leg is DERIVED from `source` (Ruling K, spec
+    // 2026-09-25-verifier-platform-expansion-design): sync-skills Phase 1b maps
+    // .claude/commands/<x>.md → .codex/prompts/<x>.md unconditionally, so no
+    // codex_source key exists for COMMANDS. This couples the check to the
+    // sync-skills mapping; if ADR-0077 D4 changes, this leg moves with it.
+    // Platform SKILLS are different: their .codex copies are declared
+    // explicitly (codex_source on common_platform_skills entries, R1.4 of
+    // 2026-09-25-inventory-decisions-batch-design) and C-CM-03b verifies their
+    // version parity like any other platform tree.
+    // .agents has no command surface (Finding D exclusion).
+    const reverseSurfaces: ReadonlyArray<readonly [string, string, "source" | "gemini_source"]> = [
+      [".claude", "commands", "source"],
+      [".gemini", "commands", "gemini_source"],
+      [".codex", "prompts", "source"],
+    ];
+    for (const [platform, leaf, sourceKey] of reverseSurfaces) {
+      const cmdDir = join(TEMPLATES_DIR, "common", platform, leaf);
+      if (!existsSync(cmdDir)) continue;
+      const soak = platform === ".codex"; // TODO(promotion): flip to fail after soak
+      const emit = soak ? warn : fail;
+      let listedCount = 0;
+      for (const file of readdirSync(cmdDir).filter((f) => f.endsWith(".md"))) {
+        const name = file.replace(/\.md$/, "");
+        listedCount++;
+        if (!contractCommands[name]) {
+          emit(
+            "common",
+            "C-CM-04",
+            `templates/common/${platform}/${leaf}/${file} exists but is not declared in common-contract.json common_commands`,
+            `Add a "${name}" entry to common_commands (source + gemini_source + description)`,
+          );
+        } else if (!contractCommands[name][sourceKey]) {
+          emit(
+            "common",
+            "C-CM-04",
+            `common-contract.json command "${name}" is missing "${sourceKey}" for ${platform}/${leaf}/`,
+            `Set "${sourceKey}" on the "${name}" entry`,
+          );
+        }
+      }
+      if (listedCount > 0) {
+        pass(
+          `C-CM-04: all ${listedCount} ${platform}/${leaf}/ file(s) declared in common_commands${soak ? " (soak: WARN until promotion)" : ""}`,
+        );
+      }
+    }
+  }
+
+  // C-CM-05 (ERROR): reverse exists-to-listed coverage for common_platform_skills
+  // (T-20260910-019). Universe: templates/common/.claude/skills/*/SKILL.md. A skill
+  // there is exempt from contract listing only when it falls into a class the
+  // contract description already declares out of scope:
+  //   mirrored  — a bulk-propagated copy of a workspace skills/<name>/ skill
+  //   country   — country-scoped (workspace-schema.json country_scoped_assets.skills)
+  //   variant   — variant-scoped (workspace-schema.json variant_scoped_skills)
+  // (graft's former claude-only exception ended with its move into the skills/ SSOT,
+  // ADR-0076 amendment — it is now an ordinary mirrored skill.)
+  const platformSkills = contract.common_platform_skills as Record<string, unknown> | undefined;
+  if (platformSkills) {
+    const schemaPath = join(ROOT, "docs", "workspace-schema.json");
+    let countryScoped = new Set<string>();
+    let variantScoped = new Set<string>();
+    if (existsSync(schemaPath)) {
+      try {
+        const wsSchema = JSON.parse(readFileSync(schemaPath, "utf-8")) as {
+          country_scoped_assets?: { skills?: Record<string, string> };
+          variant_scoped_skills?: Record<string, string[]>;
+        };
+        countryScoped = new Set(Object.keys(wsSchema.country_scoped_assets?.skills ?? {}));
+        variantScoped = new Set(Object.values(wsSchema.variant_scoped_skills ?? {}).flat());
+      } catch {
+        /* workspace-schema checks report their own drift */
+      }
+    }
+    const skillDir = join(TEMPLATES_DIR, "common", ".claude", "skills");
+    if (existsSync(skillDir)) {
+      let unlistedErrors = 0;
+      for (const entry of readdirSync(skillDir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        const name = entry.name;
+        if (!existsSync(join(skillDir, name, "SKILL.md"))) continue;
+        if (platformSkills[name]) continue; // listed — Check H owns forward coverage
+        if (existsSync(join(ROOT, "skills", name, "SKILL.md"))) continue; // mirrored workspace skill
+        if (countryScoped.has(name)) continue; // country-scoped — contract description excludes
+        if (variantScoped.has(name)) continue; // variant-scoped — contract description excludes
+        fail(
+          "common",
+          "C-CM-05",
+          `templates/common/.claude/skills/${name}/ exists but is not declared in common-contract.json common_platform_skills and matches no documented exclusion class`,
+          `Add "${name}" to common_platform_skills, or register it in workspace-schema.json country_scoped_assets/variant_scoped_skills`,
+        );
+        unlistedErrors++;
+      }
+      if (unlistedErrors === 0) {
+        pass("C-CM-05: all templates/common platform skills declared or explicitly excluded");
+      }
+    }
+  }
+
+  // C-SK-01 (WARNING): No duplicate common skills in variant dirs
+  for (const skillName of commonSkills) {
+    const commonSkillPath = join(TEMPLATES_DIR, "common", "skills", skillName, "SKILL.md");
+    if (!existsSync(commonSkillPath)) continue; // C-CM-01 already flagged this
+    const commonContent = normalizeContent(readFileSync(commonSkillPath, "utf-8"));
+    for (const variant of variantDirs) {
+      const variantSkillPath = join(TEMPLATES_DIR, variant, "skills", skillName, "SKILL.md");
+      if (existsSync(variantSkillPath)) {
+        const variantContent = normalizeContent(readFileSync(variantSkillPath, "utf-8"));
+        if (variantContent === commonContent) {
+          warn(
+            variant,
+            "C-SK-01",
+            `Duplicate common skill '${skillName}' in ${variant}/skills/ — remove variant copy to inherit from common`,
+          );
+        }
+      }
+    }
+  }
+
+  // C-AG-01 (WARNING): No duplicate common agents in variant dirs
+  // Exception: agents with expected_override_all_variants: true (e.g. pm) are intentionally
+  // overridden in every variant — skip the duplicate warning for those agents.
+  const commonAgentsMap2 = (contract.common_agents as Record<string, Record<string, unknown>>) ?? {};
+  for (const agentName of commonAgents) {
+    const agentMeta2 = commonAgentsMap2[agentName];
+    if (agentMeta2?.expected_override_all_variants) continue; // intentional override — skip
+
+    const commonAgentPath = join(TEMPLATES_DIR, "common", "agents", `${agentName}.md`);
+    if (!existsSync(commonAgentPath)) continue; // C-CM-02 already flagged this
+    const commonContent = normalizeContent(readFileSync(commonAgentPath, "utf-8"));
+    for (const variant of variantDirs) {
+      const variantAgentPath = join(TEMPLATES_DIR, variant, "agents", `${agentName}.md`);
+      if (existsSync(variantAgentPath)) {
+        const variantContent = normalizeContent(readFileSync(variantAgentPath, "utf-8"));
+        if (variantContent === commonContent) {
+          warn(
+            variant,
+            "C-AG-01",
+            `Duplicate common agent '${agentName}' in ${variant}/agents/ — remove variant copy to inherit from common`,
+          );
+        }
+      }
+    }
+  }
+
+  // C-AG-02 (INFO/WARNING): Replacement overrides flagged
+  for (const variant of variantDirs) {
+    const variantJsonPath = join(TEMPLATES_DIR, variant, "variant.json");
+    if (!existsSync(variantJsonPath)) continue;
+    let variantJson: Record<string, unknown>;
+    try {
+      variantJson = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+    } catch {
+      continue;
+    }
+    const agentOverrides = variantJson.agent_overrides as Record<string, Record<string, unknown>> | undefined;
+    if (!agentOverrides) continue;
+    for (const [agentName, override] of Object.entries(agentOverrides)) {
+      if (override.type === "replacement") {
+        const reason = (override.reason as string | undefined) ?? "no reason given";
+        warn(
+          variant,
+          "C-AG-02",
+          `${variant}: ${agentName} has replacement override (reason: ${reason}) — lifecycle-manager review confirmed`,
+        );
+      }
+    }
+  }
+
+  // C-SK-02: Invariant sections identical across all variant pm.md files
+  // Also: skeleton must not contain variant-specific agent names
+  const commonAgentsMap = (contract.common_agents as Record<string, Record<string, unknown>>) ?? {};
+  for (const [agentName, agentMeta] of Object.entries(commonAgentsMap)) {
+    const skeletonSections = (agentMeta.skeleton_sections as string[] | undefined) ?? [];
+    if (skeletonSections.length === 0) continue;
+
+    const skeletonPath = join(TEMPLATES_DIR, "common", "agents", `${agentName}.md`);
+    if (!existsSync(skeletonPath)) continue; // C-CM-02 already flagged this
+
+    const skeletonRaw = normalizeContent(readFileSync(skeletonPath, "utf-8"));
+
+    // Helper: extract section content (heading line + body until next ## heading)
+    function extractSection(content: string, heading: string): string | null {
+      // Match the heading line (## heading, possibly with bold/emoji prefix)
+      // We search for lines that contain the heading text after ##
+      const lines = content.split("\n");
+      let startIdx = -1;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.startsWith("## ") && line.includes(heading)) {
+          startIdx = i;
+          break;
+        }
+      }
+      if (startIdx === -1) return null;
+
+      // Collect until next ## heading
+      const sectionLines: string[] = [lines[startIdx]];
+      for (let i = startIdx + 1; i < lines.length; i++) {
+        if (lines[i].startsWith("## ")) break;
+        sectionLines.push(lines[i]);
+      }
+      return sectionLines.join("\n").trimEnd();
+    }
+
+    // Build map of invariant section content from skeleton
+    const invariantSections = new Map<string, string>();
+    for (const sectionTitle of skeletonSections) {
+      const content = extractSection(skeletonRaw, sectionTitle);
+      if (content !== null) {
+        invariantSections.set(sectionTitle, content);
+      }
+    }
+
+    // Check each variant
+    for (const variant of variantDirs) {
+      const variantAgentPath = join(TEMPLATES_DIR, variant, "agents", `${agentName}.md`);
+      if (!existsSync(variantAgentPath)) continue; // variant inherits from common — no override to check
+
+      const variantRaw = normalizeContent(readFileSync(variantAgentPath, "utf-8"));
+
+      // Check if variant uses extends pattern
+      // Parse with a real YAML parser, not the line-based parseFrontmatter(): that helper trims
+      // each candidate key before testing for indentation, so indented lines inside block scalars
+      // (e.g. prose under `variant_overrides:`) whose text contains a colon were reported as
+      // top-level frontmatter keys — producing nonsense C-SK-02 warnings like
+      // "unexpected fields: <!-- VARIANT-SECTION, 1. HS classification memorandum, ...".
+      const fmMatchV = normalizeContent(variantRaw.replace(/^# @resolved-from:.*\n/, "")).match(
+        /^---\n([\s\S]*?)\n---/,
+      );
+      let variantFields: Record<string, unknown> = {};
+      if (fmMatchV) {
+        try {
+          variantFields = (load(fmMatchV[1]) as Record<string, unknown>) ?? {};
+        } catch {
+          variantFields = {};
+        }
+      }
+      const hasExtends = "extends" in variantFields;
+
+      if (hasExtends) {
+        // Per ADR-0048 / docs/architecture/extends-pattern.md, the variant pm.md
+        // "Minimal pattern" REQUIRES `name`, `variant`, `version`, and `last_updated`
+        // alongside `extends` — it is not extends-only. validate-pm-extends.ts (the
+        // dedicated ADR-0033/0048 validator) already treats this schema as valid;
+        // only flag fields outside that documented schema. `remove_sections` and
+        // `variant_overrides` are the ADR-0039/ADR-0034 override mechanism consumed
+        // at scaffold time by merge-frontmatter.ts; `status` is documented optional
+        // at all levels; `owner` and `capabilities` are pass-through agent metadata
+        // read by other validators (capability-validator.ts reads pm's capabilities);
+        // `lifecycle` is required L2 metadata for variants shipping their own
+        // recursive validate-agents.ts (e.g. co-safety) that enforces
+        // lifecycle.phase/lifecycle.governance per-file, independent of `extends`.
+        // `description` is the persona-integrity field (validate-agents 1.3.2):
+        // a stub whose extends cannot resolve in project layout would otherwise
+        // fail the gate with no description to inherit — stubs inline the base
+        // persona's description (2026-09-23 fleet repair,
+        // 2026-09-22-agent-persona-integrity-gate).
+        const allowedWithExtends = new Set([
+          "extends",
+          "name",
+          "variant",
+          "version",
+          "last_updated",
+          "status",
+          "remove_sections",
+          "variant_overrides",
+          "owner",
+          "capabilities",
+          "lifecycle",
+          "description",
+          // PM Tier Semantics (design 2026-09-29): variant pm.md stubs carry the
+          // per-platform tier mapping and model override — documented optional fields
+          // in docs/architecture/extends-pattern.md, present on the L1 pm.md they extend.
+          "tier",
+          "model",
+        ]);
+        const fieldKeys = Object.keys(variantFields);
+        const unexpectedKeys = fieldKeys.filter((k) => !allowedWithExtends.has(k));
+
+        if (unexpectedKeys.length > 0) {
+          warn(
+            variant,
+            "C-SK-02",
+            `C-SK-02: ${variant}/agents/${agentName}.md uses 'extends' but also has unexpected frontmatter fields: ${unexpectedKeys.join(", ")} — see docs/architecture/extends-pattern.md for the allowed schema`,
+            `Remove the unexpected frontmatter fields, or add them to the schema in docs/architecture/extends-pattern.md if intentional`,
+          );
+        }
+
+        // Skip the rest of the checks for extends-based variants
+        // The skeleton file is already validated above
+        continue;
+      }
+
+      // Sub-check A: no <!-- VARIANT-SECTION: markers should remain in scaffolded file
+      if (variantRaw.includes("<!-- VARIANT-SECTION:")) {
+        fail(
+          variant,
+          "C-SK-02",
+          `C-SK-02: ${variant}/agents/${agentName}.md contains unresolved <!-- VARIANT-SECTION: --> markers — skeleton not fully scaffolded`,
+          `Replace all <!-- VARIANT-SECTION: --> blocks with actual variant-specific content`,
+        );
+      }
+
+      // Sub-check B: invariant sections — behavior depends on override type
+      // additive: skeleton provides invariant sections → missing in variant is EXPECTED (skip warn)
+      // replacement: variant provides everything → missing invariant = may have been stripped (warn)
+      // both: if invariant section IS present but DIFFERENT → always warn
+      const variantJsonPath = join(TEMPLATES_DIR, variant, "variant.json");
+      let overrideType = "replacement"; // conservative default
+      if (existsSync(variantJsonPath)) {
+        try {
+          const vj = JSON.parse(readFileSync(variantJsonPath, "utf-8"));
+          overrideType = vj.agent_overrides?.[agentName]?.type ?? "replacement";
+        } catch {
+          /* keep default */
+        }
+      }
+
+      for (const [sectionTitle, skeletonContent] of invariantSections) {
+        const variantContent = extractSection(variantRaw, sectionTitle);
+        if (variantContent === null) {
+          if (overrideType !== "additive") {
+            warn(
+              variant,
+              "C-SK-02",
+              `C-SK-02: ${variant}/agents/${agentName}.md is missing invariant section '## ${sectionTitle}' — may have been stripped during override`,
+              `Restore the '## ${sectionTitle}' section from templates/common/agents/${agentName}.md`,
+            );
+          }
+          // additive: missing invariant section is EXPECTED — skeleton provides it at scaffolding time
+        } else if (variantContent !== skeletonContent) {
+          warn(
+            variant,
+            "C-SK-02",
+            `C-SK-02: ${variant}/agents/${agentName}.md has modified invariant section '## ${sectionTitle}' — invariant sections should not be changed in variant overrides`,
+            `Restore '## ${sectionTitle}' to match templates/common/agents/${agentName}.md, or promote the change to the skeleton`,
+          );
+        }
+      }
+    }
+
+    // Sub-check C: skeleton must not contain variant-specific agent names
+    const variantSpecificNames = ["designer", "code-writer", "test-runner", "red-team-lead"];
+    for (const agentSpecificName of variantSpecificNames) {
+      // Search in non-frontmatter body only (strip frontmatter)
+      const bodyStart = skeletonRaw.indexOf("\n---\n", skeletonRaw.indexOf("---\n"));
+      const body = bodyStart !== -1 ? skeletonRaw.slice(bodyStart + 5) : skeletonRaw;
+      // Use word-boundary-style check: the name must appear as a standalone reference
+      const nameRegex = new RegExp(`(?<![a-z])${agentSpecificName.replace("-", "[- ]")}(?![a-z])`, "i");
+      if (nameRegex.test(body)) {
+        warn(
+          "common",
+          "C-SK-02",
+          `C-SK-02: Skeleton templates/common/agents/${agentName}.md contains variant-specific agent name: '${agentSpecificName}' — skeleton should be agent-agnostic`,
+          `Remove or generalize the reference to '${agentSpecificName}' in the skeleton`,
+        );
+      }
+    }
+  }
+  if (!JSON_MODE) pass("C-SK-02: invariant section check complete");
+
+  // WS-02 (WARNING): Anti-swelling 50% rule
+  const totalVariants = variantDirs.length;
+  for (const agentName of commonAgents) {
+    let overrideCount = 0;
+    for (const variant of variantDirs) {
+      const variantJsonPath = join(TEMPLATES_DIR, variant, "variant.json");
+      if (!existsSync(variantJsonPath)) continue;
+      let variantJson: Record<string, unknown>;
+      try {
+        variantJson = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+      } catch {
+        continue;
+      }
+      const agentOverrides = variantJson.agent_overrides as Record<string, unknown> | undefined;
+      if (agentOverrides && agentName in agentOverrides) overrideCount++;
+    }
+    const agentContract = (contract.common_agents as Record<string, Record<string, unknown>>)?.[agentName];
+    if (agentContract?.expected_override_all_variants) {
+      // skip anti-swelling check for this agent — all variants are expected to override
+    } else if (totalVariants > 0 && overrideCount / totalVariants >= 0.5) {
+      warn(
+        "common",
+        "WS-02",
+        `Anti-swelling alert: '${agentName}' overridden by ${overrideCount}/${totalVariants} variants — consider updating common definition`,
+      );
+    }
+  }
+
+  // C-CM-06 (ERROR): forward path-existence for every declared contract source path
+  // (T-20261027-002, 2026-10-27 project-review slot D). common_commands and
+  // common_platform_skills entries declare repo-relative *_source paths
+  // (source/gemini_source/agents_source/codex_source/hermes_source; values starting
+  // with '.'). Each is a MIRROR path under templates/common/ — the L1 propagated copy
+  // of the L0 surface file. C-CM-03b resolves the SKILLS ones by convention and Check
+  // H (verify-platform-lifecycle) proves copies exist, but nothing verified the
+  // declared PATH strings themselves: 13 of the 154 declarations pointed at files
+  // that do not exist (.gemini/commands/<n>.md vs the actual .toml mirrors;
+  // .agents/commands/<n>.md vs the L0-resident surface with no L1 mirror) while the
+  // entries claimed propagated_to_common:true — drift was invisible to every gate.
+  // A value not starting with '.' is an exclusion prose record (gateguard precedent)
+  // and is skipped here.
+  const pathSections = ["common_commands", "common_platform_skills"] as const;
+  let declaredPathCount = 0;
+  for (const section of pathSections) {
+    const entries = (contract[section] ?? {}) as Record<string, Record<string, unknown>>;
+    for (const [entryName, entry] of Object.entries(entries)) {
+      for (const [key, value] of Object.entries(entry)) {
+        const isSourceKey = key === "source" || key.endsWith("_source");
+        if (!isSourceKey || typeof value !== "string" || !value.startsWith(".")) continue;
+        declaredPathCount++;
+        const mirrorPath = join(TEMPLATES_DIR, "common", value);
+        if (!existsSync(mirrorPath)) {
+          fail(
+            "common",
+            "C-CM-06",
+            `common-contract.json ${section}.${entryName} declares ${key}="${value}" but templates/common/${value} does not exist (found in 2026-10-27 project-review slot D: 13 stale declarations)`,
+            `Point ${key} at the actual templates/common mirror path (e.g. the rendered .gemini/commands/<n>.toml), or replace it with an exclusion prose record citing the governing ruling (gateguard precedent)`,
+          );
+        }
+      }
+    }
+  }
+  if (declaredPathCount > 0) {
+    pass(`C-CM-06: all ${declaredPathCount} declared contract source paths resolve under templates/common/`);
+  }
+
+  pass("WS-02: common-contract.json compliance check complete");
+}
+
+// Check C-CM-04 (T-20260910-019): reverse exists→listed coverage for common-contract.json.
+// C-CM-01/C-CM-02 only prove that LISTED entries exist on disk; nothing proved that on-disk
+// common content is LISTED, so the contract inventories could silently rot in both directions.
+// Universe per section: templates/common/agents/*.md → common_agents,
+// templates/common/skills/*/ → common_skills, templates/common/.claude|.gemini/commands/*.md →
+// common_commands. Documented exemptions (contract description): country-scoped skills
+// (workspace-schema.json country_scoped_assets.skills) and variant-scoped skills
+// (variant_scoped_skills VALUES — skill names; R1.5 of 2026-09-25-inventory-decisions-
+// batch-design), plus the contract's own common_platform_skill_exclusions records for the
+// platform-skill trees. The platform skill trees (.claude + .gemini, T-20260915-013 —
+// the .gemini tree previously had no reverse arm, so a skill dir could appear there without
+// any contract listing while .claude stayed covered) are checked at WARN only;
+// since the 2026-09-25 full-inventory ruling (T-20260924-002) every dir must be
+// listed, schema-exempt, or contract-excluded — the aggregated WARN signals drift.
+function checkCommonContractReverseCoverage(): void {
+  if (!JSON_MODE) console.log("\n=== Check C-CM-04: common-contract.json reverse coverage (exists→listed) ===");
+
+  const contractPath = join(ROOT, "docs", "templates", "common-contract.json");
+  if (!existsSync(contractPath)) return; // prerequisite missing — already reported by WS-02
+  let contract: Record<string, unknown>;
+  try {
+    contract = JSON.parse(readFileSync(contractPath, "utf-8")) as Record<string, unknown>;
+  } catch {
+    return; // already reported by WS-02
+  }
+
+  // Exemptions declared by docs/workspace-schema.json (country-scoped keys +
+  // variant-scoped VALUES — skill names; R1.5 of 2026-09-25-inventory-decisions-
+  // batch-design fixed the keys-based build that exempted variant NAMES).
+  let exemptSkills = new Set<string>();
+  const schemaPath = join(ROOT, "docs", "workspace-schema.json");
+  if (existsSync(schemaPath)) {
+    try {
+      const schema = JSON.parse(readFileSync(schemaPath, "utf-8")) as Record<string, any>;
+      exemptSkills = collectSchemaExemptSkills(schema);
+    } catch {
+      /* fall through with no exemptions */
+    }
+  }
+  // Contract-declared exclusions (T-20260924-002 R1.2/R1.3): platform skills
+  // deliberately outside the common inventory (L0-only operator skills, the
+  // claude-only graft tool skill, the variant-scoped sound-synth). A stale
+  // exclusion — the dir is gone from every mirror tree — is a failure below.
+  const platformSkillExclusions = new Set(
+    Object.keys((contract.common_platform_skill_exclusions as Record<string, Record<string, string>>) ?? {}),
+  );
+
+  const commonAgents = new Set(Object.keys((contract.common_agents as Record<string, unknown>) ?? {}));
+  const commonSkills = new Set(Object.keys((contract.common_skills as Record<string, unknown>) ?? {}));
+  const commonCommands = new Set(Object.keys((contract.common_commands as Record<string, unknown>) ?? {}));
+  const commonPlatformSkills = new Set(Object.keys((contract.common_platform_skills as Record<string, unknown>) ?? {}));
+
+  // ── agents: templates/common/agents/*.md must be listed in common_agents ──
+  // _COMMON.md is a shared frontmatter fragment injected into agent files, not a roster agent.
+  const agentsDir = join(TEMPLATES_DIR, "common", "agents");
+  if (existsSync(agentsDir)) {
+    const unlistedAgents = readdirSync(agentsDir)
+      .filter((f) => f.endsWith(".md") && f !== "_COMMON.md")
+      .map((f) => f.replace(/\.md$/, ""))
+      .filter((name) => !commonAgents.has(name));
+    if (unlistedAgents.length > 0) {
+      fail(
+        "common",
+        "C-CM-04",
+        `templates/common/agents/ has agent(s) not listed in common-contract.json common_agents: ${unlistedAgents.join(", ")}`,
+        `Add the agent(s) to common-contract.json common_agents or remove them from templates/common/agents/`,
+      );
+    } else {
+      pass("C-CM-04: all templates/common/agents/*.md files are listed in common_agents");
+    }
+  }
+
+  // ── skills: templates/common/skills/*/ must be listed in common_skills (or platform/country/variant exemptions) ──
+  const skillsDir = join(TEMPLATES_DIR, "common", "skills");
+  if (existsSync(skillsDir)) {
+    const unlistedSkills = readdirSync(skillsDir).filter((e) => {
+      if (!existsSync(join(skillsDir, e, "SKILL.md"))) return false; // non-skill entries (README etc.)
+      return !commonSkills.has(e) && !commonPlatformSkills.has(e) && !exemptSkills.has(e);
+    });
+    if (unlistedSkills.length > 0) {
+      fail(
+        "common",
+        "C-CM-04",
+        `templates/common/skills/ has skill(s) not listed in common-contract.json common_skills: ${unlistedSkills.join(", ")}`,
+        `Add the skill(s) to common_skills (or document them as country-scoped/variant-scoped in workspace-schema.json)`,
+      );
+    } else {
+      pass("C-CM-04: all templates/common/skills/ directories are listed in common_skills");
+    }
+  }
+
+  // ── commands: templates/common/.claude|.gemini/commands/*.md + .codex/prompts/*.md
+  // must be listed in common_commands (codex leg: spec site 3c, WARN soak) ──
+  const unlistedCommands = new Set<string>();
+  const unlistedCodexCommands = new Set<string>();
+  for (const platformDir of [".claude", ".gemini"]) {
+    const cmdDir = join(TEMPLATES_DIR, "common", platformDir, "commands");
+    if (!existsSync(cmdDir)) continue;
+    for (const f of readdirSync(cmdDir)) {
+      if (!f.endsWith(".md")) continue;
+      const name = f.replace(/\.md$/, "");
+      if (!commonCommands.has(name)) unlistedCommands.add(name);
+    }
+  }
+  const codexPromptsDir = join(TEMPLATES_DIR, "common", ".codex", "prompts");
+  if (existsSync(codexPromptsDir)) {
+    for (const f of readdirSync(codexPromptsDir)) {
+      if (!f.endsWith(".md")) continue;
+      const name = f.replace(/\.md$/, "");
+      if (!commonCommands.has(name)) unlistedCodexCommands.add(name);
+    }
+  }
+  if (unlistedCommands.size > 0) {
+    fail(
+      "common",
+      "C-CM-04",
+      `templates/common/.claude|.gemini/commands/ has command(s) not listed in common-contract.json common_commands: ${[...unlistedCommands].join(", ")}`,
+      `Add the command(s) to common_commands with their source/gemini_source paths`,
+    );
+  } else {
+    pass("C-CM-04: all common command files are listed in common_commands");
+  }
+  if (unlistedCodexCommands.size > 0) {
+    // TODO(promotion): flip to fail after soak (T-20261009 ticket)
+    warn(
+      "common",
+      "C-CM-04",
+      `templates/common/.codex/prompts/ has prompt(s) not listed in common-contract.json common_commands: ${[...unlistedCodexCommands].join(", ")} (soak: WARN until promotion)`,
+      `Add the command(s) to common_commands with their source paths`,
+    );
+  }
+
+  // ── platform skills: templates/common/.{claude,gemini,agents,codex}/skills/*/
+  // — WARN (aggregated), see doc comment. Sweep iterates all four mirror trees
+  // (spec site 3d); filesystem-driven and name-keyed, so no contract keys needed.
+  // Contract exclusions (common_platform_skill_exclusions) cover the rest —
+  // full-inventory ruling T-20260924-002: every dir is listed, exempt, or
+  // explicitly excluded; silent omission is gone.
+  let platformTreesCovered = 0;
+  let platformTreeCount = 0;
+  const listedPlatformNames = new Set([...commonSkills, ...commonPlatformSkills]);
+  for (const platform of PLATFORM_MIRROR_DIRS) {
+    const platformDir = join(TEMPLATES_DIR, "common", platform);
+    if (!existsSync(platformDir)) continue;
+    platformTreeCount++;
+    const unlistedPlatform = unlistedPlatformSkillDirs(
+      readdirSync(platformDir).filter((e) => existsSync(join(platformDir, e, "SKILL.md"))),
+      listedPlatformNames,
+      exemptSkills,
+      platformSkillExclusions,
+    );
+    if (unlistedPlatform.length > 0) {
+      warn(
+        "common",
+        "C-CM-04",
+        `${unlistedPlatform.length} platform skill dir(s) under templates/common/${platform}/ are not in common_platform_skills or common_skills: ${unlistedPlatform.slice(0, 12).join(", ")}${unlistedPlatform.length > 12 ? `, +${unlistedPlatform.length - 12} more` : ""}`,
+        `Decide the common_platform_skills inventory scope (full platform inventory vs override record) and list or exempt accordingly`,
+      );
+    } else {
+      platformTreesCovered++;
+    }
+  }
+  // Exclusion anti-drift: an exclusion whose skill dir has vanished from every
+  // mirror tree is stale — the record must be deleted with the directory.
+  if (platformSkillExclusions.size > 0) {
+    const existingPlatformSkillNames = new Set<string>();
+    for (const platform of PLATFORM_MIRROR_DIRS) {
+      const dir = join(TEMPLATES_DIR, "common", platform);
+      if (!existsSync(dir)) continue;
+      for (const e of readdirSync(dir)) {
+        if (existsSync(join(dir, e, "SKILL.md"))) existingPlatformSkillNames.add(e);
+      }
+    }
+    for (const name of stalePlatformSkillExclusions(platformSkillExclusions, existingPlatformSkillNames)) {
+      fail(
+        "common",
+        "C-CM-04",
+        `common-contract.json common_platform_skill_exclusions names '${name}' but no templates/common/.{claude,gemini,agents,codex}/skills/${name}/ directory exists — remove the stale exclusion`,
+        `Delete the '${name}' entry from common-contract.json common_platform_skill_exclusions`,
+      );
+    }
+  }
+  if (platformTreeCount > 0 && platformTreesCovered === platformTreeCount) {
+    pass(
+      `C-CM-04: all platform skill dirs are covered by common_platform_skills/common_skills (${platformTreesCovered}/${platformTreeCount} tree(s))`,
+    );
+  }
+}
+
+// Check: skill-graph-version-drift (skill-graph v2 E2) — same skill capability, same version,
+// different content hash across scopes. Reads the committed graph; v1 graphs carry no hashes and
+// are skipped (divergence is only computable where hashes exist). WARN only.
+function checkSkillGraphVersionDrift(): void {
+  if (!JSON_MODE)
+    console.log("\n=== Check skill-graph-version-drift: same version, different content across scopes (E2) ===");
+  const graph = loadSkillGraph(join(ROOT, "docs", "skill-graph.json"));
+  if (!graph) {
+    if (!JSON_MODE) console.log("  (no docs/skill-graph.json — skipped)");
+    return;
+  }
+  const drift = findCapabilityDivergence(graph, ["skill"]).filter((d) => d.kind === "version-drift");
+  for (const d of drift) {
+    warn(
+      "common",
+      "skill-graph-version-drift",
+      `skill '${d.capability}' has the same version but different content in: ${d.entries.map((e) => `${e.scope}@${e.version ?? "?"}`).join(", ")}`,
+      `Bump the version of the copy that changed, or reconcile the copies (see docs/skill-graph.md "Same-Name Divergence")`,
+    );
+  }
+  if (!JSON_MODE && drift.length === 0) console.log("  ✓ no same-version-different-content skills in the graph");
+}
+
+// Check: mirror-hygiene (R6, spec 2026-09-25-verifier-platform-expansion-design)
+// — a platform skill mirror contains ONLY skill directories. Stray files
+// (SKILLS.md, README*.md — the 2026-09-25 Finding-B class: 11 files in 9
+// variants) and non-skill directories are drift; the producer cannot re-emit
+// them (generateSkillDirectories empty-rel guard), so the only correct state
+// is absence. WARN during the ADR-0055 soak — TODO(promotion): flip to fail.
+function checkMirrorHygiene(): void {
+  if (!JSON_MODE) console.log("\n=== Check mirror-hygiene: platform skill mirrors carry only skill directories ===");
+  let checked = 0;
+  let findings = 0;
+  const scanRoots: ReadonlyArray<readonly [string, string]> = [
+    [join(TEMPLATES_DIR, "common"), "common"],
+    ...readdirSync(TEMPLATES_DIR, { withFileTypes: true })
+      .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
+      .map((e) => [join(TEMPLATES_DIR, e.name), e.name] as const),
+  ];
+  for (const [rootPath, label] of scanRoots) {
+    for (const mirror of PLATFORM_MIRROR_DIRS) {
+      const mirrorDir = join(rootPath, mirror);
+      if (!existsSync(mirrorDir)) continue;
+      checked++;
+      for (const f of scanMirrorHygiene(mirrorDir)) {
+        warn(
+          label,
+          "mirror-hygiene",
+          `templates/${label}/${mirror}/${f.entry} — mirrors contain only skill directories (${f.kind})`,
+          `Delete templates/${label}/${mirror}/${f.entry} (sync-skills never re-emits non-skill entries)`,
+        );
+        findings++;
+      }
+    }
+  }
+  if (!JSON_MODE) {
+    if (checked === 0) console.log("  (no platform skill mirrors found)");
+    else if (findings === 0) console.log(`  ✓ ${checked} mirror dir(s) clean: only skill directories present`);
+  }
+}
+
+// Check VA-01: Phase Summary x Actual Agents Cross-Validation
+function checkPhaseSummaryAgents(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-01: Phase Summary agents cross-validation (${variant}) ===`);
+
+  const agentsMdPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
+  if (!existsSync(agentsMdPath)) {
+    warn(variant, "VA-01", `${variant}/AGENTS.md not found -- cannot validate Phase Summary agents`);
+    return;
+  }
+
+  const content = readFileSync(agentsMdPath, "utf-8");
+
+  const SKIP_CELLS = new Set([
+    "—",
+    "Specialist Agents",
+    "Orchestrator",
+    "Observer",
+    "Gate Keeper",
+    "Coordinator",
+    "Owner",
+  ]);
+  // Match data rows: | <digit(s)> | <Name> | <PM Facilitation> | <Specialist Agents> |
+  const rowRegex = /^\|\s*\d+\s*\|[^|]*\|[^|]*\|([^|]+)\|/gm;
+  let match: RegExpExecArray | null = rowRegex.exec(content);
+  const agentNames: string[] = [];
+
+  while (match !== null) {
+    const specialistCell = match[1].trim();
+    // Skip header, PM-only, and role-name cells
+    if (SKIP_CELLS.has(specialistCell) || specialistCell.includes("PM only") || specialistCell === "") {
+      match = rowRegex.exec(content);
+      continue;
+    }
+    // Split on comma or literal <br> tag, not on individual characters
+    const names = specialistCell
+      .split(/,|<br\s*\/?>/)
+      .map((n: string) => n.trim())
+      .filter(Boolean);
+    for (const name of names) {
+      const clean = name.replace(/[*_`—]/g, "").trim();
+      // Only accept lowercase hyphen-separated identifiers (e.g. analyst, content-writer)
+      if (clean && /^[a-z][a-z0-9-]*$/.test(clean)) {
+        agentNames.push(clean);
+      }
+    }
+    match = rowRegex.exec(content);
+  }
+
+  if (agentNames.length === 0) {
+    if (!JSON_MODE) console.log(`  (no specialist agents found in Phase Summary for ${variant})`);
+    return;
+  }
+
+  for (const agentName of agentNames) {
+    const agentFilePath = join(TEMPLATES_DIR, variant, "agents", `${agentName}.md`);
+    if (!existsSync(agentFilePath)) {
+      fail(
+        variant,
+        "VA-01",
+        `Phase Summary references agent '${agentName}' but templates/${variant}/agents/${agentName}.md is missing`,
+        `Create templates/${variant}/agents/${agentName}.md or remove the reference from the Phase Summary`,
+      );
+    } else {
+      pass(`VA-01: ${variant} Phase Summary agent '${agentName}' -- agents/${agentName}.md present`);
+    }
+  }
+}
+
+// Check VA-02: Workspace-Root Agent Intrusion Detection
+function checkWorkspaceRootAgentIntrusion(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-02: Workspace-root agent intrusion detection (${variant}) ===`);
+
+  const agentsMdPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
+  if (!existsSync(agentsMdPath)) {
+    return; // VA-01 already warned about missing AGENTS.md
+  }
+
+  const WORKSPACE_ROOT_AGENTS = [
+    "scaffolding-expert",
+    "docs-writer",
+    "security-expert",
+    "architect",
+    "auditor",
+    "lifecycle-manager",
+  ];
+
+  const content = readFileSync(agentsMdPath, "utf-8");
+
+  const rowRegex = /^\|\s*\d+\s*\|[^|]*\|([^|]+)\|/gm;
+  let match2: RegExpExecArray | null = rowRegex.exec(content);
+
+  while (match2 !== null) {
+    const specialistCell = match2[1].trim();
+    for (const wsAgent of WORKSPACE_ROOT_AGENTS) {
+      if (specialistCell.includes(wsAgent)) {
+        fail(
+          variant,
+          "VA-02",
+          `Workspace-root agent '${wsAgent}' referenced in ${variant}/AGENTS.md Phase Summary -- variants must use only their own agents`,
+          `Remove '${wsAgent}' from the Phase Summary table in templates/${variant}/AGENTS.md`,
+        );
+      }
+    }
+    match2 = rowRegex.exec(content);
+  }
+
+  pass(`VA-02: ${variant} AGENTS.md Phase Summary workspace-root agent intrusion check complete`);
+}
+
+// Check VA-03: .claude/skills/ vs the other platform mirrors — 4-mirror parity
+// (spec 2026-09-25-verifier-platform-expansion-design site 3e). The frontmatter
+// skip marker is generalized: `mirror-parity: skip` means "claude-only parity"
+// for ALL three non-claude mirrors; `gemini-parity: skip` is accepted as a
+// legacy alias (same pattern as validate-md-language's i18n-format → lang:).
+function checkSkillPlatformParity(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-03: .claude/skills vs platform mirrors parity (${variant}) ===`);
+
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, ".claude", "skills");
+  if (!existsSync(claudeSkillsDir)) {
+    if (!JSON_MODE) console.log(`  (no .claude/skills/ directory for ${variant} -- skipping VA-03)`);
+    return;
+  }
+
+  // [.gemini leg is pre-existing fail semantics; .agents/.codex legs are
+  // net-new coverage soaking in WARN (ADR-0055) — TODO(promotion): flip to fail.]
+  const counterpartMirrors: ReadonlyArray<readonly [string, boolean]> = [
+    [".gemini", false],
+    [".agents", true],
+    [".codex", true],
+  ];
+
+  let skillDirs: string[];
+  try {
+    skillDirs = readdirSync(claudeSkillsDir).filter((e) => {
+      try {
+        return statSync(join(claudeSkillsDir, e)).isDirectory();
+      } catch {
+        return false;
+      }
+    });
+  } catch {
+    warn(variant, "VA-03", `Could not read ${variant}/.claude/skills/ directory`);
+    return;
+  }
+
+  for (const skillName of skillDirs) {
+    const skillMdPath = join(claudeSkillsDir, skillName, "SKILL.md");
+    if (!existsSync(skillMdPath)) continue;
+
+    const raw = readFileSync(skillMdPath, "utf-8");
+
+    let frontmatter: Record<string, unknown> = {};
+    const fmMatch = raw.match(/^---\n([\s\S]*?)\n---/);
+    if (fmMatch) {
+      try {
+        frontmatter = (load(fmMatch[1]) as Record<string, unknown>) ?? {};
+      } catch {
+        /* ignore parse errors */
+      }
+    }
+
+    const skipMarker = frontmatter["mirror-parity"] === "skip" || frontmatter["gemini-parity"] === "skip";
+    if (skipMarker) {
+      if (!JSON_MODE)
+        console.log(`  VA-03: ${variant}/.claude/skills/${skillName} -- mirror-parity: skip (claude-only)`);
+      continue;
+    }
+
+    for (const [mirror, soak] of counterpartMirrors) {
+      const emit = soak ? warn : fail;
+      const counterpartPath = join(TEMPLATES_DIR, variant, mirror, "skills", skillName, "SKILL.md");
+      if (!existsSync(counterpartPath)) {
+        emit(
+          variant,
+          "VA-03",
+          `${variant}/.claude/skills/${skillName}/SKILL.md exists but ${variant}/${mirror}/skills/${skillName}/SKILL.md is missing -- platform parity required${soak ? " (soak: WARN until promotion)" : ""}`,
+          `Create templates/${variant}/${mirror}/skills/${skillName}/SKILL.md or add 'mirror-parity: skip' to the SKILL.md frontmatter`,
+        );
+      } else {
+        pass(`VA-03: ${variant} skill '${skillName}' -- ${mirror}/skills counterpart present`);
+      }
+    }
+  }
+}
+
+// Check VA-07: SKILL.md frontmatter version sync across a variant's platform
+// mirrors (spec 2026-09-25-registry-policy-completeness-design.md R3, the
+// verifier-expansion design §17.1 accepted advisory A1 follow-up). Primary
+// rule: mirror-to-mirror equality per skill (present in >= 2 mirrors, version
+// via extractFrontmatterVersion; a missing version is a finding — fail-closed).
+// Secondary rule: when the variant's curated skills/SKILLS.md registry yields a
+// row for the skill, each present mirror's version must equal the row version
+// (mirror-only adapted copies have no row and are out of scope by
+// construction — e.g. the WS-05a adapted set). Exemption: the VA-03 vocabulary
+// (`mirror-parity: skip`, legacy `gemini-parity: skip`) excludes the skill.
+// Severity: WARN per ADR-0055 soak.
+// TODO(promotion): flip VA-07 findings to fail when
+// tickets/governance/T-20260925-006.yaml promotes (not_before 2026-10-09).
+export interface MirrorVersionMismatch {
+  skill: string;
+  message: string;
+}
+
+// T-20261007-015: `.hermes` joins the version-sync comparison — the co-deck
+// html-build staleness (1.5.0 vs 1.6.0) was invisible because .hermes was
+// outside this list. The loop below existence-guards each mirror dir, so
+// variants without a .hermes tree are unaffected.
+const VA07_MIRROR_DIRS = [".claude", ".gemini", ".agents", ".codex", ".hermes"] as const;
+
+/**
+ * Pure core of VA-07 (T-004 convention): enumerate the union of skill dirs
+ * across the variant's existing platform-mirror `skills/` trees and collect
+ * version-sync findings. Reads only; emits nothing.
+ */
+export function collectMirrorVersionMismatches(variantDir: string, variant: string): MirrorVersionMismatch[] {
+  const findings: MirrorVersionMismatch[] = [];
+
+  // Authored registry rows (curated SKILLS.md) — the secondary cross-check's
+  // expected versions. An unparseable/absent registry simply contributes no rows.
+  const registryRows = new Map<string, string>();
+  const registryPath = join(variantDir, "skills", "SKILLS.md");
+  if (existsSync(registryPath)) {
+    try {
+      const { rows } = parseSkillRegistryRows(readFileSync(registryPath, "utf-8"));
+      for (const [name, row] of rows) registryRows.set(name, row.version);
+    } catch {
+      /* unreadable registry — no cross-check rows */
+    }
+  }
+
+  // skill name -> mirror -> frontmatter version (undefined = present but unparseable)
+  const versionsBySkill = new Map<string, Map<string, string | undefined>>();
+  for (const mirror of VA07_MIRROR_DIRS) {
+    const skillsDir = join(variantDir, mirror, "skills");
+    if (!existsSync(skillsDir)) continue;
+    let skillDirs: string[];
+    try {
+      skillDirs = readdirSync(skillsDir).filter((e) => {
+        try {
+          return statSync(join(skillsDir, e)).isDirectory();
+        } catch {
+          return false;
+        }
+      });
+    } catch {
+      continue;
+    }
+    for (const skill of skillDirs) {
+      const skillMdPath = join(skillsDir, skill, "SKILL.md");
+      if (!existsSync(skillMdPath)) continue;
+      let version: string | undefined;
+      try {
+        const raw = readFileSync(skillMdPath, "utf-8");
+        version = extractFrontmatterVersion(raw);
+        // VA-03 exemption vocabulary — one exemption language for the file class.
+        const fmMatch = raw.match(/^---\n([\s\S]*?)\n---/);
+        if (fmMatch) {
+          let fm: Record<string, unknown> = {};
+          try {
+            fm = (load(fmMatch[1]) as Record<string, unknown>) ?? {};
+          } catch {
+            /* ignore */
+          }
+          if (fm["mirror-parity"] === "skip" || fm["gemini-parity"] === "skip") continue;
+        }
+      } catch {
+        /* unreadable SKILL.md — treated as missing version */
+      }
+      if (!versionsBySkill.has(skill)) versionsBySkill.set(skill, new Map());
+      versionsBySkill.get(skill)!.set(mirror, version);
+    }
+  }
+
+  for (const [skill, byMirror] of versionsBySkill) {
+    if (byMirror.size < 2) continue; // VA-03 owns presence; VA-07 compares versions
+    const present = [...byMirror.entries()];
+    const versionList = present.map(([m, v]) => `${m}=${v ?? "(missing)"}`).join(", ");
+
+    if (present.some(([, v]) => v === undefined)) {
+      findings.push({
+        skill,
+        message: `${variant}/skills/${skill}: a platform-mirror SKILL.md has no parseable frontmatter version (${versionList})`,
+      });
+      continue; // mirror-to-mirror comparison is meaningless until versions parse
+    }
+
+    const [[baseMirror, baseVersion], ...rest] = present as Array<[string, string]>;
+    const divergent = rest.find(([, v]) => v !== baseVersion);
+    if (divergent) {
+      findings.push({
+        skill,
+        message: `${variant}/skills/${skill}: SKILL.md frontmatter version differs across platform mirrors (${baseMirror}=${baseVersion}, ${divergent[0]}=${divergent[1]}; all: ${versionList})`,
+      });
+    }
+
+    // Secondary rule: registry cross-check (only when a curated row exists —
+    // mirror-only adapted copies are skipped by construction).
+    const rowVersion = registryRows.get(skill);
+    if (rowVersion !== undefined) {
+      for (const [mirror, version] of present as Array<[string, string]>) {
+        if (version !== rowVersion) {
+          findings.push({
+            skill,
+            message: `${variant}/${mirror}/skills/${skill}/SKILL.md version ${version} != ${variant}/skills/SKILLS.md registry row version ${rowVersion}`,
+          });
+        }
+      }
+    }
+  }
+
+  return findings;
+}
+
+/** VA-07 wrapper — wired immediately after checkSkillPlatformParity (VA-03 family). */
+function checkSkillMirrorVersionSync(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-07: skill version sync across platform mirrors (${variant}) ===`);
+  const findings = collectMirrorVersionMismatches(join(TEMPLATES_DIR, variant), variant);
+  // WARN soak per ADR-0055 — severity flip is ticket-gated (T-20260925-006).
+  for (const f of findings) {
+    // PROMOTED to fail 2026-09-27 (T-20260925-006, zero-WARN precondition verified).
+    fail(
+      variant,
+      "VA-07",
+      f.message,
+      `Align the SKILL.md frontmatter version across all platform mirrors of ${variant} (and the curated registry row)`,
+    );
+  }
+  if (findings.length === 0) {
+    pass(`VA-07: ${variant} -- mirror skill versions in sync (mirrors and registry rows)`);
+  }
+}
+
+// Check VA-08: skill registry tables vs the SKILL.md frontmatter they
+// document (spec 2026-09-25-registry-policy-completeness-design.md W5/R5.6).
+// One cross-surface pass via collectWorkspaceRegistryFindings (skills-registry
+// helper v1.2.0): root Workspace Skills rows, the root Variant-Exclusive
+// catalog, the common scaffold seed, and each curated variant registry.
+// Remediation path: `bun scripts/sync-skill-registries.ts` (dev-sync Step
+// 4.63 re-converges on every /sync). Severity: WARN per ADR-0055 soak.
+// TODO(promotion): flip VA-08 findings to fail when
+// tickets/governance/T-20260925-007.yaml promotes (not_before 2026-10-09).
+function checkSkillRegistrySync(): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-08: skill registry tables match SKILL.md frontmatter ===`);
+  const findings = collectWorkspaceRegistryFindings(ROOT);
+  // WARN soak per ADR-0055 — severity flip is ticket-gated (T-20260925-007).
+  for (const f of findings) {
+    // PROMOTED to fail 2026-09-27 (T-20260925-007, zero-WARN precondition verified).
+    fail(
+      "registries",
+      "VA-08",
+      f.message,
+      "Run: bun scripts/sync-skill-registries.ts (dev-sync Step 4.63 re-converges on every /sync)",
+    );
+  }
+  if (findings.length === 0) {
+    pass("VA-08: all skill registry tables match SKILL.md frontmatter");
+  }
+}
+
+// Check WS-03: Common-Contract common_skills must be present in templates/common/skills/
+// common_skills are project skills (L0+L1+L2), provided by templates/common/skills/ at scaffold time.
+// They are NOT expected in templates/co-*/skills/ (empty delta after fork) nor in .claude/skills/.
+// Per-variant variant_specific skills are still verified against the variant's .claude/skills/.
+function checkCommonContractVariantSkills(variant: string): void {
+  if (!JSON_MODE)
+    console.log(`\n=== Check WS-03: Common-contract x variant .claude/skills cross-validation (${variant}) ===`);
+
+  const contractPath = join(ROOT, "docs", "templates", "common-contract.json");
+  if (!existsSync(contractPath)) {
+    return; // WS-02 already warned about missing contract
+  }
+
+  let contract: Record<string, unknown>;
+  try {
+    contract = JSON.parse(readFileSync(contractPath, "utf-8")) as Record<string, unknown>;
+  } catch {
+    return; // WS-02 already reported invalid JSON
+  }
+
+  const commonSkills = Object.keys((contract.common_skills as Record<string, unknown>) ?? {});
+
+  // common_skills are delivered via templates/common/skills/ — check there, NOT in each variant
+  // This check runs once per variant call but only needs to validate the common layer once.
+  // We gate it on variant === first stable variant to avoid repeating; simpler: always check, pass is idempotent.
+  const commonSkillsBase = join(TEMPLATES_DIR, "common", "skills");
+  for (const skillName of commonSkills) {
+    const skillPath = join(commonSkillsBase, skillName, "SKILL.md");
+    if (!existsSync(skillPath)) {
+      warn(
+        "common",
+        "WS-03",
+        `Common skill '${skillName}' (from common-contract.json) is missing from templates/common/skills/${skillName}/SKILL.md`,
+        `Create templates/common/skills/${skillName}/SKILL.md`,
+      );
+    } else {
+      pass(`WS-03: common skill '${skillName}' → templates/common/skills/${skillName}/SKILL.md present`);
+    }
+  }
+
+  // Check variant_specific skills from variant.json (still against .claude/skills/ — platform skills)
+  const claudeSkillsDir = join(TEMPLATES_DIR, variant, ".claude", "skills");
+  const variantJsonPath = join(TEMPLATES_DIR, variant, "variant.json");
+  if (!existsSync(variantJsonPath)) return;
+
+  let variantJson: Record<string, unknown>;
+  try {
+    variantJson = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+  } catch {
+    return;
+  }
+
+  const skillManifest = variantJson.skill_manifest as Record<string, unknown> | undefined;
+  const variantSpecificSkills = (skillManifest?.variant_specific as Array<{ name: string }> | undefined) ?? [];
+
+  for (const entry of variantSpecificSkills) {
+    const skillName = entry.name;
+    const skillMdPath = join(claudeSkillsDir, skillName, "SKILL.md");
+    if (!existsSync(skillMdPath)) {
+      fail(
+        variant,
+        "WS-03",
+        `variant.json skill_manifest.variant_specific lists '${skillName}' but templates/${variant}/.claude/skills/${skillName}/SKILL.md is missing`,
+        `Create templates/${variant}/.claude/skills/${skillName}/SKILL.md or remove from variant_specific in variant.json`,
+      );
+    } else {
+      pass(`WS-03: ${variant} -- variant_specific skill '${skillName}' SKILL.md present`);
+    }
+  }
+}
+
+// Check VA-04: Platform settings parity
+function getNestedKey(obj: Record<string, unknown>, dotKey: string): unknown {
+  const parts = dotKey.split(".");
+  let current: unknown = obj;
+  for (const part of parts) {
+    if (current === null || typeof current !== "object") return undefined;
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
+function checkPlatformSettingsParity(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-04: Platform settings parity (${variant}) ===`);
+
+  const contractPath = join(ROOT, "docs", "templates", "common-contract.json");
+  if (!existsSync(contractPath)) {
+    return; // WS-02 already warned about missing contract
+  }
+
+  let contract: Record<string, unknown>;
+  try {
+    contract = JSON.parse(readFileSync(contractPath, "utf-8")) as Record<string, unknown>;
+  } catch {
+    return; // WS-02 already reported invalid JSON
+  }
+
+  const platformSettings = contract.platform_settings as Record<string, unknown> | undefined;
+  if (!platformSettings) {
+    if (!JSON_MODE) console.log(`  (no platform_settings in common-contract.json -- skipping VA-04)`);
+    return;
+  }
+
+  const sharedKeys = Object.keys(
+    ((platformSettings.shared as Record<string, unknown> | undefined)?.keys as Record<string, unknown>) ?? {},
+  );
+  const claudeOnlyKeys = Object.keys(
+    ((platformSettings.claude_only as Record<string, unknown> | undefined)?.keys as Record<string, unknown>) ?? {},
+  );
+
+  const claudeSettingsPath = join(TEMPLATES_DIR, variant, ".claude", "settings.json");
+  const geminiSettingsPath = join(TEMPLATES_DIR, variant, ".gemini", "settings.json");
+
+  let claudeSettings: Record<string, unknown> | null = null;
+  let geminiSettings: Record<string, unknown> | null = null;
+
+  if (!existsSync(claudeSettingsPath)) {
+    warn(
+      variant,
+      "VA-04",
+      `templates/${variant}/.claude/settings.json is missing -- cannot verify shared settings parity`,
+    );
+  } else {
+    try {
+      claudeSettings = JSON.parse(readFileSync(claudeSettingsPath, "utf-8")) as Record<string, unknown>;
+    } catch {
+      warn(variant, "VA-04", `templates/${variant}/.claude/settings.json is invalid JSON`);
+    }
+  }
+
+  if (!existsSync(geminiSettingsPath)) {
+    warn(
+      variant,
+      "VA-04",
+      `templates/${variant}/.gemini/settings.json is missing -- cannot verify shared settings parity`,
+    );
+  } else {
+    try {
+      geminiSettings = JSON.parse(readFileSync(geminiSettingsPath, "utf-8")) as Record<string, unknown>;
+    } catch {
+      warn(variant, "VA-04", `templates/${variant}/.gemini/settings.json is invalid JSON`);
+    }
+  }
+
+  for (const key of sharedKeys) {
+    if (claudeSettings !== null) {
+      if (getNestedKey(claudeSettings, key) === undefined) {
+        warn(variant, "VA-04", `Shared key '${key}' is missing from templates/${variant}/.claude/settings.json`);
+      } else {
+        pass(`VA-04: ${variant} -- shared key '${key}' present in .claude/settings.json`);
+      }
+    }
+    if (geminiSettings !== null) {
+      if (getNestedKey(geminiSettings, key) === undefined) {
+        warn(variant, "VA-04", `Shared key '${key}' is missing from templates/${variant}/.gemini/settings.json`);
+      } else {
+        pass(`VA-04: ${variant} -- shared key '${key}' present in .gemini/settings.json`);
+      }
+    }
+  }
+
+  // claude_only keys should NOT appear in .gemini/settings.json
+  if (geminiSettings !== null) {
+    for (const key of claudeOnlyKeys) {
+      if (getNestedKey(geminiSettings, key) !== undefined) {
+        warn(
+          variant,
+          "VA-04",
+          `Claude-only key '${key}' was found in templates/${variant}/.gemini/settings.json -- incorrect parity attempt`,
+        );
+      }
+    }
+  }
+
+  checkGeminiExecutionPolicyFloor(variant, geminiSettings);
+}
+
+// v1.68.0 (spec docs/designs/2026-10-31-template-security-hardening-design.md,
+// Addendum 2026-11-01): the variant gemini overlay WINS over common in the
+// effective template tree, so a weak overlay policy silently defeats the
+// common hardening floor (the 2026-10-31 wave delivered Manual to the one
+// overlay-less project only, and co-security's overlay re-regressed its
+// manually hardened Manual policy to Auto). WARN when a variant overlay's
+// terminal.executionPolicy ranks weaker than common's (Off > Manual > Auto).
+// Floor is a floor, not a ceiling: Off and any stricter value never warn.
+// Missing/unknown values are skipped -- the shared-key loop above already
+// reports a missing key, and an unrecognized value is a schema problem, not a
+// floor violation. Severity: WARN per ADR-0055 (soak-first for net-new arms).
+const EXECUTION_POLICY_RANK: Record<string, number> = { Auto: 0, Manual: 1, Off: 2 };
+
+function checkGeminiExecutionPolicyFloor(variant: string, geminiSettings: Record<string, unknown> | null): void {
+  if (geminiSettings === null) return; // missing/invalid overlay already WARNed by the parity loop above
+
+  const commonGeminiPath = join(TEMPLATES_DIR, "common", ".gemini", "settings.json");
+  if (!existsSync(commonGeminiPath)) return; // common-surface checks live elsewhere; nothing to compare against
+
+  let commonPolicy: unknown;
+  try {
+    commonPolicy = JSON.parse(readFileSync(commonGeminiPath, "utf-8"))["terminal.executionPolicy"];
+  } catch {
+    return; // unreadable common baseline -- not this arm's failure to report
+  }
+
+  const floorRank = EXECUTION_POLICY_RANK[String(commonPolicy)];
+  if (floorRank === undefined) return; // unknown baseline value: skip (schema concern, not a floor violation)
+
+  const variantPolicy = geminiSettings["terminal.executionPolicy"];
+  const variantRank = variantPolicy === undefined ? undefined : EXECUTION_POLICY_RANK[String(variantPolicy)];
+  if (variantRank === undefined) return; // missing key -> shared-key loop; unknown value -> schema concern
+
+  if (variantRank < floorRank) {
+    warn(
+      variant,
+      "gemini-execution-policy-floor",
+      `templates/${variant}/.gemini/settings.json executionPolicy '${String(variantPolicy)}' is weaker than the common floor '${String(commonPolicy)}' -- the overlay wins over common in the effective template tree, so the template security floor is defeated; raise the overlay to 'Manual' + the common 50-entry terminal.denyList (stricter overlays are preserved verbatim; see design 2026-10-31-template-security-hardening Addendum 2026-11-01)`,
+    );
+  } else {
+    pass(
+      `gemini-execution-policy-floor: ${variant} -- executionPolicy '${String(variantPolicy)}' at-or-above the common floor '${String(commonPolicy)}'`,
+    );
+  }
+}
+
+// Helper: extract sections marked with <!-- MARKERNAME:START --> ... <!-- MARKERNAME:END -->
+function extractMarkedSections(content: string, markerName: string): Array<{ heading: string; content: string }> {
+  const startTag = `<!-- ${markerName}:START -->`;
+  const endTag = `<!-- ${markerName}:END -->`;
+  const sections: Array<{ heading: string; content: string }> = [];
+  let pos = 0;
+  while (true) {
+    const startIdx = content.indexOf(startTag, pos);
+    if (startIdx === -1) break;
+    const endIdx = content.indexOf(endTag, startIdx);
+    if (endIdx === -1) break;
+    const block = content.slice(startIdx + startTag.length, endIdx).trim();
+    const headingMatch = block.match(/^#{1,4}\s+.+$/m);
+    const heading = headingMatch ? headingMatch[0].trim() : `section-${sections.length}`;
+    sections.push({ heading, content: block });
+    pos = endIdx + endTag.length;
+  }
+  return sections;
+}
+
+// Check MM-01: Model-ID literal placement (ADR-0077 D11). Model IDs may appear ONLY inside
+// managed marker sections (COMMON-*:START/END, WORKSPACE-MANAGED) of the four instruction
+// twins at L0/L1 — those are the only regions MERGE/marker-inject passes deliver downstream.
+// A literal outside a managed section silently stalls at its layer on the next model refresh.
+function checkModelLiteralPlacement(): void {
+  if (!JSON_MODE) console.log(`\n=== Check MM-01: Model literal placement (instruction twins) ===`);
+  // T-20261101-003 (spec docs/designs/2026-10-31-registry-platform-vocabulary-design.md
+  // §R2.2): the gpt-5.6-(sol|terra|luna) alternatives added at T-20261031-005 as a
+  // convergence-window retention were retired 2026-11-01 post-convergence —
+  // the L3 tier-vocabulary convergence is achieved (all 16 projects at 0.26.0,
+  // 0 gpt-5.6 literals in delivered md surfaces), so any future gpt-5.6
+  // literal outside a managed section FAILs loudly again.
+  const LITERAL =
+    /\b(?:gpt-6\.1-(?:sol|terra)|gpt-6-luna|claude-(?:opus|sonnet)-5-[05]|claude-haiku-4-5|gemini-3\.\d+(?:\.\d+)?-(?:pro|flash))\b/i;
+  const STARTS = /<!--\s*(?:COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):START|WORKSPACE-MANAGED:[^>]*?)\s*-->/;
+  const ENDS = /<!--\s*(?:\/WORKSPACE-MANAGED|COMMON-(?:CLAUDE|GEMINI|CODEX|AGENTS):END)\s*-->/;
+  const files = [
+    "CLAUDE.md",
+    "GEMINI.md",
+    "CODEX.md",
+    "AGENTS.md",
+    "templates/common/CLAUDE.md",
+    "templates/common/GEMINI.md",
+    "templates/common/CODEX.md",
+    "templates/common/AGENTS.md",
+  ];
+  let hits = 0;
+  for (const rel of files) {
+    const p = join(ROOT, rel);
+    if (!existsSync(p)) continue;
+    const lines = readFileSync(p, "utf-8").split("\n");
+    let inside = false;
+    for (let i = 0; i < lines.length; i++) {
+      if (STARTS.test(lines[i])) inside = true;
+      if (ENDS.test(lines[i])) inside = false;
+      if (!inside && LITERAL.test(lines[i])) {
+        fail(
+          "common",
+          "model-literal-outside-managed-section",
+          `${rel}:${i + 1} — model ID outside a managed marker section will not propagate (wrap it in COMMON-*/WORKSPACE-MANAGED markers or drop the literal)`,
+        );
+        hits++;
+      }
+    }
+  }
+  if (hits === 0) pass("Model literal placement: all instruction-twin literals inside managed sections");
+}
+
+// Check VA-05: CLAUDE.md and GEMINI.md common section sync between workspace root and variant files
+function checkDocumentCommonSections(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-05: Document common section sync (${variant}) ===`);
+
+  const docFiles: Array<{ file: string; markerName: string }> = [
+    { file: "CLAUDE.md", markerName: "COMMON-CLAUDE" },
+    { file: "GEMINI.md", markerName: "COMMON-GEMINI" },
+    { file: "CODEX.md", markerName: "COMMON-CODEX" },
+  ];
+
+  for (const { file: docFile, markerName } of docFiles) {
+    const rootPath = join(ROOT, docFile);
+    const variantPath = join(TEMPLATES_DIR, variant, docFile);
+
+    if (!existsSync(rootPath) || !existsSync(variantPath)) continue;
+
+    const rootContent = normalizeContent(readFileSync(rootPath, "utf-8"));
+    const variantContent = normalizeContent(readFileSync(variantPath, "utf-8"));
+
+    const rootSections = extractMarkedSections(rootContent, markerName);
+    if (rootSections.length === 0) continue; // root has no markers — pass silently
+
+    for (const { heading, content: rootBlock } of rootSections) {
+      // Find the same marker block in the variant file
+      const variantSections = extractMarkedSections(variantContent, markerName);
+      const variantSection = variantSections.find((s) => s.heading === heading);
+
+      if (!variantSection) {
+        warn(
+          variant,
+          "VA-05",
+          `${docFile}: common section "${heading}" is not marked for sync in variant — run 'bun run propagate:docs' to sync`,
+          `bun run propagate:docs`,
+        );
+      } else if (variantSection.content !== rootBlock) {
+        warn(
+          variant,
+          "VA-05",
+          `${docFile}: common section "${heading}" differs from root — run 'bun run propagate:docs' to sync`,
+          `bun run propagate:docs`,
+        );
+      } else {
+        pass(`VA-05: ${variant} ${docFile} common section "${heading}" in sync`);
+      }
+    }
+  }
+}
+
+// Check VA-06: cross-twin common section parity (ADR-0077 twin doctrine).
+// VA-05 compares each twin root↔variant-template per file, so a policy section
+// added to two twins but never ported to the third was invisible (the 2026-09
+// CODEX.md Language Policy gap). The three instruction twins must each carry
+// the shared policy set — checked by anchor substring, not full content
+// equality, because platform-specific sections legitimately differ.
+const TWIN_FILES = ["CLAUDE.md", "GEMINI.md", "CODEX.md"];
+const TWIN_COMMON_ANCHORS = [
+  "Language Policy for Documentation",
+  "Execution Plan Boilerplate",
+  "Cost Optimization (3-Tier Model Strategy)",
+  "Custom Command Error Recovery",
+  "Windows Platform Requirement",
+  "Git & PR Additions",
+];
+
+function checkTwinCommonSectionParity(): void {
+  if (!JSON_MODE) console.log(`\n=== Check VA-06: Cross-twin common section parity ===`);
+  const layers = [
+    { label: "root", dir: ROOT, variant: "root" },
+    { label: "templates/common", dir: join(TEMPLATES_DIR, "common"), variant: "common" },
+  ];
+  for (const layer of layers) {
+    for (const file of TWIN_FILES) {
+      const twinPath = join(layer.dir, file);
+      if (!existsSync(twinPath)) {
+        fail(
+          layer.variant,
+          "VA-06",
+          `${layer.label}/${file}: platform twin not found — ADR-0077 requires all three instruction twins`,
+          "Restore the twin from its sibling platforms or templates/common",
+        );
+        continue;
+      }
+      const content = readFileSync(twinPath, "utf-8");
+      for (const anchor of TWIN_COMMON_ANCHORS) {
+        if (!content.includes(anchor)) {
+          fail(
+            layer.variant,
+            "VA-06",
+            `${layer.label}/${file}: common policy section "${anchor}" missing — the instruction twins must all carry the shared policy set`,
+            `Port the section from a sibling twin (see ${layer.dir === ROOT ? "CLAUDE.md" : "templates/common/CLAUDE.md"}) — governance-l1 then deploys it (bun run propagate:governance)`,
+          );
+        } else {
+          pass(`VA-06: ${layer.label}/${file} carries "${anchor}"`);
+        }
+      }
+    }
+  }
+}
+
+// Check WS-04: L0 scripts must NOT exist in templates/co-*/scripts/
+function checkL0ScriptsNotInVariants(
+  variant: string,
+  scriptLayerMap: Map<string, import("./helpers/layer-filter.js").LayerValue>,
+): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-04: L0 scripts must not exist in ${variant}/scripts/ ===`);
+
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, "scripts");
+  if (!existsSync(variantScriptsDir)) return;
+
+  function scanRecursive(dir: string): void {
+    for (const entry of readdirSync(dir)) {
+      const fullPath = join(dir, entry);
+      const stat = statSync(fullPath);
+      if (stat.isDirectory()) {
+        scanRecursive(fullPath);
+      } else if (entry.endsWith(".ts") || entry.endsWith(".sh") || entry.endsWith(".ps1")) {
+        const layer = getScriptLayer(entry, scriptLayerMap);
+        if (layer === "L0") {
+          const relFile = fullPath.slice(join(TEMPLATES_DIR, variant, "scripts").length + 1).replace(/\\/g, "/");
+          fail(
+            variant,
+            "WS-04",
+            `templates/${variant}/scripts/${relFile} is classified L0 — must not exist in variant template`,
+            `Remove templates/${variant}/scripts/${relFile}`,
+          );
+        }
+      }
+    }
+  }
+
+  scanRecursive(variantScriptsDir);
+}
+
+// Check WS-05: L0+L1 scripts must NOT exist in templates/co-*/scripts/ (flat root only)
+function checkL0L1ScriptsNotInVariants(
+  variant: string,
+  scriptLayerMap: Map<string, import("./helpers/layer-filter.js").LayerValue>,
+): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-05: L0+L1 scripts must not exist in ${variant}/scripts/ (flat) ===`);
+
+  const variantScriptsDir = join(TEMPLATES_DIR, variant, "scripts");
+  if (!existsSync(variantScriptsDir)) return;
+
+  for (const entry of readdirSync(variantScriptsDir)) {
+    const fullPath = join(variantScriptsDir, entry);
+    if (statSync(fullPath).isDirectory()) continue;
+    if (!entry.endsWith(".ts") && !entry.endsWith(".sh") && !entry.endsWith(".ps1")) continue;
+    const layer = getScriptLayer(entry, scriptLayerMap);
+    if (layer === "L0+L1") {
+      warn(
+        variant,
+        "WS-05",
+        `templates/${variant}/scripts/${entry} is L0+L1 — redundant copy (managed in templates/common/scripts/)`,
+        `Remove templates/${variant}/scripts/${entry} — it is inherited from templates/common/scripts/`,
+      );
+    }
+  }
+}
+
+// Check WS-05a: variant command/skill markdown must not give actionable L0-only tool commands.
+function checkL0OnlyToolRefsInVariantCommandSkills(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-05a: L0-only tool refs in ${variant} command/skill files ===`);
+
+  const scanRoots = [
+    join(TEMPLATES_DIR, variant, ".claude", "commands"),
+    join(TEMPLATES_DIR, variant, ".gemini", "commands"),
+    join(TEMPLATES_DIR, variant, ".agents", "commands"),
+    join(TEMPLATES_DIR, variant, ".claude", "skills"),
+    join(TEMPLATES_DIR, variant, ".gemini", "skills"),
+    join(TEMPLATES_DIR, variant, ".agents", "skills"),
+    join(TEMPLATES_DIR, variant, "skills"),
+  ];
+  const forbidden =
+    /\b(?:bun\s+scripts\/)?(?:validate-templates|propagate-to-templates|ticket)\.ts\b|\bbun\s+scripts\/(?:validate-templates|propagate-to-templates|ticket)\b/g;
+  let checked = 0;
+
+  function scanRecursive(dir: string): void {
+    for (const entry of readdirSync(dir)) {
+      const fullPath = join(dir, entry);
+      const stat = statSync(fullPath);
+      if (stat.isDirectory()) {
+        scanRecursive(fullPath);
+        continue;
+      }
+      if (!entry.endsWith(".md")) continue;
+
+      checked++;
+      const relFile = relative(ROOT, fullPath).replace(/\\/g, "/");
+      const content = readFileSync(fullPath, "utf-8");
+      const lines = content.split(/\r?\n/);
+      for (let i = 0; i < lines.length; i++) {
+        forbidden.lastIndex = 0;
+        const matches = [...lines[i].matchAll(forbidden)].map((m) => m[0]);
+        if (matches.length === 0) continue;
+        fail(
+          variant,
+          "WS-05a",
+          `${relFile}:${i + 1} references L0-only workspace tooling (${Array.from(new Set(matches)).join(", ")})`,
+          "Replace actionable references with project-local audit/verify commands, or describe the workspace-only gate without naming the L0-only script.",
+        );
+      }
+    }
+  }
+
+  for (const root of scanRoots) {
+    if (existsSync(root)) scanRecursive(root);
+  }
+
+  if (checked > 0)
+    pass(`WS-05a: ${variant} command/skill markdown has no L0-only tool references (${checked} file(s) checked)`);
+}
+
+// ============================================================================
+// T-20260924-007c: unresolvable agent-reference detector
+// (spec: docs/designs/2026-09-25-variant-hygiene-batch-design.md, R4)
+//
+// Sibling of T-20260924-004's checkVariantMirrorParity/classifyVariantMirrorCopy
+// — that check covers skill platform-mirror DIRECTORIES and version comparison;
+// this one covers agent-name REFERENCES in variant AGENTS.md prose and variant
+// scripts. The live instance: 10 variant AGENTS.md copies + co-abap setup.ts
+// routed work to a phantom stack setup agent the variant never shipped (user-facing
+// broken guidance, invisible to every standing detector). Distinct inputs, no
+// shared logic beyond the variant iteration loop.
+//
+// Pure cores are exported for tests/unit/variant-agent-reference.test.ts
+// (T-004 convention: decision table + injected-phantom fixture).
+// ============================================================================
+
+/** Explicit exemption list (R4 escape hatch): agent names allowed to appear in
+ *  variant deliverables without a resolvable agent file. Keep minimal — every
+ *  entry needs a written justification here. Names that resolve at any of the
+ *  three trees never need an entry. */
+const AGENT_REFERENCE_EXEMPT = new Set<string>([
+  // (empty at v1.42.0 — the healed fleet resolves cleanly)
+]);
+
+export type AgentReferenceVerdict = "resolved" | "unresolved";
+
+/** Pure resolution decision: a reference resolves when the name is exempt or
+ *  an agent file exists at the variant, common, or workspace-root agents/ tree
+ *  (resolution order per design R4). */
+export function classifyAgentReference(opts: {
+  name: string;
+  inVariantAgents: boolean; // templates/<v>/agents/<name>.md exists
+  inCommonAgents: boolean; // templates/common/agents/<name>.md exists
+  inRootAgents: boolean; // agents/<name>.md exists (L0)
+  exempt: boolean; // name on AGENT_REFERENCE_EXEMPT
+}): AgentReferenceVerdict {
+  if (opts.exempt) return "resolved";
+  if (opts.inVariantAgents || opts.inCommonAgents || opts.inRootAgents) return "resolved";
+  return "unresolved";
+}
+
+export interface AgentReferenceCandidate {
+  /** Extracted agent name. */
+  name: string;
+  /** 1-based line number of the reference (for WARN file:line naming). */
+  line: number;
+}
+
+// Reference shape 1: `agents/<name>.md` path references (prose links, code
+// strings, roster rows). Underscore-leading internal fragments (agents/_COMMON)
+// are not agent references and don't match. Governance-doc pointers under a
+// `governance/` directory (docs/governance/agents/<name>.md — the ADR-0090
+// thin-dispatcher relocation targets) are NOT agent references: the segment
+// immediately before `agents/` is `governance/`, so a negative lookbehind
+// excludes them (T-20260925-004 precondition — the 33 false positives this
+// removes were the only thing blocking the check's WARN→FAIL promotion).
+const AGENT_PATH_REF_RE = /(?<!governance\/)\bagents\/([A-Za-z0-9][A-Za-z0-9_-]*)\.md\b/g;
+// Reference shape 2: backtick-adjacent `<name>` agent mentions ("the
+// stack setup agent").
+const AGENT_BACKTICK_MENTION_RE = /`([A-Za-z0-9][A-Za-z0-9_-]*)`\s+agents?\b/g;
+
+/** Pure extraction: every agent-reference candidate in one file's content,
+ *  deduplicated per (name, line). */
+export function extractAgentReferenceCandidates(content: string): AgentReferenceCandidate[] {
+  const candidates: AgentReferenceCandidate[] = [];
+  const seen = new Set<string>();
+  const lines = content.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    for (const m of lines[i].matchAll(AGENT_PATH_REF_RE)) {
+      const key = `${m[1]}:${i + 1}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        candidates.push({ name: m[1], line: i + 1 });
+      }
+    }
+    for (const m of lines[i].matchAll(AGENT_BACKTICK_MENTION_RE)) {
+      const key = `${m[1]}:${i + 1}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        candidates.push({ name: m[1], line: i + 1 });
+      }
+    }
+  }
+  return candidates;
+}
+
+/** Check: variant-agent-references — agent references in templates/<v>/AGENTS.md
+ *  and the variant scripts tree (.ts files, recursive) must resolve at
+ *  templates/<v>/agents/, templates/common/agents/, or the workspace-root
+ *  agents/. WARN-mode per ADR-0055 soak at introduction (T-20260924-007c);
+ *  PROMOTED to fail 2026-09-27 (T-20260925-004) after the governance-doc-link
+ *  false positives were fixed at the extractor. */
+function checkVariantAgentReferences(
+  variant: string,
+  opts?: {
+    /** Directory-root override for fixture tests (defaults to the real templates/). */
+    templatesDir?: string;
+    /** Finding sink override for fixture tests (defaults to the module warn()). */
+    report?: (finding: string) => void;
+  },
+): void {
+  const templatesDir = opts?.templatesDir ?? TEMPLATES_DIR;
+  const quiet = opts !== undefined;
+  const FIX =
+    "Fix the reference so it names an agent that exists at templates/<variant>/agents/, templates/common/agents/, or the workspace-root agents/ — or remove it. A legitimately agent-shaped name that must stay unresolvable goes on AGENT_REFERENCE_EXEMPT with a justification.";
+  // PROMOTED to fail 2026-09-27 (T-20260925-004, user-authorized early promotion):
+  // the ADR-0090 governance-doc-link false positives were root-caused out of the
+  // extractor (governance/ lookbehind), leaving zero findings on the fleet.
+  const report = opts?.report ?? ((finding: string) => fail(variant, "variant-agent-references", finding, FIX));
+
+  if (!quiet && !JSON_MODE) {
+    console.log(`\n=== Check T-007c: agent references resolve in ${variant} AGENTS.md and scripts ===`);
+  }
+
+  const variantAgentsDir = join(templatesDir, variant, "agents");
+  const commonAgentsDir = join(TEMPLATES_DIR, "common", "agents");
+  const rootAgentsDir = join(ROOT, "agents");
+  const resolves = (name: string): boolean =>
+    existsSync(join(variantAgentsDir, `${name}.md`)) ||
+    existsSync(join(commonAgentsDir, `${name}.md`)) ||
+    existsSync(join(rootAgentsDir, `${name}.md`));
+
+  // Scan set: the variant's AGENTS.md + every .ts under its scripts/ tree.
+  const scanFiles: Array<{ abs: string; rel: string }> = [];
+  const agentsMd = join(templatesDir, variant, "AGENTS.md");
+  if (existsSync(agentsMd)) scanFiles.push({ abs: agentsMd, rel: `templates/${variant}/AGENTS.md` });
+  const scriptsDir = join(templatesDir, variant, "scripts");
+  const walkTs = (dir: string): void => {
+    if (!existsSync(dir)) return;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walkTs(full);
+        continue;
+      }
+      if (entry.name.endsWith(".ts")) scanFiles.push({ abs: full, rel: relative(ROOT, full).replace(/\\/g, "/") });
+    }
+  };
+  walkTs(scriptsDir);
+
+  let unresolvedCount = 0;
+  let candidatesChecked = 0;
+  for (const file of scanFiles) {
+    let content: string;
+    try {
+      content = readFileSync(file.abs, "utf-8");
+    } catch {
+      continue;
+    }
+    for (const candidate of extractAgentReferenceCandidates(content)) {
+      candidatesChecked++;
+      const verdict = classifyAgentReference({
+        name: candidate.name,
+        inVariantAgents: existsSync(join(variantAgentsDir, `${candidate.name}.md`)),
+        inCommonAgents: existsSync(join(commonAgentsDir, `${candidate.name}.md`)),
+        inRootAgents: existsSync(join(rootAgentsDir, `${candidate.name}.md`)),
+        exempt: AGENT_REFERENCE_EXEMPT.has(candidate.name),
+      });
+      if (verdict === "resolved") continue;
+      unresolvedCount++;
+      report(
+        `${file.rel}:${candidate.line} references agent "${candidate.name}" — no templates/${variant}/agents/${candidate.name}.md, no templates/common/agents/${candidate.name}.md, no agents/${candidate.name}.md`,
+      );
+    }
+  }
+
+  if (!quiet && unresolvedCount === 0 && scanFiles.length > 0) {
+    pass(
+      `variant-agent-references: ${variant} agent references all resolve (${candidatesChecked} candidate(s) in ${scanFiles.length} file(s))`,
+    );
+  }
+}
+
+// Check WS-06: Skills in templates/co-*/skills/ must be variant-scoped (L0+L2)
+function checkVariantSkillsLayer(
+  variant: string,
+  _skillLayerMap: Map<string, import("./helpers/layer-filter.js").LayerValue>,
+): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-06: Variant skills must be L0+L2 in ${variant}/skills/ ===`);
+
+  const variantSkillsDir = join(TEMPLATES_DIR, variant, "skills");
+  if (!existsSync(variantSkillsDir)) return;
+
+  // Domain-only skills live exclusively under templates/co-*/skills/ with no
+  // templates/common/skills/ base — their layer is declared in their own SKILL.md
+  // `scope:` frontmatter (see ADR-0032 §7, skills/SKILLS.md), not in the root
+  // skills/ registry. Read frontmatter directly from this variant's own directory
+  // rather than the workspace-root skill map, which never contains these files.
+  const variantSkillLayerMap = parseSkillLayers(variantSkillsDir);
+
+  for (const entry of collectSkillDirs(variantSkillsDir, variantSkillsDir)) {
+    const layer = getSkillLayer(entry, variantSkillLayerMap);
+    if (layer !== "L0+L2") {
+      warn(
+        variant,
+        "WS-06",
+        `templates/${variant}/skills/${entry} is not declared L0+L2`,
+        `Add 'scope: ${variant}' to templates/${variant}/skills/${entry}/SKILL.md if it's a genuine domain-specific skill, or move it to templates/common/skills/${basename(entry)}/ if it should be shared across all variants`,
+      );
+    }
+  }
+}
+
+// Check WS-07: Variants MUST NOT carry common-owned scaffold files — the
+// SCAFFOLD_COMMON_OWNED_FILES classification in lib/upgrade-policy.ts (the
+// same SSOT new-project's variant overlay skips, T-20260917-009). Owned
+// solely by templates/common/ and copied into every project at scaffold time.
+function checkNoVariantLocalContextMd(variant: string): void {
+  if (!JSON_MODE)
+    console.log(
+      `\n=== Check WS-07: ${variant} must not carry common-owned scaffold files (SCAFFOLD_COMMON_OWNED_FILES) ===`,
+    );
+
+  for (const relFile of [...SCAFFOLD_COMMON_OWNED_FILES].sort()) {
+    const variantFile = join(TEMPLATES_DIR, variant, ...relFile.split("/"));
+    if (existsSync(variantFile)) {
+      const hint =
+        relFile === "docs/context.md"
+          ? `Delete templates/${variant}/${relFile}; move any variant-specific content into docs/${variant}.context.md`
+          : `Delete templates/${variant}/${relFile} — the common copy is the single source of record`;
+      fail(
+        variant,
+        "WS-07",
+        `templates/${variant}/${relFile} must not exist — it is classified SCAFFOLD_COMMON_OWNED_FILES in lib/upgrade-policy.ts (owned solely by templates/common, copied into every project at scaffold time, and skipped by the variant overlay)`,
+        hint,
+      );
+    } else {
+      pass(`WS-07: ${variant} has no local ${relFile} (inherits common's)`);
+    }
+  }
+}
+
+// T-20260916-010: variant templates must NOT ship docs/VERSION_MANIFEST.md.
+// The stub class is retired: a stub tripped both the project audit's
+// skills↔manifest parity check and the VERSION_MANIFEST --check drift gate in
+// the fresh-scaffold test (2026-09-16), while co-abap/co-price shipped no stub
+// at all — inconsistent either way. The project's steady-state manifest is the
+// FULL generated one, produced post-delivery (new-project.ts §7.8) and
+// regenerated post-upgrade (upgrade-project.ts); the path is classified
+// REGENERATED in lib/upgrade-policy.ts so it is never template-delivered.
+// Also arms the check against a future FULL manifest leaking into a template
+// (it would go stale in template CI — the reason generation is
+// scaffold/upgrade-owned), making the 11/13 divergence class impossible.
+function checkNoVariantVersionManifest(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check T-010: ${variant} must not ship docs/VERSION_MANIFEST.md ===`);
+
+  const manifestPath = join(TEMPLATES_DIR, variant, "docs", "VERSION_MANIFEST.md");
+  if (existsSync(manifestPath)) {
+    fail(
+      variant,
+      "variant-version-manifest",
+      `templates/${variant}/docs/VERSION_MANIFEST.md must not exist — the manifest is generated state, not template content: new-project.ts §7.8 runs the project's own scripts/generate-version-manifest.ts after delivery and upgrade-project.ts regenerates it on upgrade (lib/upgrade-policy.ts classifies it REGENERATED)`,
+      `Delete templates/${variant}/docs/VERSION_MANIFEST.md (stub or otherwise) — scaffolds and upgrades generate the full manifest in-project`,
+    );
+  } else {
+    pass(`variant-version-manifest: ${variant} ships no docs/VERSION_MANIFEST.md (generated in-project)`);
+  }
+}
+
+// Check PM-04: managed-block parity (T-20260916-009; extended to all
+// MERGE_MANAGED files by T-20260917-001).
+// Every `<!-- WORKSPACE-MANAGED: <key> -->…<!-- /WORKSPACE-MANAGED -->` block
+// present in a templates/common/ MERGE_MANAGED file (lib/upgrade-policy.ts —
+// the same set upgrade MERGE unions into projects) must exist, marker-wrapped,
+// in EVERY templates/co-* copy of that file with content parity. Comparison is
+// per-key set-of-normalized-contents (duplicates are legitimate — common
+// AGENTS.md itself carries two tier-model-mapping blocks: the §3.6 tier list
+// and the §5.3 Model-column note). This is the standing guard for the T-009
+// defect class: §3.6 sits OUTSIDE the COMMON-AGENTS marker-inject zone, so a
+// stale, unwrapped variant copy has no other delivery channel — the
+// 2026-09-16 fresh-scaffold test showed the stale 2-model block scaffolding
+// straight into a new project and failing its model-registry gate (3 ERRORs).
+// Per-file absence policy: a variant copy of AGENTS.md must exist (the roster
+// file is the variant's identity carrier); any other MERGE_MANAGED file may
+// be absent from a variant template — the scaffold lays down the common copy
+// first and the variant overlay never fires for it (co-hr / co-safety ship no
+// .gitignore by design). A variant agents/pm.md that is an extends-stub
+// (frontmatter `extends:`) delivers the common body — keyed blocks included —
+// through stub resolution (new-project §2.3b), so marker-wrapped parity does
+// not apply to stubs. Files whose common copy carries no managed blocks are
+// skipped (nothing to enforce). Severity: Error. Extraction/comparison
+// primitives live in scripts/lib/managed-block-parity.ts (unit-tested).
+function checkManagedBlockParity(): void {
+  if (!JSON_MODE)
+    console.log("\n=== Check PM-04: managed-block parity (common → every variant, MERGE_MANAGED files) ===");
+
+  const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-") && !isTransientTestFixture(e.name))
+    .map((e) => e.name)
+    .sort();
+
+  let enforcedFiles = 0;
+  let checkedCopies = 0;
+  for (const relFile of [...MERGE_MANAGED_FILES].sort()) {
+    const commonPath = join(TEMPLATES_DIR, "common", relFile);
+    if (!existsSync(commonPath)) continue;
+    const commonIssues: string[] = [];
+    const commonBlocks = extractKeyedBlocks(readFileSync(commonPath, "utf-8"), commonIssues);
+    for (const issue of commonIssues) {
+      fail(
+        "common",
+        "managed-block-parity",
+        `templates/common/${relFile}: ${issue}`,
+        "Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->",
+      );
+    }
+    if (commonBlocks.size === 0) continue; // common defines no managed blocks here — nothing to enforce
+
+    enforcedFiles++;
+    for (const variant of variants) {
+      const variantRel = `templates/${variant}/${relFile}`;
+      const variantPath = join(TEMPLATES_DIR, variant, relFile);
+      if (!existsSync(variantPath)) {
+        if (relFile === "AGENTS.md") {
+          fail(
+            variant,
+            "managed-block-parity",
+            `${variantRel} not found — the common managed blocks have no delivery channel into this variant`,
+            `Create ${variantRel} carrying every common WORKSPACE-MANAGED block (see templates/common/AGENTS.md)`,
+          );
+        }
+        // Other MERGE_MANAGED files: absence is compliant — the scaffold copies
+        // the common file into the project and the variant overlay never fires.
+        continue;
+      }
+      const variantContent = readFileSync(variantPath, "utf-8");
+      if (relFile === "agents/pm.md" && isExtendsStub(variantContent)) {
+        // Stub resolution delivers the common body (keyed blocks included) at scaffold.
+        continue;
+      }
+      const variantIssues: string[] = [];
+      const variantBlocks = extractKeyedBlocks(variantContent, variantIssues);
+      for (const issue of variantIssues) {
+        fail(
+          variant,
+          "managed-block-parity",
+          `${variantRel}: ${issue}`,
+          "Close the WORKSPACE-MANAGED block with <!-- /WORKSPACE-MANAGED -->",
+        );
+      }
+
+      const violations = compareKeyedBlocks(commonBlocks, variantBlocks);
+      for (const v of violations) {
+        if (v.kind === "missing-key") {
+          fail(
+            variant,
+            "managed-block-parity",
+            `${variantRel} carries no "WORKSPACE-MANAGED: ${v.key}" block — the common ${relFile} keyed block has no L1→L2 delivery channel (fresh scaffolds overlay the variant copy over the common one; the COMMON-AGENTS marker-inject zone does not cover it)`,
+            `Copy the "<!-- WORKSPACE-MANAGED: ${v.key} -->" block(s) from templates/common/${relFile} into ${variantRel} at the matching section, markers included — or delete ${variantRel} so the common copy delivers`,
+          );
+        } else if (v.kind === "missing-content") {
+          fail(
+            variant,
+            "managed-block-parity",
+            `${variantRel} "WORKSPACE-MANAGED: ${v.key}" content diverges from templates/common/${relFile} (missing the common block content)`,
+            `Replace the variant's "<!-- WORKSPACE-MANAGED: ${v.key} -->" block content with the common copy (markers included), byte-identical after line normalization`,
+          );
+        } else {
+          fail(
+            variant,
+            "managed-block-parity",
+            `${variantRel} "WORKSPACE-MANAGED: ${v.key}" carries content templates/common/${relFile} does not — a variant-only managed block would be unioned into projects by upgrade MERGE with no common source`,
+            `Adjudicate: move the content out of WORKSPACE-MANAGED markers, or add the block to templates/common/${relFile} so parity holds`,
+          );
+        }
+      }
+      if (violations.length === 0 && variantIssues.length === 0) {
+        checkedCopies++;
+      }
+    }
+  }
+  if (enforcedFiles === 0) {
+    pass("managed-block-parity: no common MERGE_MANAGED file carries managed blocks (nothing to enforce)");
+    return;
+  }
+  if (checkedCopies > 0) {
+    pass(
+      `managed-block-parity: ${checkedCopies} variant file copies across ${enforcedFiles} MERGE_MANAGED file(s) carry every common WORKSPACE-MANAGED block with content parity`,
+    );
+  }
+}
+
+// Check SK-01: platform skeleton section registry (spec
+// 2026-10-25-managed-platform-skeleton-design.md / ADR-0101). The
+// upgrade MERGE pass delivers OUT-OF-ZONE CLAUDE.md/GEMINI.md skeleton
+// sections from scripts/lib/platform-skeleton-merge.ts MANAGED_SKELETON_SECTIONS,
+// reading section content from templates/common/<rel> at merge time — so
+// template-side skeleton rot (a registered heading renamed/moved into a
+// COMMON-* zone, duplicated, or reordered) must fail HERE at L0 before any
+// release, not degrade the nightly wave into ANCHOR NOT FOUND skips.
+// Contract: every registry heading exists in templates/common/{CLAUDE,GEMINI}.md
+// exactly once, OUTSIDE all COMMON-* zones, in registry order; duplicate
+// numbers inside the template's out-of-zone skeleton fail. Severity: Error.
+// Primitives: lib/platform-skeleton-merge.ts validateSkeletonRegistry (unit-tested).
+function checkSkeletonRegistry(): void {
+  if (!JSON_MODE)
+    console.log("\n=== Check SK-01: platform skeleton section registry (templates/common CLAUDE/GEMINI) ===");
+
+  const rels = [...new Set(MANAGED_SKELETON_SECTIONS.map((s) => s.rel))];
+  let issueCount = 0;
+  for (const rel of rels) {
+    const commonPath = join(TEMPLATES_DIR, "common", rel);
+    if (!existsSync(commonPath)) {
+      fail(
+        "common",
+        "skeleton-registry",
+        `templates/common/${rel} not found — the skeleton registry (${MANAGED_SKELETON_SECTIONS.filter((s) => s.rel === rel).length} registered section(s)) has no content source`,
+        `Restore templates/common/${rel} or trim MANAGED_SKELETON_SECTIONS in scripts/lib/platform-skeleton-merge.ts`,
+      );
+      issueCount++;
+      continue;
+    }
+    const issues = validateSkeletonRegistry(readFileSync(commonPath, "utf-8"), rel);
+    for (const issue of issues) {
+      fail(
+        "common",
+        "skeleton-registry",
+        issue,
+        "Realign the registry (MANAGED_SKELETON_SECTIONS in scripts/lib/platform-skeleton-merge.ts) with the template heading, or fix the template heading — the MERGE pass reads section content from this file at merge time",
+      );
+      issueCount++;
+    }
+  }
+  if (issueCount === 0) {
+    pass(
+      `skeleton-registry: ${MANAGED_SKELETON_SECTIONS.length} registered skeleton section(s) across ${rels.length} platform file(s) resolve out-of-zone in templates/common, in registry order, with unique section numbers`,
+    );
+  }
+}
+
+// Check IC-01: L1 import closure (T-20261026-011, spec
+// 2026-10-26-project-review-remediation-design.md D4). The A1 failure class:
+// an L1-delivered script statically imports a module that is not delivered
+// (the 2026-10-25 broken pair — L0+L1 validate-templates.ts/upgrade-project.ts
+// importing the then-L0-only lib/platform-skeleton-merge.ts). Every standing
+// gate evaluates the L0 copy where the import resolves, so nothing caught it.
+// This arm statically resolves the import closure of the DELIVERED tree:
+// every static relative import in every .ts under templates/common/scripts/
+// must resolve Bun-style (exact path, then +.ts, then /index.ts) to an
+// existing file within that tree. `_`-prefixed fixture files/dirs (registry
+// convention) and node_modules are excluded. Workspace-root-only: delivered
+// copies self-skip via existsSync (the check-upgrade-coverage convention —
+// their own ROOT carries no templates/common/scripts). Fix policy per
+// ADR-0073 Amendment 4: deliver the module (leaf pure-module class, the
+// lib/upgrade-policy.ts precedent) or drop the import (engine class stays
+// L0-only). Primitives: collectL1ImportClosureIssues (pure, unit-tested).
+export interface L1ImportClosureIssue {
+  /** Importing file, relative to the scanned scripts root. */
+  file: string;
+  /** The unresolvable relative specifier as written. */
+  specifier: string;
+}
+
+// Static relative import extraction. The clause class [A-Za-z0-9_$*{},\s]
+// admits every static import/export form (default, namespace, named, type,
+// export-from, multiline — digits included: import bindings like md5/sha256
+// are ordinary) while refusing to cross `=`/`(` — string literals like
+// `export const foo = "from './x'"` and dynamic import('…') calls cannot
+// false-positive. Side-effect imports (`import './x'`) get their own arm of
+// the alternation: they load the module at import time exactly like a
+// from-import, so a dangling one is the same failure.
+const L1_IMPORT_FROM_RE = /^[ \t]*(?:import|export)[ \t]+[A-Za-z0-9_$*{}, \t\r\n]*?from[ \t]*['"](\.[^'"]+)['"]/gm;
+const L1_IMPORT_SIDEEFFECT_RE = /^[ \t]*import[ \t]*['"](\.[^'"]+)['"]/gm;
+
+export function collectL1ImportClosureIssues(scriptsRoot: string): L1ImportClosureIssue[] {
+  const issues: L1ImportClosureIssue[] = [];
+  const walk = (dir: string): void => {
+    let entries: Dirent[];
+    try {
+      entries = readdirSync(dir, { withFileTypes: true });
+    } catch {
+      issues.push({ file: relative(scriptsRoot, dir), specifier: "<unreadable directory>" });
+      return;
+    }
+    for (const entry of entries) {
+      // `_`-prefixed fixture files/dirs per registry convention; dependency installs excluded.
+      if (entry.name.startsWith("_") || entry.name === "node_modules") continue;
+      const abs = join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(abs);
+        continue;
+      }
+      if (!entry.name.endsWith(".ts")) continue;
+      const content = readFileSync(abs, "utf-8");
+      const relFile = relative(scriptsRoot, abs);
+      for (const re of [L1_IMPORT_FROM_RE, L1_IMPORT_SIDEEFFECT_RE]) {
+        for (const m of content.matchAll(re)) {
+          const spec = m[1]!;
+          if (!resolvesWithinTree(join(dirname(abs), spec), scriptsRoot)) {
+            issues.push({ file: relFile, specifier: spec });
+          }
+        }
+      }
+    }
+  };
+  if (!existsSync(scriptsRoot)) return issues;
+  walk(scriptsRoot);
+  return issues;
+}
+
+// Bun-style relative-specifier resolution, constrained to the delivered tree:
+// exact path, then +.ts, then /index.ts. A specifier whose only resolution
+// escapes the tree (e.g. ../../../scripts/x — exists at L0, absent in every
+// project) is exactly the A1 class and fails.
+function resolvesWithinTree(baseCandidate: string, scriptsRoot: string): boolean {
+  for (const candidate of [baseCandidate, `${baseCandidate}.ts`, join(baseCandidate, "index.ts")]) {
+    if (!existsSync(candidate)) continue;
+    const rel = relative(scriptsRoot, candidate);
+    if (rel.length > 0 && !rel.startsWith("..") && !isAbsolute(rel)) return true;
+  }
+  return false;
+}
+
+function checkL1ImportClosure(): void {
+  if (!JSON_MODE)
+    console.log("\n=== Check IC-01: l1-import-closure (templates/common/scripts static import resolution) ===");
+  const l1ScriptsDir = join(TEMPLATES_DIR, "common", "scripts");
+  // Workspace-root-only self-skip: the marker dir exists only where the L1
+  // tree is the workspace's own delivered tree (check-upgrade-coverage
+  // convention — outside the workspace there is nothing to validate).
+  if (!existsSync(l1ScriptsDir)) {
+    if (!JSON_MODE) console.log("  l1-import-closure: no templates/common/scripts — not a workspace root, skipping.");
+    return;
+  }
+  const issues = collectL1ImportClosureIssues(l1ScriptsDir);
+  for (const issue of issues) {
+    fail(
+      "common",
+      "l1-import-closure",
+      `templates/common/scripts/${issue.file} imports '${issue.specifier}' — target not found within the delivered tree (l1-import-closure IC-01)`,
+      "Deliver the module or drop the import — see ADR-0073 Amendment 4 (engine vs leaf-module classes)",
+    );
+  }
+  if (issues.length === 0) {
+    let fileCount = 0;
+    const count = (dir: string): void => {
+      for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        if (entry.name.startsWith("_") || entry.name === "node_modules") continue;
+        if (entry.isDirectory()) count(join(dir, entry.name));
+        else if (entry.name.endsWith(".ts")) fileCount++;
+      }
+    };
+    count(l1ScriptsDir);
+    pass(
+      `l1-import-closure: all static relative import(s) in ${fileCount} .ts file(s) under templates/common/scripts resolve within the delivered tree`,
+    );
+  }
+}
+
+// Check PM-04b: COMMON-AGENTS block parity (ADR-0081 fleet sweep / T-20260919-001).
+// The COMMON-AGENTS:START/END marker-inject zone in AGENTS.md is delivered to
+// projects by upgrade MERGE from the VARIANT template copy (variant-first
+// overlay), so a stale variant block silently starves every project of policy
+// updates added to the common block — observed 2026-09-19: all 13 variant
+// COMMON-AGENTS blocks were stale (missing the ADR-0080
+// "PM Team-Management Authority" section) while this validator stayed green,
+// because PM-04's keyed WORKSPACE-MANAGED extraction does not cover the
+// key-less COMMON-AGENTS zone. Contract: every variant AGENTS.md carries the
+// block with normalized content identical to templates/common/AGENTS.md's.
+// Severity: Error. Primitives: lib/managed-block-parity.ts (unit-tested).
+function checkCommonAgentsBlockParity(): void {
+  if (!JSON_MODE) console.log("\n=== Check PM-04b: COMMON-AGENTS block parity (common → every variant AGENTS.md) ===");
+
+  const commonPath = join(TEMPLATES_DIR, "common", "AGENTS.md");
+  const commonIssues: string[] = [];
+  const commonBlock = extractCommonAgentsBlock(readFileSync(commonPath, "utf-8"), commonIssues);
+  for (const issue of commonIssues) {
+    fail(
+      "common",
+      "common-agents-parity",
+      `templates/common/AGENTS.md: ${issue}`,
+      "Close the block with <!-- /COMMON-AGENTS -->",
+    );
+  }
+  if (commonBlock === null) {
+    fail(
+      "common",
+      "common-agents-parity",
+      "templates/common/AGENTS.md carries no COMMON-AGENTS block",
+      "Add the <!-- COMMON-AGENTS:START/END --> marker-inject zone (it is the delivery channel for common policy sections into variant/project AGENTS.md)",
+    );
+    return;
+  }
+
+  const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-") && !isTransientTestFixture(e.name))
+    .map((e) => e.name)
+    .sort();
+
+  let checked = 0;
+  for (const variant of variants) {
+    const variantPath = join(TEMPLATES_DIR, variant, "AGENTS.md");
+    if (!existsSync(variantPath)) {
+      fail(
+        variant,
+        "common-agents-parity",
+        `${variant}/AGENTS.md not found — the COMMON-AGENTS zone has no delivery channel into this variant`,
+        `Create ${variant}/AGENTS.md with the COMMON-AGENTS block copied from templates/common/AGENTS.md`,
+      );
+      continue;
+    }
+    const variantIssues: string[] = [];
+    const variantBlock = extractCommonAgentsBlock(readFileSync(variantPath, "utf-8"), variantIssues);
+    for (const issue of variantIssues) {
+      fail(
+        variant,
+        "common-agents-parity",
+        `templates/${variant}/AGENTS.md: ${issue}`,
+        "Close the block with <!-- /COMMON-AGENTS -->",
+      );
+    }
+    const violation = compareCommonAgentsBlock(commonBlock, variantBlock);
+    if (violation === "missing") {
+      fail(
+        variant,
+        "common-agents-parity",
+        `templates/${variant}/AGENTS.md carries no COMMON-AGENTS block — common policy sections (LLM routing, instruction standard, PM team-management authority) have no delivery channel into this variant`,
+        `Copy the "<!-- COMMON-AGENTS:START/END -->" block from templates/common/AGENTS.md into ${variant}/AGENTS.md`,
+      );
+    } else if (violation === "mismatch") {
+      fail(
+        variant,
+        "common-agents-parity",
+        `templates/${variant}/AGENTS.md COMMON-AGENTS block content diverges from templates/common/AGENTS.md`,
+        `Replace the variant's COMMON-AGENTS block content with the common copy (markers included), byte-identical after line normalization`,
+      );
+    } else {
+      checked++;
+    }
+  }
+  if (checked > 0) {
+    pass(
+      `common-agents-parity: ${checked}/${variants.length} variant AGENTS.md files carry the COMMON-AGENTS block with content parity`,
+    );
+  }
+}
+
+// Check TB-01: trail marker-block parity (design docs/designs/2026-11-08-trail-fleet-standard-design.md
+// §5.4; DEC-20261108-01 R1+R3). The AGENTS.md trail block
+// (`<!-- trail:start -->…<!-- trail:end -->`) is TOOL-OWNED — trail init's
+// reconcileWiring re-appends it (upsertSection on the tool's markers,
+// skills/trail/SKILL.md) — but its PRESENCE and BYTES across the template tree
+// are workspace-pinned. The block sits outside every COMMON-*/WORKSPACE-MANAGED
+// zone, so PM-04b/VA-05/MM-01 cannot see it: the pre-arm state was 2 of 16
+// template AGENTS.md files carrying it with zero validation. Contract: root
+// AGENTS.md (tool-written reference) == templates/common/AGENTS.md (canonical
+// L1 seed) == every variant copy, byte-identical after line normalization
+// (managed-block-parity's normalizeBlockContent — the PM-04b contract).
+// Severity (R3): Error on templates (common missing/diverged, variant
+// missing/duplicate/diverged); WARN on root divergence (root's block is
+// tool-owned — a vendor text update lands there first and the WARN names the
+// re-sync; the workspace must not fight upsertSection with a hard gate).
+// Primitives: lib/trail-block-parity.ts (unit-tested).
+function checkTrailBlockParity(): void {
+  if (!JSON_MODE)
+    console.log("\n=== Check TB-01: trail marker-block parity (root → common → every variant AGENTS.md) ===");
+
+  const rootContent = readFileSync(join(ROOT, "AGENTS.md"), "utf-8");
+  const rootBlock = extractTrailBlock(rootContent);
+  const commonPath = join(TEMPLATES_DIR, "common", "AGENTS.md");
+  const commonContent = readFileSync(commonPath, "utf-8");
+  const commonBlock = extractTrailBlock(commonContent);
+
+  if (rootBlock === null) {
+    warn(
+      "root",
+      "trail-block-parity",
+      "AGENTS.md carries no trail marker block (tool-owned block absent — run `trail init` or restore it)",
+      "Re-run `trail init` in the workspace root (the tool re-appends its block; do NOT hand-write the prose)",
+    );
+  } else if (commonBlock === null) {
+    fail(
+      "common",
+      "trail-block-parity",
+      "templates/common/AGENTS.md carries no trail marker block",
+      `Copy the root AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/common/AGENTS.md`,
+    );
+  } else if (normalizeForTrail(rootBlock) !== normalizeForTrail(commonBlock)) {
+    warn(
+      "common",
+      "trail-block-parity",
+      "templates/common/AGENTS.md trail block diverges from the root (tool-owned) block — a vendor update landed at root; re-sync the template wave",
+      `Copy the root AGENTS.md trail block over templates/common/AGENTS.md's, then re-verify variant parity`,
+    );
+  }
+
+  if (commonBlock === null) return;
+
+  const variants = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-") && !isTransientTestFixture(e.name))
+    .map((e) => e.name)
+    .sort();
+
+  let checked = 0;
+  for (const variant of variants) {
+    const variantContent = readFileSync(join(TEMPLATES_DIR, variant, "AGENTS.md"), "utf-8");
+    const violation = compareTrailBlock(commonBlock, variantContent);
+    if (violation === "missing") {
+      fail(
+        variant,
+        "trail-block-parity",
+        `templates/${variant}/AGENTS.md carries no trail marker block — the fleet standard (DEC-20261108-01 R1) ships it in every variant`,
+        `Append the templates/common/AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/${variant}/AGENTS.md`,
+      );
+    } else if (violation === "duplicate") {
+      fail(
+        variant,
+        "trail-block-parity",
+        `templates/${variant}/AGENTS.md carries MULTIPLE trail marker blocks — a hand copy landed next to a tool-managed copy`,
+        `Delete all but one block, keeping the copy that is byte-identical to templates/common/AGENTS.md's`,
+      );
+    } else if (violation === "mismatch") {
+      fail(
+        variant,
+        "trail-block-parity",
+        `templates/${variant}/AGENTS.md trail block diverges from templates/common/AGENTS.md`,
+        `Replace the variant's trail block with the common copy (markers included), byte-identical after line normalization`,
+      );
+    } else {
+      checked++;
+    }
+  }
+  if (checked > 0) {
+    pass(
+      `trail-block-parity: ${checked}/${variants.length} variant AGENTS.md files carry the trail block with content parity`,
+    );
+  }
+
+  // U-20261112-010: the 2026-11-08 fleet standard rewrote common's platform
+  // docs but missed the variant HERMES.md copies and co-architect/CODEX.md —
+  // the tool-owned block sits outside every managed zone, so nothing else
+  // sees it, and delivered projects inherit the graft-era prose (a CLI that
+  // no longer exists on PATH). Two extensions, same era-marker contract:
+  // (1) HERMES.md/CODEX.md trail parity (common seed == variant copy where
+  // the variant carries the file); (2) graft-era block detection (Error) in
+  // every instruction file across common + variants. The delivered-side
+  // counterpart is upgrade-project's graft→trail swap (trail-block-parity.ts
+  // swapGraftForTrail), which converges already-delivered copies at the next
+  // upgrade visit.
+  const platformDocRels = ["HERMES.md", "CODEX.md"];
+  let platformChecked = 0;
+  for (const rel of platformDocRels) {
+    const commonDocPath = join(TEMPLATES_DIR, "common", rel);
+    if (!existsSync(commonDocPath)) continue;
+    const commonDocBlock = extractTrailBlock(readFileSync(commonDocPath, "utf-8"));
+    if (commonDocBlock === null) {
+      fail(
+        "common",
+        "trail-block-parity",
+        `templates/common/${rel} carries no trail marker block`,
+        `Copy the root AGENTS.md "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to the end of templates/common/${rel}`,
+      );
+      continue;
+    }
+    for (const variant of variants) {
+      const variantDocPath = join(TEMPLATES_DIR, variant, rel);
+      if (!existsSync(variantDocPath)) continue;
+      const variantDocContent = readFileSync(variantDocPath, "utf-8");
+      const violation = compareTrailBlock(commonDocBlock, variantDocContent);
+      if (violation === "missing") {
+        fail(
+          variant,
+          "trail-block-parity",
+          `templates/${variant}/${rel} carries no trail marker block — the fleet standard (DEC-20261108-01 R1) ships it in every instruction file the variant delivers`,
+          `Append the templates/common/${rel} "<!-- trail:start -->…<!-- trail:end -->" block (byte-identical) to templates/${variant}/${rel}`,
+        );
+      } else if (violation === "duplicate") {
+        fail(
+          variant,
+          "trail-block-parity",
+          `templates/${variant}/${rel} carries MULTIPLE trail marker blocks`,
+          `Delete all but one block, keeping the copy that is byte-identical to templates/common/${rel}'s`,
+        );
+      } else if (violation === "mismatch") {
+        fail(
+          variant,
+          "trail-block-parity",
+          `templates/${variant}/${rel} trail block diverges from templates/common/${rel}`,
+          `Replace the variant's trail block with the common copy (markers included), byte-identical after line normalization`,
+        );
+      } else {
+        platformChecked++;
+      }
+    }
+  }
+  if (platformChecked > 0) {
+    pass(
+      `trail-block-parity: ${platformChecked} variant HERMES.md/CODEX.md copies carry the trail block with content parity`,
+    );
+  }
+
+  // (2) Graft-era residue detection — Error in any instruction file.
+  const instructionRels = ["AGENTS.md", "CLAUDE.md", "GEMINI.md", "CODEX.md", "HERMES.md"];
+  const eraRoots = ["common", ...variants];
+  let eraChecked = 0;
+  for (const eraRoot of eraRoots) {
+    for (const rel of instructionRels) {
+      const docPath = join(TEMPLATES_DIR, eraRoot, rel);
+      if (!existsSync(docPath)) continue;
+      const docContent = readFileSync(docPath, "utf-8");
+      const graftCount = countGraftBlocks(docContent);
+      if (graftCount > 0) {
+        fail(
+          eraRoot,
+          "trail-block-parity",
+          `templates/${eraRoot}/${rel} carries ${graftCount} graft-era marker block(s) — the vendor renamed graft to trail (0.28) and the graft CLI no longer exists; delivered projects inherit the dead prose because the block sits outside every managed zone`,
+          `Swap the graft block for the trail block from templates/common/${rel} (byte-identical; U-20261112-010)`,
+        );
+      } else {
+        eraChecked++;
+      }
+    }
+  }
+  if (eraChecked > 0) {
+    pass(`trail-block-parity: ${eraChecked} template instruction files carry no graft-era block`);
+  }
+}
+
+/** Line normalization for trail-block comparison (mirrors managed-block-parity's
+ *  normalizeBlockContent: CRLF → LF, strip trailing whitespace, collapse blank
+ *  edges). Local alias keeps the arm's import surface minimal. */
+function normalizeForTrail(raw: string): string {
+  return raw
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((l) => l.replace(/\s+$/, ""))
+    .join("\n")
+    .replace(/^\n+/, "")
+    .replace(/\n+$/, "");
+}
+
+// Check WS-11: bilingual user-guide pair (docs/user-guide.md + docs/user-guide_ko.md)
+// Standard defined in docs/governance/variant-contract.md "User-Guide Standard".
+// Unlike Variant Contract required files, templates/common/ does NOT satisfy this
+// check — the guide's content is variant-specific by design, so each variant carries
+// its own pair. Root cause guard: 2026-08-23 audit found 4 of 11 variants shipped
+// without any user guide because the standard existed only as convention.
+function checkUserGuidePair(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-11: bilingual user-guide pair in ${variant} ===`);
+
+  const guidePath = join(TEMPLATES_DIR, variant, "docs", "user-guide.md");
+  const guideKoPath = join(TEMPLATES_DIR, variant, "docs", "user-guide_ko.md");
+
+  const guideExists = existsSync(guidePath);
+  const guideKoExists = existsSync(guideKoPath);
+
+  if (!guideExists) {
+    fail(
+      variant,
+      "WS-11",
+      `templates/${variant}/docs/user-guide.md is missing`,
+      `Author docs/user-guide.md per the User-Guide Standard (docs/governance/variant-contract.md "User-Guide Standard"); reference implementation: templates/co-work/docs/user-guide.md`,
+    );
+  }
+  if (!guideKoExists) {
+    fail(
+      variant,
+      "WS-11",
+      `templates/${variant}/docs/user-guide_ko.md is missing`,
+      `Author docs/user-guide_ko.md as a 1:1 Korean mirror of docs/user-guide.md`,
+    );
+  }
+  if (guideExists && guideKoExists) {
+    pass(`WS-11: ${variant} has the bilingual user-guide pair`);
+  }
+}
+
+// Check WS-12: variant index coverage — every non-draft co-* variant must appear in
+// the root and templates/ README index files. Root cause guard: 2026-08-23 audit
+// found co-export/co-news/co-abap/co-hr missing from README_es.md, README_ja.md and
+// templates/README_ko.md (discovered manually — nothing gated it).
+// EN/KO primary indexes FAIL; translation indexes (es/ja) WARN so a primary-language
+// addition can land while translations catch up, without letting drift persist silently.
+function checkVariantIndexCoverage(manifests: Map<string, VariantManifest>): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-12: variant index coverage in README files ===`);
+
+  const indexedVariants = [...manifests.entries()]
+    .filter(([name, manifest]) => name.startsWith("co-") && manifest.status !== "draft")
+    .map(([name]) => name);
+
+  if (indexedVariants.length === 0) return;
+
+  const indexFiles: Array<{ rel: string; level: "error" | "warning" }> = [
+    { rel: "README.md", level: "error" },
+    { rel: "README_ko.md", level: "error" },
+    { rel: "templates/README.md", level: "error" },
+    { rel: "templates/README_ko.md", level: "error" },
+    { rel: "README_es.md", level: "warning" },
+    { rel: "README_ja.md", level: "warning" },
+  ];
+
+  for (const { rel, level } of indexFiles) {
+    const filePath = join(ROOT, rel);
+    if (!existsSync(filePath)) continue; // presence of the index files themselves is governed elsewhere
+
+    const content = readFileSync(filePath, "utf-8");
+    const missing = indexedVariants.filter((name) => !content.includes(name));
+
+    if (missing.length === 0) {
+      pass(`WS-12: all ${indexedVariants.length} variants indexed in ${rel}`);
+    } else if (level === "error") {
+      fail(
+        "root",
+        "WS-12",
+        `${rel} does not mention variant(s): ${missing.join(", ")}`,
+        `Add the missing variant(s) to ${rel}'s template tree + "Available Variants" table (all 6 index READMEs must list every non-draft variant)`,
+      );
+    } else {
+      warn(
+        "root",
+        "WS-12",
+        `${rel} does not mention variant(s): ${missing.join(", ")}`,
+        `Backfill the missing variant(s) in ${rel} (translation index — update in the same change that adds the variant to the primary READMEs)`,
+      );
+    }
+  }
+}
+
+// Check WS-08: README standard conformance (README.md + README_ko.md)
+// Enforces the unified README skeleton defined in docs/governance/variant-contract.md
+// "README Standard" and rendered by templates/common/docs/README.template.md (+KO).
+// The FIRST check to consult governance.variantValidationPolicy: when WS-08 is listed
+// in `warningOnly` it emits WARN (non-blocking, used during rollout); otherwise FAIL.
+// H2 parity between EN/KO is transitively enforced — both files are checked against a
+// required set of equal size (7), so individual missing/extra conformance implies parity.
+// Frontmatter hash presence is delegated to Check 11 (checkReadmePresence).
+function checkReadmeStandard(variant: string): void {
+  if (!JSON_MODE) console.log(`\n=== Check WS-08: README standard conformance in ${variant} ===`);
+
+  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes("WS-08") ?? false;
+  const report = (msg: string, fix: string): void => {
+    if (isWarningOnly) warn(variant, "WS-08", msg, fix);
+    else fail(variant, "WS-08", msg, fix);
+  };
+
+  const EN_H2 = [
+    "Overview",
+    "Quick Start",
+    "Team Mission",
+    "Meet the AI Team",
+    "Skills",
+    "How to Collaborate",
+    "Variant Type",
+  ];
+  const KO_H2 = ["개요", "빠른 시작", "팀 미션", "AI 팀 소개", "스킬", "협업 방법", "변형 유형"];
+  const STATUS_RE_EN = /^> \*\*Status\*\*: (✅ Stable|⚠️ Beta) — v\d+\.\d+\.\d+$/m;
+  const STATUS_RE_KO = /^> \*\*상태\*\*: (✅ Stable|⚠️ Beta) — v\d+\.\d+\.\d+$/m;
+
+  const readmePath = join(TEMPLATES_DIR, variant, "README.md");
+  const readmeKoPath = join(TEMPLATES_DIR, variant, "README_ko.md");
+  if (!existsSync(readmePath) && !existsSync(readmeKoPath)) return; // presence is Check 11's concern
+
+  let issuesFound = 0;
+  const checkFile = (
+    path: string,
+    label: string,
+    h2Required: string[],
+    statusRe: RegExp,
+    statusLabel: string,
+    langSelector: string,
+    agentHeader: string,
+  ): void => {
+    const c = readFileSync(path, "utf-8");
+    const h2 = [...c.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());
+    const h2Set = new Set(h2);
+    const missing = h2Required.filter((h) => !h2Set.has(h));
+    const extra = h2.filter((h) => !h2Required.includes(h));
+    if (missing.length) {
+      report(
+        `templates/${variant}/${label} is missing required section(s): ${missing.join(", ")}`,
+        `Add the missing ## section(s) per the README standard (docs/governance/variant-contract.md "README Standard"). Required: ${h2Required.join(" · ")}`,
+      );
+      issuesFound++;
+    }
+    if (extra.length) {
+      report(
+        `templates/${variant}/${label} has non-standard top-level section(s): ${extra.join(", ")}`,
+        `Remove or demote (to ###) the non-standard ## section(s); only the 7 standard top-level sections are allowed`,
+      );
+      issuesFound++;
+    }
+    if (!statusRe.test(c)) {
+      report(
+        `templates/${variant}/${label} status line must match '> **${statusLabel}**: (✅ Stable|⚠️ Beta) — vX.Y.Z'`,
+        `Normalize the status line, e.g. '> **${statusLabel}**: ✅ Stable — v1.0.0'`,
+      );
+      issuesFound++;
+    }
+    if (!c.includes(langSelector)) {
+      report(
+        `templates/${variant}/${label} is missing the standard language-selector line`,
+        `Add the language-selector blockquote linking to the other-language README`,
+      );
+      issuesFound++;
+    }
+    if (!c.includes(agentHeader)) {
+      report(
+        `templates/${variant}/${label} agent table must use the 4-column header '${agentHeader}'`,
+        `Convert the agent roster table to the 4-column schema (Agent | Role | Tier | Model)`,
+      );
+      issuesFound++;
+    }
+  };
+
+  if (existsSync(readmePath)) {
+    checkFile(
+      readmePath,
+      "README.md",
+      EN_H2,
+      STATUS_RE_EN,
+      "Status",
+      "**English** · [한국어](README_ko.md)",
+      "| Agent | Role | Tier | Model |",
+    );
+  }
+  if (existsSync(readmeKoPath)) {
+    checkFile(
+      readmeKoPath,
+      "README_ko.md",
+      KO_H2,
+      STATUS_RE_KO,
+      "상태",
+      "[English](README.md) · **한국어**",
+      "| 에이전트 | 역할 | 티어 | 모델 |",
+    );
+  }
+
+  if (issuesFound === 0) {
+    pass(`WS-08: ${variant} README conforms to the standard${isWarningOnly ? " (warning-only policy active)" : ""}`);
+  }
+}
+
+// Check WS-09: docs/<variant>.context.md structure conformance
+// Established 2026-08-21 after reviewing all "collaboration-family" variants' context.md heading
+// structure (ADR-0050 Part 3 follow-up): 7 of 8 variants (all but co-abap, a structurally distinct
+// SAP/ABAP domain) already share the same skeleton — Stack → Agents → Skills → [Environment Setup]
+// → Development Workflow → <Domain> Guidelines → File Organization Policy → Domain Rules — with the
+// heading TEXT varying per domain ("Tool Stack" vs "Design Stack", "Consulting Guidelines" vs
+// "Coding Guidelines") even though the SECTION'S ROLE is identical. Content itself is deliberately
+// NOT standardized (Skills/Agents tables genuinely differ per domain — forcing identical wording
+// there destroys the domain-specific value, as the co-security commit-type-convention and
+// co-abap/co-architect/co-consult/co-game leftover-duplicate cases both showed this session).
+// This check enforces only PRESENCE and RELATIVE ORDER of the required slots via an alias/regex
+// match per slot — never a whitelist of allowed headings — so domain-specific extra headings
+// (e.g. co-export's "Overview"/"Regulatory Scope" before Stack) are always permitted.
+const WS09_STRUCTURE_SCHEMA: { slot: string; match: RegExp; required: boolean }[] = [
+  { slot: "Stack", match: /^(Tool|Tech|Design) Stack$/, required: true },
+  { slot: "Agents", match: /^Agents?\b/, required: true },
+  { slot: "Skills", match: /^Skills$/, required: true },
+  { slot: "Environment Setup", match: /^Environment Setup$/, required: false },
+  { slot: "Development Workflow", match: /^(Development|Engagement) Workflow\b/, required: true },
+  { slot: "Guidelines", match: /\bGuidelines$/, required: true },
+  { slot: "File Organization Policy", match: /^File Organization Policy$/, required: true },
+  { slot: "Domain Rules", match: /^Domain Rules$/, required: true },
+];
+// co-abap is a structurally distinct SAP/ABAP domain (30+ headings, no Stack/Guidelines/File
+// Organization Policy slots at all) — forcing it into this skeleton would misrepresent its actual
+// structure rather than standardize it. Exempt rather than fail.
+const WS09_EXEMPT_VARIANTS = new Set(["co-abap"]);
+
+function checkContextMdStructure(variant: string): void {
+  if (WS09_EXEMPT_VARIANTS.has(variant)) return;
+
+  const contextPath = join(TEMPLATES_DIR, variant, "docs", `${variant}.context.md`);
+  if (!existsSync(contextPath)) return; // presence is Check WS-checkContextSync's concern
+
+  if (!JSON_MODE) console.log(`\n=== Check WS-09: docs/${variant}.context.md structure conformance ===`);
+
+  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes("WS-09") ?? false;
+  const report = (msg: string, fix: string): void => {
+    if (isWarningOnly) warn(variant, "WS-09", msg, fix);
+    else fail(variant, "WS-09", msg, fix);
+  };
+
+  const content = readFileSync(contextPath, "utf-8");
+  const headings = [...content.matchAll(/^## (.+)$/gm)].map((m) => m[1].trim());
+
+  let lastMatchedIndex = -1;
+  let issuesFound = 0;
+  for (const { slot, match, required } of WS09_STRUCTURE_SCHEMA) {
+    const idx = headings.findIndex((h, i) => i > lastMatchedIndex && match.test(h));
+    if (idx === -1) {
+      if (required) {
+        report(
+          `templates/${variant}/docs/${variant}.context.md is missing the required "${slot}" slot (or it appears before an earlier required slot)`,
+          `Add a "## ${slot}" section (or matching domain-flavored heading) in the standard slot order: ${WS09_STRUCTURE_SCHEMA.map((s) => s.slot).join(" → ")}`,
+        );
+        issuesFound++;
+      }
+      continue;
+    }
+    lastMatchedIndex = idx;
+  }
+
+  if (issuesFound === 0) {
+    pass(
+      `WS-09: ${variant} context.md structure conforms to the standard slot order${isWarningOnly ? " (warning-only policy active)" : ""}`,
+    );
+  }
+}
+
+// Check WS-10: variant agents/*.md must carry lifecycle frontmatter
+// Established 2026-08-21. scripts/validate-agents.ts requires lifecycle.phase + lifecycle.governance
+// in every agents/*.md, and runs as part of audit.ts — but nothing validated the TEMPLATE copies, so
+// the requirement silently drifted: only co-export and co-security ever had the block, meaning
+// `new-project.ts <name> --variant <v>` produced a project that failed its own post-scaffold audit
+// for 8 of 10 variants (reported live for co-deck: 13 errors on a fresh scaffold). The governance
+// records existed and passed validate-agents.ts Part 2 the whole time — several even claimed
+// "Verified governance record and lifecycle frontmatter" in their Phase History — so only the
+// runtime pointer was missing. This check closes the loop: what validate-agents.ts demands of an
+// L2 project, validate-templates.ts now demands of the L1 template it is scaffolded from.
+//
+// Skipped deliberately:
+//   - README.md / README_ko.md — roster docs, not agent definitions.
+//   - Any file with `extends:` in its frontmatter (i.e. pm.md) — an L1-B stub whose lifecycle block
+//     is inherited from the L0 root agent at resolve time, so requiring a literal block here would
+//     duplicate the SSOT. pm.md's own scaffold-time lifecycle handling lives in new-project.ts §2.5.
+const WS10_SKIP_FILES = new Set(["README.md", "README_ko.md"]);
+// No exemptions remain. co-abap was exempted at introduction (it had no docs/lifecycle/agents/
+// directory at all, so its 19 agents had nowhere to point); its governance records were authored
+// 2026-08-21 and the exemption lifted in the same session. Keep the set rather than deleting it —
+// a newly promoted variant may legitimately need a grace period before its records exist.
+const WS10_EXEMPT_VARIANTS = new Set<string>();
+
+function checkAgentLifecycleFrontmatter(variant: string): void {
+  if (WS10_EXEMPT_VARIANTS.has(variant)) return;
+
+  const agentsDir = join(TEMPLATES_DIR, variant, "agents");
+  if (!existsSync(agentsDir)) return; // variant carries no agent roster of its own
+
+  if (!JSON_MODE) console.log(`\n=== Check WS-10: agents/*.md lifecycle frontmatter in ${variant} ===`);
+
+  const isWarningOnly = governance?.variantValidationPolicy?.warningOnly?.includes("WS-10") ?? false;
+  const report = (msg: string, fix: string): void => {
+    if (isWarningOnly) warn(variant, "WS-10", msg, fix);
+    else fail(variant, "WS-10", msg, fix);
+  };
+
+  let checked = 0;
+  let issuesFound = 0;
+
+  for (const file of readdirSync(agentsDir).filter((f) => f.endsWith(".md") && !WS10_SKIP_FILES.has(f))) {
+    const agentPath = join(agentsDir, file);
+    const content = readFileSync(agentPath, "utf-8");
+
+    const match = content
+      .replace(/^\uFEFF/, "")
+      .replace(/\r\n/g, "\n")
+      .match(/^---\n([\s\S]*?)\n---/);
+    if (!match) {
+      report(
+        `templates/${variant}/agents/${file} has no YAML frontmatter`,
+        `Add a frontmatter block with at minimum: name, and a lifecycle: block with phase + governance`,
+      );
+      issuesFound++;
+      continue;
+    }
+
+    let fm: Record<string, unknown>;
+    try {
+      fm = (load(match[1]) as Record<string, unknown>) ?? {};
+    } catch {
+      report(
+        `templates/${variant}/agents/${file} frontmatter is not valid YAML`,
+        `Fix the YAML syntax in the frontmatter block`,
+      );
+      issuesFound++;
+      continue;
+    }
+
+    if (fm.extends) continue; // L1-B stub — lifecycle is inherited from the L0 root agent
+
+    checked++;
+    const agentName = typeof fm.name === "string" && fm.name.trim() ? fm.name.trim() : file.replace(/\.md$/, "");
+    const lifecycle = fm.lifecycle as Record<string, unknown> | undefined;
+
+    if (!lifecycle || typeof lifecycle !== "object") {
+      report(
+        `templates/${variant}/agents/${file} is missing the required lifecycle: frontmatter block`,
+        `Add:\n  lifecycle:\n    phase: production\n    created: "YYYY-MM-DD"\n    last_updated: "YYYY-MM-DD"\n    governance: docs/lifecycle/agents/${agentName}.md`,
+      );
+      issuesFound++;
+      continue;
+    }
+
+    const missing = (["phase", "governance"] as const).filter((k) => !lifecycle[k]);
+    if (missing.length > 0) {
+      report(
+        `templates/${variant}/agents/${file} lifecycle block is missing: ${missing.map((m) => `lifecycle.${m}`).join(", ")}`,
+        `validate-agents.ts requires both lifecycle.phase and lifecycle.governance — add the missing key(s)`,
+      );
+      issuesFound++;
+      continue;
+    }
+
+    // The pointer must resolve. This is a STRICTER assertion than validate-agents.ts makes (which
+    // only checks the key is non-empty) — deliberately so: it caught co-security's 5 agents all
+    // carrying `governance: lifecycle-manager`, an agent NAME rather than a
+    // docs/lifecycle/agents/*.md path, which passed every project-layer check while resolving to
+    // nothing. Introduced as WARN-only pending that fix; promoted to a policy-aware failure once
+    // co-security was corrected (2026-08-21), so an unresolvable pointer can never land again.
+    const govRel = String(lifecycle.governance);
+    if (!existsSync(join(TEMPLATES_DIR, variant, govRel))) {
+      report(
+        `templates/${variant}/agents/${file} points at a governance record that does not exist: ${govRel}`,
+        `Set lifecycle.governance to a path, e.g. docs/lifecycle/agents/${agentName}.md, and create that record ("## Phase History" + "## Acceptance Criteria")`,
+      );
+      issuesFound++;
+    }
+  }
+
+  if (issuesFound === 0) {
+    pass(
+      `WS-10: ${variant} agent lifecycle frontmatter OK (${checked} agent(s) checked)${isWarningOnly ? " (warning-only policy active)" : ""}`,
+    );
+  }
+}
+
+// Main
+// A-10: propagation-map.json schema validation
+/**
+ * VRG-01: Variant Readiness Gate (continuous enforcement)
+ *
+ * Runs `validate-variant-readiness.ts` for every variant under templates/ so that a
+ * non-READY variant (flat/unresolved agent or skill paths, missing PROMOTION_CHECKLIST.md,
+ * missing README/AGENTS.md, inconsistent country_config) is surfaced here — not only at
+ * variant-ization / new-project / upgrade-project time. Complements the structural checks
+ * above by asserting each variant is internally consistent and usable.
+ */
+function checkVariantReadinessGate(): void {
+  if (!JSON_MODE) console.log("\n=== VRG-01: Variant Readiness Gate (all variants) ===");
+  const gateTs = join(__dirname, "validate-variant-readiness.ts");
+  if (!existsSync(gateTs)) {
+    warn("root", "vrg-missing", "validate-variant-readiness.ts not found — skipping VRG check");
+    return;
+  }
+  let dirs: string[] = [];
+  try {
+    dirs = readdirSync(TEMPLATES_DIR, { withFileTypes: true })
+      .filter((e) => e.isDirectory())
+      .map((e) => e.name)
+      .filter((name) => !isTransientTestFixture(name)) // E2E staging dirs (T-20260916-001)
+      .filter((name) => (name.startsWith("co-") ? isCoVariantTracked(name) : true))
+      .filter((name) => existsSync(join(TEMPLATES_DIR, name, "variant.json")));
+  } catch {
+    return;
+  }
+  let checked = 0;
+  for (const name of dirs) {
+    if (variantArg !== "all" && name !== variantArg) continue;
+    const dir = join(TEMPLATES_DIR, name);
+    const res = spawnSync(process.execPath, [gateTs, "--dir", dir, "--json"], { encoding: "utf8" });
+    let parsed: { findings?: Array<{ severity: string; code: string; message: string }> } = {};
+    try {
+      parsed = JSON.parse(res.stdout || "{}");
+    } catch {
+      continue;
+    }
+    const findings = parsed.findings || [];
+    for (const f of findings) {
+      if (f.severity === "error") {
+        fail(
+          name,
+          `vrg:${f.code}`,
+          `VRG: ${f.message}`,
+          `Run: bun scripts/validate-variant-readiness.ts --variant ${name}`,
+        );
+      }
+    }
+    checked++;
+  }
+  if (checked > 0 && !JSON_MODE) pass(`VRG checked ${checked} variant(s)`);
+}
+
+function checkPropagationMapSchema(): void {
+  if (!JSON_MODE) console.log("\n=== Check PM-01: propagation-map.json schema ===");
+  const mapPath = join(ROOT, "scripts", "propagation-map.json");
+  if (!existsSync(mapPath)) {
+    warn("root", "propagation-map-missing", "scripts/propagation-map.json not found");
+    return;
+  }
+  let map: unknown;
+  try {
+    map = JSON.parse(readFileSync(mapPath, "utf-8"));
+  } catch {
+    fail("root", "propagation-map-invalid-json", "scripts/propagation-map.json is not valid JSON");
+    return;
+  }
+  const errors = validatePropagationMap(map);
+  if (errors.length > 0) {
+    for (const e of errors) {
+      fail(
+        "root",
+        `propagation-map-schema:${e.domain}.${e.field}`,
+        `propagation-map.json domain [${e.domain}].${e.field}: ${e.message}`,
+      );
+    }
+  } else {
+    pass("propagation-map.json schema valid");
+  }
+}
+
+// Check PM-02: marker-inject zone parity (T-20260910-018)
+// For every marker-inject domain in propagation-map.json, the variants that
+// actually carry a `<MARKER>:START/END` zone must be exactly the domain's
+// target_variants:
+//   zone present, variant unlisted, content identical to the source zone → ERROR
+//     (unmanaged coverage: the manifest is stale — publishDocs() does not manage
+//     this zone, so the next source change silently stops propagating to it;
+//     fix: add the variant to target_variants)
+//   zone present, variant unlisted, content diverges from source → WARNING
+//     (potential intentional divergence — needs human adjudication, e.g.
+//     co-safety's governance section, tracked as T-20260910-022)
+//   variant listed, zone missing → ERROR (stale target: publishDocs() expects to
+//     inject here and will recreate/overwrite the file's zone)
+// A variant with no zone and no listing is an intentional exclusion — not reported.
+function checkMarkerZoneParity(): void {
+  if (!JSON_MODE) console.log("\n=== Check PM-02: marker-inject zone parity ===");
+  const mapPath = join(ROOT, "scripts", "propagation-map.json");
+  if (!existsSync(mapPath)) return; // PM-01 already reported the missing map
+
+  let map: {
+    domains?: Record<
+      string,
+      {
+        mode?: string;
+        source_file?: string;
+        target_file?: string;
+        marker?: string;
+        target_variants?: string[];
+        excluded_variants?: Array<string | { variant: string; reason?: string }>;
+      }
+    >;
+  };
+  try {
+    map = JSON.parse(readFileSync(mapPath, "utf-8"));
+  } catch {
+    return; // PM-01 already reported invalid JSON
+  }
+
+  const normalize = (s: string) => s.replace(/\r\n/g, "\n").trim();
+  const extractZone = (content: string, marker: string): string | null => {
+    const m = content.match(new RegExp(`<!--\\s*${marker}:START\\s*-->[\\s\\S]*?<!--\\s*${marker}:END\\s*-->`));
+    return m ? normalize(m[0]) : null;
+  };
+
+  let checkedZones = 0;
+  for (const [domainName, domain] of Object.entries(map.domains ?? {})) {
+    if (domain.mode !== "marker-inject" || !domain.source_file || !domain.marker) continue;
+    const sourcePath = join(ROOT, domain.source_file);
+    if (!existsSync(sourcePath)) continue; // publishDocs() owns source-file validation
+    const sourceZone = extractZone(readFileSync(sourcePath, "utf-8"), domain.marker);
+    if (!sourceZone) {
+      warn(
+        "root",
+        "marker-zone-parity",
+        `marker-inject domain [${domainName}]: source ${domain.source_file} has no ${domain.marker} zone`,
+        "Re-publish the source file or update the propagation-map marker",
+      );
+      continue;
+    }
+    const listed = new Set(domain.target_variants ?? []);
+    // T-20260912-031: explicitly excluded variants carry a documented,
+    // adjudicated fork of the zone (e.g. co-safety COMMON-AGENTS). They are
+    // skipped by parity checks instead of emitting FAIL/WARN.
+    const excluded = new Map<string, string>();
+    for (const e of domain.excluded_variants ?? []) {
+      if (typeof e === "string") excluded.set(e, "");
+      else if (e && typeof e.variant === "string") excluded.set(e.variant, e.reason ?? "");
+    }
+
+    for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+      if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
+      if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
+      const variant = entry.name;
+      const targetFile = (domain.target_file ?? "AGENTS.md").replace("{variant}", variant);
+      const variantPath = join(TEMPLATES_DIR, variant, targetFile);
+      const variantZone = existsSync(variantPath)
+        ? extractZone(readFileSync(variantPath, "utf-8"), domain.marker)
+        : null;
+      if (!variantZone) continue; // absent + (listed handled below / unlisted intentional)
+
+      checkedZones++;
+      if (listed.has(variant)) continue; // managed — publishDocs() drift checks own content sync
+      if (excluded.has(variant)) {
+        if (!JSON_MODE)
+          console.log(
+            `  ℹ️  marker-zone-parity: ${variant}/${targetFile} is an adjudicated variant-owned fork (documented exclusion)`,
+          );
+        continue;
+      }
+
+      if (variantZone === sourceZone) {
+        fail(
+          "root",
+          "marker-zone-parity",
+          `marker-inject domain [${domainName}]: ${variant}/${targetFile} carries a ${domain.marker} zone identical to the source but is not in target_variants — unmanaged coverage, the zone silently stops propagating on the next source change`,
+          `Add "${variant}" to propagation-map.json domain [${domainName}].target_variants`,
+        );
+      } else {
+        warn(
+          "root",
+          "marker-zone-parity",
+          `marker-inject domain [${domainName}]: ${variant}/${targetFile} carries a ${domain.marker} zone that diverges from the source and is not in target_variants — if this divergence is intentional, document it in the domain note (adjudication: T-20260910-022)`,
+          "Adjudicate the divergence: list the variant in target_variants and re-publish, or document the intentional divergence",
+        );
+      }
+    }
+
+    for (const variant of listed) {
+      if (!variant.startsWith("co-")) continue; // 'common' and other non-variant targets
+      const targetFile = (domain.target_file ?? "AGENTS.md").replace("{variant}", variant);
+      const variantPath = join(TEMPLATES_DIR, variant, targetFile);
+      const variantZone = existsSync(variantPath)
+        ? extractZone(readFileSync(variantPath, "utf-8"), domain.marker)
+        : null;
+      if (!variantZone) {
+        fail(
+          "root",
+          "marker-zone-parity",
+          `marker-inject domain [${domainName}]: target_variants lists "${variant}" but ${variant}/${targetFile} has no ${domain.marker} zone — stale target`,
+          "Re-run publishDocs for the domain or remove the variant from target_variants",
+        );
+      }
+      checkedZones++;
+    }
+  }
+
+  if (checkedZones > 0) {
+    pass(`marker-inject zone parity: ${checkedZones} zone listing(s) consistent with propagation-map.json`);
+  }
+}
+
+// Check PM-03: propagation target derivation (T-20260915-005 / M8)
+// The hand-maintained target lists must equal the actual templates/co-*
+// directory set, so registering a new variant can no longer silently miss
+// them. Marker-inject domains are classified structurally by target-file
+// shape (never by name):
+//   variant-scoped (target_file absent → publishDocs basename-of-source
+//     default, or carries {variant}):
+//     target_variants ⊎ exclude_variants ≡ co-* dir set, disjoint.
+//     target_variants entry that is no real co-* dir  → ERROR (stale listing)
+//     co-* dir in neither array                       → ERROR (missed
+//       registration — publishDocs() would never inject this variant; the
+//       exact M8 silent-propagation-break class)
+//     exclude_variants entry that is no real co-* dir → ERROR (typo)
+//     dir in both arrays / duplicate entries          → ERROR
+//   fixed-target (fixed relative target_file, e.g. constitution-context →
+//     docs/context.md): validated against its own declared shape — every
+//     listed target must be an existing template directory carrying the
+//     resolved target file. No co-* equality is imposed.
+// docs/templates/common.lifecycle.json propagatedTo must also equal the
+// derived co-* set in both directions (the file is L0-only: no propagation
+// domain manages it and no L1 mirror exists).
+// Every Error's fix hint names the exact JSON pointer to edit. Pure helpers
+// live in lib/propagation-map-schema.ts (unit-tested against synthetic trees).
+function checkPropagationTargets(): void {
+  if (!JSON_MODE) console.log("\n=== Check PM-03: propagation targets ≡ templates/co-* dir set ===");
+  const coDirs = deriveCoVariantDirs(TEMPLATES_DIR);
+  if (coDirs.length === 0) {
+    warn("root", "propagation-targets", "no templates/co-* directories found — target derivation skipped");
+    return;
+  }
+
+  let auditedDomains = 0;
+  let violations = 0;
+  const mapPath = join(ROOT, "scripts", "propagation-map.json");
+  if (existsSync(mapPath)) {
+    let map: {
+      domains?: Record<
+        string,
+        { mode?: string; target_file?: string; target_variants?: string[]; exclude_variants?: string[] }
+      >;
+    };
+    try {
+      map = JSON.parse(readFileSync(mapPath, "utf-8"));
+    } catch {
+      map = {}; // PM-01 already reported the invalid JSON
+    }
+
+    for (const [domainName, domain] of Object.entries(map.domains ?? {})) {
+      if (domain.mode !== "marker-inject") continue;
+      auditedDomains++;
+      const listed = domain.target_variants ?? [];
+
+      if (markerInjectTargetScope(domain) === "variant-scoped") {
+        const excluded = domain.exclude_variants ?? [];
+        const audit = auditVariantScopedTargets(listed, coDirs, excluded);
+        const targetDesc = (domain.target_file ?? "AGENTS.md (basename-of-source default)").replace(
+          "{variant}",
+          "<variant>",
+        );
+        for (const v of audit.staleEntries) {
+          violations++;
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] target_variants lists "${v}" but templates/${v}/ does not exist — stale listing`,
+            `Remove "${v}" from scripts/propagation-map.json domains.${domainName}.target_variants (or create the variant directory it references)`,
+          );
+        }
+        for (const v of audit.missingVariants) {
+          violations++;
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
+            `variant "${v}" exists (templates/${v}/) but marker-inject domain [${domainName}] neither targets nor excludes it — its ${targetDesc} would silently stop propagating (M8 registration drift)`,
+            `Add "${v}" to scripts/propagation-map.json domains.${domainName}.target_variants, or declare the deliberate non-target in domains.${domainName}.exclude_variants`,
+          );
+        }
+        for (const v of audit.invalidExclusions) {
+          violations++;
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] exclude_variants lists "${v}" but templates/${v}/ does not exist — typo?`,
+            `Remove or correct "${v}" in scripts/propagation-map.json domains.${domainName}.exclude_variants`,
+          );
+        }
+        for (const v of audit.overlaps) {
+          violations++;
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] lists "${v}" in both target_variants and exclude_variants — contradictory declaration`,
+            `Remove "${v}" from scripts/propagation-map.json domains.${domainName}.exclude_variants (target_variants wins)`,
+          );
+        }
+        for (const v of audit.duplicates) {
+          violations++;
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] lists "${v}" more than once across target_variants/exclude_variants — duplicate entry`,
+            `Keep exactly one entry for "${v}" in scripts/propagation-map.json domains.${domainName}.target_variants or .exclude_variants`,
+          );
+        }
+      } else {
+        // fixed-target: validated against the domain's own declared shape
+        const seen = new Set<string>();
+        for (const t of listed) {
+          if (seen.has(t)) {
+            violations++;
+            fail(
+              "root",
+              `propagation-targets:${domainName}`,
+              `marker-inject domain [${domainName}] target_variants lists "${t}" more than once — duplicate entry`,
+              `Keep exactly one entry for "${t}" in scripts/propagation-map.json domains.${domainName}.target_variants`,
+            );
+          }
+          seen.add(t);
+        }
+        const audit = auditFixedTargets(listed, domain.target_file!, TEMPLATES_DIR);
+        for (const t of audit.unknownDirs) {
+          violations++;
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] target_variants lists "${t}" but templates/${t}/ does not exist — stale listing`,
+            `Remove "${t}" from scripts/propagation-map.json domains.${domainName}.target_variants (or create the template directory it references)`,
+          );
+        }
+        for (const m of audit.missingTargetFiles) {
+          violations++;
+          fail(
+            "root",
+            `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] targets ${m.file} (declared target_file: ${domain.target_file}) but the file does not exist — dead target`,
+            `Create ${m.file} with the ${domainName} marker zone, or remove "${m.target}" from scripts/propagation-map.json domains.${domainName}.target_variants`,
+          );
+        }
+        if ((domain.exclude_variants ?? []).length > 0) {
+          warn(
+            "root",
+            `propagation-targets:${domainName}`,
+            `marker-inject domain [${domainName}] is fixed-target (no {variant} in target_file) — exclude_variants is never consulted for this shape`,
+            `Remove the dead exclude_variants from scripts/propagation-map.json domains.${domainName}, or drop the entries`,
+          );
+        }
+      }
+    }
+  }
+
+  // (c) common.lifecycle.json propagatedTo ≡ co-* dir set (both directions)
+  const lcPath = join(ROOT, "docs", "templates", "common.lifecycle.json");
+  let lifecycleChecked = false;
+  if (existsSync(lcPath)) {
+    let lc: { propagatedTo?: unknown };
+    try {
+      lc = JSON.parse(readFileSync(lcPath, "utf-8"));
+    } catch {
+      fail(
+        "common",
+        "common-lifecycle-propagatedto",
+        "docs/templates/common.lifecycle.json is not valid JSON — propagatedTo cannot be derived-checked",
+      );
+      return; // nothing else in this check can run meaningfully
+    }
+    if (!Array.isArray(lc.propagatedTo) || lc.propagatedTo.some((v) => typeof v !== "string")) {
+      fail(
+        "common",
+        "common-lifecycle-propagatedto",
+        "docs/templates/common.lifecycle.json propagatedTo must be an array of variant names",
+      );
+    } else {
+      lifecycleChecked = true;
+      const listed = lc.propagatedTo as string[];
+      for (const v of listed.filter((v) => !coDirs.includes(v))) {
+        violations++;
+        fail(
+          "common",
+          "common-lifecycle-propagatedto",
+          `docs/templates/common.lifecycle.json propagatedTo lists "${v}" but templates/${v}/ does not exist — stale entry`,
+          `Remove "${v}" from docs/templates/common.lifecycle.json propagatedTo (or create the variant directory it references)`,
+        );
+      }
+      for (const v of coDirs.filter((v) => !listed.includes(v))) {
+        violations++;
+        fail(
+          "common",
+          "common-lifecycle-propagatedto",
+          `variant "${v}" exists (templates/${v}/) but docs/templates/common.lifecycle.json propagatedTo does not list it — the lifecycle record under-reports common-layer propagation`,
+          `Add "${v}" to docs/templates/common.lifecycle.json propagatedTo`,
+        );
+      }
+    }
+  }
+
+  if ((auditedDomains > 0 || lifecycleChecked) && violations === 0) {
+    pass(
+      `propagation-targets: ${auditedDomains} marker-inject domain(s) + common.lifecycle.json propagatedTo consistent with the templates/co-* dir set (${coDirs.length} variants)`,
+    );
+  }
+}
+
+// ── scaffold-marker-source (T-20260915-002 / C3) ─────────────────────────────
+// Every (marker, source template) pair the scaffolders depend on — declared in
+// helpers/scaffold-markers.ts SCAFFOLD_MARKER_SOURCES — must hold: the source
+// file exists and carries the marker. A marker referenced by scaffold code but
+// absent from its source template is the C3 silent-no-op class (indexOf miss →
+// block never appended, no warning). The scaffolders also warn at extraction
+// time; this standing check fails the battery BEFORE anything scaffolds.
+function checkScaffoldMarkerSources(): void {
+  if (!JSON_MODE) console.log("\n=== Check scaffold-marker-source: scaffolder markers vs source templates ===");
+  let verified = 0;
+  for (const entry of SCAFFOLD_MARKER_SOURCES) {
+    for (const relSource of entry.sources) {
+      const absSource = join(ROOT, relSource);
+      if (!existsSync(absSource)) {
+        fail(
+          "common",
+          "scaffold-marker-source",
+          `${relSource} not found — cannot verify scaffolder marker reference: ${entry.marker} (${entry.purpose})`,
+          `Restore the source template file, or update SCAFFOLD_MARKER_SOURCES in scripts/helpers/scaffold-markers.ts`,
+        );
+        continue;
+      }
+      if (!readFileSync(absSource, "utf-8").includes(entry.marker)) {
+        fail(
+          "common",
+          "scaffold-marker-source",
+          `marker missing from ${relSource}: "${entry.marker}" (${entry.purpose}) — scaffolders referencing it silently no-op (C3 class)`,
+          `Re-wrap the block in the declared marker in ${relSource}, or update SCAFFOLD_MARKER_SOURCES in scripts/helpers/scaffold-markers.ts`,
+        );
+        continue;
+      }
+      verified++;
+    }
+  }
+  pass(
+    `scaffold-marker-source: ${verified}/${SCAFFOLD_MARKER_SOURCES.length} declared marker reference(s) verified in their source templates`,
+  );
+}
+
+// ── pm-extends-stub-body (T-20260915-010 / H12) ──────────────────────────────
+// Every variant pm.md that declares `extends:` must carry the canonical stub
+// body (empty, or exactly the canonicalPmStubBody sentence for the variant).
+// new-project.ts §2.3b discards any prose stub body when it attaches the L1
+// body — a non-canonical body means real variant content is lost silently at
+// scaffold time (the matching scaffold-time WARN lives in new-project.ts).
+function checkPmExtendsStubBodies(): void {
+  if (!JSON_MODE) console.log("\n=== Check pm-extends-stub-body: variant pm.md extends-stub bodies are canonical ===");
+  let checked = 0;
+  for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+    if (!entry.isDirectory() || !entry.name.startsWith("co-")) continue;
+    if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
+    if (variantArg !== "all" && variantArg !== entry.name) continue;
+    const pmPath = join(TEMPLATES_DIR, entry.name, "agents", "pm.md");
+    if (!existsSync(pmPath)) continue; // presence is checkAgents/checkReadmePresence's domain
+    const content = readFileSync(pmPath, "utf-8");
+    const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n?/);
+    if (!fmMatch || !/(^|\n)\s*extends:/.test(fmMatch[1])) continue;
+    checked++;
+    const body = content.slice(fmMatch[0].length);
+    if (isCanonicalPmStubBody(body, entry.name)) continue;
+    fail(
+      entry.name,
+      "pm-extends-stub-body",
+      `agents/pm.md declares extends: but its body is not the canonical stub — scaffold-time resolution would silently discard ${body.trim().length} char(s) of variant content`,
+      `Inline the real content in agents/pm.md and drop extends:, or restore the canonical stub prose (canonicalPmStubBody in scripts/helpers/scaffold-markers.ts)`,
+    );
+  }
+  if (checked > 0) {
+    pass(`pm-extends-stub-body: ${checked} extends-stub variant pm.md file(s) carry canonical stub bodies`);
+  }
+}
+
+// Check: project-identity-placeholder (spec
+// docs/designs/2026-09-24-scaffold-identity-overview-design.md, R9/D4) — the
+// fleet-level, WARN-only sibling of audit.ts's per-project live-placeholder
+// scan (audit.ts v2.41.0 added docs/project.md to its scope). Scans every
+// delivered Projects/<name>/docs/ for residual identity placeholders using the
+// SAME regex family as audit.ts (no new marker vocabulary): a docs/project.md
+// still carrying the TODO(project-overview) fallback, or a docs/context.md
+// still carrying the literal template placeholders (pre-2.13 residue), stays
+// visible until the project team fills the identity seed. Regrowth-prevention
+// sibling of T-20260924-004/007 for the identity class.
+// syncDetection gate shape check (spec docs/designs/2026-11-17-sync-auto-detection-design.md
+// §5.1, DEC-20261117-06 — detection batch PR-C): the variant.json `syncDetection` block
+// (optional top-level key; ABSENT KEY == OFF) is validated by the SSOT shape parser
+// parseSyncDetection (scripts/detect-backport.ts) so the validator and the runtime gate
+// can never diverge. Returns [] for absent/valid blocks and one clear message per
+// malformed shape (non-object block, non-boolean/missing enabled, cap outside 1..5 or
+// non-integer, retired_tokens not a string array). Unit-pinned by
+// tests/unit/validate-templates-sync-detection.test.ts.
+export function collectSyncDetectionIssues(raw: Record<string, unknown> | null): string[] {
+  const gate = parseSyncDetection(raw);
+  if (gate === null || !gate.configError) return [];
+  return [gate.configError];
+}
+
+function checkVariantSyncDetectionBlock(dir: string, raw: Record<string, unknown>): void {
+  const present = raw.syncDetection !== undefined;
+  const issues = collectSyncDetectionIssues(raw);
+  for (const issue of issues) {
+    fail(
+      dir,
+      "sync-detection",
+      `templates/${dir}/variant.json ${issue}`,
+      "Fix the syncDetection block per docs/workspace-schema.json variant_extensions._shared.syncDetection (spec docs/designs/2026-11-17-sync-auto-detection-design.md §5.1) — or delete the block to turn the feature off (absent key == OFF)",
+    );
+  }
+  if (present && issues.length === 0 && !JSON_MODE) {
+    pass(`templates/${dir}/variant.json syncDetection gate declaration OK (spec §5.1)`);
+  }
+}
+
+// T-20260927-012 (validator-hardening, ADR-0091 R3): the B-04 uniform country_config
+// declaration check scopes templates/ only — project-side variant.json could drift by
+// omission. Every delivered Projects/<name>/variant.json declares the mechanism too.
+function checkProjectCountryConfigDeclarations(): void {
+  const projectsDir = join(ROOT, "Projects");
+  if (!existsSync(projectsDir)) return;
+  for (const entry of readdirSync(projectsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
+    const variantJsonPath = join(projectsDir, entry.name, "variant.json");
+    if (!existsSync(variantJsonPath)) continue; // projects without a variant.json are out of scope
+    let raw: Record<string, unknown> | null = null;
+    try {
+      raw = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+    } catch {
+      fail(
+        entry.name,
+        "country-config",
+        `Projects/${entry.name}/variant.json is not valid JSON`,
+        "Fix the JSON syntax — the project-side copy must stay parseable for upgrade tooling",
+      );
+      continue;
+    }
+    const cc = raw.country_config as Record<string, unknown> | undefined;
+    if (!cc || typeof cc !== "object" || Array.isArray(cc)) {
+      fail(
+        entry.name,
+        "country-config",
+        `Projects/${entry.name}/variant.json missing 'country_config' (ADR-0091 R3 uniform declaration)`,
+        "Copy the country_config block from the variant template's variant.json (empty supported = non-adopting)",
+      );
+    } else if (cc.profiles_dir !== "docs/countries" || !Array.isArray(cc.supported)) {
+      fail(
+        entry.name,
+        "country-config",
+        `Projects/${entry.name}/variant.json country_config diverges from the ADR-0091 R3 shape (profiles_dir="docs/countries", supported array)`,
+        "Re-sync the country_config block from the variant template's variant.json",
+      );
+    } else {
+      pass(`Projects/${entry.name}/variant.json country_config declaration OK (ADR-0091 R3)`);
+    }
+  }
+}
+
+// Check: project-sync-detection-gate (spec
+// docs/designs/2026-11-17-sync-auto-detection-design.md §5.1, DEC-20261117-06 —
+// detection batch PR-C). The fleet-wide sibling of checkVariantSyncDetectionBlock:
+// a delivered Projects/<name>/variant.json may declare the opt-in `syncDetection`
+// gate (optional top-level key; absent = OFF — every project starts off by omission
+// and the validator must NOT require the key). A present-but-malformed block FAILs
+// loudly here — the detector itself only WARNs and stays off, so the validator owns
+// the fail-closed leg (a silently ignored misconfigured gate would defeat the opt-in).
+function checkProjectSyncDetectionGates(): void {
+  const projectsDir = join(ROOT, "Projects");
+  if (!existsSync(projectsDir)) return;
+  for (const entry of readdirSync(projectsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    if (isTransientTestFixture(entry.name)) continue; // E2E staging dirs (T-20260916-001)
+    const variantJsonPath = join(projectsDir, entry.name, "variant.json");
+    if (!existsSync(variantJsonPath)) continue; // projects without a variant.json are out of scope
+    let raw: Record<string, unknown> | null = null;
+    try {
+      raw = JSON.parse(readFileSync(variantJsonPath, "utf-8")) as Record<string, unknown>;
+    } catch {
+      // Unparseable JSON is already reported by checkProjectCountryConfigDeclarations;
+      // skip here to avoid a double report for the same defect.
+      continue;
+    }
+    const present = raw.syncDetection !== undefined;
+    const issues = collectSyncDetectionIssues(raw);
+    for (const issue of issues) {
+      fail(
+        entry.name,
+        "sync-detection",
+        `Projects/${entry.name}/variant.json ${issue}`,
+        "Fix the syncDetection block per docs/workspace-schema.json variant_extensions._shared.syncDetection (spec docs/designs/2026-11-17-sync-auto-detection-design.md §5.1) — or delete the block to turn the feature off (absent key == OFF)",
+      );
+    }
+    if (present && issues.length === 0 && !JSON_MODE) {
+      pass(`Projects/${entry.name}/variant.json syncDetection gate declaration OK (spec §5.1)`);
+    }
+  }
+}
+
+function checkProjectIdentityPlaceholders(): void {
+  const projectsDir = join(ROOT, "Projects");
+  if (!existsSync(projectsDir)) return;
+  const placeholderRe = /\[(Project Name|One-sentence description[^\]]*|TODO|TBD)\]|<variant-name>|<project-name>/i;
+  // Fleet membership SSOT (design docs/designs/2026-11-07-fleet-membership-ssot-design.md
+  // §5/§6.1, DEC-20261107-01): this sweep previously covered EVERY Projects/*
+  // directory (no co- filter at all — it swept co-abap-plugin and any other
+  // non-member); it now iterates actual fleet members from lib/fleet.ts
+  // listFleetProjects() (Projects/co-* minus the docs/fleet-membership.json
+  // exclusions, A8 — the intended semantic alignment). Malformed registry →
+  // FAIL rows (fail-closed), never a fallback sweep.
+  let fleetDirs: string[];
+  try {
+    fleetDirs = listFleetProjects(ROOT);
+  } catch (err) {
+    fail(
+      "fleet-membership",
+      "project-identity-placeholder",
+      `docs/fleet-membership.json failed to load: ${err instanceof Error ? err.message : String(err)}`,
+      "Fix or remove the malformed registry — fleet tooling must hard-fail rather than guess membership",
+    );
+    return;
+  }
+  for (const fleetPath of fleetDirs) {
+    const project = fleetPath.split(/[\\/]/).pop() ?? fleetPath;
+    if (isTransientTestFixture(project)) continue; // E2E staging dirs (T-20260916-001)
+    const projectMdPath = join(projectsDir, project, "docs", "project.md");
+    const contextMdPath = join(projectsDir, project, "docs", "context.md");
+    if (existsSync(projectMdPath) && placeholderRe.test(readFileSync(projectMdPath, "utf-8"))) {
+      warn(
+        project,
+        "project-identity-placeholder",
+        `Projects/${project}/docs/project.md still carries the TODO(project-overview) identity fallback`,
+        "Fill Description/Type in docs/project.md (scaffold flags --description/--type, or edit the file by hand — upgrades never overwrite it)",
+      );
+    }
+    if (existsSync(contextMdPath) && placeholderRe.test(readFileSync(contextMdPath, "utf-8"))) {
+      warn(
+        project,
+        "project-identity-placeholder",
+        `Projects/${project}/docs/context.md still carries literal template placeholders (pre-2.13 residue)`,
+        "Run upgrade-project (the 2.13 footer delivers the docs/project.md pointer section), then fill docs/project.md",
+      );
+    }
+  }
+}
+
+// ─── variant-common-shadow (T-20261114-012, design 2026-11-16 §4; zone-override v1.85.0,
+//     design 2026-11-17-template-lifecycle-batch §4.2) ─────────────────────────────────
+// WARN-only drift guard: a variant file that replaces a templates/common file wholesale never
+// receives later common edits. The shadow set is compared to a root-only allowlist.
+// Classes: "variant-owned" (variant identity, unguarded), "tracked" (+ commonSha256 — fires
+// when common changes since recording), "zone-override" (+ zones — the variant's ONLY permitted
+// divergence is inside the named managed zones; in-zone deltas go silent via zone-aware
+// normalization, out-of-zone divergence reports shadow-out-of-zone-drift).
+export interface ShadowAllowlistEntry {
+  path: string;
+  variants: "*" | string[];
+  class: "variant-owned" | "tracked" | "zone-override";
+  commonSha256?: string;
+  /** Managed-zone names for class "zone-override" (marker convention `<!-- <zone>-START/END -->`). */
+  zones?: string[];
+  reason?: string;
+}
+export interface ShadowInstance {
+  variant: string;
+  path: string;
+  frontmatterOnly: boolean;
+  /** zone-override path whose divergence lies entirely inside the managed zone(s) — silent. */
+  zoneInOnly?: boolean;
+  /** zone-override path whose divergence reaches outside the managed zone(s) — shadow-out-of-zone-drift. */
+  zoneOutOf?: boolean;
+}
+export interface ShadowReport {
+  undeclared: ShadowInstance[];
+  moved: { variant: string; path: string; recorded: string; current: string }[];
+  stale: { path: string; variant: string }[];
+  /** zone-override paths diverging outside their managed zones (v1.85.0). */
+  outOfZone: { variant: string; path: string; zones: string[] }[];
+  /** common's managed zone missing or carrying content — zone content belongs to variants (v1.85.0). */
+  commonZoneDirty: { path: string; zone: string }[];
+  /** variant zone content nesting a managed marker — no nested merge semantics for docs zones (v1.85.0). */
+  zoneNestedMarkers: { variant: string; path: string; zone: string }[];
+  declaredSilent: number;
+}
+
+function normalizeLf(buf: Buffer): string {
+  return buf.toString("utf-8").replace(/\r\n/g, "\n");
+}
+export function shadowSha256(text: string): string {
+  return createHash("sha256").update(text).digest("hex");
+}
+function stripFrontmatter(text: string): string {
+  return text.replace(/^---\n[\s\S]*?\n---\n/, "");
+}
+
+/** Managed-zone marker pair for a zone name — the `<!-- <zone>-START/END -->` convention shared
+ *  by helpers/scaffold-markers.ts (VARIANT_SCAFFOLD_MARKER_NAMES) and the docs-zone generator
+ *  propagate-to-templates.ts B-A10 (v1.85.0). */
+export function zoneMarkers(zone: string): { start: string; end: string } {
+  return { start: `<!-- ${zone}-START -->`, end: `<!-- ${zone}-END -->` };
+}
+
+/** Canonical empty-zone content per zone (v1.85.0): what the generator writes for an empty
+ *  zone. Only VARIANT-ROLE-BOUNDARY is zone-capable today; the value must stay byte-equal to
+ *  the B-A10 placeholder in propagate-to-templates.ts (§4.3 Role Boundary Matrix replacement).
+ *  Zones without an entry here assert against the empty string. */
+export const CANONICAL_EMPTY_ZONE_CONTENT: Record<string, string> = {
+  "VARIANT-ROLE-BOUNDARY":
+    "<!-- Add project-specific role boundary rules here. Example:\n" +
+    "     | Design implementation approach | `[design specialist]` | `[implementation specialist]` |\n" +
+    "     | Write or modify documentation | `[docs specialist]` | `[design specialist]` | -->",
+};
+
+/** Pure: replace the content between each zone's first marker pair with an empty span (markers
+ *  kept, v1.85.0), so an in-zone-only delta compares byte-equal. A side missing either marker
+ *  is returned unchanged — the raw comparison then fail-closes as out-of-zone drift. */
+export function stripManagedZones(text: string, zones: string[]): string {
+  let out = text;
+  for (const zone of zones) {
+    const { start, end } = zoneMarkers(zone);
+    const s = out.indexOf(start);
+    if (s < 0) continue;
+    const e = out.indexOf(end, s + start.length);
+    if (e < 0) continue;
+    out = out.slice(0, s + start.length) + "\n" + out.slice(e);
+  }
+  return out;
+}
+
+/** Pure: the content between a zone's first marker pair, or null when either marker is missing. */
+export function extractZoneContent(text: string, zone: string): string | null {
+  const { start, end } = zoneMarkers(zone);
+  const s = text.indexOf(start);
+  if (s < 0) return null;
+  const e = text.indexOf(end, s + start.length);
+  if (e < 0) return null;
+  return text.slice(s + start.length, e);
+}
+
+/** True when the entry covers `variant` ("*" or list membership). */
+function coversVariant(e: ShadowAllowlistEntry, variant: string): boolean {
+  return e.variants === "*" || e.variants.includes(variant);
+}
+
+function walkFiles(dir: string, base = dir, out: string[] = []): string[] {
+  for (const e of readdirSync(dir, { withFileTypes: true })) {
+    if (e.name === "node_modules" || e.name === ".git") continue;
+    const p = join(dir, e.name);
+    if (e.isDirectory()) walkFiles(p, base, out);
+    else if (e.isFile()) out.push(relative(base, p).split(/[\\/]/).join("/"));
+  }
+  return out;
+}
+
+/** Pure: compute the shadow instances per variant (path in both trees, LF-normalized bytes differ).
+ *  `entries` enables the zone-override normalization (v1.85.0): for a path covered by a
+ *  zone-override entry, the zone-aware comparison decides zoneInOnly (silent) vs zoneOutOf
+ *  (shadow-out-of-zone-drift). The zone fields attach ONLY to zone-override paths — every other
+ *  path's instance shape is unchanged. */
+export function computeShadowSet(
+  commonDir: string,
+  variantDirs: Record<string, string>,
+  commonFiles: string[] = walkFiles(commonDir),
+  entries: ShadowAllowlistEntry[] = [],
+): ShadowInstance[] {
+  const zoneEntries = entries.filter((e) => e.class === "zone-override");
+  const out: ShadowInstance[] = [];
+  for (const [variant, vdir] of Object.entries(variantDirs)) {
+    for (const rel of commonFiles) {
+      const vp = join(vdir, rel);
+      if (!existsSync(vp) || !statSync(vp).isFile()) continue;
+      const aRaw = normalizeLf(readFileSync(join(commonDir, rel)));
+      const bRaw = normalizeLf(readFileSync(vp));
+      if (aRaw === bRaw) continue;
+      const inst: ShadowInstance = {
+        variant,
+        path: rel,
+        frontmatterOnly: stripFrontmatter(aRaw) === stripFrontmatter(bRaw),
+      };
+      const zoneEntry = zoneEntries.find((e) => e.path === rel && coversVariant(e, variant));
+      if (zoneEntry) {
+        const zones = zoneEntry.zones ?? [];
+        const a = stripManagedZones(aRaw, zones);
+        const b = stripManagedZones(bRaw, zones);
+        inst.zoneInOnly = a === b;
+        inst.zoneOutOf = a !== b;
+      }
+      out.push(inst);
+    }
+  }
+  return out;
+}
+
+/** Pure: classify shadow instances against the allowlist. `variantDirs` enables the
+ *  zone-override nested-marker assertion (v1.85.0) — it reads the variant copy. */
+export function classifyShadows(
+  commonDir: string,
+  instances: ShadowInstance[],
+  entries: ShadowAllowlistEntry[],
+  variantDirs: Record<string, string> = {},
+): ShadowReport {
+  const report: ShadowReport = {
+    undeclared: [],
+    moved: [],
+    stale: [],
+    outOfZone: [],
+    commonZoneDirty: [],
+    zoneNestedMarkers: [],
+    declaredSilent: 0,
+  };
+  const shadowKey = new Set(instances.map((i) => `${i.variant}\0${i.path}`));
+  const movedSeen = new Set<string>();
+  for (const inst of instances) {
+    const entry = entries.find((e) => e.path === inst.path && coversVariant(e, inst.variant));
+    if (!entry) {
+      report.undeclared.push(inst);
+      continue;
+    }
+    if (entry.class === "zone-override") {
+      // Structural assertion (design §4.2 item 4): variant zone content must not contain
+      // managed-block markers — no nested merge semantics for docs zones.
+      const vdir = variantDirs[inst.variant];
+      const vp = vdir ? join(vdir, inst.path) : null;
+      let nested = false;
+      if (vp && existsSync(vp)) {
+        const vtext = normalizeLf(readFileSync(vp));
+        for (const zone of entry.zones ?? []) {
+          const content = extractZoneContent(vtext, zone);
+          if (content === null) continue; // missing markers → out-of-zone drift owns the report
+          const { start, end } = zoneMarkers(zone);
+          if (content.includes(start) || content.includes(end)) {
+            report.zoneNestedMarkers.push({ variant: inst.variant, path: inst.path, zone });
+            nested = true;
+          }
+        }
+      }
+      if (nested) continue; // the precise row fired; removing the nested markers restores verifiability
+      if (inst.zoneOutOf) {
+        report.outOfZone.push({ variant: inst.variant, path: inst.path, zones: entry.zones ?? [] });
+        continue; // reported, not silent — the contract permits in-zone deltas only
+      }
+    }
+    report.declaredSilent++;
+    if (entry.class === "tracked" && entry.commonSha256) {
+      const current = shadowSha256(normalizeLf(readFileSync(join(commonDir, entry.path))));
+      const key = `${inst.variant}\0${entry.path}`;
+      if (current !== entry.commonSha256 && !movedSeen.has(key)) {
+        movedSeen.add(key);
+        report.moved.push({ variant: inst.variant, path: entry.path, recorded: entry.commonSha256, current });
+      }
+    }
+  }
+  // Structural assertion (design §4.2 item 4): common's zone must be empty — the canonical
+  // generator placeholder at most. A common-side zone edit is itself a drift signal (zone
+  // content belongs to variants), independent of any instance.
+  const zonePathsSeen = new Set<string>();
+  for (const e of entries) {
+    if (e.class !== "zone-override" || zonePathsSeen.has(e.path)) continue;
+    zonePathsSeen.add(e.path);
+    const cp = join(commonDir, e.path);
+    if (!existsSync(cp)) continue;
+    const ctext = normalizeLf(readFileSync(cp));
+    for (const zone of e.zones ?? []) {
+      const content = extractZoneContent(ctext, zone);
+      const canonical = (CANONICAL_EMPTY_ZONE_CONTENT[zone] ?? "").trim();
+      if (content === null || content.trim() !== canonical) {
+        report.commonZoneDirty.push({ path: e.path, zone });
+      }
+    }
+  }
+  for (const e of entries) {
+    if (e.variants === "*") {
+      if (!instances.some((i) => i.path === e.path)) report.stale.push({ path: e.path, variant: "*" });
+    } else {
+      for (const v of e.variants) {
+        if (!shadowKey.has(`${v}\0${e.path}`)) report.stale.push({ path: e.path, variant: v });
+      }
+    }
+  }
+  return report;
+}
+
+const SKILL_COPY_RE = /^(?:\.(?:claude|codex|gemini|agents|hermes)\/)?skills\/([^/]+)\/SKILL\.md$/;
+/** Pure: one display item per variant, collapsing a skill's platform copies into one item. */
+export function collapseShadowItems(instances: ShadowInstance[]): string[] {
+  const skills = new Map<string, number>();
+  const items: string[] = [];
+  for (const i of instances) {
+    const m = SKILL_COPY_RE.exec(i.path);
+    if (m) skills.set(m[1], (skills.get(m[1]) ?? 0) + 1);
+    else items.push(i.frontmatterOnly ? `${i.path} (frontmatter-only)` : i.path);
+  }
+  for (const [n, c] of skills) items.push(`skill ${n} (${c} copies)`);
+  return items;
+}
+
+function checkVariantCommonShadow(): void {
+  if (!JSON_MODE) console.log("\n=== Check variant-common-shadow: undeclared variant shadows of templates/common ===");
+  const commonDir = join(TEMPLATES_DIR, "common");
+  const allowPath = join(ROOT, "docs", "templates", "variant-shadow-allowlist.json");
+  if (!existsSync(commonDir)) return;
+  let entries: ShadowAllowlistEntry[] = [];
+  if (existsSync(allowPath)) {
+    try {
+      const parsed = JSON.parse(readFileSync(allowPath, "utf-8")) as { entries?: ShadowAllowlistEntry[] };
+      entries = Array.isArray(parsed.entries) ? parsed.entries : [];
+    } catch (err) {
+      warn(
+        "common",
+        "variant-common-shadow",
+        `docs/templates/variant-shadow-allowlist.json is not valid JSON: ${err instanceof Error ? err.message : String(err)}`,
+        "Fix the allowlist; until then every shadow is reported as undeclared",
+      );
+    }
+  } else {
+    warn(
+      "common",
+      "variant-common-shadow",
+      "docs/templates/variant-shadow-allowlist.json not found — every variant shadow is reported as undeclared",
+      "Create the allowlist (design 2026-11-16 section 4.2)",
+    );
+  }
+  const variantDirs: Record<string, string> = {};
+  for (const e of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+    if (e.isDirectory() && e.name.startsWith("co-")) variantDirs[e.name] = join(TEMPLATES_DIR, e.name);
+  }
+  let commonFiles: string[] | undefined;
+  try {
+    commonFiles = execFileSync("git", ["ls-files", "-z", "--", "templates/common"], {
+      cwd: ROOT,
+      encoding: "utf-8",
+      stdio: ["ignore", "pipe", "ignore"],
+    })
+      .split("\0")
+      .filter(Boolean)
+      .map((f) => f.slice("templates/common/".length))
+      .filter((f) => existsSync(join(commonDir, f)));
+    if (commonFiles.length === 0) commonFiles = undefined;
+  } catch {
+    commonFiles = undefined;
+  }
+  const instances = computeShadowSet(commonDir, variantDirs, commonFiles, entries);
+  const report = classifyShadows(commonDir, instances, entries, variantDirs);
+
+  const byVariant = new Map<string, ShadowInstance[]>();
+  for (const i of report.undeclared) byVariant.set(i.variant, [...(byVariant.get(i.variant) ?? []), i]);
+  for (const [variant, list] of [...byVariant].sort()) {
+    const items = collapseShadowItems(list);
+    const fmOnly = list.filter((i) => i.frontmatterOnly).length;
+    warn(
+      variant,
+      "variant-common-shadow",
+      `${variant}: ${list.length} undeclared shadow(s) of templates/common (${fmOnly} frontmatter-only); e.g. ${items.slice(0, 5).join(", ")}${items.length > 5 ? `, +${items.length - 5} more` : ""}`,
+      "Re-sync from common (frontmatter-only), or declare the intended divergence in docs/templates/variant-shadow-allowlist.json",
+    );
+  }
+  for (const m of report.moved) {
+    warn(
+      m.variant,
+      "variant-common-shadow",
+      `shadow-common-moved: templates/${m.variant}/${m.path} shadows common, and common changed since the recorded hash`,
+      "Merge the common change into the variant copy, then update commonSha256 in docs/templates/variant-shadow-allowlist.json",
+    );
+  }
+  for (const s of report.stale) {
+    warn(
+      s.variant === "*" ? "common" : s.variant,
+      "variant-common-shadow",
+      `shadow-allowlist-stale: ${s.path} (${s.variant}) is no longer a shadow of templates/common`,
+      "Remove the stale entry from docs/templates/variant-shadow-allowlist.json",
+    );
+  }
+  for (const o of report.outOfZone) {
+    warn(
+      o.variant,
+      "variant-common-shadow",
+      `shadow-out-of-zone-drift: templates/${o.variant}/${o.path} diverges from common outside its managed zone(s) (${o.zones.join(", ") || "none declared"}) — the zone-override contract permits in-zone deltas only`,
+      "Re-sync the out-of-zone span from common (keep only the zone content), or reclassify the allowlist entry",
+    );
+  }
+  for (const c of report.commonZoneDirty) {
+    warn(
+      "common",
+      "variant-common-shadow",
+      `shadow-common-zone-dirty: common's ${c.zone} zone in ${c.path} is missing or carries content — zone content belongs to variants, not to common`,
+      "Restore the canonical empty zone in templates/common (the generator placeholder), or move the content out of the zone",
+    );
+  }
+  for (const n of report.zoneNestedMarkers) {
+    warn(
+      n.variant,
+      "variant-common-shadow",
+      `shadow-zone-nested-markers: templates/${n.variant}/${n.path} nests a managed-zone marker (${n.zone}) inside its own zone — no nested merge semantics for docs zones`,
+      "Remove the nested marker pair from the zone content",
+    );
+  }
+  if (
+    report.undeclared.length === 0 &&
+    report.moved.length === 0 &&
+    report.stale.length === 0 &&
+    report.outOfZone.length === 0 &&
+    report.commonZoneDirty.length === 0 &&
+    report.zoneNestedMarkers.length === 0
+  ) {
+    pass(`variant-common-shadow: no undeclared shadows (${report.declaredSilent} declared instance(s) silent)`);
+  }
+}
+
+function main(): number {
+  if (!JSON_MODE) {
+    console.log(`${colors.cyan}Template Lifecycle Validator${colors.reset}`);
+    console.log(`${colors.dim}Root: ${ROOT}${colors.reset}`);
+    console.log(`${colors.dim}Variant filter: ${variantArg}${colors.reset}`);
+  }
+
+  // Project (L3) roots carry no templates/common — every check below assumes the
+  // L0/L1 template tree and would fail or crash with ENOENT, so skip cleanly.
+  if (!existsSync(join(TEMPLATES_DIR, "common"))) {
+    const summary = "not applicable: no templates/common (variant/project context)";
+    if (JSON_MODE) {
+      console.log(JSON.stringify({ variantsScanned: 0, errors: [], warnings: [], summary }, null, 2));
+    } else {
+      console.log(`\n${colors.green}✓ Template validation ${summary}${colors.reset}`);
+    }
+    return 0;
+  }
+
+  loadGovernance();
+  checkGovernance();
+  checkVersion();
+  checkCommon();
+  const manifests = checkVariantManifests();
+
+  // Pre-load layer maps once for WS-04, WS-05, WS-06
+  const scriptLayerMap = parseScriptLayers();
+  const skillLayerMap = parseSkillLayers();
+
+  // Check common/ commands and parity
+  checkCommands("common");
+  checkModelLiteralPlacement();
+  checkTwinCommonSectionParity(); // VA-06: CLAUDE/GEMINI/CODEX twins carry the shared policy set
+  // Script parity check removed (dead code after ADR-0036 TypeScript migration)
+  checkVariantScopedSkillLeak(); // B-11: variant_scoped_skills must not live in common
+  checkExternalDepVendoring(); // v1.72.0: no manifest install_dir vendored into a template tree (design D4)
+  checkExternalDepLicense(); // v1.74.0: seed manifests pass the license policy + coupling contract (standard §5.4 E2)
+  checkPlatformMirrorFreshness(); // T-20260916-008: platform skill mirrors carry SSOT versions
+  checkVariantMirrorParity(); // T-20260921-009: variant mirrors carry the variant skill set
+  checkSkillRegistrySync(); // VA-08: registry rows match SKILL.md frontmatter (WARN soak, T-20260925-007)
+  checkRosterTierConsistency(); // T-20260921-020: roster tiers match resolved agent frontmatter tiers
+  checkAgentQualityRecursive(); // T-20261027-001: nested agent trees carry scalar tier (ADR-0102) + full bodies
+  checkStyleNeutrality(); // B-12: L0/L1 style neutrality (ADR-0064/0066)
+
+  let variantsChecked = 0;
+  for (const [variant, manifest] of manifests) {
+    if (variantArg !== "all" && variant !== variantArg) continue;
+
+    // Check Variant Contract for all variants (including draft)
+    checkVariantContract(variant);
+    checkSecurityGateSkills(variant); // B-03
+    checkVariantSkills(variant); // B-09: presence-driven skill lifecycle
+    checkVariantScriptsLayout(variant); // B-10: scripts/<variant>/ layout convention
+    checkVariantGeneratorManifest(variant); // v1.66.0: declared generators.json arm (absent = skip)
+    checkDeprecatedVersionBump(variant, manifest); // B-08: deprecated → version bump warning
+    checkPlatformSettingsParity(variant); // VA-04: run for stable and beta/draft so bad platform keys cannot hide
+
+    if (manifest.status === "stable") {
+      checkAgents(variant);
+      checkAgentsRoster(variant);
+      checkPhaseSummaryAgents(variant);
+      checkWorkspaceRootAgentIntrusion(variant);
+      checkSkillPlatformParity(variant);
+      checkSkillMirrorVersionSync(variant); // VA-07: mirror version sync (WARN soak, T-20260925-006)
+      checkDocumentCommonSections(variant);
+      checkCommands(variant);
+      // Script parity check removed (dead code after ADR-0036 TypeScript migration)
+      checkContextSync(variant);
+      checkReadmePresence(variant);
+      checkVariantPackageContract(variant); // VA-08: scaffold package contract (T-20261009-002)
+      variantsChecked++;
+    }
+  }
+
+  checkWorkspaceSchema();
+  checkHubTopology(); // v1.70.0: hub_topology registry legs (hub-consolidation design §2.4)
+  checkCommonContract();
+  checkCommonContractReverseCoverage(); // C-CM-04: exists→listed contract coverage (T-20260910-019)
+  for (const [variant, manifest] of manifests) {
+    if (manifest.status === "stable") checkCommonContractVariantSkills(variant);
+  }
+
+  // WS-04, WS-05, WS-06, WS-07, WS-08: Reverse-direction layer checks for co-* variants
+  for (const [variant] of manifests) {
+    if (!variant.startsWith("co-")) continue;
+    checkL0ScriptsNotInVariants(variant, scriptLayerMap); // WS-04
+    checkL0L1ScriptsNotInVariants(variant, scriptLayerMap); // WS-05
+    checkL0OnlyToolRefsInVariantCommandSkills(variant); // WS-05a
+    checkVariantAgentReferences(variant); // T-007c: agent references resolve (WARN soak)
+    checkVariantSkillsLayer(variant, skillLayerMap); // WS-06
+    checkNoVariantLocalContextMd(variant); // WS-07
+    checkNoVariantVersionManifest(variant); // T-20260916-010: no stub/full manifest in variant templates
+    checkReadmeStandard(variant); // WS-08
+    checkContextMdStructure(variant); // WS-09
+    checkAgentLifecycleFrontmatter(variant); // WS-10
+    checkUserGuidePair(variant); // WS-11
+  }
+
+  // ── ADR-0090 W0: AGENTS.md thin-dispatcher precursor arms (WARN until W4 promotion) ──
+
+  const AGENTS_MD_SIZE_BUDGET = 15_000;
+
+  /** Size budget: every AGENTS.md at L0/L1/L2 must fit the thin-dispatcher budget. */
+  function checkAgentsMdSizeBudget(): void {
+    if (!JSON_MODE)
+      console.log("\n=== Check agents-md-size-budget: AGENTS.md ≤15,000 chars at every layer (ADR-0090) ===");
+    const targets: Array<{ variant: string; path: string }> = [
+      { variant: "common", path: join(ROOT, "AGENTS.md") },
+      { variant: "common", path: join(TEMPLATES_DIR, "common", "AGENTS.md") },
+    ];
+    if (existsSync(TEMPLATES_DIR)) {
+      for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith("co-")) {
+          targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, "AGENTS.md") });
+        }
+      }
+    }
+    for (const t of targets) {
+      if (!existsSync(t.path)) continue;
+      const size = readFileSync(t.path, "utf-8").length;
+      if (size > AGENTS_MD_SIZE_BUDGET) {
+        warn(
+          t.variant,
+          "agents-md-size-budget",
+          `${t.path}: ${size.toLocaleString()} chars exceeds the 15,000-char thin-dispatcher budget (ADR-0090) — user decision 2026-09-26 (design Addendum 3): WARN-only visibility metric, no FAIL promotion and no further reduction; Hermes consumers use the documented context_file_max_chars config`,
+          `If truncation matters for a harness, see the config backstop in HERMES.md "Hermes Platform Mechanics" (context_file_max_chars) and CONSTITUTION.md §11`,
+        );
+      } else {
+        pass(`${t.path}: ${size.toLocaleString()} chars (within budget)`);
+      }
+    }
+  }
+
+  /** Pointer integrity: docs/governance|docs/constitution markdown references in any AGENTS.md must resolve on disk. */
+  function checkAgentsMdPointerIntegrity(): void {
+    if (!JSON_MODE)
+      console.log("\n=== Check agents-md-pointer-integrity: AGENTS.md reference pointers resolve (ADR-0090) ===");
+    const targets: Array<{ variant: string; path: string; base: string }> = [
+      { variant: "common", path: join(ROOT, "AGENTS.md"), base: ROOT },
+      { variant: "common", path: join(TEMPLATES_DIR, "common", "AGENTS.md"), base: join(TEMPLATES_DIR, "common") },
+    ];
+    if (existsSync(TEMPLATES_DIR)) {
+      for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith("co-")) {
+          targets.push({
+            variant: entry.name,
+            path: join(TEMPLATES_DIR, entry.name, "AGENTS.md"),
+            base: join(TEMPLATES_DIR, entry.name),
+          });
+        }
+      }
+    }
+    let checked = 0;
+    const candidateBases = (base: string): string[] =>
+      [ROOT, TEMPLATES_DIR ? join(TEMPLATES_DIR, "common") : "", base].filter(Boolean);
+    for (const t of targets) {
+      if (!existsSync(t.path)) continue;
+      const refs = [
+        ...readFileSync(t.path, "utf-8").matchAll(/\]\((docs\/(?:governance|constitution)\/[^)`]+)\)/g),
+      ].map((m) => m[1]);
+      for (const ref of refs) {
+        checked++;
+        // v1.50.4: strip the #anchor fragment before the existence check — anchors are
+        // in-page headings, not file names, so `docs/x.md#section` never existsSync'd and
+        // every anchored constitution reference misclassified as post-scaffold-only
+        // (observed 2026-10-02: the AGENTS.md §9.1 weekly-check pointer).
+        const refFile = ref.split("#")[0];
+        const resolvedSomewhere = candidateBases(t.base).some((b) => existsSync(join(b, refFile)));
+        if (!resolvedSomewhere) {
+          if (ref.startsWith("docs/constitution/")) {
+            warn(
+              t.variant,
+              "agents-md-pointer-integrity",
+              `${t.path} references '${ref}' — resolves only post-scaffold (constitution docs are delivered at project creation)`,
+              `Verify the file exists in templates delivery; if permanently absent, fix the pointer`,
+            );
+          } else {
+            fail(
+              t.variant,
+              "agents-md-pointer-integrity",
+              `${t.path} references '${ref}' but it does not exist at the workspace root, templates/common, or ${t.base}`,
+              `Create the referenced governance file or fix the pointer`,
+            );
+          }
+        }
+      }
+    }
+    if (checked === 0) {
+      pass("agents-md-pointer-integrity: no pointer tables yet (populated at W1) — vacuous pass");
+    } else {
+      pass(`agents-md-pointer-integrity: ${checked} pointer reference(s) resolve`);
+    }
+  }
+
+  const DESTRUCTIVE_FILE_OPS_MARKER = "Destructive File Operations";
+
+  /**
+   * §7 destructive-file-operations pin (design 2026-11-04-project-loss-hardening-design §5.4,
+   * T-20261104-004 item 4): every template AGENTS.md §7 (templates/common + every co-*
+   * variant) must carry the "Destructive File Operations" baseline bullet, so the multi-file
+   * §7 propagation wave cannot silently rot. Severity: WARN per design (visibility pin,
+   * not a structural failure; PM-04b covers only the COMMON-AGENTS zone, not §7).
+   */
+  function checkAgentsMdDestructiveFileOpsPin(): void {
+    if (!JSON_MODE)
+      console.log(
+        "\n=== Check agents-md-destructive-file-ops-pin: §7 carries the destructive-file-operations baseline (project-loss-hardening design §5.4) ===",
+      );
+    const targets: Array<{ variant: string; path: string }> = [
+      { variant: "common", path: join(TEMPLATES_DIR, "common", "AGENTS.md") },
+    ];
+    if (existsSync(TEMPLATES_DIR)) {
+      for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith("co-")) {
+          targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, "AGENTS.md") });
+        }
+      }
+    }
+    let checked = 0;
+    for (const t of targets) {
+      if (!existsSync(t.path)) continue;
+      checked++;
+      const content = readFileSync(t.path, "utf-8");
+      const sectionMatch = content.match(/^## §7: Universal Baseline Behaviors\n([\s\S]*?)(?=^## )/m);
+      if (!sectionMatch) {
+        warn(
+          t.variant,
+          "agents-md-destructive-file-ops-pin",
+          `${t.path}: no "§7: Universal Baseline Behaviors" section found — the destructive-file-operations baseline pin cannot hold`,
+          `Restore the §7 section (copy from templates/common/AGENTS.md) including the "Destructive File Operations" bullet (design 2026-11-04-project-loss-hardening-design §5.4)`,
+        );
+        continue;
+      }
+      if (!sectionMatch[1].includes(DESTRUCTIVE_FILE_OPS_MARKER)) {
+        warn(
+          t.variant,
+          "agents-md-destructive-file-ops-pin",
+          `${t.path} §7 is missing the "Destructive File Operations" baseline bullet — the 2026-11-04 rm -rf Projects incident lesson must ride on every template AGENTS.md`,
+          `Add the "Destructive File Operations" bullet to §7 (copy verbatim from templates/common/AGENTS.md §7; design 2026-11-04-project-loss-hardening-design §5.4)`,
+        );
+      } else {
+        pass(`agents-md-destructive-file-ops-pin: ${t.path} §7 carries the baseline`);
+      }
+    }
+    if (checked === 0) {
+      pass("agents-md-destructive-file-ops-pin: no template AGENTS.md found — vacuous pass");
+    }
+  }
+
+  /** v1.82.0 (Wave B pin, consult-output-destination-and-constitution-refs-ruling §R2/Wave-B,
+   *  U-20261113-009): every template AGENTS.md §7 carries the two-tier Output Destination
+   *  Mapping routing sentence. §7 is variant-body content with no propagation mechanism —
+   *  without this pin the 16-file wave silently rots (agents-md-destructive-file-ops-pin
+   *  precedent; severity WARN per that precedent). */
+  function checkAgentsMdOutputDestinationPin(): void {
+    if (!JSON_MODE)
+      console.log(
+        "\n=== Check agents-md-output-destination-pin: §7 carries the Output Destination Mapping routing sentence (consult-output-destination ruling Wave B) ===",
+      );
+    const targets: Array<{ variant: string; path: string }> = [
+      { variant: "common", path: join(TEMPLATES_DIR, "common", "AGENTS.md") },
+    ];
+    if (existsSync(TEMPLATES_DIR)) {
+      for (const entry of readdirSync(TEMPLATES_DIR, { withFileTypes: true })) {
+        if (entry.isDirectory() && entry.name.startsWith("co-")) {
+          targets.push({ variant: entry.name, path: join(TEMPLATES_DIR, entry.name, "AGENTS.md") });
+        }
+      }
+    }
+    const MARKER_PHRASE = "Output Destination Mapping in the project context doc";
+    let checked = 0;
+    for (const t of targets) {
+      if (!existsSync(t.path)) continue;
+      checked++;
+      const content = readFileSync(t.path, "utf-8");
+      const sectionMatch = content.match(/^## §7: Universal Baseline Behaviors\n([\s\S]*?)(?=^## )/m);
+      if (!sectionMatch) continue; // §7-absent files are the destructive-file-ops-pin arm's finding
+      if (!sectionMatch[1].includes(MARKER_PHRASE)) {
+        warn(
+          t.variant,
+          "agents-md-output-destination-pin",
+          `${t.path} §7 is missing the Output Destination Mapping routing sentence — the two-tier deliverable routing (ruling 2026-11-14-consult-output-destination-and-constitution-refs-ruling.md, U-20261113-009 Wave B) can silently rot`,
+          `Add the routing sentence to §7 (copy the File Organization bullet verbatim from templates/common/AGENTS.md §7)`,
+        );
+      } else {
+        pass(`agents-md-output-destination-pin: ${t.path} §7 carries the routing sentence`);
+      }
+    }
+    if (checked === 0) {
+      pass("agents-md-output-destination-pin: no template AGENTS.md found — vacuous pass");
+    }
+  }
+
+  checkAgentsMdOutputDestinationPin(); // Wave B pin: Output Destination Mapping routing sentence (U-20261113-009)
+  checkGraftMcpSurfaces(); // R2: template mcp surfaces are trail-only (graft-mcp-corrective-pass-design)
+  checkHookCommandTargets(); // U-20261112-013: hook command targets exist in the effective template tree (fail-on-missing)
+  checkVariantIndexCoverage(manifests); // WS-12
+  checkMirrorHygiene(); // R6: mirrors carry only skill dirs (spec 2026-09-25-verifier-platform-expansion-design)
+
+  checkCountryProfileDivergence(); // B-05: cross-variant last_verified divergence
+
+  checkL0L1ScriptParity();
+  checkCommonScriptVersions(); // CV-01: @version on every common script (T-20261110-012 C2)
+  checkSameVersionContentChange(); // CV-02: same-version content change (DEC-20261111-01 V1)
+  checkSkillLifecycleRecords(); // SLR: skill lifecycle record coverage/parity/leak/owner, flag-gated (U-20261112-005 PR-1)
+  checkPlatformDocumentationParity();
+  checkRootCommonCommandsParity();
+  checkPropagationMapSchema();
+  checkMarkerZoneParity(); // PM-02: marker-inject zones vs target_variants
+  checkManagedBlockParity(); // PM-04: WORKSPACE-MANAGED blocks, common → every variant MERGE_MANAGED copy (T-20260916-009, T-20260917-001)
+  checkSkeletonRegistry(); // SK-01: platform skeleton section registry vs templates/common CLAUDE/GEMINI (spec 2026-10-25-managed-platform-skeleton-design, ADR-0101)
+  checkL1ImportClosure(); // IC-01: delivered-tree static import closure (T-20261026-011, spec 2026-10-26-project-review-remediation-design D4, ADR-0073 Amd. 4)
+  checkCommonAgentsBlockParity(); // PM-04b: COMMON-AGENTS marker-inject zone, common → every variant AGENTS.md (ADR-0081, T-20260919-001)
+  checkTrailBlockParity(); // TB-01: trail marker block, root → common → every variant AGENTS.md (design 2026-11-08-trail-fleet-standard-design §5.4, DEC-20261108-01 R1/R3)
+  checkPropagationTargets(); // PM-03: target lists vs actual templates/co-* dir set (T-20260915-005)
+  checkScaffoldMarkerSources(); // T-20260915-002: scaffolder markers vs source templates
+  checkPmExtendsStubBodies(); // T-20260915-010: variant pm.md extends-stub bodies
+  checkVariantReadinessGate(); // VRG-01: continuous Variant Readiness Gate enforcement
+  checkProjectIdentityPlaceholders(); // fleet WARN: Projects/*/docs identity placeholders (spec 2026-09-24-scaffold-identity-overview-design)
+  checkProjectCountryConfigDeclarations(); // T-20260927-012: project-side half of the ADR-0091 R3 uniform declaration
+  checkProjectSyncDetectionGates(); // sync-auto-detection PR-C: project-side syncDetection gate shape (spec §5.1)
+  checkAgentsMdSizeBudget(); // ADR-0090 W0: thin-dispatcher ≤15k budget (WARN; FAIL promotion at W4)
+  checkAgentsMdPointerIntegrity(); // ADR-0090 W0: pointer-table references resolve on disk
+  checkAgentsMdDestructiveFileOpsPin(); // §7 baseline pin: destructive-file-operations bullet on every template AGENTS.md (WARN; T-20261104-004 item 4)
+  checkSkillGraphVersionDrift(); // skill-graph v2 E2: same-version-different-content across scopes (WARN)
+  checkVariantCommonShadow(); // T-20261114-012: undeclared variant shadows of common files (WARN-only)
+
+  // B-07: Sync validated variant info back to VERSION_REGISTRY.json
+  if (!JSON_MODE) console.log("\n=== B-07: VERSION_REGISTRY.json sync ===");
+  updateVersionRegistry(manifests);
+
+  const errors = issues.filter((i) => i.level === "error");
+  const warnings = issues.filter((i) => i.level === "warning");
+
+  if (JSON_MODE) {
+    console.log(
+      JSON.stringify(
+        {
+          variantsScanned: variantsChecked,
+          errors,
+          warnings,
+          exemptions,
+          summary: `${errors.length} error(s), ${warnings.length} warning(s), ${exemptions.length} exemption(s)`,
+        },
+        null,
+        2,
+      ),
+    );
+  } else {
+    console.log(`\n${colors.dim}${"─".repeat(50)}${colors.reset}`);
+    if (errors.length === 0) {
+      console.log(
+        `${colors.green}✓ ${errors.length} error(s), ${warnings.length} warning(s) across ${variantsChecked} stable variant(s)${colors.reset}`,
+      );
+    } else {
+      console.log(
+        `${colors.red}✗ ${errors.length} error(s), ${warnings.length} warning(s) across ${variantsChecked} stable variant(s)${colors.reset}`,
+      );
+    }
+  }
+
+  // T-20260912-019: main() returns the exit code instead of exiting directly,
+  // so importing this module never terminates the importer's process.
+  return errors.length > 0 ? 1 : 0;
+}
+
+if (import.meta.main) {
+  process.exit(main());
+}

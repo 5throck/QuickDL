@@ -60,7 +60,23 @@
       "Bash(python -m pytest tests/test_i18n.py tests/test_app.py -q)",
       "Bash(git fetch *)",
       "Bash(git rebase *)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "Bash(trail:*)",
+      "Bash(graft:*)",
+      "Bash(npx graft:*)",
+      "Bash(graft-dev:*)",
+      "Bash(node dist/cli.js:*)"
     ]
-  }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.trail/statusline.cjs\""
+  },
+  "subagentStatusLine": {
+    "type": "command",
+    "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.trail/statusline.cjs\""
+  },
+  "footerLinksRegexes": [
+    "graft/[\\w./-]+\\.md"
+  ]
 }

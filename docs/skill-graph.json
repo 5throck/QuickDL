@@ -1,0 +1,1682 @@
+{
+  "version": 2,
+  "graph_profile": "deg/v2",
+  "nodes": [
+    {
+      "id": "agent:root/architect",
+      "type": "agent",
+      "layer": "L3",
+      "name": "architect",
+      "scope": "root",
+      "capability": "architect",
+      "content_hash": "1e96d39f28f4a55a",
+      "version": "1.2.0",
+      "mirrors": [
+        "agents/architect.md"
+      ]
+    },
+    {
+      "id": "agent:root/backend",
+      "type": "agent",
+      "layer": "L3",
+      "name": "backend",
+      "scope": "root",
+      "capability": "backend",
+      "content_hash": "49a773167540439d",
+      "version": null,
+      "mirrors": [
+        "agents/backend.md"
+      ]
+    },
+    {
+      "id": "agent:root/code-writer",
+      "type": "agent",
+      "layer": "L3",
+      "name": "code-writer",
+      "scope": "root",
+      "capability": "code-writer",
+      "content_hash": "ba5421c3665255b0",
+      "version": "1.2.0",
+      "mirrors": [
+        "agents/code-writer.md"
+      ]
+    },
+    {
+      "id": "agent:root/designer",
+      "type": "agent",
+      "layer": "L3",
+      "name": "designer",
+      "scope": "root",
+      "capability": "designer",
+      "content_hash": "bc5ebc4f272f798d",
+      "version": "1.1.1",
+      "mirrors": [
+        "agents/designer.md"
+      ]
+    },
+    {
+      "id": "agent:root/frontend",
+      "type": "agent",
+      "layer": "L3",
+      "name": "frontend",
+      "scope": "root",
+      "capability": "frontend",
+      "content_hash": "4020cbccc559d879",
+      "version": null,
+      "mirrors": [
+        "agents/frontend.md"
+      ]
+    },
+    {
+      "id": "agent:root/i18n",
+      "type": "agent",
+      "layer": "L3",
+      "name": "i18n",
+      "scope": "root",
+      "capability": "i18n",
+      "content_hash": "25399ecbafea87d4",
+      "version": null,
+      "mirrors": [
+        "agents/i18n.md"
+      ]
+    },
+    {
+      "id": "agent:root/i18n-specialist",
+      "type": "agent",
+      "layer": "L3",
+      "name": "i18n-specialist",
+      "scope": "root",
+      "capability": "i18n-specialist",
+      "content_hash": "cc75c4982c09c016",
+      "version": "1.1.1",
+      "mirrors": [
+        "agents/i18n-specialist.md"
+      ]
+    },
+    {
+      "id": "agent:root/pm",
+      "type": "agent",
+      "layer": "L3",
+      "name": "pm",
+      "scope": "root",
+      "capability": "pm",
+      "content_hash": "c293754c41b8169f",
+      "version": null,
+      "mirrors": [
+        "agents/pm.md"
+      ]
+    },
+    {
+      "id": "agent:root/qa",
+      "type": "agent",
+      "layer": "L3",
+      "name": "qa",
+      "scope": "root",
+      "capability": "qa",
+      "content_hash": "d9a8646eb1e40fa5",
+      "version": null,
+      "mirrors": [
+        "agents/qa.md"
+      ]
+    },
+    {
+      "id": "agent:root/security",
+      "type": "agent",
+      "layer": "L3",
+      "name": "security",
+      "scope": "root",
+      "capability": "security",
+      "content_hash": "2847a77174d57574",
+      "version": null,
+      "mirrors": [
+        "agents/security.md"
+      ]
+    },
+    {
+      "id": "agent:root/security-monitor",
+      "type": "agent",
+      "layer": "L3",
+      "name": "security-monitor",
+      "scope": "root",
+      "capability": "security-monitor",
+      "content_hash": "21927fe90166d6a7",
+      "version": "1.1.1",
+      "mirrors": [
+        "agents/security-monitor.md"
+      ]
+    },
+    {
+      "id": "agent:root/stack-setup",
+      "type": "agent",
+      "layer": "L3",
+      "name": "stack-setup",
+      "scope": "root",
+      "capability": "stack-setup",
+      "content_hash": "9bb9449928e9762c",
+      "version": "1.1.1",
+      "mirrors": [
+        "agents/stack-setup.md"
+      ]
+    },
+    {
+      "id": "agent:root/test-runner",
+      "type": "agent",
+      "layer": "L3",
+      "name": "test-runner",
+      "scope": "root",
+      "capability": "test-runner",
+      "content_hash": "55cbd8d18fbcf5c6",
+      "version": "1.2.0",
+      "mirrors": [
+        "agents/test-runner.md"
+      ]
+    },
+    {
+      "id": "doc:AGENTS.md",
+      "type": "doc",
+      "layer": "L3"
+    },
+    {
+      "id": "doc:CLAUDE.md",
+      "type": "doc",
+      "layer": "L3"
+    },
+    {
+      "id": "doc:CODEX.md",
+      "type": "doc",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.approved_implementation_plan",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.environment_manifest",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.implementation_commit",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.regression_report",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.release_notes",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.review_findings",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.security_baseline",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.technical_findings",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.test_scaffold",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.tooling_adjustments",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "output_type.ui_specification",
+      "type": "output_type",
+      "layer": "L3"
+    },
+    {
+      "id": "phase:root/4",
+      "type": "phase",
+      "layer": "L3",
+      "scope": "root",
+      "ordinal": 4,
+      "label": "Implementation & QA Gate"
+    },
+    {
+      "id": "procedure.co-develop.architecture-design",
+      "type": "procedure",
+      "layer": "L3"
+    },
+    {
+      "id": "procedure.co-develop.environment-bootstrap",
+      "type": "procedure",
+      "layer": "L3"
+    },
+    {
+      "id": "procedure.co-develop.feature-implementation",
+      "type": "procedure",
+      "layer": "L3"
+    },
+    {
+      "id": "procedure.co-develop.release-verification",
+      "type": "procedure",
+      "layer": "L3"
+    },
+    {
+      "id": "procedure.co-develop.security-release-retrospective",
+      "type": "procedure",
+      "layer": "L3"
+    },
+    {
+      "id": "procedure.co-develop.technical-planning",
+      "type": "procedure",
+      "layer": "L3"
+    },
+    {
+      "id": "skill:root/accessibility-audit",
+      "type": "skill",
+      "layer": "L3",
+      "name": "accessibility-audit",
+      "scope": "root",
+      "capability": "accessibility-audit",
+      "content_hash": "9e6da04e275eb51c",
+      "version": "1.1.0",
+      "mirrors": [
+        "skills/accessibility-audit/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/agent-lifecycle-manager",
+      "type": "skill",
+      "layer": "L3",
+      "name": "agent-lifecycle-manager",
+      "scope": "root",
+      "capability": "agent-lifecycle-manager",
+      "content_hash": "230ce8c036a46601",
+      "version": "1.4.0",
+      "mirrors": [
+        "skills/agent-lifecycle-manager/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/api-documentation",
+      "type": "skill",
+      "layer": "L3",
+      "name": "api-documentation",
+      "scope": "root",
+      "capability": "api-documentation",
+      "content_hash": "e080e5852535bf67",
+      "version": "1.0.2",
+      "mirrors": [
+        "skills/api-documentation/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/ci-triage",
+      "type": "skill",
+      "layer": "L3",
+      "name": "ci-triage",
+      "scope": "root",
+      "capability": "ci-triage",
+      "content_hash": "c10cba25e7560168",
+      "version": "0.2.0",
+      "mirrors": [
+        "skills/ci-triage/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/code-review",
+      "type": "skill",
+      "layer": "L3",
+      "name": "code-review",
+      "scope": "root",
+      "capability": "swe-code-review",
+      "content_hash": "ff7a3bd5a5db8752",
+      "version": "1.1.0",
+      "mirrors": [
+        "skills/code-review/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/decision-record",
+      "type": "skill",
+      "layer": "L3",
+      "name": "decision-record",
+      "scope": "root",
+      "capability": "decision-record",
+      "content_hash": "af9dd89ccdeec7b2",
+      "version": "1.1.0",
+      "mirrors": [
+        "skills/decision-record/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/delegate-to-hub",
+      "type": "skill",
+      "layer": "L3",
+      "name": "delegate-to-hub",
+      "scope": "root",
+      "capability": "delegate-to-hub",
+      "content_hash": "6a8d68b6e8a283da",
+      "version": "1.0.1",
+      "mirrors": [
+        "skills/delegate-to-hub/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/design-foundation",
+      "type": "skill",
+      "layer": "L3",
+      "name": "design-foundation",
+      "scope": "root",
+      "capability": "design-foundation",
+      "content_hash": "74fdd004a399497b",
+      "version": "1.1.1",
+      "mirrors": [
+        "skills/design-foundation/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/documentation-writing",
+      "type": "skill",
+      "layer": "L3",
+      "name": "documentation-writing",
+      "scope": "root",
+      "capability": "documentation-writing",
+      "content_hash": "d0f7731ae22fc0ad",
+      "version": "1.0.3",
+      "mirrors": [
+        "skills/documentation-writing/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/evidence-ledger",
+      "type": "skill",
+      "layer": "L3",
+      "name": "evidence-ledger",
+      "scope": "root",
+      "capability": "evidence-ledger",
+      "content_hash": "8abe418bc3c78854",
+      "version": "1.1.0",
+      "mirrors": [
+        "skills/evidence-ledger/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/explain-me",
+      "type": "skill",
+      "layer": "L3",
+      "name": "explain-me",
+      "scope": "root",
+      "capability": "explain-me",
+      "content_hash": "757f9b180ab5df7e",
+      "version": "1.0.1",
+      "mirrors": [
+        "skills/explain-me/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/gateguard",
+      "type": "skill",
+      "layer": "L3",
+      "name": "gateguard",
+      "scope": "root",
+      "capability": "gateguard",
+      "content_hash": "bde1c264aec7b18c",
+      "version": "1.0.2",
+      "mirrors": [
+        "skills/gateguard/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/handbook",
+      "type": "skill",
+      "layer": "L3",
+      "name": "handbook",
+      "scope": "root",
+      "capability": "handbook",
+      "content_hash": "a9bd82eded8b1661",
+      "version": "0.6.0",
+      "mirrors": [
+        "skills/handbook/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/handbook-sync-audit",
+      "type": "skill",
+      "layer": "L3",
+      "name": "handbook-sync-audit",
+      "scope": "root",
+      "capability": "handbook-sync-audit",
+      "content_hash": "fc3909fb71e5d0a2",
+      "version": "1.0.5",
+      "mirrors": [
+        "skills/handbook-sync-audit/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/i18n-audit",
+      "type": "skill",
+      "layer": "L3",
+      "name": "i18n-audit",
+      "scope": "root",
+      "capability": "i18n-audit",
+      "content_hash": "5485334c47dd7ef0",
+      "version": "1.0.1",
+      "mirrors": [
+        "skills/i18n-audit/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/i18n-formatting",
+      "type": "skill",
+      "layer": "L3",
+      "name": "i18n-formatting",
+      "scope": "root",
+      "capability": "i18n-formatting",
+      "content_hash": "4db7cf2ed408dd22",
+      "version": "1.0.1",
+      "mirrors": [
+        "skills/i18n-formatting/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/i18n-layout",
+      "type": "skill",
+      "layer": "L3",
+      "name": "i18n-layout",
+      "scope": "root",
+      "capability": "i18n-layout",
+      "content_hash": "67b31c6f61b62452",
+      "version": "1.1.1",
+      "mirrors": [
+        "skills/i18n-layout/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/i18n-locale-config",
+      "type": "skill",
+      "layer": "L3",
+      "name": "i18n-locale-config",
+      "scope": "root",
+      "capability": "i18n-locale-config",
+      "content_hash": "7e9e381d9fd82e21",
+      "version": "1.0.1",
+      "mirrors": [
+        "skills/i18n-locale-config/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/meeting-facilitation",
+      "type": "skill",
+      "layer": "L3",
+      "name": "meeting-facilitation",
+      "scope": "root",
+      "capability": "meeting-facilitation",
+      "content_hash": "f4da9e5e2a11a853",
+      "version": "1.5.0",
+      "mirrors": [
+        "skills/meeting-facilitation/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/post-write-check",
+      "type": "skill",
+      "layer": "L3",
+      "name": "post-write-check",
+      "scope": "root",
+      "capability": "post-write-check",
+      "content_hash": "cc14385eae9848e0",
+      "version": "1.0.0",
+      "mirrors": [
+        "skills/post-write-check/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/project-review",
+      "type": "skill",
+      "layer": "L3",
+      "name": "project-review",
+      "scope": "root",
+      "capability": "project-review",
+      "content_hash": "0193167933931b10",
+      "version": "1.3.2",
+      "mirrors": [
+        "skills/project-review/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/refactoring",
+      "type": "skill",
+      "layer": "L3",
+      "name": "refactoring",
+      "scope": "root",
+      "capability": "refactoring",
+      "content_hash": "5f2a152153b459d8",
+      "version": "1.2.0",
+      "mirrors": [
+        "skills/refactoring/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/research-analysis",
+      "type": "skill",
+      "layer": "L3",
+      "name": "research-analysis",
+      "scope": "root",
+      "capability": "research-analysis",
+      "content_hash": "1e9a79fcdf108919",
+      "version": "1.0.2",
+      "mirrors": [
+        "skills/research-analysis/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/script-lifecycle-manager",
+      "type": "skill",
+      "layer": "L3",
+      "name": "script-lifecycle-manager",
+      "scope": "root",
+      "capability": "script-lifecycle-manager",
+      "content_hash": "ff4bf06dcbc99aac",
+      "version": "1.2.2",
+      "mirrors": [
+        "skills/script-lifecycle-manager/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/security-scan",
+      "type": "skill",
+      "layer": "L3",
+      "name": "security-scan",
+      "scope": "root",
+      "capability": "security-scan",
+      "content_hash": "6a70cb5e596dec68",
+      "version": "1.3.0",
+      "mirrors": [
+        "skills/security-scan/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/service-design",
+      "type": "skill",
+      "layer": "L3",
+      "name": "service-design",
+      "scope": "root",
+      "capability": "service-design",
+      "content_hash": "771b77446626ad51",
+      "version": "1.1.0",
+      "mirrors": [
+        "skills/service-design/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/skill-lifecycle-manager",
+      "type": "skill",
+      "layer": "L3",
+      "name": "skill-lifecycle-manager",
+      "scope": "root",
+      "capability": "skill-lifecycle-manager",
+      "content_hash": "883308f6fa2d77b7",
+      "version": "1.5.0",
+      "mirrors": [
+        "skills/skill-lifecycle-manager/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/source-command-commit-push-pr",
+      "type": "skill",
+      "layer": "L3",
+      "name": "source-command-commit-push-pr",
+      "scope": "root",
+      "capability": "source-command-commit-push-pr",
+      "content_hash": "4fa915cd81a96c7b",
+      "version": "1.0.3",
+      "mirrors": [
+        "skills/source-command-commit-push-pr/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/standup-synthesizer",
+      "type": "skill",
+      "layer": "L3",
+      "name": "standup-synthesizer",
+      "scope": "root",
+      "capability": "standup-synthesizer",
+      "content_hash": "78faf9d2096937e5",
+      "version": "1.1.0",
+      "mirrors": [
+        "skills/standup-synthesizer/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/swe-solve",
+      "type": "skill",
+      "layer": "L3",
+      "name": "swe-solve",
+      "scope": "root",
+      "capability": "swe-solve",
+      "content_hash": "3f74840de807cc09",
+      "version": "1.1.1",
+      "mirrors": [
+        "skills/swe-solve/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/sync",
+      "type": "skill",
+      "layer": "L3",
+      "name": "sync",
+      "scope": "root",
+      "capability": "sync",
+      "content_hash": "80a9c66a71aac4f1",
+      "version": "1.10.0",
+      "mirrors": [
+        "skills/sync/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/team-builder",
+      "type": "skill",
+      "layer": "L3",
+      "name": "team-builder",
+      "scope": "root",
+      "capability": "team-builder",
+      "content_hash": "c375e7fd2ba21e93",
+      "version": "1.2.0",
+      "mirrors": [
+        "skills/team-builder/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/test-driven-development",
+      "type": "skill",
+      "layer": "L3",
+      "name": "test-driven-development",
+      "scope": "root",
+      "capability": "test-driven-development",
+      "content_hash": "e19f762943c56644",
+      "version": "1.2.0",
+      "mirrors": [
+        "skills/test-driven-development/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/token-usage-lint",
+      "type": "skill",
+      "layer": "L3",
+      "name": "token-usage-lint",
+      "scope": "root",
+      "capability": "token-usage-lint",
+      "content_hash": "e7762c79dcc9a7f2",
+      "version": "1.1.0",
+      "mirrors": [
+        "skills/token-usage-lint/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/translate",
+      "type": "skill",
+      "layer": "L3",
+      "name": "translate",
+      "scope": "root",
+      "capability": "translate",
+      "content_hash": "130763d32d8932dc",
+      "version": "1.0.3",
+      "mirrors": [
+        "skills/translate/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/ui-ux-design-intelligence",
+      "type": "skill",
+      "layer": "L3",
+      "name": "ui-ux-design-intelligence",
+      "scope": "root",
+      "capability": "ui-ux-design-intelligence",
+      "content_hash": "584f569c20014122",
+      "version": "1.0.1",
+      "mirrors": [
+        "skills/ui-ux-design-intelligence/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/update-bun-packages",
+      "type": "skill",
+      "layer": "L3",
+      "name": "update-bun-packages",
+      "scope": "root",
+      "capability": "update-bun-packages",
+      "content_hash": "d051c963862b0514",
+      "version": "1.3.1",
+      "mirrors": [
+        "skills/update-bun-packages/SKILL.md"
+      ]
+    },
+    {
+      "id": "skill:root/zod-contract-gate",
+      "type": "skill",
+      "layer": "L3",
+      "name": "zod-contract-gate",
+      "scope": "root",
+      "capability": "zod-contract-gate",
+      "content_hash": "11e4c739d4dfeedc",
+      "version": "1.0.3",
+      "mirrors": [
+        "skills/zod-contract-gate/SKILL.md"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "type": "references",
+      "from": "agent:root/architect",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/code-writer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/designer",
+      "to": "skill:root/code-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/designer",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/designer",
+      "to": "skill:root/refactoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/designer",
+      "to": "skill:root/swe-solve",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/designer",
+      "to": "skill:root/test-driven-development",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/i18n-specialist",
+      "to": "skill:root/i18n-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/i18n-specialist",
+      "to": "skill:root/i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/i18n-specialist",
+      "to": "skill:root/i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/i18n-specialist",
+      "to": "skill:root/i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/i18n-specialist",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/i18n-specialist",
+      "to": "skill:root/translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/pm",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/pm",
+      "to": "skill:root/decision-record",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/pm",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/pm",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/security-monitor",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/stack-setup",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "agent:root/test-runner",
+      "to": "skill:root/meeting-facilitation",
+      "source": "prose"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "skill:root/i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "skill:root/post-write-check",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:AGENTS.md",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:CLAUDE.md",
+      "to": "skill:root/i18n-audit",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:CLAUDE.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:CLAUDE.md",
+      "to": "skill:root/post-write-check",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "cites_skill",
+      "from": "doc:CODEX.md",
+      "to": "skill:root/meeting-facilitation",
+      "source": "workflow-doc"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "agent:root/architect",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "output_type.approved_implementation_plan",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "procedure.co-develop.feature-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "procedure.co-develop.technical-planning",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.architecture-design",
+      "to": "skill:root/code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "agent:root/security-monitor",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "agent:root/stack-setup",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "output_type.environment_manifest",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "enables",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "procedure.co-develop.technical-planning",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "skill:root/code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.environment-bootstrap",
+      "to": "skill:root/test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "agent:root/architect",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "agent:root/code-writer",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "agent:root/designer",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "agent:root/security-monitor",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "output_type.implementation_commit",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "skill:root/code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "skill:root/documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "skill:root/refactoring",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.feature-implementation",
+      "to": "skill:root/test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.release-verification",
+      "to": "agent:root/code-writer",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.release-verification",
+      "to": "agent:root/test-runner",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.release-verification",
+      "to": "output_type.regression_report",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.release-verification",
+      "to": "procedure.co-develop.feature-implementation",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.release-verification",
+      "to": "skill:root/documentation-writing",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.release-verification",
+      "to": "skill:root/test-driven-development",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.security-release-retrospective",
+      "to": "agent:root/security-monitor",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.security-release-retrospective",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.security-release-retrospective",
+      "to": "procedure.co-develop.release-verification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.security-release-retrospective",
+      "to": "skill:root/code-review",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "agent:root/architect",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "agent:root/stack-setup",
+      "source": "procedure_schema",
+      "actor_type": "agent"
+    },
+    {
+      "type": "produces",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "output_type.technical_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "follows",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "procedure.co-develop.environment-bootstrap",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "skill:root/refactoring",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "step_uses_skill",
+      "from": "procedure.co-develop.technical-planning",
+      "to": "skill:root/research-analysis",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/agent-lifecycle-manager",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/agent-lifecycle-manager/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/agent-lifecycle-manager",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/ci-triage",
+      "to": "skill:root/project-review",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/code-review",
+      "to": "agent:root/code-writer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/code-writer.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/code-review",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/code-review",
+      "to": "output_type.security_baseline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/code-review",
+      "to": "phase:root/4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/code-review",
+      "to": "skill:root/refactoring",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/code-review/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/code-review",
+      "to": "skill:root/refactoring",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/code-review",
+      "to": "skill:root/test-driven-development",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/decision-record",
+      "to": "skill:root/evidence-ledger",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/delegate-to-hub",
+      "to": "skill:root/sync",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/design-foundation",
+      "to": "skill:root/accessibility-audit",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/design-foundation",
+      "to": "skill:root/accessibility-audit",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/design-foundation",
+      "to": "skill:root/token-usage-lint",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/design-foundation",
+      "to": "skill:root/token-usage-lint",
+      "source": "prose"
+    },
+    {
+      "type": "enables",
+      "from": "skill:root/design-foundation",
+      "to": "skill:root/ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/design-foundation/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/design-foundation",
+      "to": "skill:root/ui-ux-design-intelligence",
+      "source": "prose"
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/documentation-writing",
+      "to": "output_type.release_notes",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/documentation-writing",
+      "to": "output_type.ui_specification",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/documentation-writing",
+      "to": "skill:root/team-builder",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/documentation-writing/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/evidence-ledger",
+      "to": "skill:root/decision-record",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/handbook",
+      "to": "skill:root/handbook-sync-audit",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/handbook-sync-audit",
+      "to": "skill:root/handbook",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/handbook-sync-audit",
+      "to": "skill:root/project-review",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/i18n-audit",
+      "to": "agent:root/i18n-specialist",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/i18n-specialist.md",
+        "field": "required_skills",
+        "index": 3
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-audit",
+      "to": "skill:root/i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-audit",
+      "to": "skill:root/i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-audit",
+      "to": "skill:root/i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/i18n-formatting",
+      "to": "agent:root/i18n-specialist",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/i18n-specialist.md",
+        "field": "required_skills",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-formatting",
+      "to": "skill:root/i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-formatting",
+      "to": "skill:root/i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-formatting",
+      "to": "skill:root/translate",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/i18n-layout",
+      "to": "agent:root/i18n-specialist",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/i18n-specialist.md",
+        "field": "required_skills",
+        "index": 2
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-layout",
+      "to": "skill:root/i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-layout",
+      "to": "skill:root/i18n-locale-config",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-layout",
+      "to": "skill:root/translate",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/i18n-locale-config",
+      "to": "agent:root/i18n-specialist",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/i18n-specialist.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-locale-config",
+      "to": "skill:root/i18n-formatting",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-locale-config",
+      "to": "skill:root/i18n-layout",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/i18n-locale-config",
+      "to": "skill:root/translate",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/meeting-facilitation",
+      "to": "skill:root/project-review",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/meeting-facilitation",
+      "to": "skill:root/team-builder",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/refactoring",
+      "to": "agent:root/code-writer",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/code-writer.md",
+        "field": "required_skills",
+        "index": 1
+      }
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/refactoring",
+      "to": "output_type.tooling_adjustments",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/refactoring",
+      "to": "phase:root/4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/refactoring",
+      "to": "skill:root/code-review",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/refactoring/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "enables",
+      "from": "skill:root/research-analysis",
+      "to": "skill:root/documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/research-analysis/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/security-scan",
+      "to": "skill:root/update-bun-packages",
+      "source": "prose"
+    },
+    {
+      "type": "follows",
+      "from": "skill:root/service-design",
+      "to": "skill:root/accessibility-audit",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/service-design/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "skill:root/service-design",
+      "to": "skill:root/token-usage-lint",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/service-design/SKILL.md",
+        "field": "relates_to",
+        "index": 2
+      }
+    },
+    {
+      "type": "follows",
+      "from": "skill:root/service-design",
+      "to": "skill:root/ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/service-design/SKILL.md",
+        "field": "relates_to",
+        "index": 1
+      }
+    },
+    {
+      "type": "references",
+      "from": "skill:root/skill-lifecycle-manager",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/skill-lifecycle-manager",
+      "to": "skill:root/script-lifecycle-manager",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/skill-lifecycle-manager/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/swe-solve",
+      "to": "phase:root/4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/team-builder",
+      "to": "skill:root/agent-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "references",
+      "from": "skill:root/team-builder",
+      "to": "skill:root/skill-lifecycle-manager",
+      "source": "prose"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/test-driven-development",
+      "to": "agent:root/test-runner",
+      "source": "required_skills",
+      "provenance": {
+        "file": "agents/test-runner.md",
+        "field": "required_skills",
+        "index": 0
+      }
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/test-driven-development",
+      "to": "output_type.test_scaffold",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/test-driven-development",
+      "to": "phase:root/4",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "follows",
+      "from": "skill:root/test-driven-development",
+      "to": "skill:root/code-review",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/test-driven-development/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "skill:root/token-usage-lint",
+      "to": "skill:root/ui-ux-design-intelligence",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/token-usage-lint/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "composes_with",
+      "from": "skill:root/translate",
+      "to": "skill:root/documentation-writing",
+      "source": "relates_to",
+      "symmetric": true,
+      "provenance": {
+        "file": "skills/translate/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    },
+    {
+      "type": "follows",
+      "from": "skill:root/ui-ux-design-intelligence",
+      "to": "skill:root/documentation-writing",
+      "source": "relates_to",
+      "provenance": {
+        "file": "skills/ui-ux-design-intelligence/SKILL.md",
+        "field": "relates_to",
+        "index": 0
+      }
+    }
+  ]
+}

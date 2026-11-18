@@ -1,0 +1,241 @@
+// @version 1.3.0
+/**
+ * constitution-scrub.ts — shared context.md reference scrubber
+ *
+ * v1.3.0 (2026-11-11, U-20261111-002 from co-deck, spec
+ *          docs/designs/2026-11-11-co-deck-upstream-fixes-design.md §U-002): new
+ *          prose rule A-10 — bare section citations without the .md suffix
+ *          (`CONSTITUTION §11`) project to `context.md §11`, like A-4 does for
+ *          `context.md §N`. The L1 CODEX.md body kept "(CONSTITUTION §11)"
+ *          under an L0-ONLY marker that claimed the strip was complete. Code
+ *          files and JSON are unchanged (prose arm only).
+ *
+ * v1.2.0 (2026-10-19, T-20261019-001): rule A-6 generalizes from the
+ *          self-reference special case to full target-depth relativization —
+ *          every ](docs/context.md) the blanket rules emit is rewritten to the
+ *          path relative to the TARGET file's directory (a
+ *          docs/governance/agents/*.md mirror three levels deep gets
+ *          ../../context.md, not the root-depth docs/context.md that broke 7
+ *          links per mirror on every re-propagation). The in-project target
+ *          path is derived by stripping the templates/<variant>/ prefix.
+ *          New rule A-9: docs/adr/ link targets redirect to the projected
+ *          docs/context.md (L1+ trees carry no docs/adr/ content; the
+ *          workflows.md mirror's ADR-0099 link broke in every scaffold).
+ * v1.1.0 (2026-10-05, T-20261004-022): code-branch state machine no longer lets
+ *          a `//` line corrupt block-comment state — a `/*`-shaped glob inside a
+ *          // comment (e.g. `docs/**` in a path list) used to wedge the machine
+ *          into block-comment mode and blanket-scrub FUNCTIONAL string literals
+ *          further down (audit.ts verify-memory guard, dev-sync/validate-templates
+ *          literals). Full-line // comments are now classified first and scrubbed
+ *          without touching the state; only real block-comment markers drive it.
+ *
+ * Single source for the L0→L1+ reference transform applied when workspace-root
+ * (L0) content is propagated into templates/ (L1/L2), where context.md is
+ * replaced by docs/context.md (§7.5 context.md Non-Propagation).
+ *
+ * Consumers:
+ *   - scripts/propagate-to-templates.ts (L0→L1 copy + marker-inject + governance deploy)
+ *   - scripts/validate-templates.ts (L0/L1 parity normalization before comparison)
+ *   - scripts/lifecycle-sync-audit.ts (Check C skill-mirror normalization)
+ *
+ * Sharing one implementation keeps the propagator and the checkers from ever
+ * disagreeing again about which substitutions are intentional (T-20260912-005/
+ * T-20260912-010): a checker that compares raw L0 content against a scrubbed L1
+ * copy reports the scrub itself as drift, and its fix hint would tell you to
+ * clobber the intentional state.
+ *
+ * Rules (prose files): A-1 header line, A-2/A-3 markdown links, A-4 plain-text,
+ * A-5/A-5b docs/constitution/ link targets, A-7 part-file mentions, A-8 bare
+ * directory mentions, A-6 target-aware depth relativization, A-9 docs/adr/
+ * target redirect.
+ *
+ * Non-targets (never scrubbed):
+ *   - JSON files (.json): functional data. Field values such as
+ *     propagation-map.json's constitution-context "source_file": "context.md"
+ *     are read by code (publishDocs / runMarkerRewrite); scrubbing them corrupts
+ *     the L1 mirror (found 2026-09-12 — T-20260912-005).
+ *   - Code outside comments (.ts/.tsx/.js/.jsx): string literals used in
+ *     functional file-existence checks must keep pointing at the real L0 marker.
+ *   - Policy self-description HTML comments: a comment that says "must NOT
+ *     reference context.md — see §7.5 Non-Propagation" documents the rule;
+ *     scrubbing it produces a self-referentially false statement.
+ *
+ * @license MIT
+ */
+
+import { extname, posix } from "node:path";
+import { isPolicySelfDescription, POLICY_SELF_DESCRIPTION_MARKERS } from "../helpers/l0-ref-policy.ts";
+
+/**
+ * Mask policy self-description HTML comments so the prose rules cannot touch
+ * them, apply the transform, then restore them verbatim.
+ */
+/**
+ * Policy self-description phrases live in helpers/l0-ref-policy.ts — the
+ * L0-reference policy SSOT — so the scrub's block protection and the audit
+ * leak-scan's line exemption can never disagree (T-20260912-005).
+ */
+const SELF_DESCRIPTION_MARKERS = POLICY_SELF_DESCRIPTION_MARKERS;
+
+function isPolicySelfDescriptionBlock(block: string): boolean {
+  return SELF_DESCRIPTION_MARKERS.some((m) => block.includes(m));
+}
+
+/**
+ * Scrub context.md references for L1+ targets (no longer L0 context).
+ *
+ * For code files (.ts/.js/.tsx/.jsx), only text inside line comments and block
+ * comments is scrubbed — string literals used in functional file-existence checks (e.g.
+ * `join(dir, "context.md")`, used by several scripts' own L0-root detection) are
+ * left untouched. Those checks must keep pointing at the real L0 marker file regardless
+ * of which layer the script itself runs from; blanket-replacing them with "context.md"
+ * silently breaks root detection in the propagated copy (found 2026-08-15 — several
+ * already-propagated L1 scripts, e.g. agent-lifecycle-audit.ts, had this exact bug).
+ *
+ * For JSON files (.json), the content is returned unchanged — JSON has no comments,
+ * every occurrence is a functional field value.
+ *
+ * For markdown/prose files (the default), the full blanket replace is applied, except
+ * inside HTML comments that describe the Non-Propagation policy itself.
+ */
+export function scrubConstitutionRefs(content: string, filePath?: string, targetPath?: string): string {
+  // T-20260912-005: JSON is functional data, not prose. No occurrence of
+  // context.md in a .json file is ever prose — it is a field value some
+  // reader depends on.
+  if (filePath && extname(filePath).toLowerCase() === ".json") {
+    return content;
+  }
+
+  const isCode = filePath ? /\.(ts|tsx|js|jsx)$/.test(filePath) : false;
+
+  if (isCode) {
+    const lines = content.split("\n");
+    let inBlockComment = false;
+    const scrubbedLines = lines.map((line) => {
+      const trimmed = line.trim();
+      // T-20261004-022: a full-line `//` comment is scrubbed as comment text
+      // WITHOUT consulting or corrupting the block-comment state machine.
+      // Previously a `/*`-shaped glob inside a // line (e.g. `docs/**` in a
+      // path list) matched the block-opener heuristic and wedged the machine
+      // into block-comment mode, so every following functional string literal
+      // was blanket-scrubbed — the divergence class that shipped context.md
+      // into audit.ts/dev-sync.ts existsSync guards and message strings.
+      if (trimmed.startsWith("//")) {
+        return line.replace(/CONSTITUTION\.md/g, "context.md");
+      }
+      const wasInBlockComment = inBlockComment;
+      // The closer probe starts at idx+1 (not idx+2) so an OVERLAPPING `/*/`
+      // glob in functional code (e.g. `templates/*/skills/` in a message
+      // string) counts as balanced instead of wedging the machine open
+      // (T-20261004-022: this wedge blanket-scrubbed dev-sync.ts literals
+      // between the glob line and the next real block close).
+      if (/\/\*/.test(line) && !/\*\//.test(line.slice(line.indexOf("/*") + 1))) {
+        inBlockComment = true;
+      } else if (wasInBlockComment && /\*\//.test(line)) {
+        inBlockComment = false;
+      }
+      const isFullLineComment = wasInBlockComment || inBlockComment || trimmed.startsWith("*");
+
+      if (isFullLineComment) {
+        return line.replace(/CONSTITUTION\.md/g, "context.md");
+      }
+
+      // Trailing line comment on an otherwise-functional line: scrub only the comment part.
+      const commentIdx = line.indexOf("//");
+      if (commentIdx !== -1 && line.slice(commentIdx).includes("context.md")) {
+        return line.slice(0, commentIdx) + line.slice(commentIdx).replace(/CONSTITUTION\.md/g, "context.md");
+      }
+
+      // Functional code (string literal in join()/existsSync()/array/etc.) — leave as-is.
+      return line;
+    });
+    return scrubbedLines.join("\n");
+  }
+
+  // T-20260912-005: policy self-description comments (documentation OF the
+  // Non-Propagation rule) must survive scrubbing — e.g. CLAUDE.md's
+  // "L1/L2 projects must NOT reference context.md — see context.md §7.5
+  // context.md Non-Propagation" comment. Mask qualifying HTML comment blocks
+  // out of the content, run the prose rules, then restore them verbatim.
+  const protectedBlocks: string[] = [];
+  let work = content.replace(/<!--[\s\S]*?-->/g, (block) => {
+    if (isPolicySelfDescriptionBlock(block)) {
+      protectedBlocks.push(block);
+      return `\u0000SCRUB-KEEP-${protectedBlocks.length - 1}\u0000`;
+    }
+    return block;
+  });
+
+  // A-1. Header line — handles both backtick and plain variants.
+  work = work.replace(
+    /> \*\*(?:Shared workspace setup.*?|Project context.*?)(?:CONSTITUTION\.md|context\.md)[^*]*?\.\*\*/s,
+    "> **Project context, architecture, coding guidelines, and design standards live in [`docs/context.md`](docs/context.md) - read it first.**",
+  );
+  // A-2. Full markdown links where link text mentions context.md.
+  work = work.replace(/\[`?CONSTITUTION\.md`?[^\]]*\]\([^)]*\)/g, "[docs/context.md](docs/context.md)");
+  // A-3. Remaining markdown link targets that still point at context.md.
+  work = work.replace(/\]\(CONSTITUTION\.md[^)]*\)/g, "](docs/context.md)");
+  // A-4. Plain-text mentions.
+  work = work.replace(/CONSTITUTION\.md/g, "context.md");
+  // A-10. Bare section citations without the .md suffix ("(CONSTITUTION §11)") —
+  // A-4 keys on the filename, so these leaked into L1 CODEX.md body text while
+  // the L0-ONLY marker above them said the strip was complete (U-20261111-002).
+  // Same projection as A-4: the section number stays as visible text.
+  work = work.replace(/\bCONSTITUTION(?=\s*§)/g, "context.md");
+  // A-5. Part-file links into docs/constitution/ (e.g. 06-skill-lifecycle.md) whose
+  // link text does NOT mention context.md (those are already covered by A-2).
+  // L1/L2 trees have no docs/constitution/ directory — the projected home is
+  // docs/context.md, so pointing the link there keeps it resolvable.
+  work = work.replace(
+    /\[[^\]]*docs\/constitution\/[^\]]*\]\([^)]*docs\/constitution\/[^)]*\)/g,
+    "[docs/context.md](docs/context.md)",
+  );
+  // A-5b. ANY remaining markdown link whose TARGET points into docs/constitution/ —
+  // link text like "[§9.1]" carries no recognizable hint, so A-5 misses it. Projected
+  // home is docs/context.md (anchors dropped; the visible text keeps the reference).
+  work = work.replace(/\]\([^)]*docs\/constitution\/[^)]*\)/g, "](docs/context.md)");
+  // A-7. Plain-text / inline-code mentions of a docs/constitution/ part file
+  // (e.g. `docs/constitution/06-skill-lifecycle.md §6.6`) — projected to docs/context.md.
+  work = work.replace(/docs\/constitution\/[a-z0-9.-]+\.md/gi, "docs/context.md");
+  // A-8. Bare `docs/constitution/` directory mentions (no part-file name, so A-7
+  // misses them — found 2026-09-12: context.md's validate-md-language scan-path
+  // list propagated the bare directory into templates/common/docs/context.md, where
+  // it was masked by the L0-leakage check's old whole-file intentional-duplicate
+  // exemption). A list item (`X`, `docs/constitution/`, …) is dropped with one
+  // delimiter; a standalone backticked mention projects to `docs/` (the L1+
+  // governance-docs root); any remaining plain-text mention likewise.
+  work = work.replace(/`docs\/constitution\/`,\s*/g, "");
+  work = work.replace(/,\s*`docs\/constitution\/`/g, "");
+  work = work.replace(/`docs\/constitution\/`/g, "`docs/`");
+  work = work.replace(/(^|[^\/\w.-])docs\/constitution\/(?![\w.-])/gi, "$1docs/");
+  // A-6. Target-aware: every ](docs/context.md) the rules above emit is
+  // root-depth-shaped, which only resolves from the project root. Rewrite the
+  // target to the path relative to the TARGET file's own directory — a
+  // docs/governance/agents/*.md mirror needs ../../context.md, a root file
+  // keeps docs/context.md, and docs/context.md itself gets context.md (the
+  // self-reference case: ](docs/context.md) inside docs/context.md would
+  // resolve to docs/docs/context.md). No targetPath → no-op (callers that
+  // cannot say where the content lands keep the legacy literal).
+  if (targetPath) {
+    const normalizedTarget = targetPath.replace(/\\/g, "/");
+    // In-project path: strip the templates/<variant>/ prefix (L1 common and
+    // L2 variants alike) — the delivered depth is what links resolve against.
+    const inProject = normalizedTarget.replace(/^.*?templates\/[^/]+\//, "").replace(/^\/+/, "");
+    const rel = posix.relative(posix.dirname("/" + inProject), "/docs/context.md");
+    work = work.replace(/\]\(docs\/context\.md\)/g, `](${rel})`);
+    // A-9. adr/ link targets have no projected home — L1+ trees carry no
+    // docs/adr/ content (root docs/adr/ is L0-only governance, §7.5), so the
+    // target redirects to the projected docs/context.md with the link text
+    // preserved and anchors dropped (A-5b policy). Depth-relative like A-6.
+    // The source may reference the ADR root-depth (docs/adr/…) or relative to
+    // its own depth (../../adr/… in docs/governance/agents/workflows.md — both
+    // shapes broke in the mirror and in every scaffold, T-20261019-001).
+    work = work.replace(/\]\((?:[^)]*\/)?adr\/[^)]*\)/g, `](${rel})`);
+  }
+
+  // Restore protected self-description comment blocks verbatim.
+  if (protectedBlocks.length > 0) {
+    work = work.replace(/\u0000SCRUB-KEEP-(\d+)\u0000/g, (_, i) => protectedBlocks[Number(i)]);
+  }
+  return work;
+}

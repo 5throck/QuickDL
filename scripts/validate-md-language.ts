@@ -1,0 +1,636 @@
+#!/usr/bin/env bun
+// @version 1.16.2
+// v1.16.1 (2026-10-28, T-20261028-003): whitespace-only — the two-statement line at isOfficialDocument reflowed (dev-sync script-registry gate requires a version bump for any modified script; no behavior change).
+// v1.16.0 (2026-10-27, U-20261027-007): perimeter hardening — (a) the
+//           `/^Hermes\.md$/` official-pattern was case-SENSITIVE and never
+//           matched the actual root file HERMES.md: dead protection, now /i.
+//           (b) The EN originals of the bilingual twins (README.md,
+//           docs/README.md, docs/user-guide.md) join officialPatterns, so
+//           stray Korean in an English original FAILS (same detector the KO
+//           side uses; README.md's language-link line survives via the link
+//           stripper). (c) The suffix-locale declaration gate extends to the
+//           KO twins (README_ko.md, docs/README_ko.md, docs/user-guide_ko.md)
+//           — their `lang: ko` declarations were convention-only before; root
+//           README_ko.md lacked the declaration and now carries
+//           `lang: ko` + `lang_reason: source-material` (the
+//           templates/*/README_ko.md precedent). The gate is extracted to the
+//           exported pure evaluateSuffixLocaleGate() (import-safety guard added
+//           — the module-level scan ran unguarded and process.exit'ed importers).
+// v1.15.0 (2026-10-08, T-20261006-004): suffix-style locale files inside the
+//           official perimeter (README_ko.md, guide-ja.yaml — the [._-]locale.\ext
+//           form) must DECLARE their language (any legal locale value) instead of
+//           being silently excluded; missing/unknown declarations FAIL. Wholesale
+//           locale directories stay excluded, the base locale (en) is never a
+//           translation marker, and the gate runs after the official-document
+//           filter (runtime/service data stays out of scope). 51 template docs
+//           stamped with `lang: ko` + `lang_reason: source-material` in the same
+//           pass (the README_ko.md precedent); co-learning's three _ko docs carry
+//           the full sync_version/translated_from_hash pattern (T-20261006-003).
+// v1.14.0 (2026-10-05, T-20261005-004, spec docs/designs/2026-10-05-scripts-hygiene-batch-design.md):
+//           inline-code stripping extracted to the exported pure helper
+//           stripCodeForLanguageScan() and hardened for CommonMark
+//           double-backtick spans (`` `x` ``) — they are consumed before the
+//           single-backtick pass, whose stray-run pairing previously shifted
+//           parity for the rest of the file and unmasked Korean living inside
+//           intentional inline-code tokens (language-gate false positive on
+//           an English-only CHANGELOG entry). analyzeFile() exported for the
+//           regression test; single-span semantics unchanged.
+// v1.13.0 (2026-10-05, T-20261004-025): the docs-reorganization destinations
+//           docs/reports/ + docs/guides/ + docs/standards/ join the official
+//           perimeter so undeclared Korean there fails (declared lang files
+//           keep their exception mechanism).
+// v1.12.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
+//           site 4): official patterns gain CODEX.md and the
+//           .agents/{skills,commands}/ + .codex/{skills,prompts}/ trees
+//           (byte-copies of already-scanned SSOT content; .agents/commands
+//           included read-only despite the Finding-D adjudication).
+/**
+ * Markdown/YAML Language Validation Script with I18N Support
+ *
+ * Policy: Official documents and governance files must contain English sentences.
+ * Validates only allowlisted paths: agents/, AGENTS.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md,
+ * context.md, CHANGELOG.md, docs/constitution/, docs/governance/, docs/designs/,
+ * docs/adr/, docs/decisions/, docs/reports/, docs/guides/, docs/standards/, docs/VERSION_MANIFEST.md, skills/,
+ * .claude/skills/, .gemini/skills/, .claude/commands/, .gemini/commands/,
+ * templates/, and SECURITY.md — plus, since v1.16.0, the bilingual twins'
+ * EN originals (README.md, docs/README.md, docs/user-guide.md — stray Korean
+ * there FAILS) and their KO twins (README_ko.md, docs/README_ko.md,
+ * docs/user-guide_ko.md — gated on a `lang: ko` DECLARATION via the
+ * suffix-locale gate). Both `.md` and `.yaml`/`.yml` files under these
+ * paths are scanned; the `lang: ko` + `lang_reason` exception is declared in
+ * `---` frontmatter for Markdown, or as a top-level `lang:`/`lang_reason:` key
+ * for plain YAML files that have no frontmatter fence. `language: ko` is
+ * accepted as a legacy alias for `lang: ko` (a WARN recommends migrating to
+ * `lang:` so the declaration vocabulary converges) — T-20260910-027.
+ *
+ * Generated-region allowlist (T-20260912-015): files may mark a machine-generated
+ * section with `<!-- validate-md-language:allowlist-begin reason="..." -->` ...
+ * `<!-- validate-md-language:allowlist-end -->`; content inside is exempt, the
+ * rest of the file is still validated. Used by scripts/generate-version-manifest.ts
+ * for the VERSION_MANIFEST Skills table, which embeds verbatim Korean triggers
+ * copied from k-* SKILL.md frontmatter. Prefer frontmatter `lang: ko` for
+ * hand-written files; the marker form is for generated regions only.
+ *
+ * Deliberately NOT scanned: memory/ session logs — they routinely quote the
+ * user's Korean requests verbatim, which is a policy gray zone (source-material
+ * vs. operational log) explicitly deferred; do not "fix" by widening scope here
+ * without a governance decision. Locale-specific files for all supported I18N
+ * languages and node_modules/.git directories are also excluded.
+ *
+ * Locale-only content in excluded paths is acceptable. Mixed-language content
+ * is acceptable in all paths.
+ *
+ * Reference: context.md §3 - Mandatory English Git & PR Artifacts
+ *            context.md §4 - Internationalization (I18N)
+ *
+ * Usage: bun run scripts/validate-md-language.ts
+ * Exit codes: 0 (pass), 1 (violation found)
+ */
+
+import { readFileSync, existsSync } from "node:fs";
+import { join, dirname } from "node:path";
+import { execFileSync } from "node:child_process";
+import { die } from "./lib/error-handling.ts";
+
+const _TRACKED_CO_VARIANTS: Set<string> | null = (() => {
+  try {
+    const out = execFileSync("git", ["ls-files", "--cached", "--", "templates/"], { encoding: "utf-8" }).trim();
+    const dirs = new Set<string>();
+    if (!out) return dirs;
+    for (const line of out.split("\n")) {
+      const m = line.match(/^templates\/(co-[^/]+)\//);
+      if (m) dirs.add(m[1]);
+    }
+    return dirs;
+  } catch {
+    return null;
+  }
+})();
+
+function isCoVariantTracked(name: string): boolean {
+  if (!_TRACKED_CO_VARIANTS) return true;
+  return _TRACKED_CO_VARIANTS.has(name);
+}
+
+/**
+ * Supported locale codes are loaded from docs/workspace-schema.json (i18n.locale_codes).
+ * To add a new locale: update docs/workspace-schema.json — do NOT hardcode here.
+ * If the schema file is unavailable, falls back to ['ko'] only (degraded mode,
+ * with a warning) — the language policy names ko/ and locales/ko/ as translation
+ * zones independent of the schema registry.
+ */
+// Read locale codes from workspace-schema.json (SSOT for i18n policy)
+// Falls back to ['ko'] (degraded mode) if schema is unavailable
+function loadSupportedLocales(): string[] {
+  try {
+    const schemaPath = join(dirname(import.meta.path), "..", "docs", "workspace-schema.json");
+    const schema = JSON.parse(readFileSync(schemaPath, "utf-8"));
+    const codes = schema?.i18n?.locale_codes;
+    if (Array.isArray(codes) && codes.length > 0) return codes;
+  } catch {
+    // fall through to degraded fallback
+  }
+  // Degraded mode (schema missing, e.g. project-local runs where the workspace
+  // schema is not shipped): only 'ko' is guaranteed without the registry.
+  console.warn(
+    "[validate-md-language] docs/workspace-schema.json unavailable — using degraded locale list (ko only); other translation zones will not be exempted.",
+  );
+  return ["ko"];
+}
+
+const SUPPORTED_LOCALES: string[] = loadSupportedLocales();
+
+// Korean character range (Hangul syllables and jamo)
+const KOREAN_PATTERN = /[가-힯ᄀ-ᇿ]/;
+
+// English sentence pattern (requires letters, spaces, and sentence punctuation)
+const ENGLISH_SENTENCE_PATTERN = /[A-Za-z][A-Za-z\s,;\.!\?]{10,}/;
+
+// Permitted lang_reason values for Korean exception declarations
+const ALLOWED_LANG_REASONS = ["legal", "source-material", "proper-noun"] as const;
+
+// Generated-region allowlist markers (see header comment). The begin marker
+// carries a reason="..." attribute; the region between the markers is stripped
+// before Korean detection so exactly the generated section is exempt — the
+// remainder of the file is still validated. Emitted by
+// scripts/generate-version-manifest.ts for the VERSION_MANIFEST Skills table.
+const ALLOWLIST_REGION_PATTERN =
+  /<!--\s*validate-md-language:allowlist-begin\b[^\n]*-->[\s\S]*?<!--\s*validate-md-language:allowlist-end\s*-->/g;
+
+interface Violation {
+  file: string;
+  reason: string;
+}
+
+/**
+ * Returns true for protected paths where lang: ko exception is never permitted —
+ * core governance/routing docs that must stay single-source English regardless
+ * of a project's domain. agents/*.md and skills/*.md are NOT protected: a project
+ * whose real-world domain requires Korean (e.g. citing Korean building codes,
+ * bilingual client-facing skill docs) may declare `lang: ko` + `lang_reason:
+ * legal|source-material|proper-noun` in frontmatter, same exception mechanism
+ * used everywhere else — see Stage 3 in analyzeFile().
+ */
+function isProtectedPath(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, "/");
+  const basename = normalized.split("/").pop() ?? "";
+  if (["CLAUDE.md", "GEMINI.md", "CODEX.md", "HERMES.md", "CONSTITUTION.md", "AGENTS.md"].includes(basename))
+    return true;
+  if (basename.endsWith(".context.md")) return true;
+  return false;
+}
+
+/**
+ * Extract lang and lang_reason from YAML frontmatter (`---`-fenced, as used in
+ * Markdown files). For plain YAML files with no fence (e.g. `schema.yaml`
+ * starting directly with `schema_version:`), fall back to a top-level
+ * (column-0) `lang:`/`lang_reason:` key when isPlainYaml is true.
+ *
+ * `language:` is accepted as a legacy alias for `lang:` (T-20260910-027):
+ * treated identically for the exception check, with `langKey` reporting which
+ * key was used so the caller can WARN in favor of the canonical `lang:`.
+ */
+function parseLangDeclaration(
+  content: string,
+  isPlainYaml: boolean,
+): { lang?: string; lang_reason?: string; langKey?: "lang" | "language" } {
+  const fenced = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const source = fenced ? fenced[1] : isPlainYaml ? content : null;
+  if (source === null) return {};
+  const lang = source.match(/^lang:\s*(\S+)/m)?.[1];
+  const languageAlias = lang ? undefined : source.match(/^language:\s*(\S+)/m)?.[1];
+  return {
+    lang: lang ?? languageAlias,
+    lang_reason: source.match(/^lang_reason:\s*(\S+)/m)?.[1],
+    langKey: lang ? "lang" : languageAlias ? "language" : undefined,
+  };
+}
+
+/**
+ * Check if file path is an OFFICIAL document that requires English validation
+ *
+ * Only validates these allowlisted paths:
+ * - agents/ (subdirectories)
+ * - AGENTS.md, CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, context.md, CHANGELOG.md, SECURITY.md
+ * - docs/constitution/ (subdirectories)
+ * - docs/governance/ (subdirectories)
+ * - docs/designs/ (design docs may use lang frontmatter exceptions)
+ * - docs/adr/, docs/decisions/ (decision records; same exception mechanism)
+ * - docs/VERSION_MANIFEST.md (generated; Korean allowed only inside the
+ *   generator-emitted allowlist markers — see header comment)
+ * - README.md / docs/README.md / docs/user-guide.md (EN originals of the
+ *   bilingual twins — English scanned, v1.16.0) and their _ko twins
+ *   (declaration-gated via the suffix-locale gate, v1.16.0)
+ * - skills/ (subdirectories)
+ * - .claude/skills/, .claude/commands/ (subdirectories)
+ * - .gemini/skills/, .gemini/commands/ (subdirectories)
+ * - .agents/skills/, .agents/commands/ (subdirectories)
+ * - .codex/skills/, .codex/prompts/ (subdirectories)
+ * - templates/ (subdirectories)
+ *
+ * Directory-prefixed patterns match both `.md` and `.yaml`/`.yml` files; the
+ * fixed root filenames (AGENTS.md, CLAUDE.md, ...) are Markdown-only by name.
+ */
+export function isOfficialDocument(filePath: string): boolean {
+  const normalizedPath = filePath.replace(/\\/g, "/");
+
+  // Allowlisted official paths
+  const officialPatterns = [
+    /^agents\/.*\.(md|ya?ml)$/,
+    /^AGENTS\.md$/,
+    /^CLAUDE\.md$/,
+    /^GEMINI\.md$/,
+    /^CONSTITUTION\.md$/,
+    /^CHANGELOG\.md$/,
+    /^SECURITY\.md$/,
+    /^docs\/constitution\/.*\.(md|ya?ml)$/,
+    /^docs\/governance\/.*\.(md|ya?ml)$/,
+    /^docs\/designs\/.*\.(md|ya?ml)$/,
+    /^docs\/adr\/.*\.(md|ya?ml)$/,
+    /^docs\/decisions\/.*\.(md|ya?ml)$/,
+    // T-20261004-025: the 2026-10-05 docs reorganization destinations join the
+    // perimeter — reports/guides/standards carry official prose, so undeclared
+    // Korean there must fail (declared lang: ko files stay exempt).
+    /^docs\/reports\/.*\.(md|ya?ml)$/,
+    /^docs\/guides\/.*\.(md|ya?ml)$/,
+    /^docs\/standards\/.*\.(md|ya?ml)$/,
+    /^docs\/VERSION_MANIFEST\.md$/,
+    /^skills\/.*\.(md|ya?ml)$/,
+    /^\.claude\/skills\/.*\.(md|ya?ml)$/,
+    /^\.claude\/commands\/.*\.(md|ya?ml)$/,
+    /^\.gemini\/skills\/.*\.(md|ya?ml)$/,
+    /^\.gemini\/commands\/.*\.(md|ya?ml)$/,
+    // Spec 2026-09-25-verifier-platform-expansion-design site 4: the two
+    // newest platform surfaces join the official-document scan. .agents/commands
+    // is included despite having no producer yet (Finding D): the check is
+    // read-only and the files are English today.
+    /^CODEX\.md$/,
+    // U-20261027-007(a): /i — the case-sensitive /^Hermes\.md$/ form never
+    // matched the actual root file HERMES.md (dead protection since the
+    // pattern landed). Both spellings are official documents.
+    /^Hermes\.md$/i,
+    /^\.agents\/skills\/.*\.(md|ya?ml)$/,
+    /^\.agents\/commands\/.*\.(md|ya?ml)$/,
+    /^\.codex\/skills\/.*\.(md|ya?ml)$/,
+    /^\.codex\/prompts\/.*\.(md|ya?ml)$/,
+    /^templates\/.*\.(md|ya?ml)$/,
+    // U-20261027-007(b): the EN originals of the bilingual twins join the
+    // perimeter so stray Korean in an English original FAILS (same detector
+    // the KO side uses). docs/user-guide.md may not exist in every checkout —
+    // the pattern is dormant until the documented path is created.
+    /^README\.md$/,
+    /^docs\/README\.md$/,
+    /^docs\/user-guide\.md$/,
+    // U-20261027-007(c): the KO twins join so the suffix-locale DECLARATION
+    // gate covers them — their `lang: ko` frontmatter was convention-only
+    // before. The suffix gate (evaluateSuffixLocaleGate) checks the
+    // declaration; the Korean prose scan stays skipped for locale files.
+    /^README_ko\.md$/,
+    /^docs\/README_ko\.md$/,
+    /^docs\/user-guide_ko\.md$/,
+  ];
+
+  return officialPatterns.some((pattern) => pattern.test(normalizedPath));
+}
+
+/**
+ * Check if file path is a locale-specific path for any supported I18N language.
+ * Dynamically built from SUPPORTED_LOCALES to support extensibility.
+ */
+function isI18nLocalePath(filePath: string): boolean {
+  const normalized = filePath.replace(/\\/g, "/");
+  return SUPPORTED_LOCALES.some((locale) => {
+    return (
+      new RegExp(`[._-]${locale}\\.(md|ya?ml)$`).test(normalized) || // README-ko.md, foo-ko.yaml
+      normalized.startsWith(`${locale}/`) || // ko/...
+      normalized.includes(`/${locale}/`) || // .../ko/...
+      normalized.startsWith(`locales/${locale}/`) || // locales/ko/...
+      normalized.includes(`/locales/${locale}/`) // .../locales/ko/...
+    );
+  });
+}
+
+/**
+ * The locale declared by a SUFFIX-style locale filename (README_ko.md → "ko",
+ * guide-ja.md → "ja"), or null (T-20261006-004). Only the suffix form —
+ * wholesale locale directories (ko/, locales/ko/) stay wholesale-excluded.
+ * The base locale ("en") is not a translation marker — README.en.md is an
+ * English ORIGINAL, and the default language never needs a declaration.
+ */
+function suffixLocaleOfFile(filePath: string): string | null {
+  const normalized = filePath.replace(/\\/g, "/");
+  const m = normalized.match(new RegExp(`[._-](${SUPPORTED_LOCALES.join("|")})\\.(md|ya?ml)$`));
+  if (!m || m[1] === "en") return null;
+  return m[1];
+}
+
+/**
+ * The suffix-locale DECLARATION gate (T-20261006-004, extended U-20261027-007):
+ * a suffix-style locale file inside the official perimeter (README_ko.md,
+ * docs/user-guide_ko.md, ...) must DECLARE its language (any supported locale)
+ * — missing/unknown declarations are violations. Exported pure for regression
+ * tests (content = raw file text, or null when the file is unreadable, which
+ * is treated as undeclared).
+ */
+export function evaluateSuffixLocaleGate(filePath: string, content: string | null): Violation | null {
+  const suffixLocale = suffixLocaleOfFile(filePath);
+  if (!suffixLocale) return null;
+  let declared: string | null | undefined = undefined;
+  if (content !== null) {
+    declared = parseLangDeclaration(content, /\.ya?ml$/.test(filePath)).lang;
+  }
+  if (declared === undefined || declared === null || !SUPPORTED_LOCALES.includes(declared)) {
+    return {
+      file: filePath,
+      reason: declared
+        ? `suffix declares unknown locale "${declared}" — must be one of: ${SUPPORTED_LOCALES.join(", ")}`
+        : `${suffixLocale}-suffixed file carries locale content without a lang declaration — add 'lang: ${suffixLocale}' (markdown: frontmatter; yaml: top-level key)`,
+    };
+  }
+  return null;
+}
+
+/**
+ * Check if file path should be explicitly excluded (locale files, infrastructure)
+ */
+function isExcludedPath(filePath: string): boolean {
+  const normalizedPath = filePath.replace(/\\/g, "/");
+
+  // I18N: exclude locale-specific files and directories for all supported languages
+  if (isI18nLocalePath(normalizedPath)) {
+    return true;
+  }
+
+  // NOTE: docs/adr/ and docs/decisions/ were excluded as "planning/draft docs"
+  // until T-20260912-015 — they are official records now scanned like other
+  // docs/ governance paths (Korean there requires frontmatter lang: ko).
+
+  return false;
+}
+
+/**
+ * Strip fenced code blocks and inline code from content before Korean
+ * detection (T-20261005-004). Multi-backtick code spans (`` `x` ``) must be
+ * consumed BEFORE the single-backtick pass: the single-span regex cannot pair
+ * double-backtick delimiters, and the resulting stray runs shift pairing
+ * parity for the rest of the file — swallowing or unmasking Korean that sits
+ * inside intentional inline-code tokens further down.
+ */
+export function stripCodeForLanguageScan(content: string): string {
+  return content
+    .replace(/```[\s\S]*?```/g, "")
+    .replace(/``[\s\S]*?``/g, "")
+    .replace(/`[^`]+`/g, "")
+    .replace(/\[[^\]]+\]\([^)]+\)/g, "");
+}
+
+/**
+ * Analyze file content for language violations using 4-stage judgment.
+ *
+ * Stage 1 (exception folder) is handled upstream by isExcludedPath / isOfficialDocument.
+ * Stage 2: Protected path (core governance/routing files) → FAIL
+ * Stage 3: lang: ko frontmatter → PASS+INFO (valid reason) or FAIL (missing/invalid)
+ * Stage 4: No declaration → FAIL
+ */
+export function analyzeFile(filePath: string): Violation | null {
+  try {
+    let content = readFileSync(filePath, "utf-8");
+
+    // Strip generated-region allowlist sections BEFORE code-block stripping so
+    // exactly the marked machine-generated region is exempt (see header comment;
+    // markers are emitted by scripts/generate-version-manifest.ts).
+    content = content.replace(ALLOWLIST_REGION_PATTERN, "");
+
+    // Remove code blocks and inline code from analysis
+    const contentWithoutCode = stripCodeForLanguageScan(content);
+
+    const hasKorean = KOREAN_PATTERN.test(contentWithoutCode);
+    if (!hasKorean) return null;
+
+    // Stage 2: Protected path — no exception permitted
+    if (isProtectedPath(filePath)) {
+      return {
+        file: filePath,
+        reason: "Korean content in protected path (core governance/routing file) — lang: ko exception is not permitted",
+      };
+    }
+
+    // Stage 3: Frontmatter/top-level lang declaration
+    const { lang, lang_reason, langKey } = parseLangDeclaration(content, /\.ya?ml$/.test(filePath));
+    if (lang === "ko") {
+      // Legacy `language: ko` alias (T-20260910-027): accepted, but nudge
+      // toward the canonical `lang:` key so the vocabulary converges.
+      if (langKey === "language") {
+        console.log(
+          `   ⚠️  [WARN] Legacy declaration: ${filePath} uses 'language: ko' — migrate to 'lang: ko' (the policy key)`,
+        );
+      }
+      if (lang_reason && (ALLOWED_LANG_REASONS as readonly string[]).includes(lang_reason)) {
+        console.log(`   ℹ️  [INFO] Korean exception granted: ${filePath} (lang_reason: ${lang_reason})`);
+        return null;
+      }
+      return {
+        file: filePath,
+        reason: `lang: ko declared but lang_reason is ${lang_reason ? `invalid ("${lang_reason}")` : "missing"} — must be one of: ${ALLOWED_LANG_REASONS.join(" | ")}`,
+      };
+    }
+
+    // Stage 4: Korean without declaration
+    return {
+      file: filePath,
+      reason: "Korean content detected without lang: ko declaration",
+    };
+  } catch (error) {
+    console.error(`Error reading ${filePath}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Main validation function
+ */
+async function validateMarkdownLanguage(): Promise<void> {
+  console.log("🔍 Scanning official markdown/YAML files for undeclared Korean content...\n");
+
+  // Find all .md and .yaml/.yml files using Bun's built-in Glob API
+  const globPatterns = ["**/*.md", "**/*.{yaml,yml}"];
+  let allFiles: string[] = [];
+  try {
+    for (const pattern of globPatterns) {
+      const globber = new Bun.Glob(pattern);
+      allFiles.push(...(await Array.fromAsync(globber.scan({ cwd: process.cwd(), onlyFiles: true }))));
+    }
+  } catch (err) {
+    // On Windows, scaffold test directories may have EPERM; collect files that are accessible
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code !== "EPERM" && code !== "EACCES") throw err;
+    console.warn(`⚠️  Glob scan encountered permission error (${code}) — some directories may be skipped`);
+  }
+  // Collect root-level generated project directories (have AGENTS.md or variant.json)
+  // to exclude their contents from scanning — they are separate projects, not workspace governance.
+  const cwd = process.cwd();
+  const rootProjectDirs = new Set<string>();
+  try {
+    const { readdirSync, statSync } = await import("node:fs");
+    for (const entry of readdirSync(cwd, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const fullPath = join(cwd, entry.name);
+      if (existsSync(join(fullPath, "AGENTS.md")) || existsSync(join(fullPath, "variant.json"))) {
+        rootProjectDirs.add(entry.name + "/");
+      }
+    }
+  } catch {
+    /* ignore scan errors */
+  }
+
+  // Collect templates/<variant>/ directories whose variant.json has country_config.locales
+  // Files under those variants are exempt from Korean language validation
+  const variantLocaleExemptions = new Map<string, Set<string>>(); // variantDir -> Set<locale>
+  try {
+    const templatesDir = join(cwd, "templates");
+    if (existsSync(templatesDir)) {
+      const { readdirSync } = await import("node:fs");
+      for (const entry of readdirSync(templatesDir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) continue;
+        const vf = join(templatesDir, entry.name, "variant.json");
+        if (!existsSync(vf)) continue;
+        try {
+          const vjson = JSON.parse(readFileSync(vf, "utf-8"));
+          const locales: string[] = vjson?.country_config?.locales ?? [];
+          if (locales.length > 0) {
+            variantLocaleExemptions.set(entry.name + "/", new Set(locales));
+          }
+        } catch {
+          /* ignore parse errors */
+        }
+      }
+    }
+  } catch {
+    /* ignore scan errors */
+  }
+
+  const candidateFiles = allFiles.filter((f) => {
+    const normalized = f.replace(/\\/g, "/");
+    if (
+      normalized.includes("node_modules/") ||
+      normalized.includes(".git/") ||
+      normalized.includes("dist/") ||
+      normalized.includes("build/") ||
+      normalized.startsWith("test-project/")
+    )
+      return false;
+    // Exclude root-level generated project directories
+    for (const dir of rootProjectDirs) {
+      if (normalized.startsWith(dir)) return false;
+    }
+    // Skip untracked template variants (WIP scaffolds on disk)
+    if (normalized.startsWith("templates/co-")) {
+      const afterTemplates = normalized.slice("templates/".length);
+      const slashIdx = afterTemplates.indexOf("/");
+      if (slashIdx > 0) {
+        const variantName = afterTemplates.slice(0, slashIdx);
+        if (!isCoVariantTracked(variantName)) return false;
+      }
+    }
+    return true;
+  });
+
+  const violations: Violation[] = [];
+  let officialCount = 0;
+
+  for (const file of candidateFiles) {
+    // Only validate official documents
+    if (!isOfficialDocument(file)) {
+      continue;
+    }
+
+    // T-20261006-004: a suffix-style locale file (README_ko.md, guide-ja.yaml)
+    // inside the official perimeter is not silently excluded — it must DECLARE
+    // its language (any legal locale value) so declaration drift fails. The
+    // Korean prose scan still skips it (a locale file is expected to be in its
+    // language); the declaration is the gate. Order matters: AFTER the official
+    // filter (runtime state and service data are out of scope like every other
+    // check here), BEFORE isExcludedPath — whose suffix-locale arm would
+    // otherwise swallow exactly these files. Wholesale locale directories
+    // (ko/, locales/ko/) stay excluded. U-20261027-007: gate logic extracted
+    // to the exported pure evaluateSuffixLocaleGate() for regression coverage.
+    const suffixViolation = (() => {
+      let content: string | null = null;
+      try {
+        content = readFileSync(file, "utf-8");
+      } catch {
+        content = null;
+      }
+      return evaluateSuffixLocaleGate(file, content);
+    })();
+    if (suffixViolation) {
+      violations.push(suffixViolation);
+      continue;
+    }
+
+    // Skip excluded paths (locales, planning docs)
+    if (isExcludedPath(file)) {
+      continue;
+    }
+
+    officialCount++;
+
+    // Check variant locale exemption (templates/<variant>/ with country_config.locales)
+    const normed = file.replace(/\\/g, "/");
+    let variantExempt = false;
+    if (normed.startsWith("templates/")) {
+      const afterTemplates = normed.slice("templates/".length);
+      const slashIdx = afterTemplates.indexOf("/");
+      if (slashIdx > 0) {
+        const variantDir = afterTemplates.slice(0, slashIdx + 1);
+        const exemptLocales = variantLocaleExemptions.get(variantDir);
+        if (exemptLocales?.has("ko")) {
+          variantExempt = true;
+        }
+      }
+    }
+    if (variantExempt) continue;
+
+    const violation = analyzeFile(file);
+    if (violation) {
+      violations.push(violation);
+    }
+  }
+
+  // Report results
+  if (violations.length === 0) {
+    console.log("✅ No language violations in official documents.\n");
+    console.log(`   Scanned ${officialCount} official markdown/YAML files (agents, governance, skills, templates)`);
+    console.log(
+      `   I18N locale files excluded: ${SUPPORTED_LOCALES.length} language codes (${SUPPORTED_LOCALES.join(", ")})`,
+    );
+    process.exit(0);
+  } else {
+    console.log(`❌ Found ${violations.length} language violation(s) in official documents:\n`);
+    violations.forEach((v) => {
+      console.log(`   📄 ${v.file}`);
+      console.log(`      Reason: ${v.reason}\n`);
+    });
+    console.log(
+      "Policy: Official documents must be in English. Korean exception requires 'lang: ko' + 'lang_reason: legal|source-material|proper-noun' in frontmatter (Markdown) or as a top-level key (plain YAML). Legacy 'language: ko' declarations are accepted with a migration warning — prefer 'lang: ko'.",
+    );
+    console.log(
+      "Exception NOT available for: CLAUDE.md, GEMINI.md, CODEX.md, HERMES.md, CONSTITUTION.md, AGENTS.md, *.context.md",
+    );
+    const policyRef = existsSync("CONSTITUTION.md")
+      ? "CONSTITUTION.md — Language Policy Exception — Korean Legal/Regulatory Content"
+      : "docs/context.md — Language Policy (workspace English-only standard)";
+    console.log(`See: ${policyRef}\n`);
+    process.exit(1);
+  }
+}
+
+// Run validation — guarded by import.meta.main (U-20261027-007): the module
+// is now imported by unit tests for the exported pure gates, and the unguarded
+// module-level scan + process.exit raced every importer (it only survived
+// because the glob scan's await yielded long enough for tests to register).
+if (import.meta.main) {
+  validateMarkdownLanguage().catch((error) => {
+    die(`Validation error: ${error instanceof Error ? error.message : String(error)}`, 1);
+  });
+}

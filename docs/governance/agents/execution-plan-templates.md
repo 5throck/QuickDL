@@ -1,0 +1,129 @@
+# Execution Plan Templates — Operational Reference
+
+> Project-applicable operational guidance for execution-plan authoring — the
+> standard plan template, the Row 0 Design Gate, exemption codes, and worked
+> examples. Maintained at L1 (templates/common) and delivered to every scaffolded
+> project; it is companion guidance to the thin-dispatcher sections in
+> [`AGENTS.md`](../../../AGENTS.md) (§5), not a copy of any workspace-root document.
+> The workspace root maintains its own L0-authored equivalent at
+> `docs/governance/agents/execution-plan-templates.md`; divergence between the
+> two is intentional (DEC-20261028-05, design 2026-10-28-l0-only-governance-doc-cleanup).
+
+**Load contract**: PM and specialists MUST Read this file before executing the workflow it describes. Citing a rule without reading its owning file is a process violation.
+
+---
+
+## §5: Execution Plan Templates
+
+### §5.1 Standard Execution Plan Template
+
+> **Design Gate (Row 0)**: Universal across tiers (L0–L3) per ADR-0074 — every code change must
+> carry spec activity (design doc + registry entry), enforced by the sync-time spec-check
+> (`audit.ts --spec-check`, dev-sync step 3.9, FATAL). Full Row 0 ceremony (execution-plan
+> boilerplate, architect ownership) applies at L0/L1; L2/L3 satisfy the gate with the
+> one-design-doc convention via `scripts/spec-register.ts`.
+
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | [model] | NEW |
+| 1 | [task description] | [specialist] | High/Medium/Low | [model] | <spec-id> |
+| N | `/sync "type(scope): message"` — lifecycle + audit + commit + push + PR | automation-engineer | Medium | sonnet | |
+| N+1 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit (<session model alias>) | — |
+
+**Execution Order**: [Parallel | Sequential]
+
+**Key points**:
+- **Row 0 (Design Gate) is MANDATORY at every tier (ADR-0074)** — a design document must be created/updated before implementation; L2/L3 satisfy it with a single design doc + `spec-register.ts` entry (full ceremony stays L0/L1)
+- **Design docs for user-facing features MUST include an Accessibility section** (target level, affected interaction areas, verification method) per ADR-0065 — accessibility is a mandatory consideration for web/app/CLI/document feature development (WCAG 2.1 AA baseline); backend/non-UI work is exempt only with an explicit statement
+- **Design docs for user-facing web/app UI MUST include a Preview Verification note** (rendered check at ≥ 2 declared breakpoints, ≥ 1 key interaction, evidence attached) per ADR-0070 — a UI change is not done until it was seen rendered; pure backend/non-UI work is exempt only with an explicit statement
+- Tier column is MANDATORY (High/Medium/Low)
+- Every execution plan starts with one line: "PM running on: <model>". The line records the model of the current session. The PM tier is a capability floor for a session-hosted agent, see [AGENTS.md §3.6](../../../AGENTS.md#36-3-tier-strategy) (a higher model is allowed; a model below the tier is a warning).
+- **PM rows are mandatory in every execution-plan table, with every column filled.** A row whose Agent is the PM — the design-gate decision, a verification step, the landing verification, or any other PM-owned step the plan's flow includes — must appear in the table and must never be dropped. Every column of a PM row must be filled:
+  - **Agent**: `pm`
+  - **Tier**: `Medium` — the tier declared in the `agents/pm.md` frontmatter. The session model may be higher (PM Tier Semantics, AGENTS.md §3.6); a lower one is a warning.
+  - **Model**: `inherit (<session model alias>)` — the PM is session-hosted and is never dispatched through a model parameter, so its Model cell records the session-hosted alias. The alias in parentheses must match the `PM running on:` header line. Example on Claude Code: `inherit (sonnet)`.
+  - **Platform**: filled on every table that carries a Platform column (§5.2 form).
+
+  A PM row with `—`, a blank Tier/Model cell, or a missing PM-owned row makes the execution plan invalid. The only rows that may leave Agent/Tier/Model blank (`—`) are E1–E5 exemption marker rows (§5.1.1) — no agent performs work on an exempt row. The `Spec` column keeps its existing semantics: the `/sync` row stays blank there; PM rows carry `—`.
+- **The `/sync` row is owned by `automation-engineer` (Medium, `sonnet` on Claude Code; the literal Medium-tier model ID elsewhere). PM never runs `/sync`.** The brief to `automation-engineer` carries the commit message, the worktree path, the explicit staged-file list, and the PR body file path. If its Bash or git access is denied, the PM follows the Permission Denial Protocol (Type C) and gives the user the exact `/sync` command; the PM does not run it.
+- `/sync` is the last implementation row — it covers lifecycle update, full audit, commit, push, and PR creation. Only the PM landing-verification row follows it: the PM runs read-only checks (`git log -1 --stat`, `git show`, `gh pr view`, `gh pr checks`) and compares the committed files with the brief's staged-file list.
+- A PR is merged only on the user's explicit request, as a separate `automation-engineer` row (`gh pr merge`, no `--admin`, no bypass). The PM never runs `gh pr merge`.
+- No separate Lifecycle Update or Final QA Audit rows needed — `/sync` handles both
+- State parallel vs sequential order below the table
+- "pm (direct)" is FORBIDDEN - PM never executes directly
+- **When a plan spans more than one PR**: merge each PR before branching for the next row's work, per [docs/context.md](../../context.md) — `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so unmerged parallel branches conflict by default. If parallel branches are genuinely required, this plan's Trade-offs section must state why.
+
+### §5.1.1 Design Gate Exemptions
+
+When a task falls into an exempt category, Row 0 is replaced with an exemption marker:
+
+| Category | ID | Description | Row 0 Format |
+|----------|----|-------------|--------------|
+| memory-log | E1 | Session log entry in `memory/YYYY-MM-DD.md` | `── EXEMPT: memory-log ──` |
+| changelog | E2 | `CHANGELOG.md` update only | `── EXEMPT: changelog ──` |
+| hotfix-typo | E3 | Typo fix, single-line change, trivial fix | `── EXEMPT: hotfix-typo ──` |
+| pure-readme | E4 | README.md body text only (no structural/design change) | `── EXEMPT: pure-readme ──` |
+| sync-only | E5 | `/sync` execution only (lifecycle finalization); row 1 is the `automation-engineer` `/sync` row, row 2 the PM landing verification | `── EXEMPT: sync-only ──` |
+
+**Rules**:
+- Exempt Row 0: Agent/Tier/Model columns left blank (`—`)
+- Blank Agent/Tier/Model (`—`) applies to exemption marker rows only — a non-exempt PM row is never blank (see §5.1 PM-row rule)
+- Only E1–E5 categories may be used — PM cannot invent ad-hoc exemptions
+- Abuse of exemptions is a governance violation
+- These codes are machine-consumed by `audit.ts --spec-exempt=E1..E5` / `SYNC_SPEC_EXEMPT` (ADR-0055 Stage 2 gating; invalid codes hard-Fail)
+
+### §5.2 Platform Parity Considerations
+
+When modifying files that affect both CLAUDE.md and GEMINI.md:
+
+| # | Task | Agent | Tier | Model | Spec | Platform |
+|---|------|-------|------|---------|----------|
+| 1 | [task] | [specialist] | [tier] | [model] | Both |
+| N | `/sync "type(scope): message"` | automation-engineer | Medium | sonnet | | Both |
+| N+1 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit (<session model alias>) | — | Both |
+
+**Platform Column**: `Claude` / `Antigravity` / `Both` / `L0-only`
+
+**Note**: See execution plan boilerplate in CLAUDE.md ("### 5. Agent Dispatch Rules" and "## Execution Plan Boilerplate"), GEMINI.md (identical headings), and agents/pm.md for the Platform column definition.
+
+### §5.3 Example Execution Plans
+
+#### Example 1: Multi-Agent Platform Parity Update
+
+<!-- WORKSPACE-MANAGED: tier-model-mapping -->
+> **Note**: The `Model` column below shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See [CLAUDE.md — Execution Plan Boilerplate](../../../CLAUDE.md#execution-plan-boilerplate) for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent example). Hermes maps to the claude model ids (it validates against the claude column), and Z.AI (zai) models take reasoning levels low/high/max (default max); workspace dispatch posture is reasoning level **high** for all tiers. Dispatched rows carry the alias passed to the `Agent()` tool; PM rows carry `inherit (<alias>)` because the PM is session-hosted and takes no model parameter.
+<!-- /WORKSPACE-MANAGED -->
+
+PM running on: <model>
+
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | sonnet | NEW |
+| 0a | Design Gate decision — present design doc, record ruling, await user approval | pm | Medium | inherit (sonnet) | — |
+| 1 | Update agents/pm.md | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 2 | Update scripts/audit.ts | `[implementation specialist]` | Low | haiku | <spec-id> |
+| 3 | Update CLAUDE.md §5 | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 4 | Update GEMINI.md §5 | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 5 | Verify deliverable against acceptance criteria | pm | Medium | inherit (sonnet) | — |
+| 6 | `/sync "docs(agents): update pm.md and platform dispatch rules"` | automation-engineer | Medium | sonnet | |
+| 7 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit (sonnet) | — |
+
+**Execution Order**: Sequential (platform parity requires CLAUDE.md and GEMINI.md updates together)
+
+#### Example 2: Single Specialist Task
+
+PM running on: <model>
+
+| # | Task | Agent | Tier | Model | Spec |
+|---|------|-------|------|-------|------|
+| 0 | Create/update design doc → `docs/designs/<spec-id>-design.md` | architect | High | sonnet | NEW |
+| 0a | Design Gate decision — present design doc, record ruling, await user approval | pm | Medium | inherit (sonnet) | — |
+| 1 | Update project README introduction | `[docs specialist]` | Medium | sonnet | <spec-id> |
+| 2 | Verify deliverable against acceptance criteria | pm | Medium | inherit (sonnet) | — |
+| 3 | `/sync "docs: update project README introduction"` | automation-engineer | Medium | sonnet | |
+| 4 | Verify landing — PR URL, branch, CI state, committed file set | pm | Medium | inherit (sonnet) | — |
+
+**Execution Order**: Sequential
+
+---
+

@@ -1,0 +1,1143 @@
+#!/usr/bin/env bun
+/**
+ * Skill Lifecycle Audit Script
+ *
+ * Cross-platform skill health checker for Claude Code & Antigravity (Gemini CLI)
+ * Checks: orphaned skills, deprecated skills, missing owners, circular dependencies
+ *
+ * Usage:
+ *   bun scripts/skill-lifecycle-audit.ts
+ *   bun scripts/skill-lifecycle-audit.ts --json   # JSON output
+ *
+ * @version 1.15.0
+ *
+ * v1.15.0 (2026-11-13, T-20261113-003, D4 of T-20261113-002; spec
+ *         docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md section 5):
+ *         removed the isSelfManagedPath arms that the v1.11.0 loop-top skip made
+ *         unreachable (owner check, registry-row check, Check SD flag, Check LC
+ *         exemption and its self-managed lifecycle INFO line). Behaviour is
+ *         unchanged for every input; the 1.14.0 registry-row tolerance and the
+ *         honest self-managed count are kept.
+ *
+ * v1.14.0 (2026-11-13, T-20261113-002; spec
+ *         docs/designs/2026-11-13-skill-audit-self-managed-registry-design.md): a skills/SKILLS.md
+ *         row for a self-managed skill (e.g. skills/graft/) is tolerated — the inverse registry
+ *         check no longer reports "no matching runtime skill" for it (one INFO line outside
+ *         --json mode); the removal-date check still applies. "Skills found" and the summary
+ *         now state the self-managed count and audit only the remaining skills.
+ *
+ * v1.13.0 (2026-11-12, common-agents CA-1): agentExists() also resolves owners against
+ *         templates/common/agents (the common roster), so L0 skills owned by a common agent
+ *         are no longer reported as orphaned.
+ *
+ * v1.12.0 (2026-11-12, U-20261112-005 PR-1): Check LC fix text gains one sentence — template-delivered
+ *         skills receive their record on upgrade; a project-local skill needs its record
+ *         created. Message text and severity are unchanged.
+ *
+ * v1.11.0 (2026-11-08, T-20261108-004 — E2E nightly red, co-work scaffold
+ *          only, 14/15 variants green): vendored external-deps clones
+ *          (external/<id>/ via the project external-deps.json install_dirs,
+ *          self-managed-tools v1.3.0 path-set union) skip EVERY authoring
+ *          check — loop-top isSelfManagedPath skip covering frontmatter,
+ *          owner, SKILLS.md registry rows, and Check MM model literals.
+ *          Closes the scaffold pre-commit block on the vendored ppt-master
+ *          SKILL.md (no owner frontmatter; DEC-20261106-04 "consumed
+ *          as-is"). No lifecycle stubs (falsifies upstream provenance).
+ * v1.10.0 (2026-10-29, spec docs/designs/2026-10-29-delivery-bookkeeping-engine-design.md
+ *         §3.A2, DEC-20261029-01 PR2): Check SD gains the baseline-hash-equality
+ *         tolerance — a flagged last_reviewed staleness warning is suppressed to
+ *         an INFO line when the SKILL.md's current bytes hash-match the delivered
+ *         baseline recorded in the in-project .claude/last-upgrade-delivery.json
+ *         manifest (shared loadDeliveryBaselineManifest / isDeliveredBaselineEqual
+ *         helpers from agent-lifecycle-audit). The engine never stamps last_reviewed
+ *         (an engine write is not a review), so wave-delivered skills no longer
+ *         re-flag; any genuine project edit breaks the hash and re-arms the
+ *         warning. Absent/corrupt/v1-shaped manifest degrades to the pre-tolerance
+ *         behavior; at the workspace root (no manifest) the tolerance is inert.
+ * v1.9.0 (2026-10-29, U-20261028-011): Check LC (and its MV arm) moved OUT of
+ *         the IS_WORKSPACE_ROOT gate — delivered projects run the lifecycle-
+ *         record check too, so the health summary stops over-claiming
+ *         "All N skills healthy" while the dimension goes unmeasured (an
+ *         active skill without docs/lifecycle/skills/<name>.md now WARNs at
+ *         project level). RI/SD/SVP semantics unchanged (RI stays
+ *         workspace-gated: the reference-allowlist surface is L0-only).
+ * v1.8.0 (2026-10-11, T-20261011-015): Check MM — skills must not hardcode
+ *         registry model IDs (workspace directive 2026-10-11). Every skill
+ *         tree the audit walks (SKILL.md + references/** and sibling skill
+ *         files) is scanned for versioned model-ID literals (claude-/gemini-/
+ *         gpt-5.* patterns shared via lib/model-literal-patterns.ts, also used
+ *         by sync-model-registry.ts); IDs live only in docs/workspace-schema.json
+ *         (`models.*`) and the CLAUDE.md §6 / AGENTS.md §3.6 managed prose.
+ *         Distinct from validate-templates Check MM-01, which gates the
+ *         instruction twins' managed-marker placement.
+ * v1.7.1 (2026-10-08, E2E Test 30 fix): Check SVP's registry lookup no longer
+ *         imports the L0-only write-scripts-snapshot helper — the parse is
+ *         inlined (parseRegistryVersions) because THIS script ships to
+ *         scaffolds where that helper does not exist (static import broke
+ *         module loading). Keep in sync with the helper.
+ * v1.7.0 (2026-10-08, T-20261007-026): Check SVP — a SKILL.md script version
+ *         pin (`script.ts v?X.Y.Z` without a floor operator) must match the
+ *         pinned script's current registry version (shared parseScriptRegistry
+ *         lookup); floor pins (≥/>=) and unknown script names are ignored.
+ *         Two live drifts found and fixed in promote-variant/project-to-variant.
+ * v1.6.0 (2026-10-05, T-20261004-020 + T-20261004-023): Check MV — an active
+ *         skill's lifecycle record must carry matching header/footer Metadata
+ *         Version lines and both must equal the SKILL.md frontmatter version
+ *         (the ci-triage footer said 0.1.0 against a 0.2.0 bump and nothing
+ *         caught it); Check SD — WARN when an active skill's last_reviewed is
+ *         older than its last git content commit (agent Check 11 semantics:
+ *         sync-only and metadata-only commits skipped; archived/self-managed
+ *         exempt; WARN not ERROR because 20 of 41 root skills are grandfathered
+ *         stale and mass-stamping would falsify review provenance).
+ * v1.5.1: scope validation accepts the project's variant name from
+ *         .claude/template-version.txt (project dir name != variant name);
+ *         orphaned-owner WARN gated to the workspace-root authoring surface.
+ * @last_updated 2026-10-29
+ * @license MIT
+ */
+
+import { readFileSync, existsSync, readdirSync, statSync, type Dirent } from "node:fs";
+import { join, dirname, relative, basename } from "node:path";
+import { cwd } from "node:process";
+import { isSelfManagedPath } from "./lib/self-managed-tools.ts";
+import {
+  lastContentCommitDate,
+  loadDeliveryBaselineManifest,
+  isDeliveredBaselineEqual,
+  deliveryStalenessInfoLine,
+} from "./agent-lifecycle-audit.ts";
+import { findModelLiterals } from "./lib/model-literal-patterns.ts";
+
+interface SkillFrontmatter {
+  name: string;
+  description: string;
+  version?: string;
+  status?: "draft" | "active" | "deprecated" | "archived";
+  owner?: string;
+  requires?: string[];
+  supersedes?: string;
+  superseded_by?: string[];
+  last_reviewed?: string;
+  last_reviewed_by?: string;
+}
+
+interface ReferenceAllowlistEntry {
+  file_substring: string;
+  refs: string[];
+  reason?: string;
+}
+
+interface SkillIssue {
+  level: "error" | "warning";
+  file: string;
+  message: string;
+  fix?: string;
+}
+
+interface AuditResult {
+  skillsScanned: number;
+  errors: SkillIssue[];
+  warnings: SkillIssue[];
+  summary: string;
+  summaryClean: string; // Without ANSI colors for JSON output
+}
+
+interface AgentRegistry {
+  agents: string[];
+  skills: Array<{ name: string; file: string; owner: string }>;
+}
+
+interface SkillRegistryRow {
+  version: string;
+  status: string;
+  owner: string;
+  lastReviewed: string;
+  removalDate: string;
+}
+
+// ANSI colors for terminal output
+const colors = {
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  green: "\x1b[32m",
+  cyan: "\x1b[36m",
+  reset: "\x1b[0m",
+  dim: "\x1b[2m",
+};
+
+const ROOT = cwd();
+const AGENTS_FILE = join(ROOT, "AGENTS.md");
+const CONSTITUTION_FILE = join(ROOT, "CONSTITUTION.md");
+
+// A skill's `scope` may be 'workspace' (L0-only), 'common' (L0+L1, shared across
+// all variants), or the literal name of the variant it belongs to (L0+L1+L2) —
+// see scripts/helpers/layer-filter.ts. `variant` itself is also accepted as a
+// generic placeholder for skills not yet tied to one specific variant name.
+const CURRENT_VARIANT_NAME = basename(ROOT);
+// In a scaffolded project the skills' variant scope is the VARIANT name recorded
+// in template-version.txt (project root; legacy .claude/template-version.txt
+// accepted) — not the project directory name (a project named `co-develop-demo`
+// still carries `scope: co-develop` skills).
+const PROJECT_VARIANT_NAME = (() => {
+  const canonical = join(ROOT, "template-version.txt");
+  const tv = existsSync(canonical) ? canonical : join(ROOT, ".claude", "template-version.txt");
+  if (!existsSync(tv)) return "";
+  const m = readFileSync(tv, "utf-8").match(/^variant=(\S+)/m);
+  return m ? m[1].trim() : "";
+})();
+// Root-level (L0) skills in skills/ may declare a specific variant's name as
+// their scope even though the audit always runs from workspace root (where
+// CURRENT_VARIANT_NAME resolves to the workspace folder name, never a co-*
+// name) — so known variant directory names must be accepted too.
+const KNOWN_VARIANT_NAMES = (() => {
+  const templatesDir = join(ROOT, "templates");
+  if (!existsSync(templatesDir)) return [] as string[];
+  return readdirSync(templatesDir, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && e.name.startsWith("co-"))
+    .map((e) => e.name);
+})();
+function isValidScope(scope: string): boolean {
+  return ["workspace", "common", "variant", CURRENT_VARIANT_NAME, PROJECT_VARIANT_NAME, ...KNOWN_VARIANT_NAMES]
+    .filter(Boolean)
+    .includes(scope);
+}
+
+// Detect if we're at workspace root or in a sub-project
+const IS_WORKSPACE_ROOT = existsSync(CONSTITUTION_FILE);
+
+// Platform detection: Claude Code vs Antigravity
+const PLATFORM = detectPlatform();
+
+function detectPlatform(): "claude-code" | "antigravity" | "unknown" {
+  if (existsSync(join(ROOT, "GEMINI.md"))) return "antigravity";
+  if (existsSync(join(ROOT, "CLAUDE.md")) || existsSync(join(ROOT, ".claude"))) return "claude-code";
+  return "unknown";
+}
+
+function parseSkillRegistryRows(registryPath = join(ROOT, "skills", "SKILLS.md")): Map<string, SkillRegistryRow> {
+  const rows = new Map<string, SkillRegistryRow>();
+  if (!existsSync(registryPath)) return rows;
+  const content = readFileSync(registryPath, "utf-8").replace(/\r\n/g, "\n");
+  const registrySection =
+    content.split(/\n###\s+Workspace Skills\b/i)[1]?.split(/\n###\s+Variant-Exclusive Skills\b/i)[0] ??
+    content.split(/\n##\s+Registry\b/i)[1]?.split(/\n##\s+/)[0] ??
+    content;
+  for (const line of registrySection.split("\n")) {
+    const cells = line.split("|").map((c) => c.trim());
+    if (cells.length < 8) continue;
+    const nameMatch = cells[1].match(/`([^`]+)`/);
+    if (!nameMatch) continue;
+    if (cells[2].toLowerCase() === "version") continue;
+    rows.set(nameMatch[1], {
+      version: cells[2],
+      status: cells[3],
+      owner: cells[4],
+      lastReviewed: cells[5],
+      removalDate: cells[6],
+    });
+  }
+  return rows;
+}
+
+// Parse AGENTS.md for valid agents
+function getAgentRegistry(): AgentRegistry {
+  const registry: AgentRegistry = { agents: [], skills: [] };
+
+  if (!existsSync(AGENTS_FILE)) {
+    console.warn(`${colors.yellow}⚠️  AGENTS.md not found - owner validation disabled${colors.reset}`);
+    return registry;
+  }
+
+  const content = readFileSync(AGENTS_FILE, "utf-8");
+
+  // Extract agent names from markdown table
+  const agentMatches = content.matchAll(/\[([^\]]+)\]\(agents\/([^)]+)\.md\)/g);
+  for (const match of agentMatches) {
+    registry.agents.push(match[1]);
+  }
+
+  return registry;
+}
+
+// Parse YAML frontmatter from SKILL.md
+function parseFrontmatter(filePath: string): SkillFrontmatter | null {
+  try {
+    const content = readFileSync(filePath, "utf-8").replace(/\r\n/g, "\n");
+    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+
+    if (!frontmatterMatch) return null;
+
+    const frontmatter: Record<string, unknown> = {};
+    const lines = frontmatterMatch[1].split("\n");
+
+    for (const line of lines) {
+      const colonIndex = line.indexOf(":");
+      if (colonIndex === -1) continue;
+
+      const key = line.slice(0, colonIndex).trim();
+      const value = line.slice(colonIndex + 1).trim();
+
+      if (value.startsWith("[") && value.endsWith("]")) {
+        frontmatter[key] = value
+          .slice(1, -1)
+          .split(",")
+          .map((v) => v.trim().replace(/^['"]|['"]$/g, ""))
+          .filter(Boolean);
+      } else {
+        frontmatter[key] = value.replace(/^['"]|['"]$/g, "");
+      }
+    }
+
+    return frontmatter as unknown as SkillFrontmatter;
+  } catch {
+    return null;
+  }
+}
+
+// Recursively find all SKILL.md files
+function findSkillFiles(dir: string, baseDir: string = ROOT, depth = 0): string[] {
+  const skills: string[] = [];
+
+  if (!existsSync(dir)) return skills;
+  if (depth > 8) return skills; // symlink-cycle / runaway-recursion bound (T-20260910-026)
+
+  const entries = readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue; // never follow links: cycle-safe, no duplicate visits (T-20260910-026)
+    const fullPath = join(dir, entry.name);
+
+    if (entry.isDirectory()) {
+      if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+      // Skip agent directories (they don't contain skills)
+      if (entry.name === "agents") continue;
+      // Skip documentation/teaching example trees — illustrative SKILL.md
+      // samples under docs/_examples/ are not real, lifecycle-managed skills.
+      if (entry.name === "_examples" && basename(dir) === "docs") continue;
+
+      // At workspace root: only scan known subdirectories
+      if (IS_WORKSPACE_ROOT && dir === ROOT) {
+        // Only recurse into skills/ and .claude/ directories
+        if (entry.name !== "skills" && entry.name !== ".claude") continue;
+      }
+
+      skills.push(...findSkillFiles(fullPath, baseDir, depth + 1));
+    } else if (entry.name === "SKILL.md") {
+      skills.push(fullPath);
+    }
+  }
+
+  return skills;
+}
+
+// Validate agent exists
+export function agentExists(owner: string, registry: AgentRegistry, ROOT: string = cwd()): boolean {
+  if (registry.agents.includes(owner)) return true;
+
+  const agentPath1 = join(ROOT, "agents", `${owner}.md`);
+  const agentPath2 = join(ROOT, ".claude", "agents", `${owner}.md`);
+  if (existsSync(agentPath1) || existsSync(agentPath2)) return true;
+
+  // Common (L1) skill-owner agents (design 2026-11-12-common-agents-for-common-skills section 5.7).
+  if (existsSync(join(ROOT, "templates", "common", "agents", `${owner}.md`))) return true;
+
+  // A root-level (L0) skill's owner may be a variant-specific agent (the
+  // skill's home domain) even though the skill itself lives in the shared
+  // skills/ directory for L1 propagation — check every variant's roster too.
+  for (const variantName of KNOWN_VARIANT_NAMES) {
+    const variantAgentPath = join(ROOT, "templates", variantName, "agents", `${owner}.md`);
+    if (existsSync(variantAgentPath)) return true;
+  }
+  return false;
+}
+
+// Check file modification time (safe, no shell execution)
+function wasModifiedRecently(filePath: string, days: number = 30): boolean {
+  if (!existsSync(filePath)) return false;
+
+  const mtime = statSync(filePath).mtime;
+  const daysSince = (Date.now() - mtime.getTime()) / (1000 * 60 * 60 * 24);
+  return daysSince < days;
+}
+
+// ── Reference integrity (v1.5.0, 2026-09-21 agent-skill-lifecycle modernization) ──
+
+/** Every skill name that exists in the workspace: root SSOT + every variant/common template. */
+function collectKnownSkillNames(): { names: Set<string>; statusByName: Map<string, string> } {
+  const names = new Set<string>();
+  const statusByName = new Map<string, string>();
+  const roots = [join(ROOT, "skills")];
+  const templatesDir = join(ROOT, "templates");
+  if (existsSync(templatesDir)) {
+    for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
+      if (e.isDirectory() && (e.name.startsWith("co-") || e.name === "common")) {
+        roots.push(join(templatesDir, e.name, "skills"));
+      }
+    }
+  }
+  for (const base of roots) {
+    if (!existsSync(base)) continue;
+    for (const e of readdirSync(base, { withFileTypes: true })) {
+      if (!e.isDirectory()) continue;
+      const fm = parseFrontmatter(join(base, e.name, "SKILL.md"));
+      if (fm?.name) {
+        names.add(fm.name);
+        if (fm.status) statusByName.set(fm.name, String(fm.status));
+      }
+    }
+  }
+  return { names, statusByName };
+}
+
+/** Allowlisted intentional historical references (docs/lifecycle/reference-allowlist.json). */
+function loadReferenceAllowlist(): ReferenceAllowlistEntry[] {
+  const p = join(ROOT, "docs", "lifecycle", "reference-allowlist.json");
+  if (!existsSync(p)) return [];
+  try {
+    const parsed = JSON.parse(readFileSync(p, "utf-8"));
+    return Array.isArray(parsed?.allow) ? (parsed.allow as ReferenceAllowlistEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Header/footer Metadata Version of a lifecycle record (Check MV, v1.6.0,
+ * T-20261004-020). Records carry two `## Metadata` sections — the FIRST is
+ * the header (Skill/Status/Version/Created/Last Updated), the LAST is the
+ * footer (Current Phase/Version/Owner/...). Returns null when fewer than
+ * two blocks or an unparseable version line: shape drift belongs to the
+ * record-creation guidance, not this parity check.
+ */
+export function lifecycleRecordVersions(content: string): { header: string; footer: string } | null {
+  const blocks = content.split(/^##\s+Metadata\s*$/m).slice(1);
+  if (blocks.length < 2) return null;
+  const pick = (block: string): string | null => block.match(/^\s*-\s+\*\*Version\*\*:\s*(\S+)/m)?.[1] ?? null;
+  const header = pick(blocks[0]);
+  const footer = pick(blocks[blocks.length - 1]);
+  if (!header || !footer) return null;
+  return { header, footer };
+}
+
+/**
+ * Scan a SKILL.md body for references that look like skill citations and
+ * classify each as resolvable / deprecated / unknown / agent-only.
+ *
+ * Precision rules (kebab-case backticks alone would flag HTML attributes and
+ * shell commands): a token counts as a skill reference only when it appears
+ *   (a) in a `## Related Skills` section, or
+ *   (b) adjacent to the word "skill" — `` `x` skill`` / ``skill `x` ``.
+ */
+export function scanSkillReferences(
+  skillFile: string,
+  known: { names: Set<string>; statusByName: Map<string, string> },
+  allowlist: ReferenceAllowlistEntry[],
+  agentNames: Set<string> = new Set(),
+): { unknown: string[]; deprecated: string[]; agentOnly: string[] } {
+  const content = readFileSync(skillFile, "utf-8").replace(/\r\n/g, "\n");
+  const body = content.replace(/^---\n[\s\S]*?\n---/, ""); // frontmatter relations are covered by requires/relates_to checks
+  const self = parseFrontmatter(skillFile)?.name ?? "";
+  const allowForFile = allowlist
+    .filter((e) => skillFile.replace(/\\/g, "/").includes(e.file_substring))
+    .flatMap((e) => e.refs);
+
+  const candidates = new Set<string>();
+  // (a) Related Skills sections
+  const section = body.match(/## Related Skills\n([\s\S]*?)(?=\n## |$)/);
+  if (section) {
+    for (const m of section[1].matchAll(/`([a-z0-9]+(?:-[a-z0-9]+)+)`/g)) candidates.add(m[1]);
+  }
+  // (b) "skill"-adjacent inline mentions
+  for (const m of body.matchAll(/`([a-z0-9]+(?:-[a-z0-9]+)+)`\s+skills?\b/gi)) candidates.add(m[1]);
+  for (const m of body.matchAll(/skills?\s+`([a-z0-9]+(?:-[a-z0-9]+)+)`/gi)) candidates.add(m[1]);
+
+  const unknown = new Set<string>();
+  const deprecated = new Set<string>();
+  const agentOnly = new Set<string>();
+  for (const name of candidates) {
+    if (name === self) continue;
+    if (known.names.has(name)) {
+      if (known.statusByName.get(name) === "deprecated") deprecated.add(name);
+      continue;
+    }
+    if (agentNames.has(name)) {
+      agentOnly.add(name);
+      continue;
+    }
+    if (allowForFile.includes(name)) continue;
+    unknown.add(name);
+  }
+  return { unknown: [...unknown], deprecated: [...deprecated], agentOnly: [...agentOnly] };
+}
+
+/** Every agent name declared in agents/ rosters at L0 and inside template variants. */
+function collectKnownAgentNames(): Set<string> {
+  const names = new Set<string>();
+  const dirs = [join(ROOT, "agents"), join(ROOT, ".claude", "agents")];
+  const templatesDir = join(ROOT, "templates");
+  if (existsSync(templatesDir)) {
+    for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
+      if (e.isDirectory() && e.name.startsWith("co-")) dirs.push(join(templatesDir, e.name, "agents"));
+    }
+  }
+  for (const dir of dirs) {
+    if (!existsSync(dir)) continue;
+    for (const f of readdirSync(dir)) {
+      if (f.endsWith(".md")) names.add(f.replace(/\.md$/, ""));
+    }
+  }
+  return names;
+}
+
+/** Registry removal-date ≤ today on a skill that still exists (Check RD, ERROR). */
+function isRemovalDateExpired(removalDate: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(removalDate)) return false;
+  return new Date(removalDate + "T23:59:59").getTime() <= Date.now();
+}
+
+// Text file extensions scanned for model-ID literals (Check MM). Binary and
+// unknown extensions are skipped — a file that is not text cannot carry a
+// prose model-ID literal worth reporting.
+const MODEL_LITERAL_TEXT_EXT = /\.(md|markdown|txt|json|jsonc|yaml|yml|html|htm|ts|js|mjs|cjs|css|svg)$/i;
+
+/**
+ * Check MM (v1.8.0, T-20261011-015): scan a skill's whole directory tree
+ * (SKILL.md + references/** and any other skill files) for registry model-ID
+ * literals. Returns one entry per offending file with its unique matched
+ * literals. Directory bounds mirror findSkillFiles (symlink skip, depth cap,
+ * node_modules/hidden-dir skip). Exported for unit tests.
+ */
+export function scanSkillTreeForModelLiterals(
+  skillDir: string,
+  depth = 0,
+): Array<{ file: string; literals: string[] }> {
+  if (depth > 8) return [];
+  const hits: Array<{ file: string; literals: string[] }> = [];
+  let entries: Dirent<string>[];
+  try {
+    // the cast only pins the overload — Bun's readdirSync ReturnType resolves Dirent<Buffer> (verify-skills.ts precedent)
+    entries = readdirSync(skillDir, { withFileTypes: true }) as unknown as Dirent<string>[];
+  } catch {
+    return hits;
+  }
+  for (const entry of entries) {
+    if (entry.isSymbolicLink()) continue;
+    const full = join(skillDir, entry.name);
+    if (entry.isDirectory()) {
+      if (entry.name === "node_modules" || entry.name.startsWith(".")) continue;
+      hits.push(...scanSkillTreeForModelLiterals(full, depth + 1));
+    } else if (MODEL_LITERAL_TEXT_EXT.test(entry.name)) {
+      try {
+        const text: string = readFileSync(full, "utf-8");
+        const literals = findModelLiterals(text);
+        if (literals.length > 0) hits.push({ file: full, literals });
+      } catch {
+        // unreadable file — skip
+      }
+    }
+  }
+  return hits;
+}
+
+// Check for circular dependencies
+function checkCircularDependencies(
+  skillFile: string,
+  requires: string[],
+  allSkills: Map<string, string>,
+  visited = new Set<string>(),
+  path: string[] = [],
+): string[] | null {
+  const skillName = dirname(relative(ROOT, skillFile));
+
+  if (visited.has(skillName)) {
+    if (path.includes(skillName)) {
+      return [...path, skillName];
+    }
+    return null;
+  }
+
+  visited.add(skillName);
+  path.push(skillName);
+
+  for (const req of requires) {
+    const reqSkillFile = allSkills.get(req);
+    if (reqSkillFile) {
+      const reqFrontmatter = parseFrontmatter(reqSkillFile);
+      if (reqFrontmatter?.requires) {
+        const cycle = checkCircularDependencies(reqSkillFile, reqFrontmatter.requires, allSkills, visited, path);
+        if (cycle) return cycle;
+      }
+    }
+  }
+
+  path.pop();
+  return null;
+}
+
+// Main audit function
+/**
+ * Local registry parser for Check SVP (v1.7.1): identical logic to
+ * helpers/write-scripts-snapshot.ts parseScriptRegistry, inlined because that
+ * helper is L0-only (not delivered to scaffolds) while THIS script ships at
+ * L0+L1 — a static import broke module loading in every scaffolded project
+ * (E2E Test 30, 2026-10-08). Keep in sync with the helper.
+ */
+function parseRegistryVersions(content: string): Record<string, { version: string; status: string }> {
+  const scripts: Record<string, { version: string; status: string }> = {};
+  for (const line of content.split("\n")) {
+    if (!/^\|\s*`[A-Za-z0-9][A-Za-z0-9._/-]*`\s*\|/.test(line)) continue;
+    const parts = line
+      .split("|")
+      .map((p) => p.trim())
+      .filter((p) => p);
+    if (parts.length < 4) continue;
+    const name = parts[0].replace(/`/g, "");
+    const version = parts[2];
+    const status = parts[3];
+    if (!/^\d+\.\d+\.\d+$/.test(version)) continue;
+    scripts[name] = { version, status };
+  }
+  return scripts;
+}
+
+function auditSkills(jsonMode = false): AuditResult {
+  // Check SVP lazy registry (T-20261007-026) — loaded once on first pin found.
+  let scriptRegistry: Record<string, { version: string; status: string }> | null = null;
+  const registry = getAgentRegistry();
+  const skillFiles = findSkillFiles(ROOT);
+  const allSkills = new Map<string, string>();
+
+  for (const file of skillFiles) {
+    const frontmatter = parseFrontmatter(file);
+    if (frontmatter?.name) {
+      allSkills.set(frontmatter.name, file);
+    }
+  }
+
+  const errors: SkillIssue[] = [];
+  const warnings: SkillIssue[] = [];
+  const registryRows = parseSkillRegistryRows();
+  const runtimeSkillNames = new Set<string>();
+  // v1.14.0 (T-20261113-002): names of self-managed skills (frontmatter name,
+  // else directory name) — their registry rows are tolerated, not validated.
+  const selfManagedSkillNames = new Set<string>();
+  const selfManagedCount = skillFiles.filter((f) => isSelfManagedPath(relative(ROOT, f).replace(/\\/g, "/"))).length;
+  // v1.5.0 reference-integrity inputs (L0 only — mirrors/projects inherit L0 state)
+  const knownSkills = collectKnownSkillNames();
+  const refAllowlist = loadReferenceAllowlist();
+  const knownAgents = collectKnownAgentNames();
+
+  // Skip header in JSON mode
+  if (!jsonMode) {
+    console.log(`${colors.cyan}🔍 Skill Lifecycle Audit${colors.reset}`);
+    console.log(`${colors.cyan}=========================${colors.reset}`);
+    console.log(`${colors.dim}Platform: ${PLATFORM}${colors.reset}`);
+    console.log(`${colors.dim}Location: ${IS_WORKSPACE_ROOT ? "workspace root" : "current project"}${colors.reset}`);
+    console.log(
+      `${colors.dim}Skills found: ${skillFiles.length}${selfManagedCount > 0 ? ` (${selfManagedCount} self-managed, not audited)` : ""}${colors.reset}`,
+    );
+    console.log("");
+  }
+
+  for (const skillFile of skillFiles) {
+    const relPath = relative(ROOT, skillFile).replace(/\\/g, "/");
+    // T-20261108-004 (F-1): vendored external-deps clones (external/<id>/ per
+    // DEC-20261106-04 "consumed as-is") are tool-custody upstream content —
+    // exempt from every authoring check here (frontmatter, owner, registry,
+    // model literals): the project's external-deps.json install_dirs join the
+    // self-managed path set (self-managed-tools v1.3.0), so isSelfManagedPath
+    // is the single sanctioned skip point.
+    if (isSelfManagedPath(relPath)) {
+      selfManagedSkillNames.add(parseFrontmatter(skillFile)?.name || basename(dirname(skillFile)));
+      continue;
+    }
+    const frontmatter = parseFrontmatter(skillFile);
+
+    if (!frontmatter) {
+      errors.push({
+        level: "error",
+        file: relPath,
+        message: "No valid frontmatter found",
+        fix: "Add YAML frontmatter with name and description",
+      });
+      continue;
+    }
+
+    const isPlatformSkill = skillFile.includes("/.claude/skills/") || skillFile.includes("\\.claude\\skills\\");
+    if (frontmatter.name && !isPlatformSkill) runtimeSkillNames.add(frontmatter.name);
+
+    if (!frontmatter.name) {
+      errors.push({
+        level: "error",
+        file: relPath,
+        message: "Missing name in frontmatter",
+        fix: "Add 'name: skill-name' to frontmatter",
+      });
+      continue;
+    }
+
+    if (!frontmatter.description) {
+      warnings.push({
+        level: "warning",
+        file: relPath,
+        message: "Missing description in frontmatter",
+        fix: "Add 'description: This skill should be used when...'",
+      });
+    }
+
+    // Self-managed skills (tool-owned graft/trail, vendored external-deps clones)
+    // never reach here: the loop-top isSelfManagedPath skip handles them.
+    if (!isPlatformSkill && !frontmatter.owner) {
+      errors.push({
+        level: "error",
+        file: relPath,
+        message: "No owner defined",
+        fix: "Add 'owner: agent-name' to frontmatter",
+      });
+      continue;
+    }
+
+    // v1.5.1: orphaned-owner is an authoring-surface check — project snapshots
+    // keep their delivered owners as-is (same rationale as agent-audit Check 12).
+    if (IS_WORKSPACE_ROOT && !isPlatformSkill && frontmatter.owner && !agentExists(frontmatter.owner, registry)) {
+      warnings.push({
+        level: "warning",
+        file: relPath,
+        message: `Orphaned skill (owner: ${frontmatter.owner} not found)`,
+        fix: `Reassign to valid agent or create agents/${frontmatter.owner}.md`,
+      });
+    }
+
+    // Check status field is present and valid
+    const validSkillStatuses = ["active", "deprecated", "experimental", "archived"];
+    if (!isPlatformSkill && !frontmatter.status) {
+      errors.push({
+        level: "error",
+        file: relPath,
+        message: "Missing status in frontmatter",
+        fix: "Add 'status: active' (or deprecated/experimental/archived)",
+      });
+    } else if (!isPlatformSkill && frontmatter.status && !validSkillStatuses.includes(frontmatter.status as string)) {
+      errors.push({
+        level: "error",
+        file: relPath,
+        message: `Invalid status value '${frontmatter.status}' (allowed: ${validSkillStatuses.join(" | ")})`,
+        fix: `Set status to one of: ${validSkillStatuses.join(", ")}`,
+      });
+    }
+
+    if (frontmatter.status === "deprecated" && wasModifiedRecently(skillFile, 30)) {
+      warnings.push({
+        level: "warning",
+        file: relPath,
+        message: `Deprecated skill still active (v${frontmatter.version || "unknown"})`,
+        fix: "Archive to skills/_archive/ or remove from repository",
+      });
+    }
+    if (!isPlatformSkill && frontmatter.name && registryRows.size > 0) {
+      const row = registryRows.get(frontmatter.name);
+      if (!row) {
+        errors.push({
+          level: "error",
+          file: relPath,
+          message: `Missing skills/SKILLS.md registry row for ${frontmatter.name}`,
+          fix: `Add a registry row for ${frontmatter.name} or remove the runtime skill`,
+        });
+      } else {
+        if (frontmatter.version && row.version !== String(frontmatter.version)) {
+          errors.push({
+            level: "error",
+            file: relPath,
+            message: `Registry version drift for ${frontmatter.name}: SKILL.md=${frontmatter.version}, SKILLS.md=${row.version}`,
+            fix: "Update skills/SKILLS.md version to match SKILL.md frontmatter",
+          });
+        }
+        if (frontmatter.status && row.status !== String(frontmatter.status)) {
+          errors.push({
+            level: "error",
+            file: relPath,
+            message: `Registry status drift for ${frontmatter.name}: SKILL.md=${frontmatter.status}, SKILLS.md=${row.status}`,
+            fix: "Update skills/SKILLS.md status to match SKILL.md frontmatter",
+          });
+        }
+        if (frontmatter.owner && row.owner !== String(frontmatter.owner)) {
+          errors.push({
+            level: "error",
+            file: relPath,
+            message: `Registry owner drift for ${frontmatter.name}: SKILL.md=${frontmatter.owner}, SKILLS.md=${row.owner}`,
+            fix: "Update skills/SKILLS.md owner to match SKILL.md frontmatter",
+          });
+        }
+        if (frontmatter.last_reviewed && row.lastReviewed !== String(frontmatter.last_reviewed)) {
+          errors.push({
+            level: "error",
+            file: relPath,
+            message: `Registry last_reviewed drift for ${frontmatter.name}: SKILL.md=${frontmatter.last_reviewed}, SKILLS.md=${row.lastReviewed}`,
+            fix: "Update skills/SKILLS.md last reviewed date to match SKILL.md frontmatter",
+          });
+        }
+      }
+    }
+
+    // Check: scope field should be declared
+    const skillContent = readFileSync(skillFile, "utf-8");
+    const scopeMatch = skillContent.match(/^scope:\s*(\S+)/m);
+    if (!scopeMatch) {
+      warnings.push({
+        level: "warning",
+        file: relPath,
+        message: `scope field missing in SKILL.md frontmatter — declare scope: workspace | common | variant`,
+      });
+    } else if (!isValidScope(scopeMatch[1])) {
+      warnings.push({
+        level: "warning",
+        file: relPath,
+        message: `scope field has invalid value "${scopeMatch[1]}" — must be: workspace | common | variant | ${CURRENT_VARIANT_NAME} | ${KNOWN_VARIANT_NAMES.join(" | ")}`,
+      });
+    }
+
+    // Check MM (v1.8.0, T-20261011-015): no registry model-ID literals in
+    // skill trees (workspace directive 2026-10-11). IDs live only in
+    // docs/workspace-schema.json (`models.*`) and the CLAUDE.md §6 /
+    // AGENTS.md §3.6 managed prose. Distinct from validate-templates Check
+    // MM-01, which gates the instruction twins' managed-marker placement.
+    {
+      const skillDir = dirname(skillFile);
+      for (const hit of scanSkillTreeForModelLiterals(skillDir)) {
+        if (hit.file === skillFile) continue; // SKILL.md reported below with its own relPath context
+        errors.push({
+          level: "error",
+          file: relative(ROOT, hit.file).replace(/\\/g, "/"),
+          message: `Model-ID literal(s) in skill tree: ${hit.literals.join(", ")} (Check MM)`,
+          fix: "Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose",
+        });
+      }
+      const ownLiterals = findModelLiterals(skillContent);
+      if (ownLiterals.length > 0) {
+        errors.push({
+          level: "error",
+          file: relPath,
+          message: `Model-ID literal(s) in skill tree: ${ownLiterals.join(", ")} (Check MM)`,
+          fix: "Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose",
+        });
+      }
+    }
+
+    if (frontmatter.requires && frontmatter.requires.length > 0) {
+      for (const req of frontmatter.requires) {
+        if (!allSkills.has(req)) {
+          warnings.push({
+            level: "warning",
+            file: relPath,
+            message: `Missing dependency: ${req}`,
+            fix: `Create ${req} skill or remove from requires: []`,
+          });
+        }
+      }
+    }
+
+    if (frontmatter.requires && frontmatter.requires.length > 0) {
+      const cycle = checkCircularDependencies(skillFile, frontmatter.requires, allSkills);
+      if (cycle) {
+        errors.push({
+          level: "error",
+          file: relPath,
+          message: `Circular dependency: ${cycle.join(" → ")}`,
+          fix: "Break the cycle by removing one dependency",
+        });
+      }
+    }
+
+    // Check RI/RI-d/RI-a (v1.5.0): body references must resolve to real skills
+    if (IS_WORKSPACE_ROOT && !isPlatformSkill && frontmatter.name) {
+      const { unknown, deprecated, agentOnly } = scanSkillReferences(skillFile, knownSkills, refAllowlist, knownAgents);
+      for (const name of unknown) {
+        errors.push({
+          level: "error",
+          file: relPath,
+          message: `Reference integrity: backtick reference \`${name}\` resolves to no skill in skills/ or templates/*/skills/`,
+          fix: `Fix or remove the reference (add docs/lifecycle/reference-allowlist.json entry if it is an intentional historical note)`,
+        });
+      }
+      for (const name of deprecated) {
+        warnings.push({
+          level: "warning",
+          file: relPath,
+          message: `Reference \`${name}\` points at a deprecated skill`,
+          fix: `Update the reference to the successor skill`,
+        });
+      }
+      for (const name of agentOnly) {
+        warnings.push({
+          level: "warning",
+          file: relPath,
+          message: `Related-Skills entry \`${name}\` resolves to an agent, not a skill`,
+          fix: `Move the reference to the agent-relations section or cite the actual skill name`,
+        });
+      }
+      // U-20261028-011: the LC/MV checks moved below — out of the
+      // IS_WORKSPACE_ROOT gate — so delivered projects run them too.
+
+      // Check SD (v1.6.0, T-20261004-023): stale last_reviewed — the SKILL.md's
+      // git content history moved past its declared last_reviewed without a
+      // stamp refresh (the graft doctrine-block window case). Same semantics as
+      // agent-lifecycle-audit Check 11 (T-20260909-004): the shared
+      // lastContentCommitDate helper skips sync-only pipeline commits and
+      // metadata-only (stamp-only) commits; archived skills are exempt, and
+      // self-managed skills never reach this check (loop-top skip).
+      // v1.10.0 A2 tolerance (spec 2026-10-29-delivery-bookkeeping-engine-design):
+      // the engine never stamps last_reviewed (an engine write is not a review),
+      // so a wave-delivered SKILL.md whose current bytes hash-match the recorded
+      // delivered baseline (in-project .claude/last-upgrade-delivery.json —
+      // absent at L0, where the tolerance is inert) is suppressed to an INFO
+      // line instead; any genuine project edit breaks the hash and re-arms the
+      // warning with full history.
+      if (frontmatter.status === "active") {
+        const reviewed = frontmatter.last_reviewed;
+        const commitDate = lastContentCommitDate(skillFile);
+        if (reviewed && /^\d{4}-\d{2}-\d{2}$/.test(reviewed) && commitDate && reviewed < commitDate) {
+          const manifest = loadDeliveryBaselineManifest();
+          if (isDeliveredBaselineEqual(relPath, skillContent, manifest)) {
+            if (!jsonMode) {
+              console.log(`  ℹ️  ${deliveryStalenessInfoLine(relPath, reviewed, commitDate, manifest!)}`);
+            }
+          } else {
+            warnings.push({
+              level: "warning",
+              file: relPath,
+              message: `frontmatter last_reviewed (${reviewed}) is older than the last git content commit (${commitDate})`,
+              fix: "Review the current content and update 'last_reviewed' in SKILL.md frontmatter",
+            });
+          }
+        }
+      }
+
+      // Check SVP (v1.7.0, T-20261007-026): SKILL.md script version pins must
+      // match the pinned script's current registry version. A pin is
+      // `script.ts v?X.Y.Z` WITHOUT a floor operator (≥/>= floors are
+      // minimums, not pins, and never drift stale). Unknown script names are
+      // ignored (prose references, other-variant tools).
+      if (frontmatter.status === "active") {
+        if (scriptRegistry === null) {
+          scriptRegistry = existsSync(join(ROOT, "scripts", "SCRIPTS.md"))
+            ? parseRegistryVersions(readFileSync(join(ROOT, "scripts", "SCRIPTS.md"), "utf-8"))
+            : {};
+        }
+        const content = skillContent.replace(/\r\n/g, "\n");
+        for (const m of content.matchAll(/([\w./-]+\.ts)`?[ \t]+(?:v|≥|>=)?[ \t]*(\d+\.\d+\.\d+)/g)) {
+          if (/≥|>=/.test(m[0])) continue; // floor, not a pin
+          const script = m[1];
+          const current = scriptRegistry[script];
+          if (!current) continue;
+          if (current.version !== m[2]) {
+            warnings.push({
+              level: "warning",
+              file: relPath,
+              message: `script version pin drift: "${script} ${m[2]}" but the registry has ${current.version}`,
+              fix: `Update the ${script} version pin in the SKILL.md body to ${current.version} (or drop the pin)`,
+            });
+          }
+        }
+      }
+    }
+
+    // Check LC (v1.5.0) + MV (v1.6.0): active skills must carry a lifecycle
+    // record, and a present record's Metadata Version lines must match each
+    // other and the SKILL.md frontmatter. U-20261028-011: moved OUT of the
+    // IS_WORKSPACE_ROOT gate above — delivered projects run this audit too,
+    // and skipping LC there let generateSummary print "All N skills healthy"
+    // while the dimension went unmeasured (49 active skills, 7 records, zero
+    // project-level signals). Check RI stays workspace-gated: the reference
+    // integrity allowlist surface is L0-only.
+    // Self-managed skills (e.g. graft) never reach here: the loop-top skip exempts them.
+    if (!isPlatformSkill && frontmatter.name) {
+      const lifecycleRecordPath = join(ROOT, "docs", "lifecycle", "skills", `${frontmatter.name}.md`);
+      if (frontmatter.status === "active" && !existsSync(lifecycleRecordPath)) {
+        warnings.push({
+          level: "warning",
+          file: relPath,
+          message: `No lifecycle record: docs/lifecycle/skills/${frontmatter.name}.md is missing for an active skill`,
+          fix: `Create the record (Created / Phase History / Acceptance Criteria / Metadata). Template-delivered skills receive their record when the project is next upgraded from its template; if this skill is project-local, create the record.`,
+        });
+      } else if (frontmatter.status === "active" && existsSync(lifecycleRecordPath)) {
+        // Check MV (v1.6.0, T-20261004-020): the record's footer Metadata Version
+        // must match the header Metadata Version and the SKILL.md frontmatter —
+        // the ci-triage footer said 0.1.0 while header/frontmatter said 0.2.0
+        // after the 2026-10-04 bump and nothing caught it.
+        const versions = lifecycleRecordVersions(readFileSync(lifecycleRecordPath, "utf-8"));
+        if (versions) {
+          const fmVersion = frontmatter.version ?? "—";
+          if (versions.header !== versions.footer || versions.footer !== fmVersion) {
+            errors.push({
+              level: "error",
+              file: relPath,
+              message: `Lifecycle record version drift for ${frontmatter.name}: header=${versions.header}, footer=${versions.footer}, SKILL.md=${fmVersion} (docs/lifecycle/skills/${frontmatter.name}.md)`,
+              fix: "Align both Metadata Version lines in the lifecycle record with the SKILL.md frontmatter version",
+            });
+          }
+        }
+      }
+    }
+  }
+
+  if (registryRows.size > 0) {
+    for (const name of registryRows.keys()) {
+      if (!runtimeSkillNames.has(name) && selfManagedSkillNames.has(name)) {
+        // v1.14.0: a row for a self-managed skill is tolerated (tool-owned, not validated).
+        if (!jsonMode) {
+          console.log(
+            `  ℹ️  skills/SKILLS.md row \`${name}\` belongs to a self-managed skill — not validated (rows for self-managed skills are optional)`,
+          );
+        }
+      } else if (!runtimeSkillNames.has(name)) {
+        errors.push({
+          level: "error",
+          file: "skills/SKILLS.md",
+          message: `Registry row has no matching runtime skill: ${name}`,
+          fix: `Remove the ${name} row from skills/SKILLS.md or restore skills/${name}/SKILL.md`,
+        });
+      }
+      // Check RD (v1.5.0): expired removal-date on a still-present skill
+      const row = registryRows.get(name)!;
+      if (row.removalDate && isRemovalDateExpired(row.removalDate)) {
+        errors.push({
+          level: "error",
+          file: "skills/SKILLS.md",
+          message: `Removal date expired for ${name} (removal-date ${row.removalDate} has passed; the skill is still present)`,
+          fix: `Run the removal review now: remove the skill or push the removal-date out with a recorded rationale`,
+        });
+      }
+    }
+  }
+
+  // Check RI for template-resident skills (v1.5.0) — templates/*/skills are not
+  // part of the runtime scan above, but their SKILL.md bodies reference skills too.
+  if (IS_WORKSPACE_ROOT) {
+    const templatesDir = join(ROOT, "templates");
+    if (existsSync(templatesDir)) {
+      for (const e of readdirSync(templatesDir, { withFileTypes: true })) {
+        if (!e.isDirectory() || !(e.name.startsWith("co-") || e.name === "common")) continue;
+        const tplSkillsDir = join(templatesDir, e.name, "skills");
+        if (!existsSync(tplSkillsDir)) continue;
+        for (const s of readdirSync(tplSkillsDir, { withFileTypes: true })) {
+          if (!s.isDirectory()) continue;
+          const f = join(tplSkillsDir, s.name, "SKILL.md");
+          if (!existsSync(f)) continue;
+          const { unknown } = scanSkillReferences(f, knownSkills, refAllowlist, knownAgents);
+          for (const name of unknown) {
+            errors.push({
+              level: "error",
+              file: `templates/${e.name}/skills/${s.name}/SKILL.md`,
+              message: `Reference integrity: backtick reference \`${name}\` resolves to no skill in skills/ or templates/*/skills/`,
+              fix: `Fix or remove the reference (add docs/lifecycle/reference-allowlist.json entry if it is an intentional historical note)`,
+            });
+          }
+          // Check MM (v1.8.0): template-resident skill trees are model-ID
+          // literal-free too (same patterns, same rule as the runtime scan).
+          const skillDir = join(tplSkillsDir, s.name);
+          for (const hit of scanSkillTreeForModelLiterals(skillDir)) {
+            const hitRel = relative(skillDir, hit.file).replace(/\\/g, "/");
+            errors.push({
+              level: "error",
+              file: `templates/${e.name}/skills/${s.name}/${hitRel}`,
+              message: `Model-ID literal(s) in skill tree: ${hit.literals.join(", ")} (Check MM)`,
+              fix: "Replace with a registry pointer (docs/workspace-schema.json → models.<platform>.<tier>) or a tier alias; model IDs live only in docs/workspace-schema.json (models.*) and the CLAUDE.md §6 / AGENTS.md §3.6 prose",
+            });
+          }
+        }
+      }
+    }
+  }
+
+  const summary = generateSummary(skillFiles.length - selfManagedCount, errors.length, warnings.length);
+
+  return {
+    skillsScanned: skillFiles.length,
+    errors,
+    warnings,
+    summary: summary.colored,
+    summaryClean: summary.clean,
+  };
+}
+
+function generateSummary(scanned: number, errors: number, warnings: number): { colored: string; clean: string } {
+  if (errors === 0 && warnings === 0) {
+    return {
+      colored: `${colors.green}✓ All ${scanned} skills healthy${colors.reset}`,
+      clean: `All ${scanned} skills healthy`,
+    };
+  }
+  return {
+    colored:
+      `${colors.green}✓ Skills scanned: ${scanned}${colors.reset}` +
+      (warnings > 0 ? `\n${colors.yellow}⚠️  Warnings: ${warnings}${colors.reset}` : "") +
+      (errors > 0 ? `\n${colors.red}✖ Errors: ${errors}${colors.reset}` : ""),
+    clean:
+      `Skills scanned: ${scanned}` +
+      (warnings > 0 ? `, Warnings: ${warnings}` : "") +
+      (errors > 0 ? `, Errors: ${errors}` : ""),
+  };
+}
+
+function printResults(result: AuditResult): void {
+  for (const error of result.errors) {
+    console.log(`${colors.red}✖ ERROR: ${error.message}${colors.reset}`);
+    console.log(`   File: ${error.file}`);
+    if (error.fix) console.log(`   Fix: ${error.fix}`);
+    console.log("");
+  }
+
+  for (const warning of result.warnings) {
+    console.log(`${colors.yellow}⚠️  WARNING: ${warning.message}${colors.reset}`);
+    console.log(`   File: ${warning.file}`);
+    if (warning.fix) console.log(`   Fix: ${warning.fix}`);
+    console.log("");
+  }
+
+  console.log(`${colors.cyan}=========================${colors.reset}`);
+  console.log(result.summary);
+}
+
+function printJsonResults(result: AuditResult): void {
+  console.log(JSON.stringify(result, null, 2));
+}
+
+// CLI interface
+const args = process.argv.slice(2);
+const jsonMode = args.includes("--json");
+const helpMode = args.includes("--help") || args.includes("-h");
+
+if (helpMode) {
+  console.log(`
+Skill Lifecycle Audit v1.0.0
+
+Usage:
+  bun scripts/skill-lifecycle-audit.ts          # Run audit
+  bun scripts/skill-lifecycle-audit.ts --json   # JSON output
+  bun scripts/skill-lifecycle-audit.ts --help   # Show this help
+
+Checks:
+  ✓ Skills without owners
+  ✓ Orphaned skills (owner agent doesn't exist)
+  ✓ Deprecated skills still being modified
+  ✓ Missing dependencies (requires field)
+  ✓ Circular dependencies
+
+Platform: ${PLATFORM}
+  `);
+  if (import.meta.main) {
+    process.exit(0);
+  }
+}
+
+const result = auditSkills(jsonMode);
+
+if (jsonMode) {
+  printJsonResults(result);
+} else {
+  printResults(result);
+}
+
+if (import.meta.main) {
+  process.exit(result.errors.length > 0 ? 1 : 0);
+}

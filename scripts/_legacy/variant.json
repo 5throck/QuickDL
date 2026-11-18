@@ -1,0 +1,156 @@
+{
+  "name": "co-develop",
+  "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization)",
+  "variant_type": "development",
+  "status": "stable",
+  "version": "1.0.0",
+  "inherits_common": "templates/common",
+  "created_at": "2026-06-09T18:35:54.011Z",
+  "lifecycle": {
+    "statusSince": "2026-06-13",
+    "lastTransition": "beta → stable on 2026-06-13",
+    "stablePromotedOn": "2026-06-13"
+  },
+  "agents": [
+    {
+      "name": "architect",
+      "file": "agents/architect.md"
+    },
+    {
+      "name": "code-writer",
+      "file": "agents/code-writer.md"
+    },
+    {
+      "name": "designer",
+      "file": "agents/designer.md"
+    },
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
+    {
+      "name": "security-monitor",
+      "file": "agents/security-monitor.md"
+    },
+    {
+      "name": "stack-setup",
+      "file": "agents/stack-setup.md"
+    },
+    {
+      "name": "test-runner",
+      "file": "agents/test-runner.md"
+    },
+    {
+      "name": "i18n-specialist",
+      "file": "agents/i18n-specialist.md"
+    }
+  ],
+  "skills": [
+    {
+      "name": "code-review",
+      "file": "skills/code-review/SKILL.md"
+    },
+    {
+      "name": "refactoring",
+      "file": "skills/refactoring/SKILL.md"
+    },
+    {
+      "name": "swe-solve",
+      "file": "skills/swe-solve/SKILL.md"
+    },
+    {
+      "name": "test-driven-development",
+      "file": "skills/test-driven-development/SKILL.md"
+    }
+  ],
+  "skill_manifest": {
+    "variant_specific": [
+      {
+        "name": "code-review",
+        "layer": "workspace",
+        "used_by_agents": [
+          "code-writer"
+        ],
+        "phases": [
+          4
+        ],
+        "platform_parity": "skip"
+      },
+      {
+        "name": "refactoring",
+        "layer": "workspace",
+        "used_by_agents": [
+          "code-writer"
+        ],
+        "phases": [
+          4
+        ],
+        "platform_parity": "skip"
+      },
+      {
+        "name": "swe-solve",
+        "layer": "workspace",
+        "used_by_agents": [],
+        "phases": [
+          4
+        ],
+        "platform_parity": "required"
+      },
+      {
+        "name": "test-driven-development",
+        "layer": "workspace",
+        "used_by_agents": [
+          "test-runner"
+        ],
+        "phases": [
+          4
+        ],
+        "platform_parity": "skip"
+      },
+      {
+        "name": "post-write-check",
+        "reason": "adopted foreign skill (adopt-project)"
+      }
+    ]
+  },
+  "agent_manifest": {
+    "variant_agents_dir": "agents",
+    "pipeline_order": [
+      "architect",
+      "designer",
+      "stack-setup",
+      "code-writer",
+      "test-runner",
+      "security-monitor"
+    ],
+    "optional": [
+      "designer",
+      "stack-setup"
+    ],
+    "notes": "designer: skip if no UI/UX component in scope. stack-setup: skip for projects with an existing configured stack. i18n-specialist: engaged on demand for locale deliverables (common extends-stub); not part of the sequential pipeline."
+  },
+  "promotionChecklist": "PROMOTION_CHECKLIST.md",
+  "deg_conformance": "core",
+  "hub": {
+    "role": "hub",
+    "domain": "co-develop",
+    "hub_remote": "https://github.com/5throck/co-develop.git",
+    "consumes": [
+      {
+        "domain": "co-security",
+        "minimum_version": "1.1.0"
+      }
+    ]
+  },
+  "process_manifest": {
+    "stages_file": null,
+    "raci_file": null,
+    "gates_file": null,
+    "evidence_models_dir": null
+  },
+  "country_config": {
+    "profiles_dir": "docs/countries",
+    "supported": [],
+    "default": null
+  }
+}

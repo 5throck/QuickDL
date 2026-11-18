@@ -60,3 +60,99 @@ downloads/
 .codegraph/
 graft/
 .openchrome/
+
+
+<!-- WORKSPACE-MANAGED: Git ignore patterns. Content outside this block is preserved during project upgrades. -->
+# Secrets — never commit
+.env
+.env.*
+!.env.sample
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+*.egg-info/
+
+# Node.js
+node_modules/
+.next/
+build/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.swp
+# Generated IDE rule files (scripts/generate-ide-rules.ts) — regenerable, not committed
+.cursorrules
+.clauderules
+
+# Local AI settings (personal overrides — never shared)
+.claude/settings.local.json
+.gemini/settings.local.json
+.mcp.local.json
+
+# Crypto / certificates — never commit private key material
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.jks
+*.keystore
+
+# Temp / build artifacts
+*.log
+*.bak
+*.tmp
+
+# Databases
+*.sqlite
+*.db
+
+
+# Antigravity/ZCode session-local state (plans, config — never shared)
+.zcode/
+
+# Windows reserved device name artifacts (created by git hooks on cmd.exe)
+nul
+NUL
+
+# --- Sandbox for testing ---
+.sandbox/
+
+# Archive directory ignored to save space (local preservation only)
+memory/archive/
+
+# Ignore test temp directories
+tests/.temp/
+
+# trail's local graph cache (trail-era; design 2026-10-31-graft-trail-migration).
+.trail/cache/
+.claude/helpers/trail-hooks.cjs
+.claude/helpers/trail-statusline.cjs
+
+# graft's local graph cache — regenerable, not committed (run `graft build`).
+/graft/
+
+# graft helper machine-local override (issue #1048) — untracked by design.
+# (graft-era surfaces stay as legacy until the fleet converges — design 2026-10-31-graft-trail-migration)
+.claude/helpers/graft.local.json
+# tool-owned mirrors (trail-era + graft-era legacy; self-managed, designs 2026-10-02-self-managed-tool-surfaces + 2026-10-31-graft-trail-migration):
+.claude/skills/graft/
+.agents/skills/graft/
+.codex/skills/graft/
+.gemini/skills/graft/
+.hermes/skills/graft/
+.claude/helpers/graft-hooks.cjs
+.claude/helpers/graft-statusline.cjs
+<!-- /WORKSPACE-MANAGED -->
