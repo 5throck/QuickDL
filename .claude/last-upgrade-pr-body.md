@@ -4,23 +4,21 @@ Auto-composed from `.claude/last-upgrade-delivery.json` at delivery time — thi
 
 - Variant: co-develop
 - Template: 0.30.0 → 0.30.0
-- Delivered: 37 file(s) at 2026-11-18T17:33:15.995Z
+- Delivered: 10 file(s) at 2026-11-18T19:13:48.183Z
 
 ### Delivery footprint
 
-- .claude/ — 5 file(s)
-- docs/ — 5 file(s)
-- .agents/ — 4 file(s)
-- .codex/ — 4 file(s)
-- .gemini/ — 4 file(s)
-- .hermes/ — 4 file(s)
-- agents/ — 4 file(s)
-- skills/ — 4 file(s)
-- (root) — 3 file(s)
+- scripts/ — 3 file(s)
+- (root) — 2 file(s)
+- .agents/ — 1 file(s)
+- .claude/ — 1 file(s)
+- .codex/ — 1 file(s)
+- .gemini/ — 1 file(s)
+- .hermes/ — 1 file(s)
 
 ### Decisions
 
-- INFO: 124 / WARN: 106 / ERROR: 3
+- INFO: 119 / WARN: 105 / ERROR: 3
 
 **Unresolved ERROR dispositions** (CONFLICT/TOMBSTONED: delivery skipped, project copy preserved; BEHAVIOR_REGRESSION: delivered, new sibling-test failure):
 - `agents/architect.md` (SYNC_IF_NEWER: agents/) — equal-version drift on project-evolved content — CONFLICT disposition: restore-to-canonical SKIPPED, project copy preserved

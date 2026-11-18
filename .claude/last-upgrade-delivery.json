@@ -1,55 +1,23 @@
 {
   "schemaVersion": 2,
-  "timestamp": "2026-11-18T17:33:15.846Z",
+  "timestamp": "2026-11-18T19:13:48.094Z",
   "project": "QuickDL",
   "templateVersion": "0.30.0",
-  "templateSha": "b694167a902c988303513ad264921be2bdd60fbc",
-  "baseSha": "476f1364ab8d7c005e7fafec6b66cabcaff7d76e",
+  "templateSha": "e14d35b818ed9ad3836a5b90d9b3825e19f46ee0",
+  "baseSha": "0b66b1906cf53d361786538b8109e3561b84ee18",
   "files": [
-    ".agents/skills/translate/SKILL.md",
-    ".claude/settings.json",
-    ".claude/skills/translate/SKILL.md",
-    ".codex/skills/translate/SKILL.md",
-    ".gemini/skills/translate/SKILL.md",
-    ".gitattributes",
-    ".hermes/skills/translate/SKILL.md",
-    "AGENTS.md",
-    "agents/pm.md",
-    "docs/co-develop.context.md",
-    "docs/workspace-schema.json",
-    "skills/.sync-skills-managed.json",
-    "template-version.txt",
-    ".agents/skills/finishing-a-development-branch/SKILL.md",
-    ".agents/skills/platform-command-lifecycle-manager/SKILL.md",
-    ".agents/skills/platform-skill-lifecycle-manager/SKILL.md",
-    ".claude/skills/finishing-a-development-branch/SKILL.md",
-    ".claude/skills/platform-command-lifecycle-manager/SKILL.md",
-    ".claude/skills/platform-skill-lifecycle-manager/SKILL.md",
-    ".codex/skills/finishing-a-development-branch/SKILL.md",
-    ".codex/skills/platform-command-lifecycle-manager/SKILL.md",
-    ".codex/skills/platform-skill-lifecycle-manager/SKILL.md",
-    ".gemini/skills/finishing-a-development-branch/SKILL.md",
-    ".gemini/skills/platform-command-lifecycle-manager/SKILL.md",
-    ".gemini/skills/platform-skill-lifecycle-manager/SKILL.md",
-    ".hermes/skills/finishing-a-development-branch/SKILL.md",
-    ".hermes/skills/platform-command-lifecycle-manager/SKILL.md",
-    ".hermes/skills/platform-skill-lifecycle-manager/SKILL.md",
-    "agents/automation-engineer.md",
-    "agents/contract-gate-engineer.md",
-    "agents/design-system-lead.md",
-    "docs/lifecycle/agents/automation-engineer.md",
-    "docs/lifecycle/agents/contract-gate-engineer.md",
-    "docs/lifecycle/agents/design-system-lead.md",
-    "skills/finishing-a-development-branch/SKILL.md",
-    "skills/platform-command-lifecycle-manager/SKILL.md",
-    "skills/platform-skill-lifecycle-manager/SKILL.md"
+    ".agents/skills/post-write-check/SKILL.md",
+    ".claude/skills/post-write-check/SKILL.md",
+    ".codex/skills/post-write-check/SKILL.md",
+    ".gemini/skills/post-write-check/SKILL.md",
+    ".hermes/skills/post-write-check/SKILL.md",
+    "GEMINI.md",
+    "scripts/SCRIPTS.md",
+    "scripts/lib/external-deps.ts",
+    "scripts/lib/upgrade-policy.ts",
+    "template-version.txt"
   ],
   "baselines": {
-    ".claude/settings.json": {
-      "hash": "03a1439fb0e9427479152e231d4d94e3729d6b3f4f6ff80d0445374f766324af",
-      "templateVersion": "0.30.0",
-      "blob": "298c94c8d0208da3ab52b6d3fc86eb306d2376e5"
-    },
     ".githooks/commit-msg": {
       "hash": "6375ca75a1fa6cf1547835b64f2b36c549b4faf4aa4aab0fccc4e88e06451f54",
       "templateVersion": "0.30.0",
@@ -81,14 +49,14 @@
       "blob": "1f9ebe631477bf2e532d66215be35019a87c806c"
     },
     "AGENTS.md": {
-      "hash": "2e360096636975f908c9ba88b4c99c238dde1489e15f585358d605c9aef0a150",
+      "hash": "529d7d2d2292210e428baa3d75f145de5a289d09f280aaa9695674905e8bea51",
       "templateVersion": "0.30.0",
-      "blob": "2be184808da20147131d038811b489c956349720"
+      "blob": "4462624e4dda53d296cdbc258f55801f2bcf0fb8"
     },
     "CLAUDE.md": {
-      "hash": "3acf4da0c84d16c73f2c258f23c985f1c80e50aae99d914cfc2570065b62865a",
+      "hash": "e7e538b118024318a75db77318df52c39dcd9dcd63890e24402484872a22e3f6",
       "templateVersion": "0.30.0",
-      "blob": "1bafa0b182d18bc556eefe9b822bd125bc97b249"
+      "blob": "cbe3c82f5ceb5431cc210f4b3b3e270d88d013b3"
     },
     "CODEX.md": {
       "hash": "a97f02c0c20af9a0136854e8655bca22136c225f8d41eacd7690d8c40ac67f39",
@@ -96,14 +64,49 @@
       "blob": "f300e118dda28f457a0a8a46412c88f89e2800d1"
     },
     "GEMINI.md": {
-      "hash": "355e82ccf0696efb497d6df07e89f2c37d552fbee4f11d936d5b50d3e536942b",
+      "hash": "86660ef56083b7da76e47daac84046183864e0c79536d0b47475c5085aed38b8",
       "templateVersion": "0.30.0",
-      "blob": "952da797fad137655095b0e7fc8669fd2f857c19"
+      "blob": "619079b1aba6bb696769d8348da1b1012bf297a0"
     },
     "HERMES.md": {
       "hash": "99c0722c58dbc5640de6f486c85d4f934e8d318d31b76593ffb7f8d8423ae121",
       "templateVersion": "0.30.0",
       "blob": "a5e8ffc9a9b3a699e524d39815d2686865080505"
+    },
+    "agents/pm.md": {
+      "hash": "ba87a6070e8211abd920be2802e25ab1a427c996f19476cfd6b22fe6b03e5966",
+      "templateVersion": "0.30.0",
+      "blob": "0608061cd656636b789e59b489a03b5dde43e0eb"
+    },
+    "docs/co-develop.context.md": {
+      "hash": "09e70436860450b658861f831e39efc12a4a6cfb584798f0c63f7f5c2e2b6fd0",
+      "templateVersion": "0.30.0",
+      "blob": "dbc590b8b0d5af7f75cfd29d029181d560a48c58"
+    },
+    "docs/phase-definitions.md": {
+      "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
+      "templateVersion": "0.30.0",
+      "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
+    },
+    "docs/security.md": {
+      "hash": "6424d80604638ae56523d66a6a3447b3bb14ec249afb20d2fe70f75bca30f87d",
+      "templateVersion": "0.30.0",
+      "blob": "dc6dd2e84dd1ad63b77bbdde06e6ff63eeb2151e"
+    },
+    "scripts/lib/external-deps.ts": {
+      "hash": "952377ae40fb15b1599ee378a5961a2bc6caea991e9e41597bc914134c6a5e8a",
+      "templateVersion": "0.30.0",
+      "blob": "4b1e7fe3b7e43348d9abc3fbc2d5bf38ce5659df"
+    },
+    "scripts/lib/upgrade-policy.ts": {
+      "hash": "73b19b13d1be90bf8edce154a50c869e217f755c65881c76d808f2f7346e2980",
+      "templateVersion": "0.30.0",
+      "blob": "197bec686457190c2d0d6b85e82000fddf3b9d20"
+    },
+    ".claude/settings.json": {
+      "hash": "03a1439fb0e9427479152e231d4d94e3729d6b3f4f6ff80d0445374f766324af",
+      "templateVersion": "0.30.0",
+      "blob": "298c94c8d0208da3ab52b6d3fc86eb306d2376e5"
     },
     "agents/automation-engineer.md": {
       "hash": "0cdff6f6439400114ddd590fff00f01ea96f3c2e47091c8f7ae8d14b10ea554a",
@@ -120,16 +123,6 @@
       "templateVersion": "0.30.0",
       "blob": "a66068e3b45c67504a02c050bed82497bf9f7cd4"
     },
-    "agents/pm.md": {
-      "hash": "79bd8d5ec1a7dd0bbc4ccd132c27bfe74a68309aa18c3b217fe70a21854306c2",
-      "templateVersion": "0.30.0",
-      "blob": "51ffa7ee26ac32786f76f6ae74490087cd942186"
-    },
-    "docs/co-develop.context.md": {
-      "hash": "09e70436860450b658861f831e39efc12a4a6cfb584798f0c63f7f5c2e2b6fd0",
-      "templateVersion": "0.30.0",
-      "blob": "dbc590b8b0d5af7f75cfd29d029181d560a48c58"
-    },
     "docs/lifecycle/agents/automation-engineer.md": {
       "hash": "c9385a85a1fea524a0690fed059d59ecaa69b72c197388a15df0a9842c610759",
       "templateVersion": "0.30.0",
@@ -144,16 +137,6 @@
       "hash": "787eae1d14126494342b8c954e6404c502535a360423454962233fe0fa3fbd4d",
       "templateVersion": "0.30.0",
       "blob": "7ada33249f5664598a871f3f078b9ef2fc12fc20"
-    },
-    "docs/phase-definitions.md": {
-      "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
-      "templateVersion": "0.30.0",
-      "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
-    },
-    "docs/security.md": {
-      "hash": "6424d80604638ae56523d66a6a3447b3bb14ec249afb20d2fe70f75bca30f87d",
-      "templateVersion": "0.30.0",
-      "blob": "dc6dd2e84dd1ad63b77bbdde06e6ff63eeb2151e"
     },
     "docs/workspace-schema.json": {
       "hash": "48a1f35440a561a1f06f28d638990bc44bf0e6798dba7a8ceb0b4685f4185220",
@@ -1280,11 +1263,6 @@
       "templateVersion": "0.30.0",
       "blob": "b5ebc943ee25cf206061caec00a8db8f2b30080f"
     },
-    "scripts/lib/external-deps.ts": {
-      "hash": "498b34c123cdb0b75a1ec4c9b42ef1da8320d16863be23eff66b8fac1fde1180",
-      "templateVersion": "0.30.0",
-      "blob": "4600aac6b15a1ad4a101a9133f4d954dcb2f8920"
-    },
     "scripts/lib/fleet.ts": {
       "hash": "e2feee4e7b5359a53d42d57c71c71996ed5083cdc98ba93df8e0992f309e124d",
       "templateVersion": "0.30.0",
@@ -1429,11 +1407,6 @@
       "hash": "f8404f8b6817340b4bd754e5f057aa6eba471065ef4a958f8fa85bf7f507c1a3",
       "templateVersion": "0.30.0",
       "blob": "b739ed9fa737717d48b59ba0ea3e833d5ffd5c89"
-    },
-    "scripts/lib/upgrade-policy.ts": {
-      "hash": "6c395c846a8629caf6893663bdbca062135d75d701c370459523e1b5dd488fcf",
-      "templateVersion": "0.30.0",
-      "blob": "6d807d30b3bbc6ffcfa674c5a0193d837500ef90"
     },
     "scripts/lib/variant-overlay-guard.ts": {
       "hash": "9921ec2b42e3c8a04fbce7b91d12ee9996a9e939bdd615d5918e5df4c5493067",
@@ -2305,7 +2278,7 @@
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
       "verdict": "REGION_IN_SYNC",
-      "detail": "32 of 137 out-of-zone lines byte-equal — in-sync regions carry no write channel; 40 divergent block(s) below",
+      "detail": "32 of 134 out-of-zone lines byte-equal — in-sync regions carry no write channel; 39 divergent block(s) below",
       "severity": "INFO"
     },
     {
@@ -2537,15 +2510,7 @@
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
       "verdict": "EVOLVED_REGION",
-      "detail": "project-authored line-block (5 line(s)) after '# PowerShell (Windows)' — preserved (WARN — port candidate: land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6))",
-      "severity": "WARN"
-    },
-    {
-      "path": "GEMINI.md",
-      "policy": "MERGE_MANAGED",
-      "pass": "MERGE",
-      "verdict": "EVOLVED_REGION",
-      "detail": "project-authored line-block (1 line(s)) after '# PowerShell (Windows)' — preserved (WARN — port candidate: land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6))",
+      "detail": "project-authored line-block (3 line(s)) after '### Git Commit Policy' — preserved (WARN — port candidate: land it template-side inside a managed zone or skeleton-registry section per the adjudicated-port procedure (sync-overwrite-policy §6))",
       "severity": "WARN"
     },
     {
@@ -2553,7 +2518,7 @@
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
       "verdict": "TEMPLATE_AHEAD_REGION",
-      "detail": "template line-block (15 line(s)) absent from the project copy after '# PowerShell (Windows)' — template content the project never received, or a deliberate project deletion (WARN — never silently reverted; ERROR only when a write channel targets the span)",
+      "detail": "template line-block (15 line(s)) absent from the project copy after '### Git Commit Policy' — template content the project never received, or a deliberate project deletion (WARN — never silently reverted; ERROR only when a write channel targets the span)",
       "severity": "WARN"
     },
     {
@@ -2627,6 +2592,14 @@
       "verdict": "TEMPLATE_AHEAD_REGION",
       "detail": "template line-block (37 line(s)) absent from the project copy after '### Model Selection Override' — template content the project never received, or a deliberate project deletion (WARN — never silently reverted; ERROR only when a write channel targets the span)",
       "severity": "WARN"
+    },
+    {
+      "path": "GEMINI.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "MERGE",
+      "verdict": "TEMPLATE_DELTA",
+      "detail": "template-authoritative managed block restamped (template wins): COMMON-GEMINI — project block diverged from the template and was restamped (22 line(s) → 22 line(s))",
+      "severity": "INFO"
     },
     {
       "path": "GEMINI.md",
@@ -2712,17 +2685,17 @@
       "path": "agents/pm.md",
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
-      "verdict": "TEMPLATE_DELTA",
-      "detail": "template-authoritative managed block restamped (template wins): WORKSPACE-MANAGED:PM agent body. Content outside this block is preserved during project upgrades. — project block diverged from the template and was restamped (333 line(s) → 333 line(s))",
+      "verdict": "MERGE",
+      "detail": "managed-zone merge delivered (non-destructive union/insert)",
       "severity": "INFO"
     },
     {
       "path": "agents/pm.md",
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
-      "verdict": "MERGE",
-      "detail": "managed-zone merge delivered (non-destructive union/insert)",
-      "severity": "INFO"
+      "verdict": "EVOLVED",
+      "detail": "tier scalar divergence kept (project 'high' vs template 'medium') — deliberate divergence, untouched",
+      "severity": "WARN"
     },
     {
       "path": "AGENTS.md",
@@ -2976,24 +2949,8 @@
       "path": "AGENTS.md",
       "policy": "MERGE_MANAGED",
       "pass": "DOCS_MERGE",
-      "verdict": "TEMPLATE_DELTA",
-      "detail": "template-authoritative managed block restamped (template wins): COMMON-AGENTS — project block diverged from the template and was restamped (35 line(s) → 35 line(s))",
-      "severity": "INFO"
-    },
-    {
-      "path": "AGENTS.md",
-      "policy": "MERGE_MANAGED",
-      "pass": "DOCS_MERGE",
       "verdict": "MERGE",
-      "detail": "managed-zone merge delivered (non-destructive union/insert) — MERGE_DROP: 1 project-authored line(s) dropped outside the project region (absent from the merged text, the template and every template revision) — review the diff and port or restore",
-      "severity": "WARN"
-    },
-    {
-      "path": "docs/co-develop.context.md",
-      "policy": "MERGE_MANAGED",
-      "pass": "DOCS_MERGE",
-      "verdict": "TEMPLATE_DELTA",
-      "detail": "template-authoritative managed block restamped (template wins): DYNAMIC_SKILLS — project block diverged from the template and was restamped (6 line(s) → 2 line(s))",
+      "detail": "managed-zone merge delivered (non-destructive union/insert)",
       "severity": "INFO"
     },
     {
@@ -3001,8 +2958,8 @@
       "policy": "MERGE_MANAGED",
       "pass": "DOCS_MERGE",
       "verdict": "MERGE",
-      "detail": "managed-zone merge delivered (non-destructive union/insert) — MERGE_DROP: 4 project-authored line(s) dropped outside the project region (absent from the merged text, the template and every template revision) — review the diff and port or restore",
-      "severity": "WARN"
+      "detail": "managed-zone merge delivered (non-destructive union/insert)",
+      "severity": "INFO"
     },
     {
       "path": "docs/phase-definitions.md",
@@ -3031,6 +2988,40 @@
       "pass": "PRESERVE",
       "verdict": "SKIP",
       "detail": "preserve-listed — never modified by the upgrade",
+      "severity": "INFO"
+    },
+    {
+      "path": "src/",
+      "policy": "PRESERVE",
+      "pass": "PRESERVE",
+      "verdict": "SKIP",
+      "detail": "preserve-listed directory — never touched",
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/lib/external-deps.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.2.0 → 1.3.0 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "498b34c123cdb0b75a1ec4c9b42ef1da8320d16863be23eff66b8fac1fde1180",
+        "templateVersion": "0.30.0",
+        "blob": "4600aac6b15a1ad4a101a9133f4d954dcb2f8920"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/lib/upgrade-policy.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.46.0 → 1.47.0 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "6c395c846a8629caf6893663bdbca062135d75d701c370459523e1b5dd488fcf",
+        "templateVersion": "0.30.0",
+        "blob": "6d807d30b3bbc6ffcfa674c5a0193d837500ef90"
+      },
       "severity": "INFO"
     },
     {
@@ -3068,35 +3059,11 @@
       "severity": "ERROR"
     },
     {
-      "path": "agents/automation-engineer.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.1.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/design-system-lead.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
       "path": "agents/public-data-analyst.md",
       "policy": "CORRECTIVE",
       "pass": "SYNC_IF_NEWER: agents/",
       "verdict": "SKIP",
       "detail": "country-scoped agent withheld (non-matching detectedCountry: none) — scaffold-prune coverage mirrored at upgrade time (T-20261112-004)",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/contract-gate-engineer.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
       "severity": "INFO"
     },
     {
@@ -3156,16 +3123,16 @@
       "path": "skills/k-opendata/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.2.3",
+      "verdict": "SKIP",
+      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
       "severity": "INFO"
     },
     {
       "path": "skills/k-kosis/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.3",
+      "verdict": "SKIP",
+      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
       "severity": "INFO"
     },
     {
@@ -3185,32 +3152,16 @@
       "path": "skills/k-krx/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.3",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/platform-command-lifecycle-manager/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.3",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/finishing-a-development-branch/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.2",
+      "verdict": "SKIP",
+      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
       "severity": "INFO"
     },
     {
       "path": "skills/k-ecos/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.1",
+      "verdict": "SKIP",
+      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
       "severity": "INFO"
     },
     {
@@ -3230,16 +3181,8 @@
       "path": "skills/k-dart/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 2.1.3",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/platform-skill-lifecycle-manager/SKILL.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.3",
+      "verdict": "SKIP",
+      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
       "severity": "INFO"
     },
     {
@@ -3259,8 +3202,8 @@
       "path": "skills/k-law/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "NEW",
-      "detail": "whole skill directory delivered (none) → 1.0.3",
+      "verdict": "SKIP",
+      "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
       "severity": "INFO"
     },
     {
@@ -3365,14 +3308,6 @@
       "pass": "PROCEDURES",
       "verdict": "SEED_SKIP",
       "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".claude/settings.json",
-      "policy": "JSON_MERGE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "MERGE",
-      "detail": "settings deep-merged — project-only entries preserved: mcpServers",
       "severity": "INFO"
     },
     {
@@ -3509,27 +3444,19 @@
       "severity": "INFO"
     },
     {
-      "path": "docs/workspace-schema.json",
-      "policy": "SCHEMA_MERGE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "MERGE",
-      "detail": "schema merge — landed: —; preserved: —; landed template deltas: 0; template changes withheld (project-wins): 0",
-      "severity": "INFO"
-    },
-    {
       "path": "docs/lifecycle/agents/automation-engineer.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
       "path": "docs/lifecycle/agents/design-system-lead.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
@@ -3544,8 +3471,8 @@
       "path": "docs/lifecycle/agents/contract-gate-engineer.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
@@ -3885,6 +3812,19 @@
       "severity": "INFO"
     },
     {
+      "path": "docs/governance/agents/execution-plan-templates.md",
+      "policy": "SYNC",
+      "pass": "TEMPLATE TREE SYNC",
+      "verdict": "EVOLVED_PRESERVE",
+      "detail": "project-evolved since delivery; template content unchanged since the baseline — EVOLVED_PRESERVE: delivery SKIPPED, project copy preserved, baseline kept (re-run with --disposition adopt-template[=glob] to take the template copy)",
+      "baseline": {
+        "hash": "7a36d707e42341786fad59b004d3391450140969cb1beda1d441e1859922156a",
+        "templateVersion": "0.30.0",
+        "blob": "38cbde395584cfbd3457174b1d85889bd65aa361"
+      },
+      "severity": "WARN"
+    },
+    {
       "path": "docs/procedure-schema-spec.md",
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
@@ -4024,6 +3964,14 @@
       "firstSeenTemplateVersion": "0.30.0"
     },
     {
+      "path": "docs/governance/agents/execution-plan-templates.md",
+      "kind": "EVOLVED_PRESERVE",
+      "projectHash": "1920b0fcb5da9b2468320000b3c3d300d833769ecdd2d9900caf708aed2d1f44",
+      "deliverableHash": "7a36d707e42341786fad59b004d3391450140969cb1beda1d441e1859922156a",
+      "firstSeen": "2026-11-18",
+      "firstSeenTemplateVersion": "0.30.0"
+    },
+    {
       "path": "docs/procedure-schema-spec.md",
       "kind": "EVOLVED_PRESERVE",
       "projectHash": "17b58014379400793fccfdb6b1170ebbf6b142b95c9420c1894dccceaec8e444",
@@ -4032,6 +3980,6 @@
       "firstSeenTemplateVersion": "0.30.0"
     }
   ],
-  "templateDirty": false,
-  "engineVersion": "1.110.0"
+  "templateDirty": true,
+  "engineVersion": "1.111.0"
 }

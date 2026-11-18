@@ -74,3 +74,20 @@ Output: Security audit report with severity (Critical / High / Medium / Low) + f
 | Sweeps | pattern → match count (0 is a result, not an omission) |
 | Dependencies | new/changed deps and advisory status |
 | Verdict | Clear / fix-before-PR / block-push (SEV1/SEV2) |
+
+## 9. Ongoing Security Monitoring (absorbed from security-monitor)
+
+Beyond per-task audits, this agent owns continuous surveillance across all project phases:
+
+1. **Dependency scan** — run the local vulnerability scan over `requirements.txt`
+   (pip-audit or advisory lookup) and check the installed set for known CVEs.
+2. **Advisory lookup** — for each dependency finding, fetch the upstream advisory
+   (affected versions, fix release, references) before reporting.
+3. **Secret-leak sweep** — verify gitleaks coverage is green and no credential
+   material landed in the tree or `downloads/` output.
+4. **Findings ledger** — write each finding (Summary / Affected Versions / Fix /
+   References) under `security/`; never fix vulnerabilities directly — report to
+   **pm** for remediation dispatch.
+
+Findings severity follows §6 Handoff: SEV1 secret exposure / SEV2 exploitable
+surface block pushes; SEV3 routine findings go through the normal ticket flow.
