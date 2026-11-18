@@ -13,50 +13,50 @@
 | `root/accessibility-audit` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/agent-lifecycle-manager` | L3 | 1.4.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L3 | 1.0.2 | — | — | — | — | — |
-| `root/ci-triage` | L3 | 0.2.0 | root/automation-engineer | — | — | — | — |
-| `root/code-review` | L3 | 1.1.0 | root/code-writer | root/phase 4 | root/refactoring (composes_with) | — | — |
+| `root/ci-triage` | L3 | 0.2.0 | — | — | — | — | — |
+| `root/code-review` | L3 | 1.1.0 | — | — | root/refactoring (composes_with) | — | — |
 | `root/decision-record` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/delegate-to-hub` | L3 | 1.0.1 | — | — | — | — | — |
-| `root/design-foundation` | L3 | 1.1.1 | root/design-system-lead | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
+| `root/design-foundation` | L3 | 1.1.1 | — | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
 | `root/documentation-writing` | L3 | 1.0.3 | — | — | root/team-builder (composes_with) | — | — |
 | `root/evidence-ledger` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/explain-me` | L3 | 1.0.1 | — | — | — | — | — |
 | `root/finishing-a-development-branch` | L3 | 1.0.2 | — | — | — | — | — |
-| `root/gateguard` | L3 | 1.0.2 | root/automation-engineer | — | — | — | — |
+| `root/gateguard` | L3 | 1.0.2 | — | — | — | — | — |
 | `root/handbook` | L3 | 0.6.0 | — | — | — | — | — |
 | `root/handbook-sync-audit` | L3 | 1.0.5 | — | — | — | — | — |
-| `root/i18n-audit` | L3 | 1.0.1 | root/i18n-specialist | — | — | — | — |
+| `root/i18n-audit` | L3 | 1.0.2 | root/i18n-specialist | — | — | — | — |
 | `root/i18n-formatting` | L3 | 1.0.1 | root/i18n-specialist | — | — | — | — |
 | `root/i18n-layout` | L3 | 1.1.1 | root/i18n-specialist | — | — | — | — |
 | `root/i18n-locale-config` | L3 | 1.0.1 | root/i18n-specialist | — | — | — | — |
 | `root/meeting-facilitation` | L3 | 1.5.0 | — | — | — | — | — |
 | `root/platform-command-lifecycle-manager` | L3 | 1.0.3 | — | — | — | — | — |
 | `root/platform-skill-lifecycle-manager` | L3 | 1.0.3 | — | — | — | — | — |
-| `root/post-write-check` | L3 | 1.1.0 | — | — | — | — | — |
+| `root/post-write-check` | L3 | 1.1.0 | root/backend, root/frontend, root/qa | root/phase 4 | — | — | — |
 | `root/project-review` | L3 | 1.3.2 | — | — | — | — | — |
-| `root/refactoring` | L3 | 1.2.0 | root/code-writer | root/phase 4 | root/code-review (composes_with) | — | — |
+| `root/refactoring` | L3 | 1.2.0 | — | — | root/code-review (composes_with) | — | — |
 | `root/research-analysis` | L3 | 1.0.2 | — | — | root/documentation-writing (enables) | — | — |
-| `root/script-lifecycle-manager` | L3 | 1.2.2 | root/automation-engineer | — | — | — | — |
+| `root/script-lifecycle-manager` | L3 | 1.2.2 | — | — | — | — | — |
 | `root/security-scan` | L3 | 1.3.0 | — | — | — | — | — |
 | `root/service-design` | L3 | 1.1.0 | — | — | root/accessibility-audit (follows), root/token-usage-lint (follows), root/ui-ux-design-intelligence (follows) | — | — |
 | `root/skill-lifecycle-manager` | L3 | 1.5.0 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
 | `root/source-command-commit-push-pr` | L3 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L3 | 1.1.0 | — | — | — | — | — |
-| `root/swe-solve` | L3 | 1.1.1 | — | root/phase 4 | — | — | — |
-| `root/sync` | L3 | 1.10.0 | root/automation-engineer | — | — | — | — |
+| `root/swe-solve` | L3 | 1.1.1 | — | — | — | — | — |
+| `root/sync` | L3 | 1.10.0 | — | — | — | — | — |
 | `root/team-builder` | L3 | 1.2.0 | — | — | — | — | — |
-| `root/test-driven-development` | L3 | 1.2.0 | root/test-runner | root/phase 4 | root/code-review (follows) | — | — |
+| `root/test-driven-development` | L3 | 1.2.0 | — | — | root/code-review (follows) | — | — |
 | `root/token-usage-lint` | L3 | 1.1.0 | — | — | root/ui-ux-design-intelligence (follows) | — | — |
 | `root/translate` | L3 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/ui-ux-design-intelligence` | L3 | 1.0.1 | — | — | root/documentation-writing (follows) | — | — |
 | `root/update-bun-packages` | L3 | 1.3.1 | — | — | — | — | — |
-| `root/zod-contract-gate` | L3 | 1.0.3 | root/contract-gate-engineer | — | — | — | — |
+| `root/zod-contract-gate` | L3 | 1.0.3 | — | — | — | — | — |
 
 ## Lifecycle Phase Grouping
 
 Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`); phase numbering is per scope:
 
-- **root/phase 4** (Implementation & QA Gate): root/code-review, root/refactoring, root/swe-solve, root/test-driven-development
+- **root/phase 4** (Implementation & QA Gate): root/post-write-check
 
 ## Edge Types
 
@@ -99,21 +99,16 @@ None — every capability has a single content hash.
 
 | Type | Count | Nodes |
 |------|-------|-------|
-| agent | 5 | root/backend, root/frontend, root/i18n, root/qa, root/security |
-| skill | 7 | root/api-documentation, root/explain-me, root/finishing-a-development-branch, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer |
+| agent | 1 | root/security |
+| skill | 10 | root/api-documentation, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/swe-solve, root/zod-contract-gate |
 
 ## Skills Without `used_by` (G6)
 
-28 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+36 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
-Inferred from procedure steps that cite the skill and are owned via `step_by_agent`. This report never edits SKILL.md.
-
-| Skill | Suggested agents (via procedures) |
-|-------|-----------------------------------|
-| `root/documentation-writing` | root/code-writer (co-develop.release-verification); root/designer (co-develop.feature-implementation) |
-| `root/research-analysis` | root/architect (co-develop.technical-planning) |
+No suggestions: no procedure step pairs one of these skills with an owning agent.
 
 ## Skill Usage (E3)
 

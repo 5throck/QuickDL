@@ -69,7 +69,7 @@ def test_get_all_returns_dict():
 def test_all_locales_have_same_keys():
     """All locale files must have identical key sets to en.json."""
     from pathlib import Path as _Path
-    root = _Path(__file__).parent.parent  # project root (tests/ is one level down)
+    root = _Path(__file__).parent.parent / 'src'  # src/ holds locales/ next to i18n.py
     base = json.loads((root / 'locales' / 'en.json').read_text(encoding='utf-8'))
     for p in sorted((root / 'locales').glob('*.json')):
         other = json.loads(p.read_text(encoding='utf-8'))

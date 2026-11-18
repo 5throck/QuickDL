@@ -1,5 +1,14 @@
 {
-  "_comment": "Universal Design Gate seed (ADR-0074) — delivered to projects add-if-missing (upgrade claim: DESIGN GATE SEED). Register design docs: bun scripts/spec-register.ts --file docs/designs/<spec-id>-design.md --source manual. The sync-time spec-check (audit.ts --spec-check, dev-sync step 3.9) blocks code changes without spec activity. Project entries are never overwritten or pruned by upgrades.",
   "version": "1.0.0",
-  "specs": []
+  "specs": [
+    {
+      "id": "2026-11-19-quickdl-restructure-design",
+      "title": "quickdl restructure design",
+      "file": "docs/designs/2026-11-19-quickdl-restructure-design.md",
+      "status": "implemented",
+      "source": "manual",
+      "created": "2026-11-18",
+      "last_updated": "2026-11-18"
+    }
+  ]
 }

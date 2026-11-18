@@ -13,121 +13,54 @@
   },
   "agents": [
     {
-      "name": "architect",
-      "file": "agents/architect.md"
+      "name": "backend",
+      "file": "agents/backend.md"
     },
     {
-      "name": "code-writer",
-      "file": "agents/code-writer.md"
-    },
-    {
-      "name": "designer",
-      "file": "agents/designer.md"
-    },
-    {
-      "name": "pm",
-      "file": "agents/pm.md"
-    },
-    {
-      "name": "security-monitor",
-      "file": "agents/security-monitor.md"
-    },
-    {
-      "name": "stack-setup",
-      "file": "agents/stack-setup.md"
-    },
-    {
-      "name": "test-runner",
-      "file": "agents/test-runner.md"
+      "name": "frontend",
+      "file": "agents/frontend.md"
     },
     {
       "name": "i18n-specialist",
       "file": "agents/i18n-specialist.md"
+    },
+    {
+      "name": "qa",
+      "file": "agents/qa.md"
+    },
+    {
+      "name": "security",
+      "file": "agents/security.md"
     }
   ],
-  "skills": [
-    {
-      "name": "code-review",
-      "file": "skills/code-review/SKILL.md"
-    },
-    {
-      "name": "refactoring",
-      "file": "skills/refactoring/SKILL.md"
-    },
-    {
-      "name": "swe-solve",
-      "file": "skills/swe-solve/SKILL.md"
-    },
-    {
-      "name": "test-driven-development",
-      "file": "skills/test-driven-development/SKILL.md"
-    }
-  ],
+  "skills": [],
   "skill_manifest": {
     "variant_specific": [
       {
-        "name": "code-review",
+        "name": "post-write-check",
         "layer": "workspace",
         "used_by_agents": [
-          "code-writer"
+          "backend",
+          "frontend",
+          "qa"
         ],
-        "phases": [
-          4
-        ],
-        "platform_parity": "skip"
-      },
-      {
-        "name": "refactoring",
-        "layer": "workspace",
-        "used_by_agents": [
-          "code-writer"
-        ],
-        "phases": [
-          4
-        ],
-        "platform_parity": "skip"
-      },
-      {
-        "name": "swe-solve",
-        "layer": "workspace",
-        "used_by_agents": [],
         "phases": [
           4
         ],
         "platform_parity": "required"
-      },
-      {
-        "name": "test-driven-development",
-        "layer": "workspace",
-        "used_by_agents": [
-          "test-runner"
-        ],
-        "phases": [
-          4
-        ],
-        "platform_parity": "skip"
-      },
-      {
-        "name": "post-write-check",
-        "reason": "adopted foreign skill (adopt-project)"
       }
     ]
   },
   "agent_manifest": {
     "variant_agents_dir": "agents",
     "pipeline_order": [
-      "architect",
-      "designer",
-      "stack-setup",
-      "code-writer",
-      "test-runner",
-      "security-monitor"
+      "backend",
+      "frontend",
+      "i18n-specialist",
+      "qa"
     ],
-    "optional": [
-      "designer",
-      "stack-setup"
-    ],
-    "notes": "designer: skip if no UI/UX component in scope. stack-setup: skip for projects with an existing configured stack. i18n-specialist: engaged on demand for locale deliverables (common extends-stub); not part of the sequential pipeline."
+    "optional": [],
+    "notes": "Utility-project roster: backend and frontend own the code surfaces (serial writes), i18n-specialist is engaged on locale deliverables (common extends-stub), qa runs the test gate, security audits external-input paths and owns ongoing monitoring. security-monitor was absorbed into security (2026-11-19)."
   },
   "promotionChecklist": "PROMOTION_CHECKLIST.md",
   "deg_conformance": "core",
@@ -152,5 +85,8 @@
     "profiles_dir": "docs/countries",
     "supported": [],
     "default": null
+  },
+  "designLint": {
+    "enabled": false
   }
 }

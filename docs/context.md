@@ -20,7 +20,7 @@
 | Download engine | yt-dlp |
 | Desktop shell | pywebview + pystray |
 | Frontend | Vanilla JS + Jinja2 templates |
-| i18n | Custom `i18n.py` (flat JSON locale files) |
+| i18n | Custom `src/i18n.py` (flat JSON locale files) |
 | Tests | pytest (`tests/test_i18n.py`) + unittest (`tests/test_app.py`) |
 | CI | GitHub Actions (`.github/workflows/ci.yml`) —Python 3.8/3.10/3.12 |
 
@@ -42,7 +42,7 @@ pip install -r requirements.txt
 git config core.hooksPath .githooks
 
 # Run development server
-python app.py      # Web UI at http://localhost:5000
+python src/app.py      # Web UI at http://localhost:5000
 
 # Run tests
 pytest tests/ -v   # 23 tests
@@ -57,34 +57,29 @@ Required env keys (see `.env.sample`):
 
 ```
 quickdl/
-????? app.py                  # Flask server ??routes, job queue, file serving
-????? download_service.py     # yt-dlp wrapper (get_video_info, download_video)
-????? desktop.py              # Desktop entry point (pywebview + pystray + Flask thread)
-????? cli.py                  # CLI entry point (argparse)
-????? install.py              # Cross-platform installer (.venv setup)
-????? i18n.py                 # i18n: init(), t(), get_all(), get_lang(), format_duration()
-????? requirements.txt        # Python dependencies
-????? ytdl.bat / ytdl.sh      # One-click launchers (Windows / macOS+Linux)
-????? locales/                # 16 flat JSON locale files (en.json is the baseline)
-????? templates/index.html    # Web UI (Jinja2)
-????? static/
-??  ????? css/styles.css      # UI styles (dark + light mode, responsive)
-??  ?遺??? js/script.js        # Frontend JS (fetch API, download queue, polling)
-????? agents/pm.md            # PM orchestrator agent definition
-????? docs/
-??  ?遺??? context.md          # THIS FILE ??single source of truth for all AI tools
-????? scripts/
-??  ????? audit.sh / audit.ps1        # Quality gate (CHANGELOG + i18n key parity)
-??  ?遺??? dev-sync.sh / dev-sync.ps1  # Full PR pipeline
-????? memory/                 # Session development logs
-??  ?遺??? MEMORY.md           # Log index
-????? .claude/
-??  ????? settings.json       # PostToolUse audit hook (committed)
-??  ????? settings.local.json # Personal git/gh permissions (gitignored)
-??  ?遺??? commands/           # /sync, /memlog, /new-task slash commands
-?遺??? .github/workflows/ci.yml  # GitHub Actions CI
+├── src/                         # Application package root
+│   ├── app.py                   # Flask server —routes, job queue, file serving
+│   ├── download_service.py      # yt-dlp wrapper (get_video_info, download_video)
+│   ├── desktop.py               # Desktop entry point (pywebview + pystray + Flask thread)
+│   ├── cli.py                   # CLI entry point (argparse)
+│   ├── install.py               # Cross-platform installer (.venv setup)
+│   ├── i18n.py                  # i18n: init(), t(), get_all(), get_lang(), format_duration()
+│   ├── verification.py          # Post-download verification gates
+│   ├── locales/                 # 16 flat JSON locale files (en.json is the baseline)
+│   ├── templates/index.html     # Web UI (Jinja2)
+│   └── static/
+│       ├── css/styles.css       # UI styles (dark + light mode, responsive)
+│       └── js/script.js         # Frontend JS (fetch API, download queue, polling)
+├── requirements.txt             # Python dependencies
+├── ytdl.bat / ytdl.sh           # One-click launchers (Windows / macOS+Linux)
+├── tests/                       # pytest + unittest suite (111 tests)
+├── agents/                      # Agent definitions (pm, backend, frontend, i18n-specialist, qa, security)
+├── docs/                        # Project + workspace-standard documentation
+├── scripts/                     # Workspace-standard tooling (audit.ts, dev-sync.ts, ...)
+├── memory/                      # Session development logs + MEMORY.md index
+├── .claude/                     # settings.json, commands/, agents/ mirrors
+└── .github/workflows/ci.yml     # GitHub Actions CI
 ```
-
 ---
 
 ## Agents
@@ -92,10 +87,9 @@ quickdl/
 | Agent | File | Role |
 |-------|------|------|
 | PM | `agents/pm.md` | Orchestrates all work —planning, specs, task tracking, PR |
-| Designer | `agents/designer.md` | HTML structure, CSS, accessibility |
 | Frontend | `agents/frontend.md` | JS logic, API wiring, i18n in templates |
-| i18n Expert | `agents/i18n.md` | locale files, i18n.py, launcher scripts |
-| Security Officer | `agents/security.md` | Read-only audit, injection/path risks |
+| i18n Specialist | `agents/i18n-specialist.md` | Locale config/formatting/layout (workspace standard); QuickDL specifics live in §i18n System below |
+| Security Officer | `agents/security.md` | Read-only audit, injection/path risks + ongoing dependency/secret monitoring |
 | Backend Developer | `agents/backend.md` | Flask routes, download logic, CLI, installer |
 | QA Engineer | `agents/qa.md` | tests/, cross-platform validation |
 
@@ -120,11 +114,11 @@ quickdl/
 5. /sync "feat: description" ??audit ??commit ??PR branch ??gh pr create
 ```
 
-**PR rule:** All changes reach `master` via Pull Request —never direct push.
+**PR rule:** All changes reach `main` via Pull Request —never direct push.
 
-**Audit gate** (`scripts/audit.sh` runs after every Write/Edit):
+**Audit gate** (`bun scripts/audit.ts` runs after every Write/Edit):
 - CHANGELOG.md must exist
-- All 16 locale files must have identical keys to `locales/en.json`
+- All 16 locale files must have identical keys to `src/locales/en.json`
 
 ---
 
@@ -132,10 +126,10 @@ quickdl/
 
 | File | Purpose |
 |------|---------|
-| `app.py` | Flask routes: `/api/info`, `/api/download`, `/api/status/<id>`, `/api/file/<id>` |
-| `download_service.py` | `get_video_info(url)`, `download_video(url, dir, progress_hook, cancel_event)` |
-| `i18n.py` | `init()`, `t(key)`, `get_all()`, `get_lang()`, `format_duration(seconds)` |
-| `locales/en.json` | i18n baseline —56 keys, all other locales must match exactly |
+| `src/app.py` | Flask routes: `/api/info`, `/api/download`, `/api/status/<id>`, `/api/file/<id>` |
+| `src/download_service.py` | `get_video_info(url)`, `download_video(url, dir, progress_hook, cancel_event)` |
+| `src/i18n.py` | `init()`, `t(key)`, `get_all()`, `get_lang()`, `format_duration(seconds)` |
+| `src/locales/en.json` | i18n baseline —56 keys, all other locales must match exactly |
 | `tests/test_i18n.py` | 14 tests —format_duration + locale key parity (pytest) |
 | `tests/test_app.py` | 9 tests —Flask API endpoints (unittest) |
 | `tests/manual/test_api.py` | Manual integration test —requires live server at :5000 |
@@ -149,8 +143,10 @@ quickdl/
 
 - **16 languages:** en, ko, ja, zh-TW, zh-CN, de, es, fr, pt, vi, ms, id, th, ru, it, ar
 - **Detection priority:** `QUICKDL_LANG` env var —OS locale —`en` fallback
-- **Baseline:** `locales/en.json` (56 keys) —all other files must match exactly
+- **Baseline:** `src/locales/en.json` (56 keys) —all other files must match exactly
 - **Web UI injection:** `render_template('index.html', i18n=get_all(), lang=get_lang())`
+- **Runtime loader contract (`src/i18n.py`):** `SUPPORTED` set lists the 16 shipped locales and must match the `src/locales/*.json` directory exactly — the common `i18n-audit` skill's Runtime Loader Sync step verifies this; adding a locale means updating `SUPPORTED`, dropping the JSON file, extending `format_duration` rules, and `tests/test_i18n.py` expectations together
+- **`t(key)`** returns the translation for the active language with `en` fallback; **`format_duration(seconds)`** carries per-locale pluralization/duration word rules
 - **JS access:** `window.I18N['key']`
 
 ## Session Start Skills
@@ -196,9 +192,9 @@ git checkout -b chore/<name>    # maintenance (docs, deps, config)
 ## Running the Project
 
 ```bash
-python app.py            # Web UI at http://localhost:5000
-python desktop.py        # Desktop app (pywebview + tray)
-python cli.py <URL>      # CLI download
+python src/app.py            # Web UI at http://localhost:5000
+python src/desktop.py        # Desktop app (pywebview + tray)
+python src/cli.py <URL>      # CLI download
 
 pytest tests/ -v         # All tests (23 tests)
 bash scripts/audit.sh    # Quality gate check

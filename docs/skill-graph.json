@@ -3,32 +3,6 @@
   "graph_profile": "deg/v2",
   "nodes": [
     {
-      "id": "agent:root/architect",
-      "type": "agent",
-      "layer": "L3",
-      "name": "architect",
-      "scope": "root",
-      "capability": "architect",
-      "content_hash": "1e96d39f28f4a55a",
-      "version": "1.2.0",
-      "mirrors": [
-        "agents/architect.md"
-      ]
-    },
-    {
-      "id": "agent:root/automation-engineer",
-      "type": "agent",
-      "layer": "L3",
-      "name": "automation-engineer",
-      "scope": "root",
-      "capability": "automation-engineer",
-      "content_hash": "fc785c7ec9b1d201",
-      "version": "1.1.0",
-      "mirrors": [
-        "agents/automation-engineer.md"
-      ]
-    },
-    {
       "id": "agent:root/backend",
       "type": "agent",
       "layer": "L3",
@@ -42,58 +16,6 @@
       ]
     },
     {
-      "id": "agent:root/code-writer",
-      "type": "agent",
-      "layer": "L3",
-      "name": "code-writer",
-      "scope": "root",
-      "capability": "code-writer",
-      "content_hash": "ba5421c3665255b0",
-      "version": "1.2.0",
-      "mirrors": [
-        "agents/code-writer.md"
-      ]
-    },
-    {
-      "id": "agent:root/contract-gate-engineer",
-      "type": "agent",
-      "layer": "L3",
-      "name": "contract-gate-engineer",
-      "scope": "root",
-      "capability": "contract-gate-engineer",
-      "content_hash": "cb00bcc1577a8762",
-      "version": "1.0.0",
-      "mirrors": [
-        "agents/contract-gate-engineer.md"
-      ]
-    },
-    {
-      "id": "agent:root/design-system-lead",
-      "type": "agent",
-      "layer": "L3",
-      "name": "design-system-lead",
-      "scope": "root",
-      "capability": "design-system-lead",
-      "content_hash": "2ed6e482a494e676",
-      "version": "1.0.0",
-      "mirrors": [
-        "agents/design-system-lead.md"
-      ]
-    },
-    {
-      "id": "agent:root/designer",
-      "type": "agent",
-      "layer": "L3",
-      "name": "designer",
-      "scope": "root",
-      "capability": "designer",
-      "content_hash": "bc5ebc4f272f798d",
-      "version": "1.1.1",
-      "mirrors": [
-        "agents/designer.md"
-      ]
-    },
-    {
       "id": "agent:root/frontend",
       "type": "agent",
       "layer": "L3",
@@ -104,19 +26,6 @@
       "version": null,
       "mirrors": [
         "agents/frontend.md"
-      ]
-    },
-    {
-      "id": "agent:root/i18n",
-      "type": "agent",
-      "layer": "L3",
-      "name": "i18n",
-      "scope": "root",
-      "capability": "i18n",
-      "content_hash": "b64e18bcf4c617b2",
-      "version": null,
-      "mirrors": [
-        "agents/i18n.md"
       ]
     },
     {
@@ -165,49 +74,10 @@
       "name": "security",
       "scope": "root",
       "capability": "security",
-      "content_hash": "002ec392d9bad956",
+      "content_hash": "3fc70a2a38fabf16",
       "version": null,
       "mirrors": [
         "agents/security.md"
-      ]
-    },
-    {
-      "id": "agent:root/security-monitor",
-      "type": "agent",
-      "layer": "L3",
-      "name": "security-monitor",
-      "scope": "root",
-      "capability": "security-monitor",
-      "content_hash": "21927fe90166d6a7",
-      "version": "1.1.1",
-      "mirrors": [
-        "agents/security-monitor.md"
-      ]
-    },
-    {
-      "id": "agent:root/stack-setup",
-      "type": "agent",
-      "layer": "L3",
-      "name": "stack-setup",
-      "scope": "root",
-      "capability": "stack-setup",
-      "content_hash": "9bb9449928e9762c",
-      "version": "1.1.1",
-      "mirrors": [
-        "agents/stack-setup.md"
-      ]
-    },
-    {
-      "id": "agent:root/test-runner",
-      "type": "agent",
-      "layer": "L3",
-      "name": "test-runner",
-      "scope": "root",
-      "capability": "test-runner",
-      "content_hash": "55cbd8d18fbcf5c6",
-      "version": "1.2.0",
-      "mirrors": [
-        "agents/test-runner.md"
       ]
     },
     {
@@ -595,8 +465,8 @@
       "name": "i18n-audit",
       "scope": "root",
       "capability": "i18n-audit",
-      "content_hash": "5485334c47dd7ef0",
-      "version": "1.0.1",
+      "content_hash": "b5259cc88ab22d58",
+      "version": "1.0.2",
       "mirrors": [
         "skills/i18n-audit/SKILL.md",
         ".claude/skills/i18n-audit/SKILL.md",
@@ -721,10 +591,15 @@
       "name": "post-write-check",
       "scope": "root",
       "capability": "post-write-check",
-      "content_hash": "984beb975411646b",
+      "content_hash": "14971385d107deb4",
       "version": "1.1.0",
       "mirrors": [
-        "skills/post-write-check/SKILL.md"
+        "skills/post-write-check/SKILL.md",
+        ".claude/skills/post-write-check/SKILL.md",
+        ".gemini/skills/post-write-check/SKILL.md",
+        ".agents/skills/post-write-check/SKILL.md",
+        ".codex/skills/post-write-check/SKILL.md",
+        ".hermes/skills/post-write-check/SKILL.md"
       ]
     },
     {
@@ -1055,102 +930,6 @@
   "edges": [
     {
       "type": "references",
-      "from": "agent:root/architect",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/automation-engineer",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/automation-engineer",
-      "to": "skill:root/sync",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/code-writer",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/contract-gate-engineer",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/contract-gate-engineer",
-      "to": "skill:root/zod-contract-gate",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/design-system-lead",
-      "to": "skill:root/accessibility-audit",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/design-system-lead",
-      "to": "skill:root/design-foundation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/design-system-lead",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/design-system-lead",
-      "to": "skill:root/token-usage-lint",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/design-system-lead",
-      "to": "skill:root/ui-ux-design-intelligence",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/designer",
-      "to": "skill:root/code-review",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/designer",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/designer",
-      "to": "skill:root/refactoring",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/designer",
-      "to": "skill:root/swe-solve",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/designer",
-      "to": "skill:root/test-driven-development",
-      "source": "prose"
-    },
-    {
-      "type": "references",
       "from": "agent:root/i18n-specialist",
       "to": "skill:root/i18n-audit",
       "source": "prose"
@@ -1210,24 +989,6 @@
       "source": "prose"
     },
     {
-      "type": "references",
-      "from": "agent:root/security-monitor",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/stack-setup",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
-      "type": "references",
-      "from": "agent:root/test-runner",
-      "to": "skill:root/meeting-facilitation",
-      "source": "prose"
-    },
-    {
       "type": "cites_skill",
       "from": "doc:AGENTS.md",
       "to": "skill:root/agent-lifecycle-manager",
@@ -1276,13 +1037,6 @@
       "source": "workflow-doc"
     },
     {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.architecture-design",
-      "to": "agent:root/architect",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
       "type": "produces",
       "from": "procedure.co-develop.architecture-design",
       "to": "output_type.approved_implementation_plan",
@@ -1307,20 +1061,6 @@
       "source": "procedure_schema"
     },
     {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.environment-bootstrap",
-      "to": "agent:root/security-monitor",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.environment-bootstrap",
-      "to": "agent:root/stack-setup",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
       "type": "produces",
       "from": "procedure.co-develop.environment-bootstrap",
       "to": "output_type.environment_manifest",
@@ -1343,34 +1083,6 @@
       "from": "procedure.co-develop.environment-bootstrap",
       "to": "skill:root/test-driven-development",
       "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.feature-implementation",
-      "to": "agent:root/architect",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.feature-implementation",
-      "to": "agent:root/code-writer",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.feature-implementation",
-      "to": "agent:root/designer",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.feature-implementation",
-      "to": "agent:root/security-monitor",
-      "source": "procedure_schema",
-      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -1403,20 +1115,6 @@
       "source": "procedure_schema"
     },
     {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.release-verification",
-      "to": "agent:root/code-writer",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.release-verification",
-      "to": "agent:root/test-runner",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
       "type": "produces",
       "from": "procedure.co-develop.release-verification",
       "to": "output_type.regression_report",
@@ -1441,13 +1139,6 @@
       "source": "procedure_schema"
     },
     {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.security-release-retrospective",
-      "to": "agent:root/security-monitor",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
       "type": "produces",
       "from": "procedure.co-develop.security-release-retrospective",
       "to": "output_type.review_findings",
@@ -1464,20 +1155,6 @@
       "from": "procedure.co-develop.security-release-retrospective",
       "to": "skill:root/code-review",
       "source": "procedure_schema"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.technical-planning",
-      "to": "agent:root/architect",
-      "source": "procedure_schema",
-      "actor_type": "agent"
-    },
-    {
-      "type": "step_by_agent",
-      "from": "procedure.co-develop.technical-planning",
-      "to": "agent:root/stack-setup",
-      "source": "procedure_schema",
-      "actor_type": "agent"
     },
     {
       "type": "produces",
@@ -1522,32 +1199,10 @@
       "source": "prose"
     },
     {
-      "type": "used_by",
-      "from": "skill:root/ci-triage",
-      "to": "agent:root/automation-engineer",
-      "source": "required_skills",
-      "provenance": {
-        "file": "agents/automation-engineer.md",
-        "field": "required_skills",
-        "index": 2
-      }
-    },
-    {
       "type": "references",
       "from": "skill:root/ci-triage",
       "to": "skill:root/project-review",
       "source": "prose"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:root/code-review",
-      "to": "agent:root/code-writer",
-      "source": "required_skills",
-      "provenance": {
-        "file": "agents/code-writer.md",
-        "field": "required_skills",
-        "index": 0
-      }
     },
     {
       "type": "produces",
@@ -1560,12 +1215,6 @@
       "from": "skill:root/code-review",
       "to": "output_type.security_baseline",
       "source": "procedure_schema"
-    },
-    {
-      "type": "phase",
-      "from": "skill:root/code-review",
-      "to": "phase:root/4",
-      "source": "skill_manifest"
     },
     {
       "type": "composes_with",
@@ -1602,17 +1251,6 @@
       "from": "skill:root/delegate-to-hub",
       "to": "skill:root/sync",
       "source": "prose"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:root/design-foundation",
-      "to": "agent:root/design-system-lead",
-      "source": "required_skills",
-      "provenance": {
-        "file": "agents/design-system-lead.md",
-        "field": "required_skills",
-        "index": 0
-      }
     },
     {
       "type": "composes_with",
@@ -1696,17 +1334,6 @@
       "from": "skill:root/evidence-ledger",
       "to": "skill:root/decision-record",
       "source": "prose"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:root/gateguard",
-      "to": "agent:root/automation-engineer",
-      "source": "required_skills",
-      "provenance": {
-        "file": "agents/automation-engineer.md",
-        "field": "required_skills",
-        "index": 1
-      }
     },
     {
       "type": "references",
@@ -1856,26 +1483,33 @@
     },
     {
       "type": "used_by",
-      "from": "skill:root/refactoring",
-      "to": "agent:root/code-writer",
-      "source": "required_skills",
-      "provenance": {
-        "file": "agents/code-writer.md",
-        "field": "required_skills",
-        "index": 1
-      }
+      "from": "skill:root/post-write-check",
+      "to": "agent:root/backend",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/post-write-check",
+      "to": "agent:root/frontend",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "used_by",
+      "from": "skill:root/post-write-check",
+      "to": "agent:root/qa",
+      "source": "skill_manifest"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/post-write-check",
+      "to": "phase:root/4",
+      "source": "skill_manifest"
     },
     {
       "type": "produces",
       "from": "skill:root/refactoring",
       "to": "output_type.tooling_adjustments",
       "source": "procedure_schema"
-    },
-    {
-      "type": "phase",
-      "from": "skill:root/refactoring",
-      "to": "phase:root/4",
-      "source": "skill_manifest"
     },
     {
       "type": "composes_with",
@@ -1898,17 +1532,6 @@
         "file": "skills/research-analysis/SKILL.md",
         "field": "relates_to",
         "index": 0
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:root/script-lifecycle-manager",
-      "to": "agent:root/automation-engineer",
-      "source": "required_skills",
-      "provenance": {
-        "file": "agents/automation-engineer.md",
-        "field": "required_skills",
-        "index": 3
       }
     },
     {
@@ -1969,23 +1592,6 @@
       }
     },
     {
-      "type": "phase",
-      "from": "skill:root/swe-solve",
-      "to": "phase:root/4",
-      "source": "skill_manifest"
-    },
-    {
-      "type": "used_by",
-      "from": "skill:root/sync",
-      "to": "agent:root/automation-engineer",
-      "source": "required_skills",
-      "provenance": {
-        "file": "agents/automation-engineer.md",
-        "field": "required_skills",
-        "index": 0
-      }
-    },
-    {
       "type": "references",
       "from": "skill:root/team-builder",
       "to": "skill:root/agent-lifecycle-manager",
@@ -1998,27 +1604,10 @@
       "source": "prose"
     },
     {
-      "type": "used_by",
-      "from": "skill:root/test-driven-development",
-      "to": "agent:root/test-runner",
-      "source": "required_skills",
-      "provenance": {
-        "file": "agents/test-runner.md",
-        "field": "required_skills",
-        "index": 0
-      }
-    },
-    {
       "type": "produces",
       "from": "skill:root/test-driven-development",
       "to": "output_type.test_scaffold",
       "source": "procedure_schema"
-    },
-    {
-      "type": "phase",
-      "from": "skill:root/test-driven-development",
-      "to": "phase:root/4",
-      "source": "skill_manifest"
     },
     {
       "type": "follows",
@@ -2062,17 +1651,6 @@
       "provenance": {
         "file": "skills/ui-ux-design-intelligence/SKILL.md",
         "field": "relates_to",
-        "index": 0
-      }
-    },
-    {
-      "type": "used_by",
-      "from": "skill:root/zod-contract-gate",
-      "to": "agent:root/contract-gate-engineer",
-      "source": "required_skills",
-      "provenance": {
-        "file": "agents/contract-gate-engineer.md",
-        "field": "required_skills",
         "index": 0
       }
     }

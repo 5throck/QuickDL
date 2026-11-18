@@ -193,7 +193,7 @@ jobs:
           from pathlib import Path
           base = json.loads(Path('locales/en.json').read_text(encoding='utf-8'))
           failed = False
-          for p in sorted(Path('locales').glob('*.json')):
+          for p in sorted(Path('src/locales').glob('*.json')):
               other = json.loads(p.read_text(encoding='utf-8'))
               missing = set(base) - set(other)
               extra = set(other) - set(base)
