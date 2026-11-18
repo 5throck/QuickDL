@@ -2,4 +2,4 @@ variant=co-develop
 version=0.30.0
 platform=all
 country=none
-upgraded=2026-11-18T19:13:47.986Z
+upgraded=2026-11-18T19:21:31.902Z
