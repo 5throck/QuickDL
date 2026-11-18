@@ -1,11 +1,25 @@
 ---
 name: stack-setup
-description: "Stack Setup Specialist. Use when: \"Unrecognized tech stack\", \"Environment setup needed\", \"Project initialization\""
-model: haiku
+role: Unknown stack identification and secure setup procedure specialist
+status: active
+version: "1.1.1"
+last_updated: 2026-11-18
+tier: low
+color: orange
+description: 'Stack Setup Specialist. Use when: "Unrecognized tech stack", "Environment setup needed", "Project initialization"'
+examples:
+  - user: "Set up this unknown project"
+    assistant: "I'll identify the tech stack and provide a security-assessed setup plan"
+phases: [0, 1]
+handoff_to: [architect]
+handoff_from: [pm]
+required_skills: []
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: 2026-11-18
+  governance: docs/lifecycle/agents/stack-setup.md
 ---
-
-<!-- GENERATED from agents/stack-setup.md by scripts/sync-agent-mirrors.ts — do not edit; rerun the script. -->
-
 
 # Agent: stack-setup
 

@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-18T17:42:48.237Z
+**Generated**: 2026-11-18T19:20:03.233Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -8,7 +8,7 @@
 
 ## Summary
 
-- **Agents**: 16
+- **Agents**: 6
 - **Skills**: 41
 - **Scripts**: 101 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
 - **Commands**: 7
@@ -19,22 +19,12 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| architect | agents/architect.md | high | claude-opus-5-5 | 2026-11-18 |
-| automation-engineer | agents/automation-engineer.md | medium | claude-sonnet-5-5 | N/A |
-| backend | agents/backend.md | high | inherit | 2026-05-22 |
-| code-writer | agents/code-writer.md | low | claude-haiku-5-5 | 2026-11-18 |
-| contract-gate-engineer | agents/contract-gate-engineer.md | medium | claude-sonnet-5-5 | N/A |
-| design-system-lead | agents/design-system-lead.md | medium | claude-sonnet-5-5 | N/A |
-| designer | agents/designer.md | medium | claude-sonnet-5-5 | 2026-11-18 |
-| frontend | agents/frontend.md | medium | inherit | 2026-05-21 |
-| i18n | agents/i18n.md | medium | inherit | 2026-05-22 |
+| backend | agents/backend.md | high | inherit | 2026-11-18 |
+| frontend | agents/frontend.md | medium | inherit | 2026-11-18 |
 | i18n-specialist | agents/i18n-specialist.md | medium | claude-sonnet-5-5 | 2026-11-18 |
 | pm | agents/pm.md | high | inherit | 2026-11-18 |
-| qa | agents/qa.md | medium | inherit | 2026-05-22 |
-| security | agents/security.md | high | inherit | 2026-05-21 |
-| security-monitor | agents/security-monitor.md | medium | claude-sonnet-5-5 | 2026-11-18 |
-| stack-setup | agents/stack-setup.md | low | claude-haiku-5-5 | 2026-11-18 |
-| test-runner | agents/test-runner.md | medium | claude-sonnet-5-5 | 2026-11-18 |
+| qa | agents/qa.md | medium | inherit | 2026-11-18 |
+| security | agents/security.md | high | inherit | 2026-11-18 |
 
 ---
 
@@ -58,7 +48,7 @@
 | gateguard | 1.0.2 | active | skills/gateguard/SKILL.md | workspace | gateguard, /gateguard, investigate file, check before edit, pre-edit check | pm |
 | handbook | 0.6.0 | active | skills/handbook/SKILL.md | workspace | make handbook, create handbook, build course site, companion handbook, update handbook, handbook sync, handbook maintenance | pm |
 | handbook-sync-audit | 1.0.5 | active | skills/handbook-sync-audit/SKILL.md | workspace | audit handbook, handbook parity check, handbook sync audit, textbook drift check | pm |
-| i18n-audit | 1.0.1 | active | skills/i18n-audit/SKILL.md | workspace | i18n audit, locale parity, translation parity, glossary audit, L10N parity | i18n-specialist |
+| i18n-audit | 1.0.2 | active | skills/i18n-audit/SKILL.md | workspace | i18n audit, locale parity, translation parity, glossary audit, L10N parity | i18n-specialist |
 | i18n-formatting | 1.0.1 | active | skills/i18n-formatting/SKILL.md | workspace | date format, number format, currency format, unit conversion, paper size, korean numerals | i18n-specialist |
 | i18n-layout | 1.1.1 | active | skills/i18n-layout/SKILL.md | workspace | character encoding, RTL, bidi, font selection, CRLF, BOM | i18n-specialist |
 | i18n-locale-config | 1.0.1 | active | skills/i18n-locale-config/SKILL.md | workspace | locale config, locale code, BCP 47, collation, collation order, timezone | i18n-specialist |

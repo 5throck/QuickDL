@@ -1,11 +1,27 @@
 ---
 name: code-writer
-description: "Implementation agent - writes code from an approved plan. Use when: an architect plan has been approved and it is time to write, modify, or delete source files."
-model: haiku
+role: Approved plan implementation with surgical, minimal code changes
+status: active
+version: "1.2.0"
+last_updated: 2026-11-18
+tier: low
+color: green
+description: >
+  Implementation agent - writes code from an approved plan. Use when: an architect plan has been
+  approved and it is time to write, modify, or delete source files.
+examples:
+  - user: "Implement the plan in docs/adr/0002-auth-model.md"
+    assistant: "Implementing the approved authentication data model - starting with the schema migration."
+phases: [4]
+handoff_to: [test-runner]
+handoff_from: [designer, architect]
+required_skills: [code-review, refactoring]
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: 2026-11-18
+  governance: docs/lifecycle/agents/code-writer.md
 ---
-
-<!-- GENERATED from agents/code-writer.md by scripts/sync-agent-mirrors.ts — do not edit; rerun the script. -->
-
 
 ## Role
 

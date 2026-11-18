@@ -1,11 +1,27 @@
 ---
 name: architect
-description: "Design agent - produces implementation plans and technical specs. Use when: planning a new feature, evaluating architectural trade-offs, or generating an ADR before implementation starts."
-model: opus
+role: Implementation plans, ADRs, and system architecture design specialist
+status: active
+version: "1.2.0"
+last_updated: 2026-11-18
+tier: high
+color: blue
+description: >
+  Design agent - produces implementation plans and technical specs. Use when: planning a new
+  feature, evaluating architectural trade-offs, or generating an ADR before implementation starts.
+examples:
+  - user: "Design the data model for user authentication"
+    assistant: "Analyzing requirements and producing an implementation plan with schema, API surface, and trade-offs."
+phases: [1, 2]
+handoff_to: [designer, code-writer]
+handoff_from: [pm]
+required_skills: []
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: 2026-11-18
+  governance: docs/lifecycle/agents/architect.md
 ---
-
-<!-- GENERATED from agents/architect.md by scripts/sync-agent-mirrors.ts — do not edit; rerun the script. -->
-
 
 ## Role
 

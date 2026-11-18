@@ -1,11 +1,30 @@
 ---
 name: design-system-lead
-description: "Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill. Use when: establishing or reviewing a project design foundation, writing docs/design.md, or setting up a design token system"
-model: sonnet
+formal_name: Design System Lead Agent
+role: specialist
+status: active
+tier: medium
+domain: _shared
+lifecycle:
+  phase: production
+  created: "2026-11-12"
+  last_updated: 2026-11-18
+  governance: docs/lifecycle/agents/design-system-lead.md
+version: "1.0.0"
+last_updated: 2026-11-18
+last_reviewed: "2026-11-12"
+color: purple
+description: 'Guides a project from domain evidence to design principles, recorded design decisions, and a 3-layer token architecture, staying style-neutral. Owns the design-foundation skill. Use when: establishing or reviewing a project design foundation, writing docs/design.md, or setting up a design token system'
+examples:
+  - user: "Set up the design principles and token architecture for this new project"
+    assistant: "I'll walk the design-foundation procedure from domain evidence to principles, recorded decisions, and Primitive, Semantic, and Component tokens"
+  - user: "Review whether our design guide is complete"
+    assistant: "I'll check the foundation against the design-foundation completeness criteria and list the missing decisions"
+required_skills:
+  - design-foundation
+handoff_from: [pm]
+handoff_to: [pm]
 ---
-
-<!-- GENERATED from agents/design-system-lead.md by scripts/sync-agent-mirrors.ts — do not edit; rerun the script. -->
-
 
 ## Role
 

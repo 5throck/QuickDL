@@ -1,11 +1,35 @@
 ---
 name: automation-engineer
-description: "Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests. Use when: running /sync, creating or changing scripts and automation, or implementing an approved plan for tool handlers, data models, or integration bridges"
-model: sonnet
+formal_name: Automation Engineer
+role: specialist
+status: active
+tier: medium
+domain: _shared
+lifecycle:
+  phase: production
+  created: "2026-11-12"
+  last_updated: 2026-11-18
+  governance: docs/lifecycle/agents/automation-engineer.md
+version: "1.1.0"
+last_updated: 2026-11-18
+last_reviewed: "2026-11-12"
+color: green
+description: 'Executes the /sync pipeline row, implements repository automation (project scripts, hooks, CI workflow files), and implements approved plans for the project software and tooling layer with their unit tests. Use when: running /sync, creating or changing scripts and automation, or implementing an approved plan for tool handlers, data models, or integration bridges'
+examples:
+  - user: "Run /sync for the approved change"
+    assistant: "I'll run the sync pipeline from the PM brief (commit message, worktree, staged file list, PR body file) and return the result or the exact failure output"
+  - user: "Create a script that validates our release checklist"
+    assistant: "I'll implement it as an idempotent, cross-platform TypeScript script run with Bun, with explicit exit codes, and report each file changed"
+  - user: "Implement the approved plan for the new tool handler"
+    assistant: "I'll implement exactly what the plan specifies, follow the existing registration and handler conventions, add unit tests, and report file by file"
+required_skills:
+  - sync
+  - gateguard
+  - ci-triage
+  - script-lifecycle-manager
+handoff_from: [pm]
+handoff_to: [pm]
 ---
-
-<!-- GENERATED from agents/automation-engineer.md by scripts/sync-agent-mirrors.ts — do not edit; rerun the script. -->
-
 
 ## Role
 

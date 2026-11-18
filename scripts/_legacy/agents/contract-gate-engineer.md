@@ -1,11 +1,30 @@
 ---
 name: contract-gate-engineer
-description: "Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill. Use when: defining or reviewing boundary schemas, validating data crossing a trust boundary, or adding a contract-safety gate"
-model: sonnet
+formal_name: Contract Gate Engineer Agent
+role: specialist
+status: active
+tier: medium
+domain: _shared
+lifecycle:
+  phase: production
+  created: "2026-11-12"
+  last_updated: 2026-11-18
+  governance: docs/lifecycle/agents/contract-gate-engineer.md
+version: "1.0.0"
+last_updated: 2026-11-18
+last_reviewed: "2026-11-12"
+color: orange
+description: 'Owns runtime schema (Zod) contract patterns for interface boundaries, IPC channels, and API endpoints, and the contract-safety rules around them. Owns the zod-contract-gate skill. Use when: defining or reviewing boundary schemas, validating data crossing a trust boundary, or adding a contract-safety gate'
+examples:
+  - user: "Add runtime validation to the new IPC channel payload"
+    assistant: "I'll define the Zod schema at the boundary, derive the TypeScript type from it, and add the parse-at-the-edge gate per the contract rules"
+  - user: "Review our API endpoint handlers for missing input validation"
+    assistant: "I'll check each boundary against the zod-contract-gate rules and list the unvalidated entry points"
+required_skills:
+  - zod-contract-gate
+handoff_from: [pm]
+handoff_to: [pm]
 ---
-
-<!-- GENERATED from agents/contract-gate-engineer.md by scripts/sync-agent-mirrors.ts — do not edit; rerun the script. -->
-
 
 ## Role
 

@@ -1,11 +1,27 @@
 ---
 name: test-runner
-description: "QA and verification agent - runs tests and validates acceptance criteria. Use when: code has been written and needs to be verified, or when the QA gate needs to be run before a PR."
-model: sonnet
+role: Test execution and acceptance criteria verification specialist
+status: active
+version: "1.2.0"
+last_updated: 2026-11-18
+tier: medium
+color: cyan
+description: >
+  QA and verification agent - runs tests and validates acceptance criteria. Use when: code has
+  been written and needs to be verified, or when the QA gate needs to be run before a PR.
+examples:
+  - user: "Verify the authentication implementation against the acceptance criteria"
+    assistant: "Running the test suite and validating each acceptance criterion from the implementation plan."
+phases: [4]
+handoff_to: [pm]
+handoff_from: [code-writer]
+required_skills: [test-driven-development]
+lifecycle:
+  phase: production
+  created: "2026-08-12"
+  last_updated: 2026-11-18
+  governance: docs/lifecycle/agents/test-runner.md
 ---
-
-<!-- GENERATED from agents/test-runner.md by scripts/sync-agent-mirrors.ts — do not edit; rerun the script. -->
-
 
 ## Role
 
