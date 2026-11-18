@@ -1,4 +1,4 @@
-variant=co-develop
+variant=co-utility
 version=0.30.0
 platform=all
 country=none

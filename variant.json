@@ -1,7 +1,7 @@
 {
-  "name": "co-develop",
+  "name": "co-utility",
   "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization)",
-  "variant_type": "development",
+  "variant_type": "utility",
   "status": "stable",
   "version": "1.0.0",
   "inherits_common": "templates/common",
@@ -64,17 +64,6 @@
   },
   "promotionChecklist": "PROMOTION_CHECKLIST.md",
   "deg_conformance": "core",
-  "hub": {
-    "role": "hub",
-    "domain": "co-develop",
-    "hub_remote": "https://github.com/5throck/co-develop.git",
-    "consumes": [
-      {
-        "domain": "co-security",
-        "minimum_version": "1.1.0"
-      }
-    ]
-  },
   "process_manifest": {
     "stages_file": null,
     "raci_file": null,

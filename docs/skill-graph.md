@@ -10,11 +10,13 @@
 
 | Skill (scope/name) | Layer | Version | Required-by Agents | Phases | Relates-to | Inputs | Outputs |
 |--------------------|-------|---------|-------------------|--------|------------|--------|---------|
+| `co-develop/code-review` | L3 | — | — | — | — | — | — |
+| `co-develop/refactoring` | L3 | — | — | — | — | — | — |
+| `co-develop/test-driven-development` | L3 | — | — | — | — | — | — |
 | `root/accessibility-audit` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/agent-lifecycle-manager` | L3 | 1.4.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L3 | 1.0.2 | — | — | — | — | — |
 | `root/ci-triage` | L3 | 0.2.0 | — | — | — | — | — |
-| `root/code-review` | L3 | 1.1.0 | — | — | root/refactoring (composes_with) | — | — |
 | `root/decision-record` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/delegate-to-hub` | L3 | 1.0.1 | — | — | — | — | — |
 | `root/design-foundation` | L3 | 1.1.1 | — | — | root/accessibility-audit (composes_with), root/token-usage-lint (composes_with), root/ui-ux-design-intelligence (enables) | — | — |
@@ -34,7 +36,6 @@
 | `root/platform-skill-lifecycle-manager` | L3 | 1.0.3 | — | — | — | — | — |
 | `root/post-write-check` | L3 | 1.1.0 | root/backend, root/frontend, root/qa | root/phase 4 | — | — | — |
 | `root/project-review` | L3 | 1.3.2 | — | — | — | — | — |
-| `root/refactoring` | L3 | 1.2.0 | — | — | root/code-review (composes_with) | — | — |
 | `root/research-analysis` | L3 | 1.0.2 | — | — | root/documentation-writing (enables) | — | — |
 | `root/script-lifecycle-manager` | L3 | 1.2.2 | — | — | — | — | — |
 | `root/security-scan` | L3 | 1.3.0 | — | — | — | — | — |
@@ -42,10 +43,8 @@
 | `root/skill-lifecycle-manager` | L3 | 1.5.0 | — | — | root/script-lifecycle-manager (composes_with) | — | — |
 | `root/source-command-commit-push-pr` | L3 | 1.0.3 | — | — | — | — | — |
 | `root/standup-synthesizer` | L3 | 1.1.0 | — | — | — | — | — |
-| `root/swe-solve` | L3 | 1.1.1 | — | — | — | — | — |
 | `root/sync` | L3 | 1.10.0 | — | — | — | — | — |
 | `root/team-builder` | L3 | 1.2.0 | — | — | — | — | — |
-| `root/test-driven-development` | L3 | 1.2.0 | — | — | root/code-review (follows) | — | — |
 | `root/token-usage-lint` | L3 | 1.1.0 | — | — | root/ui-ux-design-intelligence (follows) | — | — |
 | `root/translate` | L3 | 1.0.3 | — | — | root/documentation-writing (composes_with) | — | — |
 | `root/ui-ux-design-intelligence` | L3 | 1.0.1 | — | — | root/documentation-writing (follows) | — | — |
@@ -56,7 +55,7 @@
 
 Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`); phase numbering is per scope:
 
-- **root/phase 4** (Implementation & QA Gate): root/post-write-check
+- **root/phase 4** (QA Verification): root/post-write-check
 
 ## Edge Types
 
@@ -100,11 +99,11 @@ None — every capability has a single content hash.
 | Type | Count | Nodes |
 |------|-------|-------|
 | agent | 1 | root/security |
-| skill | 10 | root/api-documentation, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/swe-solve, root/zod-contract-gate |
+| skill | 9 | root/api-documentation, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/zod-contract-gate |
 
 ## Skills Without `used_by` (G6)
 
-36 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+35 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
@@ -115,4 +114,4 @@ No suggestions: no procedure step pairs one of these skills with an owning agent
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-19), window 90 days. Skill nodes with usage: 0.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (0): —
-- **unused** (0 sessions in 90 days) (41): root/accessibility-audit, root/agent-lifecycle-manager, root/api-documentation, root/ci-triage, root/code-review, root/decision-record, root/delegate-to-hub, root/design-foundation, root/documentation-writing, root/evidence-ledger, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/handbook, root/handbook-sync-audit, root/i18n-audit, root/i18n-formatting, root/i18n-layout, root/i18n-locale-config, root/meeting-facilitation, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/post-write-check, root/project-review, root/refactoring, root/research-analysis, root/script-lifecycle-manager, root/security-scan, root/service-design, root/skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/swe-solve, root/sync, root/team-builder, root/test-driven-development, root/token-usage-lint, root/translate, root/ui-ux-design-intelligence, root/update-bun-packages … and 1 more
+- **unused** (0 sessions in 90 days) (40): co-develop/code-review, co-develop/refactoring, co-develop/test-driven-development, root/accessibility-audit, root/agent-lifecycle-manager, root/api-documentation, root/ci-triage, root/decision-record, root/delegate-to-hub, root/design-foundation, root/documentation-writing, root/evidence-ledger, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/handbook, root/handbook-sync-audit, root/i18n-audit, root/i18n-formatting, root/i18n-layout, root/i18n-locale-config, root/meeting-facilitation, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/post-write-check, root/project-review, root/research-analysis, root/script-lifecycle-manager, root/security-scan, root/service-design, root/skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/sync, root/team-builder, root/token-usage-lint, root/translate, root/ui-ux-design-intelligence, root/update-bun-packages, root/zod-contract-gate

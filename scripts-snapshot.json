@@ -1,6 +1,6 @@
 {
   "created": "2026-11-18",
-  "variant": "co-develop",
+  "variant": "co-utility",
   "l1_source": "templates/common/scripts",
   "scripts": {
     "agent-create.ts": {
