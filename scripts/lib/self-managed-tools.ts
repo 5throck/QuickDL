@@ -1,0 +1,195 @@
+#!/usr/bin/env bun
+// @version 1.3.1
+// v1.3.0 (2026-11-06/08, T-20261108-004 — E2E nightly red, co-work scaffold
+//          only, 14/15 variants green): PROJECT-MODE external-deps vendoring
+//          — when <rootDir>/external-deps.json exists, its install_dirs
+//          (extractInstallDirsLoose from ./external-deps.ts, data-driven)
+//          join the path set with trailing slash, so vendored upstream
+//          content (external/<id>/skills/... — scaffold-time clones per
+//          DEC-20261106-04 "consumed as-is") is self-managed: no owner
+//          frontmatter, no lifecycle record, no falsified provenance.
+//          Workspace root has no external-deps.json (inert at L0).
+// v1.3.1 (2026-11-13, U-20261112-017, design
+//          docs/designs/2026-11-12-abap-delivery-docs-batch-design.md §U-017): doc-only — the
+//          v1.2.0 history row's design citation is qualified per the L0-citation convention
+//          (workspace-root: prefix); no logic change.
+// v1.2.0 (2026-10-31, design workspace-root: docs/designs/2026-10-31-graft-trail-migration-design.md,
+//           U-20261031-009): trail-era default paths — the vendor renamed graft to
+//           trail (0.28, @trailhq/trail-code) and `trail init` creates `.trail/` +
+//           `.claude/helpers/trail-*.cjs`. DEFAULT_SELF_MANAGED_PATHS carries BOTH
+//           path generations (graft-era kept as legacy until the fleet converges on
+//           its upgrade visits — never shrink the set), and the built-in-row guard
+//           accepts either tool name (registry `trail` entry suppresses the default
+//           `graft` row). The tracked `skills/trail/` SSOT is deliberately NOT in
+//           the default set — lifecycle gates read its frontmatter (design R2.1).
+// v1.1.0 (2026-10-11, U-20261009-001, spec
+//           docs/designs/2026-10-11-backlog-batch-2-design.md): built-in default
+//           exclusion set — docs/self-managed-surfaces.json is L0-only (ADR-0069
+//           disables the docs propagation domain; the propagator deliberately skips
+//           self-managed paths), so a fresh scaffolded project loads an EMPTY
+//           registry and a third-party graft install re-blocks every /sync with
+//           "[FAIL] .../skills/graft/SKILL.md missing version: field". The graft
+//           surfaces are now the module-level default (fail-safe: config can only
+//           ADD exclusions, never shrink the set), extendable via the registry file
+//           and the SELF_MANAGED_SURFACES_EXCL env var (comma-separated paths).
+// v1.0.0 (2026-10-02, T-20261002-001): initial loader — generic self-managed tool
+//           surface registry (design docs/designs/2026-10-02-self-managed-tool-surfaces-design.md).
+// self-managed-tools.ts — Shared loader for docs/self-managed-surfaces.json.
+//
+// A SELF-MANAGED TOOL owns listed repo-relative paths: it installs and rewrites
+// them itself (e.g. trail's session hook re-bakes helpers and strips SKILL.md
+// frontmatter on its platform mirrors; graft-era binaries behaved identically).
+// Validators consult this registry to skip
+// such paths instead of each check hard-coding tool names — a future self-managing
+// tool registers here and every consumer follows.
+
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { extractInstallDirsLoose } from "./external-deps.ts";
+
+export interface SelfManagedTool {
+  name: string;
+  reason: string;
+  paths: string[];
+}
+
+const REGISTRY_REL = join("docs", "self-managed-surfaces.json");
+
+/**
+ * Built-in default exclusion set (U-20261009-001; trail-era paths per design
+ * 2026-10-31-graft-trail-migration). Applied EVEN WHEN the registry file is
+ * absent — the registry is L0-only, and a fresh scaffolded project where a
+ * third-party tool (graft / trail) has wired its mirrors must not fail the skill
+ * version gates. Mirrors the trail entry in docs/self-managed-surfaces.json;
+ * keep the two in sync (the registry file is the documentation of record at L0).
+ * BOTH path generations are carried: graft-era paths stay as legacy until the
+ * fleet converges (pre-migration projects still create them); trail-era paths
+ * cover post-`trail init` states. The tracked `skills/trail/` SSOT is NOT
+ * excluded — lifecycle gates read its frontmatter.
+ */
+export const DEFAULT_SELF_MANAGED_PATHS: readonly string[] = [
+  // Trail-era (design 2026-10-31-graft-trail-migration R2.1/R2.2).
+  ".trail/",
+  ".claude/helpers/trail-hooks.cjs",
+  ".claude/helpers/trail-statusline.cjs",
+  // Graft-era legacy (kept until fleet convergence — design R2.6 non-goal).
+  ".claude/skills/graft/",
+  ".agents/skills/graft/",
+  ".codex/skills/graft/",
+  ".gemini/skills/graft/",
+  ".hermes/skills/graft/",
+  ".claude/helpers/graft-hooks.cjs",
+  ".claude/helpers/graft-statusline.cjs",
+  ".claude/helpers/graft.local.json",
+  "skills/graft/",
+];
+
+/**
+ * Optional env extension: comma-separated repo-relative paths to treat as
+ * self-managed in addition to the default + registry sets (e.g.
+ * SELF_MANAGED_SURFACES_EXCL=".claude/skills/mytool/,.codex/skills/mytool/").
+ * Extension-only by design — there is no way to un-exclude a path, so a
+ * misconfigured env can never reintroduce the gate failure this module exists
+ * to prevent.
+ */
+function envExtraPaths(): string[] {
+  const raw = process.env.SELF_MANAGED_SURFACES_EXCL ?? "";
+  return raw
+    .split(",")
+    .map((p) => p.trim().replace(/\\/g, "/").replace(/^\.\//, ""))
+    .filter(Boolean);
+}
+
+let cache: { rootDir: string; tools: SelfManagedTool[]; pathSet: Set<string> } | null = null;
+
+/**
+ * Load the registry (cached per rootDir). Missing registry = the built-in default
+ * set only (U-20261009-001); a present registry ADDS to the default — it can never
+ * shrink it.
+ */
+export function loadSelfManagedTools(rootDir = process.cwd()): SelfManagedTool[] {
+  if (cache?.rootDir === rootDir) return cache.tools;
+  const registryPath = join(rootDir, REGISTRY_REL);
+  let tools: SelfManagedTool[] = [];
+  if (existsSync(registryPath)) {
+    try {
+      const data = JSON.parse(readFileSync(registryPath, "utf-8"));
+      if (Array.isArray(data.tools)) tools = data.tools;
+    } catch (err) {
+      throw new Error(`[self-managed-tools] ${REGISTRY_REL} is not valid JSON: ${(err as Error).message}`);
+    }
+  }
+  // The registry entry renamed graft → trail (design 2026-10-31-graft-trail-migration);
+  // a named entry under EITHER spelling suppresses the built-in default row (the
+  // path set is unioned below regardless, so this only keeps tools[] clean).
+  const hasNamedToolEntry = tools.some(
+    (t) => (t.name === "graft" || t.name === "trail") && Array.isArray(t.paths) && t.paths.length > 0,
+  );
+  const effective: SelfManagedTool[] = hasNamedToolEntry
+    ? tools
+    : [
+        {
+          name: "trail",
+          reason:
+            "built-in default (U-20261009-001; renamed from graft per design 2026-10-31-graft-trail-migration): third-party tool-owned surfaces excluded even without docs/self-managed-surfaces.json — see scripts/lib/self-managed-tools.ts",
+          paths: [...DEFAULT_SELF_MANAGED_PATHS],
+        },
+        ...tools,
+      ];
+  cache = { rootDir, tools: effective, pathSet: buildPathSet(effective) };
+  return effective;
+}
+
+function buildPathSet(tools: SelfManagedTool[]): Set<string> {
+  const set = new Set<string>();
+  for (const p of DEFAULT_SELF_MANAGED_PATHS) set.add(p);
+  for (const p of envExtraPaths()) set.add(p);
+  for (const t of tools) {
+    for (const p of t.paths) {
+      const norm = p.replace(/\\/g, "/").replace(/^\.\//, "");
+      set.add(norm.endsWith("/") ? norm : `${norm}`);
+    }
+  }
+  return set;
+}
+
+function pathSet(rootDir = process.cwd()): Set<string> {
+  loadSelfManagedTools(rootDir);
+  const set = new Set(cache!.pathSet);
+  // v1.3.0 project-mode external-deps vendoring (T-20261108-004): union the
+  // install_dirs from <rootDir>/external-deps.json (data-driven, extracted
+  // by scripts/lib/external-deps.ts extractInstallDirsLoose). Absent file =
+  // inert (workspace root). Dirs carry the trailing-slash directory entry
+  // convention isSelfManagedPath matches.
+  try {
+    const depsRaw = readFileSync(join(rootDir, "external-deps.json"), "utf-8");
+    for (const dir of extractInstallDirsLoose(depsRaw)) {
+      set.add(dir.endsWith("/") ? dir : `${dir}/`);
+    }
+  } catch {
+    // no external-deps.json / unreadable — inert
+  }
+  return set;
+}
+
+/** True when `rel` (repo-relative, forward slashes) IS a registered path or lives
+ *  inside a registered directory entry (trailing slash in the registry). */
+export function isSelfManagedPath(rel: string, rootDir = process.cwd()): boolean {
+  const norm = rel.replace(/\\/g, "/").replace(/^\.\//, "");
+  for (const p of pathSet(rootDir)) {
+    if (p.endsWith("/") ? norm.startsWith(p) : norm === p) return true;
+  }
+  return false;
+}
+
+/** Derive the `<platform>/skills/<name>` keys that verify-platform-lifecycle's
+ *  VERSION_EXEMPT_PLATFORM_SKILLS set consumes (platform dirs with a tool-owned
+ *  skills/<name>/ entry). */
+export function selfManagedMirrorSkills(rootDir = process.cwd()): Set<string> {
+  const out = new Set<string>();
+  for (const p of pathSet(rootDir)) {
+    const m = /^(\.[a-z0-9]+)\/skills\/([a-z0-9-]+)\/$/.exec(p);
+    if (m) out.add(`${m[1]}/skills/${m[2]}`);
+  }
+  return out;
+}

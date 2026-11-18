@@ -1,0 +1,638 @@
+#!/usr/bin/env bun
+/**
+ * pre-commit.ts — TS-based pre-commit hook.
+ * Replaces the legacy bash/ps1 hooks.
+ * @version 1.14.0
+ *
+ * v1.14.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
+ *  §5.4 E3, DEC-20261107-02, T-20261107-005): check 4b — when the project-root
+ *  external-deps.json is staged, run `bun scripts/external-deps.ts verify
+ *  --manifest-only` (offline: strict parse, license policy, R3 install_dir
+ *  convention, gitignore coverage, adapter presence, excluded components); a
+ *  FAIL blocks the commit (registration refused). Zero cost when the manifest
+ *  is not staged; skipped when the CLI is absent.
+ * v1.13.0 (2026-11-07, U-20261107-001 — spec
+ *  docs/designs/2026-11-07-precommit-zero-delta-gate-design.md): check 6's
+ *  non-merge path no longer fails unconditionally on the staged-file-set
+ *  proxy. When scripts/*.ts are staged and SCRIPTS.md is not, the commit's
+ *  SCRIPTS.md content IS HEAD's (staged blob of a zero-delta file equals
+ *  HEAD's), so each staged script's @version is verified against the HEAD
+ *  registry rows via evaluateStagedScriptCoverage
+ *  (helpers/pre-commit-script-gate.ts v1.2.0): all covered → PASS with a
+ *  one-line notice (the U-20261107-001 incident — row swept into an earlier
+ *  pipeline commit, script bump landed later, zero legitimate SCRIPTS.md
+ *  delta — could never be committed before: the old FAIL's own remedy, "stage
+ *  the updated SCRIPTS.md", is a no-op when the delta is zero); any uncovered
+ *  script (missing @version, unregistered row, version mismatch, or staged
+ *  deletion) still blocks with a per-script remedy. The registration invariant
+ *  is preserved — Check A iterates registry rows, so only this per-script
+ *  coverage check can catch a staged-but-unregistered script. Merge path and
+ *  check 6c unchanged.
+ * v1.12.0 (2026-10-30, T-20261030-006 — spec
+ *  docs/designs/2026-10-30-language-gate-parent-verbatim-tolerance-design.md):
+ *  check 2-B gains parent-commit verbatim tolerance. The 0.24.0 co-safety canary
+ *  blocked because the changelog reorganization (duplicate-category merge per the
+ *  dev-sync v1.35.0 gate's fix action) MOVED pre-existing Korean-bearing CHANGELOG
+ *  lines — moved lines re-appear as "+ lines" in the staged diff and the non-English
+ *  additions check failed on 25 of them (file carries the sanctioned
+ *  lang_reason: legal exception; third gate-vs-legacy-content interaction in two
+ *  waves). An added line whose trimmed content exists verbatim in HEAD's blob of
+ *  the same file is moved/reordered, not newly added. HEAD is the baseline
+ *  `git diff --cached` already compares against; fetched via Bun.spawnSync
+ *  (shell-quoting-safe) ONLY on the failing path (hasNonEnglish hit), empty parent
+ *  set on git-show failure (initial commit / file-new-in-HEAD → fail behavior
+ *  preserved). Genuinely new non-English lines still block. Extends the A2
+ *  baseline-tolerance honesty principle (delivery-bookkeeping design §A2, PR #1722).
+ * v1.11.0 (2026-10-27, T-20261027-010): check 6c's content gate was DEAD — it
+ *  parsed `parsed.results` from `lifecycle-sync-audit.ts --json`, but the
+ *  AuditResult wire shape is {passed, errors, warnings, registry}: `results`
+ *  never existed, checkAErrors was always empty, and version mismatches never
+ *  blocked. Rewired to the real wire shape via the shared extractor
+ *  parseCheckAErrorsDetailed (helpers/pre-commit-script-gate.ts v1.1.0, same
+ *  module as the T-20261027-009 merge gate) so the extraction cannot drift
+ *  between the two call sites; the fixData-driven "→ Fix:" output is kept.
+ * v1.10.0 (2026-10-27, T-20261027-009): check 6 becomes merge-aware. The
+ *  "scripts/*.ts staged AND scripts/SCRIPTS.md not staged → FAIL" rule is a
+ *  staged-file-set proxy and false-positives on merge commits where the
+ *  merged-in side carries script changes whose SCRIPTS.md rows pre-exist on
+ *  the receiving branch (zero delta) — observed 2026-10-27 concluding
+ *  main→PR #1643 after #1644 landed while content-based lifecycle-sync-audit
+ *  Check A passed. When a merge is in progress (MERGE_HEAD present, resolved
+ *  via `git rev-parse --git-path MERGE_HEAD` so worktrees are covered), check
+ *  6 delegates to the content invariant the proxy stands for — the Check A
+ *  rows==@version-headers comparison (scripts/helpers/pre-commit-script-gate.ts)
+ *  — instead of failing, and logs a one-line notice. Non-merge commits keep
+ *  the exact prior behavior.
+ * v1.9.0 (2026-10-02): check 6b command counterpart check becomes L0-only —
+ *  skipped when templates/common does not exist (recorded exclusion, D8 style
+ *  like .agents/commands): L2 projects and scaffold commits have no mapping
+ *  target, so every staged command warned there (observed 21x on the
+ *  gw-76f6b4c9c6ff scaffold's initial commit, 2026-10-01). Severity stays WARN.
+ * v1.8.0 (2026-09-25, spec docs/designs/2026-09-25-verifier-platform-expansion-design.md
+ *  site 8 / D8): check 6b generalizes to all four platforms — skills regexes
+ *  cover .agents/.codex mirrors; command propagation checks map .claude/commands
+ *  and .gemini/commands to common, plus the .codex/prompts mapping
+ *  (ADR-0077 D4). .agents/commands excluded (L0-resident by design, ticket
+ *  T-20260925-003). Severity stays WARN.
+ */
+
+import { $ } from "bun";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { hasNonEnglish, filterParentVerbatimLines } from "../lib/language-guard.ts";
+import { localDateISO } from "../lib/local-date.ts";
+import {
+  evaluateScriptsMdGate,
+  extractFileVersionFromContent,
+  evaluateStagedScriptCoverage,
+  MERGE_GATE_NOTICE,
+  ZERO_DELTA_GATE_NOTICE,
+  parseCheckAErrorsDetailed,
+  runScriptsMdContentGate,
+} from "../helpers/pre-commit-script-gate.ts";
+
+async function main() {
+  const stagedOutput = await $`git diff --cached --name-only`.text();
+  const staged = stagedOutput.split("\n").filter(Boolean);
+  if (staged.length === 0) process.exit(0);
+
+  const memoryOnly = staged.every((f) => f.startsWith("memory/"));
+
+  console.log("=== TS Pre-commit Hook ===");
+
+  if (process.env.SYNC_ACTIVE !== "1") {
+    console.error(
+      "\x1b[31m[FAIL]\x1b[0m Direct git commits are restricted. Please use the /sync skill to commit and push changes.",
+    );
+    console.error(
+      "\x1b[33m[WARN]\x1b[0m --no-verify is FORBIDDEN in this workspace — it bypasses secret scanning and all quality gates. Use /sync instead.",
+    );
+    process.exit(1);
+  }
+
+  // The context file name is unique per /sync run (embeds the context UUID) so that
+  // two overlapping runs (e.g. concurrent Agent Teams teammates) can't collide on a
+  // shared fixed filename and validate one run's commit against another's token.
+  const expectedContext = process.env.DEV_SYNC_CONTEXT;
+  const contextFile = process.env.DEV_SYNC_CONTEXT_FILE;
+  if (
+    !expectedContext ||
+    !contextFile ||
+    !existsSync(contextFile) ||
+    readFileSync(contextFile, "utf-8") !== expectedContext
+  ) {
+    console.error(
+      "\x1b[31m[FAIL]\x1b[0m Execution context validation failed. Direct environment variable manipulation detected.",
+    );
+    console.error("\x1b[33m[WARN]\x1b[0m Please use the /sync skill to commit and push changes.");
+    process.exit(1);
+  }
+
+  // 1. Auto-update Markdown "Last Updated" dates
+  const mdStaged = staged.filter((f) => f.toLowerCase().endsWith(".md"));
+  if (mdStaged.length > 0) {
+    // Local calendar day, not toISOString() (UTC) — see lib/local-date.ts (T-20260910-030).
+    const today = localDateISO();
+    for (const file of mdStaged) {
+      try {
+        let content = readFileSync(file, "utf-8");
+        if (content.includes("Last Updated:")) {
+          content = content.replace(/Last Updated: \d{4}-\d{2}-\d{2}/g, `Last Updated: ${today}`);
+          writeFileSync(file, content, "utf-8");
+          await $`git add ${file}`;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+    }
+  }
+
+  // 1-A. Auto-date CHANGELOG.md [Unreleased]
+  if (staged.includes("CHANGELOG.md")) {
+    // Local calendar day, not toISOString() (UTC) — see lib/local-date.ts (T-20260910-030).
+    const today = localDateISO();
+    let content = readFileSync("CHANGELOG.md", "utf-8");
+    let lines = content.split("\n");
+    let inUnreleased = false;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith("## [Unreleased]")) inUnreleased = true;
+      else if (lines[i].startsWith("## [") && !lines[i].startsWith("## [Unreleased]")) inUnreleased = false;
+
+      if (inUnreleased && /^\s*-\s+/.test(lines[i]) && !lines[i].match(/\*\*\[\d{4}-\d{2}-\d{2}\]\*\*: /)) {
+        lines[i] = lines[i].replace(/^(\s*-\s+)/, `$1**[${today}]**: `);
+      }
+    }
+    const rewritten = lines.join("\n");
+    if (rewritten !== content) {
+      writeFileSync("CHANGELOG.md", rewritten, "utf-8");
+      await $`git add CHANGELOG.md`;
+    }
+  }
+
+  // 2. Block .env files (".env.example" / ".env.sample" templates are allowed)
+  const envStaged = staged.filter((f) =>
+    /^\.env$|^\.env\.(?!example$|sample$)[^s]|(\/|\\)\.env$|(\/|\\)\.env\.(?!example$|sample$)[^s]/.test(f),
+  );
+  if (envStaged.length > 0) {
+    console.error("\x1b[31m[FAIL]\x1b[0m Attempt to commit .env file detected.");
+    process.exit(1);
+  }
+
+  // Tracked .env cleanup gate (T-20260910-015): staging a new .env is blocked
+  // above, but a .env committed before this hook existed stays tracked — and
+  // gitleaks' git-mode scans skip it via the .gitleaks.toml path allowlist, so
+  // nothing else would ever flag it. Block every commit until it is untracked.
+  const trackedEnv = (await $`git ls-files -- '*.env' '**/.env'`.nothrow().text())
+    .split("\n")
+    .map((l: string) => l.trim())
+    .filter((l: string) => /(^|\/)\.env$/.test(l));
+  if (trackedEnv.length > 0) {
+    console.error("\x1b[31m[FAIL]\x1b[0m Tracked .env file detected — commit blocked:");
+    for (const f of trackedEnv) console.error(`  - ${f}`);
+    console.error(
+      "\x1b[33m[INFO]\x1b[0m Untrack it with 'git rm --cached <file>' (keep the file on disk), then commit the removal.",
+    );
+    process.exit(1);
+  }
+
+  // 2-A. Block merge conflict markers
+  const textStaged = staged.filter((f) => !f.match(/\.(png|jpg|jpeg|gif|ico|pdf|zip|tar|gz|mp4|webm|bin|exe|dll)$/i));
+  for (const file of textStaged) {
+    if (!existsSync(file)) continue;
+    try {
+      const content = readFileSync(file, "utf-8");
+      // `=======` alone is a legal markdown setext underline — only the opening
+      // and closing markers block (the former bare-`=======` test here was dead
+      // code: the inner exit path never fired for it).
+      if (/^<<<<<<<\s/m.test(content) || /^>>>>>>>\s/m.test(content)) {
+        console.error(`\x1b[31m[FAIL]\x1b[0m Merge conflict marker detected in ${file}`);
+        process.exit(1);
+      }
+    } catch {
+      /* ignore binary read errors */
+    }
+  }
+
+  // 2-B. Enforce English Only in PR Artifacts (CHANGELOG only)
+  // Files ending in _ko.md are intentionally Korean — skip them
+  // memory/ files are exempt (may contain Korean meeting transcripts and daily logs)
+  // Detection (Korean/Japanese/Chinese) lives in scripts/lib/language-guard.ts, shared
+  // with dev-sync.ts and gen-pr-body.ts so the three enforcement points can't drift.
+  // Only newly *added* lines (via the staged diff) are checked — scanning the whole
+  // file would false-positive on pre-existing legitimate non-English content elsewhere
+  // in CHANGELOG.md (e.g. CJK glyph names quoted in an unrelated font-rendering fix).
+  // v1.12.0 parent-commit verbatim tolerance (T-20261030-006): an added line whose
+  // trimmed content exists verbatim in HEAD's blob of the same file is moved/reordered
+  // history, not new content (observed: the co-safety 0.24.0 changelog reorganization
+  // moved sanctioned Korean statute entries back into the add-set — 25 phantom
+  // additions). HEAD is the baseline `git diff --cached` already compares against;
+  // the parent blob is fetched ONLY on the failing path (raw hasNonEnglish hit) via
+  // argv-array Bun.spawnSync (shell-quoting-safe). git-show failure (initial commit,
+  // file new in HEAD) leaves the parent set empty — every added line stays genuinely
+  // new and the fail behavior is preserved. Genuinely new non-English lines still
+  // block: the tolerance self-expires the moment the content is truly new.
+  const docsToCheck = staged.filter(
+    (f) => /^CHANGELOG\.md$/.test(f.replace(/\\/g, "/")) && !/_ko\.md$/.test(f.replace(/\\/g, "/")),
+  );
+  for (const file of docsToCheck) {
+    if (!existsSync(file)) continue;
+    const diff = await $`git diff --cached -U0 -- ${file}`.text();
+    const addedLines = diff
+      .split("\n")
+      .filter((l) => l.startsWith("+") && !l.startsWith("+++"))
+      .map((l) => l.slice(1));
+    if (!hasNonEnglish(addedLines.join("\n"))) continue;
+    let parentLines: string[] = [];
+    try {
+      const show = Bun.spawnSync(["git", "show", `HEAD:${file}`], { stdout: "pipe", stderr: "pipe" });
+      if (show.exitCode === 0) parentLines = show.stdout.toString().split("\n");
+    } catch {
+      /* parent unavailable — treat as no parent content */
+    }
+    const genuinelyNew = filterParentVerbatimLines(addedLines, parentLines);
+    if (hasNonEnglish(genuinelyNew.join("\n"))) {
+      console.error(`\x1b[31m[FAIL]\x1b[0m Non-English characters detected in newly added lines of ${file}`);
+      process.exit(1);
+    }
+  }
+
+  // 3. Memory Cleanup & Validation
+  const memoryStaged = staged.filter((f) => /^memory\//.test(f.replace(/\\/g, "/")));
+  if (memoryStaged.length > 0) {
+    console.log("\n=== Memory Format Validation ===");
+    try {
+      await $`bun scripts/verify-memory.ts --verify ${memoryStaged}`.quiet();
+    } catch {
+      console.log("\x1b[33m[WARN]\x1b[0m Memory format: some entries use legacy format");
+    }
+  }
+
+  // 3.5. Lifecycle-only audit (fast pre-commit check)
+  let lifecycleOk = true;
+  if (!memoryOnly) {
+    console.log("\n=== Lifecycle Audit (Pre-commit Gatekeeper) ===");
+    try {
+      await $`bun scripts/audit.ts --lifecycle-only`;
+      console.log("\x1b[32m[PASS]\x1b[0m Lifecycle audit: all lifecycle checks passed");
+    } catch {
+      console.error("\x1b[31m[FAIL]\x1b[0m Lifecycle audit detected drift - commit blocked.");
+      console.error("\x1b[33m[INFO]\x1b[0m Run 'bun scripts/audit.ts --lifecycle-only' to see details.");
+      lifecycleOk = false;
+      process.exit(1);
+    }
+  }
+
+  // 4. Audits (only if lifecycle check passed)
+  // When running via /sync (SYNC_ACTIVE=1), dev-sync.ts already ran full audit before commit — skip here to avoid triple execution.
+  const auditAlreadyRan = process.env.SYNC_ACTIVE === "1";
+  if (!memoryOnly && lifecycleOk && !auditAlreadyRan) {
+    console.log("\n=== Workspace Audit ===");
+    try {
+      await $`bun scripts/audit.ts`;
+    } catch {
+      process.exit(1);
+    }
+  } else if (auditAlreadyRan) {
+    console.log("\n=== Workspace Audit === [skipped — already ran in dev-sync pipeline]");
+  }
+
+  const templateStaged = staged.filter((f) => /^templates\//.test(f.replace(/\\/g, "/")));
+  if (templateStaged.length > 0 && existsSync("scripts/validate-templates.ts")) {
+    console.log("\n=== Template Lifecycle Validation ===");
+    try {
+      await $`bun scripts/validate-templates.ts`;
+      console.log("\x1b[32m[PASS]\x1b[0m Template validation: all checks passed");
+    } catch {
+      console.error("\x1b[31m[FAIL]\x1b[0m Template validation failed - commit blocked.");
+      process.exit(1);
+    }
+  }
+
+  // 4b. External-dependency manifest gate (E3 — external-deps standard §5.4,
+  // DEC-20261107-02). Zero cost unless the project-root external-deps.json is
+  // staged; then the offline `verify --manifest-only` leg runs (strict parse,
+  // license policy, R3 install_dir convention, gitignore coverage, adapter
+  // presence, excluded components). A FAIL blocks the commit — this is where a
+  // new entry's registration is refused.
+  if (staged.some((f) => f.replace(/\\/g, "/") === "external-deps.json") && existsSync("scripts/external-deps.ts")) {
+    console.log("\n=== External-dependency manifest (verify --manifest-only) ===");
+    const r = Bun.spawnSync(["bun", "scripts/external-deps.ts", "verify", "--manifest-only"], {
+      stdout: "pipe",
+      stderr: "pipe",
+    });
+    const out = r.stdout.toString().trim();
+    if (r.exitCode !== 0) {
+      if (out) console.error(out);
+      const err = r.stderr.toString().trim();
+      if (err) console.error(err);
+      console.error(
+        "\x1b[31m[FAIL]\x1b[0m external-deps.json failed the manifest gate - commit blocked. Fix the [FAIL] rows above (bun scripts/external-deps.ts verify --manifest-only).",
+      );
+      process.exit(1);
+    }
+    console.log("\x1b[32m[PASS]\x1b[0m external-deps.json: manifest gate clean");
+  }
+
+  // 5. README sync check
+  const readmeStaged = staged.some((f) => /README(\_ko)?\.md$/.test(f));
+  if (readmeStaged) {
+    console.log("\n=== README Synchronization ===");
+    try {
+      await $`bun scripts/verify-readme-sync.ts --pre-commit`;
+      console.log("\x1b[32m[PASS]\x1b[0m README sync: all hashes match");
+    } catch {
+      console.error("\x1b[31m[FAIL]\x1b[0m README sync check failed — commit blocked.");
+      process.exit(1);
+    }
+  }
+
+  // 6. Lifecycle compliance check (Tier 1 Gatekeeper)
+  const scriptStaged = staged.filter((f) => /^scripts\/.*\.ts$/.test(f.replace(/\\/g, "/")));
+  const scriptsMdStaged = staged.includes("scripts/SCRIPTS.md");
+
+  // T-20261027-009: merge-in-progress detection — resolved via --git-path so
+  // linked worktrees (MERGE_HEAD under .git/worktrees/<name>/) are covered.
+  // Probed lazily, only when the staged-file-set proxy would otherwise arm.
+  let mergeInProgress = false;
+  if (scriptStaged.length > 0 && !scriptsMdStaged) {
+    try {
+      const mergeHeadPath = (await $`git rev-parse --git-path MERGE_HEAD`.text()).trim();
+      mergeInProgress = mergeHeadPath.length > 0 && existsSync(mergeHeadPath);
+    } catch {
+      mergeInProgress = false; // outside a repo cannot happen here; treat as non-merge
+    }
+  }
+
+  const scriptsGate = evaluateScriptsMdGate({
+    scriptsStagedCount: scriptStaged.length,
+    scriptsMdStaged,
+    mergeInProgress,
+  });
+
+  if (scriptsGate === "verify-staged-coverage") {
+    // U-20261107-001: the old unconditional proxy FAIL ("SCRIPTS.md was not
+    // updated", remedy "stage the updated SCRIPTS.md") is a no-op trap when
+    // the SCRIPTS.md content delta is zero — a row already at the target
+    // version in HEAD (swept into an earlier pipeline commit) can never enter
+    // `git diff --cached --name-only`, so every retry failed identically.
+    // Verify the invariant the proxy stood for instead: each staged script's
+    // @version must be covered by the SCRIPTS.md registry content this commit
+    // carries. SCRIPTS.md is unstaged here, so the commit's registry content
+    // IS HEAD's (the staged blob of a zero-delta file equals HEAD's blob).
+    console.log("\n=== Lifecycle Compliance Check ===");
+    const showMd = await $`git show HEAD:scripts/SCRIPTS.md`.quiet().nothrow();
+    const scriptsMdContent = showMd.exitCode === 0 ? showMd.stdout.toString() : null;
+    const scriptVersions: Record<string, string | null> = {};
+    const unreadable: string[] = []; // staged deletions (no index blob to read)
+    for (const script of scriptStaged) {
+      const showScript = await $`git show :${script}`.quiet().nothrow();
+      if (showScript.exitCode === 0) {
+        scriptVersions[script] = extractFileVersionFromContent(showScript.stdout.toString());
+      } else {
+        unreadable.push(script);
+      }
+    }
+    const coverage = evaluateStagedScriptCoverage({
+      stagedScripts: scriptStaged.filter((s) => !unreadable.includes(s)),
+      scriptsMdContent,
+      scriptVersions,
+    });
+
+    if (coverage.allCovered && unreadable.length === 0) {
+      console.log(`\x1b[32m[PASS]\x1b[0m ${ZERO_DELTA_GATE_NOTICE}`);
+    } else {
+      console.error(
+        "\x1b[31m[FAIL]\x1b[0m scripts/*.ts staged, but not every staged script's @version is covered by scripts/SCRIPTS.md (checked against the content this commit carries).",
+      );
+      console.error("");
+      console.error("Uncovered script files:");
+      for (const entry of coverage.uncovered) {
+        console.error(`  - ${entry.script} (@version ${entry.fileVersion ?? "missing"})`);
+        if (entry.reason === "no-version-header") {
+          console.error(
+            "    → Fix: add an @version header to the script (or revert the change) — its registry coverage cannot be verified without one",
+          );
+        } else if (entry.reason === "no-registry-row") {
+          console.error("    → Fix: register the script in scripts/SCRIPTS.md and stage the updated file:");
+          console.error("      git add scripts/SCRIPTS.md");
+        } else {
+          console.error(
+            `    → Fix: update the scripts/SCRIPTS.md row to ${entry.fileVersion} and stage it (git add scripts/SCRIPTS.md), or revert the @version bump to ${entry.registryVersion}`,
+          );
+        }
+      }
+      for (const script of unreadable) {
+        console.error(`  - ${script} (staged content unreadable — deletion or rename)`);
+        console.error("    → Fix: update scripts/SCRIPTS.md for the removal/rename and stage the updated file:");
+        console.error("      git add scripts/SCRIPTS.md");
+      }
+      console.error("");
+      process.exit(1);
+    }
+  }
+
+  if (scriptsGate === "merge-verify") {
+    // T-20261027-009: the merged-in side may carry script changes whose
+    // SCRIPTS.md rows pre-exist on this branch (zero delta), so the
+    // staged-file-set proxy does not apply. Verify the content invariant the
+    // proxy stands for instead — the Check A rows == @version-headers
+    // comparison run by lifecycle-sync-audit.ts (exit code is the gate).
+    console.log(`\n=== Lifecycle Compliance Check ===\n${MERGE_GATE_NOTICE}`);
+    const { pass, checkAErrors } = await runScriptsMdContentGate(async () => {
+      const result = await $`bun scripts/lifecycle-sync-audit.ts --json`.quiet().nothrow();
+      return { exitCode: result.exitCode, stdout: result.stdout.toString() };
+    });
+    if (!pass) {
+      console.error(
+        "\x1b[31m[FAIL]\x1b[0m Merge commit fails the SCRIPTS.md content check (lifecycle-sync-audit Check A):",
+      );
+      for (const err of checkAErrors) {
+        console.error(`  - ${err.file}: ${err.message}`);
+      }
+      if (checkAErrors.length === 0) {
+        console.error(
+          "  (lifecycle-sync-audit.ts exited non-zero without parseable Check A detail — run 'bun scripts/lifecycle-sync-audit.ts' to see the failure)",
+        );
+      }
+      console.error("");
+      process.exit(1);
+    }
+  }
+
+  // 6c. Check A version blocking: @version in scripts/*.ts must match SCRIPTS.md
+  // (T-20261027-010: this gate was dead until v1.11.0 — it read `parsed.results`,
+  // a key that never exists on the AuditResult wire shape, so Check A mismatches
+  // never blocked. Extraction now goes through the shared, tested helper.)
+  const scriptOrMdStaged = staged.some((f) => {
+    const normalized = f.replace(/\\/g, "/");
+    return /^scripts\/.*\.ts$/.test(normalized) || normalized === "scripts/SCRIPTS.md";
+  });
+
+  if (scriptOrMdStaged) {
+    console.log("\n=== Script Version Sync Check (Check A) ===");
+    try {
+      const auditResult = await $`bun scripts/lifecycle-sync-audit.ts --json`.quiet().nothrow();
+      let checkAErrors: Awaited<ReturnType<typeof parseCheckAErrorsDetailed>> = [];
+      try {
+        // AuditResult wire shape: {passed, errors, warnings, registry} — Check A
+        // errors live in `errors` (level === 'error', message includes 'Check A:').
+        checkAErrors = parseCheckAErrorsDetailed(auditResult.stdout.toString().trim());
+      } catch {
+        console.error(
+          "\x1b[33m[WARN]\x1b[0m lifecycle-sync-audit.ts returned non-JSON output — skipping Check A version block",
+        );
+      }
+      if (checkAErrors.length > 0) {
+        console.error("\x1b[31m[FAIL]\x1b[0m Script @version / SCRIPTS.md mismatch detected:");
+        console.error("");
+        for (const err of checkAErrors) {
+          const fd = err.fixData;
+          if (fd) {
+            console.error(
+              `[FAIL] ${err.file}: @version ${fd.fileVersion} does not match SCRIPTS.md entry ${fd.registryVersion}`,
+            );
+            console.error(
+              `  → Fix: ${existsSync("scripts/fix-script-versions.ts") ? `bun scripts/fix-script-versions.ts --script ${fd.scriptName}` : `update the @version header in ${fd.scriptName} to match SCRIPTS.md`}`,
+            );
+          } else {
+            console.error(`[FAIL] ${err.file}: ${err.message}`);
+          }
+        }
+        console.error("");
+        process.exit(1);
+      } else {
+        console.log("\x1b[32m[PASS]\x1b[0m Check A: all script @version tags match SCRIPTS.md");
+      }
+    } catch {
+      console.error("\x1b[33m[WARN]\x1b[0m Could not run lifecycle-sync-audit.ts — Check A skipped");
+    }
+  }
+
+  // 6b. Platform Skill/Command lifecycle check (non-blocking WARN)
+  // D8 (spec 2026-09-25-verifier-platform-expansion-design site 8): all four
+  // platform skill mirrors join the version-field nudge; command propagation
+  // checks map .claude/commands and .gemini/commands to their common
+  // counterparts, and .codex/prompts to the common prompts mapping
+  // (ADR-0077 D4). .agents/commands is excluded — L0-resident by design,
+  // consumed by the Antigravity CLI at the workspace root (spec
+  // docs/designs/2026-09-25-propagation-engine-batch-design.md §6-D8, ticket
+  // T-20260925-003; recorded exclusion, not a silent skip).
+  const skillStaged = staged.filter((f) =>
+    /^\.(claude|gemini|agents|codex)\/skills\/[^/]+\/SKILL\.md$/.test(f.replace(/\\/g, "/")),
+  );
+  const claudeCommandStaged = staged.filter((f) => /^\.claude\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, "/")));
+  const geminiCommandStaged = staged.filter((f) => /^\.gemini\/commands\/[^/]+\.md$/.test(f.replace(/\\/g, "/")));
+  const codexPromptStaged = staged.filter((f) => /^\.codex\/prompts\/[^/]+\.md$/.test(f.replace(/\\/g, "/")));
+
+  // The command counterpart check is L0-only (recorded exclusion, D8 style like the
+  // .agents/commands exclusion below): L2/L3 projects and scaffold commits have no
+  // templates/common tree to map to, so every staged command warned there — observed
+  // 21x on the gw-76f6b4c9c6ff scaffold's initial commit (2026-10-01).
+  const commandCheckL0 = existsSync("templates/common");
+
+  for (const f of skillStaged) {
+    try {
+      const content = readFileSync(f, "utf-8");
+      if (!/^version:\s*\d+\.\d+\.\d+/m.test(content)) {
+        console.error(
+          `\x1b[33m[WARN]\x1b[0m ${f}: missing 'version:' in frontmatter — add version: 1.0.0 for new skills`,
+        );
+      }
+    } catch {
+      /* file may be deleted */
+    }
+  }
+
+  if (commandCheckL0) {
+    for (const f of claudeCommandStaged) {
+      const commonPath = f.replace(/^\.claude\//, "templates/common/.claude/").replace(/\\/g, "/");
+      if (!existsSync(commonPath)) {
+        console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
+        console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+      }
+    }
+
+    for (const f of geminiCommandStaged) {
+      const commonPath = f.replace(/^\.gemini\//, "templates/common/.gemini/").replace(/\\/g, "/");
+      if (!existsSync(commonPath)) {
+        console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
+        console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+      }
+    }
+
+    for (const f of codexPromptStaged) {
+      const commonPath = f.replace(/^\.codex\//, "templates/common/.codex/").replace(/\\/g, "/");
+      if (!existsSync(commonPath)) {
+        console.error(`\x1b[33m[WARN]\x1b[0m ${f} — templates/common counterpart missing: ${commonPath}`);
+        console.error(`       Run platform-command-lifecycle-manager skill to propagate.`);
+      }
+    }
+  }
+
+  // 7. Secret scan
+  console.log("\n=== Secret scan ===");
+
+  // Regex fallback always runs for defense-in-depth
+  const regexScanPassed = (() => {
+    const diff = $`git diff --cached -U0`.nothrow().quiet();
+    // We need the text synchronously; use sync-safe approach
+    const patterns = [
+      /(password|passwd|secret|api_key|apikey|access_token|auth_token)\s*=\s*['"][^'"]{8,}['"]/i,
+      /AKIA[0-9A-Z]{16}/,
+      /ghp_[0-9a-zA-Z]{36}/,
+      /sk-[0-9a-zA-Z]{48}/,
+      /sk-ant-[a-zA-Z0-9\-_]{95,}/, // H-07: Anthropic API keys (sk-ant-api03-...)
+      /sk-proj-[a-zA-Z0-9\-_]{48,}/, // H-07: Anthropic project keys
+      /gho_[A-Za-z0-9]{30,}/, // GitHub OAuth tokens (shorter than ghp_)
+      /github_pat_[A-Za-z0-9_]{20,}/, // GitHub fine-grained PATs
+      /xox[baprs]-[A-Za-z0-9-]{10,}/, // Slack tokens
+    ];
+    return async () => {
+      const diffText = await diff.text();
+      const added = diffText
+        .split("\n")
+        .filter((l) => l.startsWith("+") && !l.startsWith("+++"))
+        .join("\n");
+      for (const p of patterns) {
+        if (p.test(added)) {
+          return false;
+        }
+      }
+      return true;
+    };
+  })();
+
+  // Check gitleaks availability
+  const gitleaksCheck = await $`which gitleaks 2>/dev/null`.nothrow().quiet();
+  if (gitleaksCheck.exitCode === 0) {
+    try {
+      // Build the argv array conditionally — interpolating empty-string
+      // fallback args into the Bun shell passed literal '' arguments to
+      // gitleaks when no .gitleaks.toml exists, weakening the gate.
+      const gitleaksArgs = existsSync(".gitleaks.toml")
+        ? ["protect", "--staged", "--no-banner", "--log-level", "error", "--config", ".gitleaks.toml"]
+        : ["protect", "--staged", "--no-banner", "--log-level", "error"];
+      const gitleaksResult = await $`gitleaks ${gitleaksArgs}`.nothrow().quiet();
+      if (gitleaksResult.exitCode !== 0) {
+        console.error("\x1b[31m[FAIL]\x1b[0m Secrets detected by gitleaks! Commit blocked.");
+        process.exit(1);
+      }
+      console.log("\x1b[32m[PASS]\x1b[0m gitleaks: no secrets detected");
+    } catch (err) {
+      console.warn("\x1b[33m[WARN]\x1b[0m gitleaks execution error -- using regex fallback");
+    }
+  } else {
+    console.warn("\x1b[33m[WARN]\x1b[0m gitleaks not installed -- using regex fallback");
+  }
+
+  // Regex fallback runs regardless for defense-in-depth
+  if (!(await regexScanPassed())) {
+    console.error("\x1b[31m[FAIL]\x1b[0m Possible secret detected by regex. Commit blocked.");
+    process.exit(1);
+  }
+  console.log("\x1b[32m[PASS]\x1b[0m Regex secret scan: nothing detected");
+}
+
+main().catch((err) => {
+  console.error("Hook error:", err);
+  process.exit(1);
+});

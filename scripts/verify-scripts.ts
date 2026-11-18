@@ -1,0 +1,1126 @@
+#!/usr/bin/env bun
+/**
+ * verify-scripts.ts — Script Lifecycle Registry Verifier
+ * @version 1.15.0
+ *         v1.15.0 (2026-11-13, U-20261112-014): new Check 10 `workflow-script-ref` —
+ *         every `bun scripts/<name>.ts` reference in .github/workflows/*.yml|*.yaml
+ *         must resolve to an existing file under scripts/ (the 2026-11-08 co-abap
+ *         prune-recurrence class: upgrade deleted scripts/validate-abap-platform-parity.ts
+ *         while ci.yml still invoked it, and no gate scanned workflow files). Error-level,
+ *         mirroring the ghost-entry convention. Pure scanner
+ *         findDanglingWorkflowScriptRefs exported for unit tests.
+ *         v1.14.0 (2026-11-06, DEC-20261106-03): Ghost-entry check skips L0+L2 rows whose
+ *         script exists under templates/co-X/scripts/ (variant-scoped, co-abap registry rows).
+ *         v1.13.0 (2026-10-27, U-20261026-010): --check-drift equal-version divergence
+ *         blocks only in mirror contexts (L0/L1). In L2/L3 (variant templates and
+ *         Projects/*) it prints a WARNING with the upgrade-project remedy and exits 0,
+ *         because the L1 side there is the upstream delivery source, not a mirror.
+ *         equalVersionDivergenceBlocks exported for unit tests.
+ *
+ *         v1.12.0 (2026-10-05, T-20261004-022): equal-version L0/L1 content gate —
+ *         detectDrift now canonicalizes the L0 side with the SAME sanctioned
+ *         scrub the propagator applies (scripts/lib/constitution-scrub.ts:
+ *         comments scrubbed context.md→context.md, functional string
+ *         literals preserved) and compares against the RAW L1 bytes. A pair
+ *         whose @version headers MATCH but whose canonical bytes diverge is an
+ *         ERROR (verify) and exits 1 (--check-drift, dev-sync Step 3.7) — the
+ *         previous blanket replace on BOTH sides was blind to it (it scrubbed
+ *         the L0 functional literals too, hiding the audit.ts/dev-sync.ts
+ *         mixed-marker keying). Version-skew drift stays warn-only (publish
+ *         pending). classifyL0L1Pair exported for unit tests. v1.11.1: the
+ *         divergent-row check is L0-only — scaffolded projects inherit
+ *         SCRIPTS.md with historical doc-tail fragments by design.
+ *
+ *         v1.11.0 (2026-10-04, T-20261004-012): findDivergentDuplicateRows — registry-style rows
+ *         appearing OUTSIDE the ## Registry span (doc-tail fragments) must agree with the
+ *         authoritative version; a script name with >1 distinct version cell is an ERROR.
+ *         Exported for tests. v1.11.1: the check is L0-only — scaffolded projects
+ *         inherit SCRIPTS.md with historical doc-tail fragments by design.
+ *
+ * v1.10.0: ERROR on SCRIPTS.md registry rows with column count ≠ 8. Exported REGISTRY_COLUMN_COUNT and findMalformedRegistryRows for test coverage.
+ * v1.8.0 (2026-09-23, adopt-project engine prerequisites): walkScripts() skips
+ *         scripts/_legacy/ — the archive where adopt-project parks preserved
+ *         foreign scripts. Archived files keep their original languages and carry
+ *         no @version headers by design, so they are exempt from the registry
+ *         scan; they remain visible to gitleaks and the adopt report.
+ * v1.7.0 (ADR-0081 / T-20260919-002): new `--fix` mode — auto-registers the
+ *         scripts Check 1 flags as unregistered. A row per script (version
+ *         from its @version header, today's date, placeholder description) is
+ *         appended directly after the last Registry table row; descriptions
+ *         are left for the author. Removes the hand-written-row step that made
+ *         every new project-local script block its project's audit until
+ *         SCRIPTS.md was edited by hand (observed on co-newbiz/co-architect
+ *         during the 2026-09-19 fleet sweep). Primitives are exported for
+ *         unit tests (extractHeaderVersion, buildFixRow,
+ *         insertRowsIntoRegistry).
+ * v1.6.1: walkScripts() now skips node_modules directories — a scripts/-local
+ *         `bun install` (fresh CI runners) materialized dependency files that
+ *         were flagged as unregistered scripts (207 false positives), failing
+ *         the audit gate on every CI run.
+ * v1.6.0: SCRIPT_EXTENSIONS now includes .bat (T-20260909-003) — Windows batch
+ *         helpers under scripts/ are registry-governed like .sh/.ps1/.ts and can
+ *         no longer escape the unregistered-script check. CLI dispatch is
+ *         import-guarded so unit tests can import the module safely.
+ * Validates that scripts/SCRIPTS.md Registry is in sync with actual script files,
+ * enforces deprecation removal dates, and blocks on security advisories.
+ *
+ * Layer-aware: auto-detects L0 (workspace root) / L1 (templates/common) /
+ * L2 (templates/co-<variant>) / L3 (Projects/<name>) context and skips
+ * L0-only registry entries outside L0.
+ *
+ * Usage:
+ *   bun scripts/verify-scripts.ts --verify       # CI / pre-commit: fail on drift; reads scripts/SCRIPTS.md
+ *   bun scripts/verify-scripts.ts --generate    # Generate Registry draft from filesystem
+ *   bun scripts/verify-scripts.ts --report      # Human-readable status report
+ *   bun scripts/verify-scripts.ts --check-drift # L0/L1 drift report; exits 1 on equal-version content divergence in L0/L1 (T-20261004-022); warn-only in L2/L3 (U-20261026-010)
+ *
+ * Exit codes:
+ *   0 = all checks passed
+ *   1 = drift, expired removal date, or active security advisory detected
+ *
+ * --fix (ADR-0081 / T-20260919-002): auto-registers unregistered scripts found
+ *   by Check 1 — appends a registry row per script (version read from the
+ *   script's @version header) directly after the last row of the Registry
+ *   table, so a project-local script no longer blocks the audit until someone
+ *   hand-writes the row. Descriptions are left as placeholders to fill in.
+ */
+
+import * as fs from "node:fs";
+import { createHash } from "node:crypto";
+import { readFileSync, readdirSync, existsSync, writeFileSync } from "node:fs";
+import { join, dirname, relative } from "node:path";
+import { scrubConstitutionRefs } from "./lib/constitution-scrub.ts";
+
+// ── --fix helpers (ADR-0081 / T-20260919-002; pure, unit-tested) ────────────
+
+/** Read a script file's `@version X.Y.Z` header. Returns '1.0.0' when absent. */
+export function extractHeaderVersion(scriptContent: string): string {
+  const m = scriptContent.match(/@version\s+(\d+\.\d+\.\d+)/);
+  return m ? m[1] : "1.0.0";
+}
+
+/** Build one Registry table row for an auto-registered script. */
+export function buildFixRow(script: string, version: string, source: string, layer: string, today: string): string {
+  return `| \`${script}\` | ${source} | ${version} | active | ${today} | — | ${layer} | — |`;
+}
+
+/**
+ * Insert rows after the LAST table row of the `## Registry` section.
+ * Returns null when the Registry table cannot be located (leave the file
+ * untouched and let the regular error message guide the operator).
+ */
+export function insertRowsIntoRegistry(
+  content: string,
+  rows: string[],
+): { content: string; insertedAt: number } | null {
+  const lines = content.split("\n");
+  let inRegistry = false;
+  let lastRowIndex = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith("## Registry")) {
+      inRegistry = true;
+      continue;
+    }
+    if (inRegistry && line.startsWith("## ")) break;
+    if (!inRegistry) continue;
+    const t = line.trim();
+    if (t.startsWith("|") && !t.startsWith("|-")) lastRowIndex = i;
+  }
+  if (lastRowIndex < 0) return null;
+  const out = lines.slice(0, lastRowIndex + 1).concat(rows, lines.slice(lastRowIndex + 1));
+  return { content: out.join("\n"), insertedAt: lastRowIndex };
+}
+
+// ── Configuration ────────────────────────────────────────────────────────────
+
+// .bat is governed too: Windows setup/batch helpers shipped under scripts/ must be
+// registered like any other script (T-20260909-003 — unregistered setup.bat escaped
+// every registry check because the scanner ignored the extension).
+export const SCRIPT_EXTENSIONS = [".sh", ".ps1", ".ts", ".bat"];
+const SCRIPTS_MD_FILENAME = "SCRIPTS.md";
+
+// Resolve workspace root (this script lives in scripts/ or templates/common/scripts/,
+// templates/co-*/scripts/, or a scaffolded Projects/<name>/scripts/ — possibly detached
+// from the workspace entirely once a project has been relocated, e.g. to C:\projects\).
+// context.md marks the true L0 workspace root; variant.json / docs/context.md mark
+// a generated context root (no context.md there by design). If this script is
+// running standalone with none of these markers present, fall back to the directory
+// containing this script's own scripts/ folder.
+function findWorkspaceRoot(startDir: string): string {
+  let dir = startDir;
+  for (let i = 0; i < 6; i++) {
+    if (
+      existsSync(join(dir, "CONSTITUTION.md")) ||
+      existsSync(join(dir, "variant.json")) ||
+      existsSync(join(dir, "docs", "context.md"))
+    ) {
+      return dir;
+    }
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return dirname(startDir);
+}
+
+// Walk all the way up to the true L0 workspace root (context.md), independent of
+// findWorkspaceRoot()'s "nearest marker" stop. Returns null if the workspace root is not
+// reachable (e.g. a project relocated outside the workspace tree) — the drift check below
+// only makes sense relative to the true root, so it must be skipped in that case rather
+// than silently computing a path that can never exist.
+function findTrueWorkspaceRoot(startDir: string): string | null {
+  let dir = startDir;
+  for (let i = 0; i < 8; i++) {
+    if (existsSync(join(dir, "CONSTITUTION.md"))) return dir;
+    const parent = dirname(dir);
+    if (parent === dir) return null;
+    dir = parent;
+  }
+  return null;
+}
+
+const scriptDir = import.meta.dir;
+const workspaceRoot = findWorkspaceRoot(scriptDir);
+const trueWorkspaceRoot = findTrueWorkspaceRoot(scriptDir);
+const scriptsDir = join(workspaceRoot, "scripts"); // L0 SSOT (or nearest context root)
+const l1TemplateDir = trueWorkspaceRoot
+  ? join(trueWorkspaceRoot, "templates", "common", "scripts") // L1 snapshot, always resolved from the true root
+  : join(workspaceRoot, "templates", "common", "scripts");
+const scriptsMdPath = join(scriptsDir, SCRIPTS_MD_FILENAME);
+
+// ── Layer Detection ──────────────────────────────────────────────────────────
+// Determine the current execution context so that checks can be scoped. Layer
+// numbering follows context.md §Terminology Definition (L1=templates/common,
+// L2=templates/co-*, L3=Projects/*):
+// L0 = workspace root (context.md), full verification.
+// L1 = templates/common/, L2 = an official variant template (templates/co-*/),
+// L3 = a scaffolded/live project (Projects/*/, or detached elsewhere) — L1/L2/L3
+// all skip L0-only registry entries.
+//
+// When the true workspace root is reachable (this script is still nested inside it),
+// detection is precise and path-based: findWorkspaceRoot()'s "nearest marker" walk is
+// NOT used here, because it stops at the first ancestor with any marker and would
+// otherwise misdetect templates/common/ (which carries no local marker of its own) as
+// L0 by walking straight past it to the true root. Only when the true root is NOT
+// reachable (a project relocated outside the workspace tree) do we fall back to a
+// file-presence heuristic — in which case variant.json can't distinguish an L2 template
+// from an L3 Phase-A draft (create-l3-scaffold.ts writes variant.json into Projects/*/
+// too), so an unreachable-root context with variant.json is assumed L3 (the far more
+// common real-world case: a relocated project, not a relocated template).
+export type ContextLayer = "L0" | "L1" | "L2" | "L3";
+
+/**
+ * U-20261026-010: equal-version L0/L1 divergence is a mirror violation only in
+ * the mirror contexts. In L2/L3 the L1 side is the upstream delivery source, so
+ * divergence is reconciled by upgrade-project and must not block the sync.
+ */
+export function equalVersionDivergenceBlocks(layer: ContextLayer): boolean {
+  return layer === "L0" || layer === "L1";
+}
+
+function detectContextLayer(): ContextLayer {
+  if (trueWorkspaceRoot) {
+    const rel = relative(trueWorkspaceRoot, scriptDir).replace(/\\/g, "/");
+    if (rel === "scripts" || rel.startsWith("scripts/")) return "L0";
+    if (rel === "templates/common/scripts" || rel.startsWith("templates/common/scripts/")) return "L1";
+    if (/^templates\/co-[^/]+\/scripts(\/|$)/.test(rel)) return "L2";
+    return "L3";
+  }
+
+  if (existsSync(join(workspaceRoot, "context.md"))) return "L0"; // defensive; unreachable given the branch above
+  return "L3";
+}
+
+const contextLayer = detectContextLayer();
+
+// ── Types ────────────────────────────────────────────────────────────────────
+
+interface RegistryEntry {
+  script: string;
+  source: string;
+  version: string;
+  status: "active" | "deprecated" | "experimental";
+  removalDate: string; // "—" or "YYYY-MM-DD"
+  securityAdvisory: string; // "—" or "CVE-XXXX"
+  layer: "common" | "L0-only" | "L1-only" | "L0+L1" | "L0+L1+L2" | string;
+  pair: string; // "—" or "<script-name>" (.sh declares its .ps1 pair)
+}
+
+// ── Registry Parser ──────────────────────────────────────────────────────────
+
+export const REGISTRY_COLUMN_COUNT = 8;
+
+/** Registry data rows whose column count differs from the 8-column header. */
+export function findMalformedRegistryRows(content: string): { script: string; columns: number }[] {
+  const bad: { script: string; columns: number }[] = [];
+  let inRegistry = false;
+  let headerParsed = false;
+  for (const line of content.split("\n")) {
+    if (line.startsWith("## Registry")) {
+      inRegistry = true;
+      headerParsed = false;
+      continue;
+    }
+    if (inRegistry && line.startsWith("## ")) break;
+    if (!inRegistry) continue;
+    const trimmed = line.trim();
+    if (!trimmed.startsWith("|") || trimmed.startsWith("|-")) continue;
+    const cols = trimmed
+      .split("|")
+      .slice(1, -1)
+      .map((c) => c.trim());
+    if (!headerParsed) {
+      headerParsed = true;
+      continue;
+    }
+    if (cols.length !== REGISTRY_COLUMN_COUNT) {
+      bad.push({ script: (cols[0] ?? "").replace(/`/g, ""), columns: cols.length });
+    }
+  }
+  return bad;
+}
+
+/** T-20261004-012: doc-tail fragments repeat registry-style rows outside the
+ * authoritative ## Registry span; when their version cell drifts (historically:
+ * ticket.ts 1.3.0 fragment vs 1.9.1 primary) the file self-contradicts. Any
+ * script name with >1 distinct version anywhere in the file is reported. */
+export function findDivergentDuplicateRows(content: string): { script: string; versions: string[] }[] {
+  const versions = new Map<string, Set<string>>();
+  for (const line of content.split("\n")) {
+    const m = /^\|\s*`([^`]+)`\s*\|\s*L\d[^|]*\|\s*(\d+\.\d+\.\d+)\s*\|/.exec(line);
+    if (m) {
+      const set = versions.get(m[1]) ?? new Set<string>();
+      set.add(m[2]);
+      versions.set(m[1], set);
+    }
+  }
+  return [...versions.entries()]
+    .filter(([, set]) => set.size > 1)
+    .map(([script, set]) => ({ script, versions: [...set].sort() }));
+}
+
+function parseRegistry(content: string): RegistryEntry[] {
+  const lines = content.split("\n");
+  const entries: RegistryEntry[] = [];
+
+  let inRegistry = false;
+  let headerParsed = false;
+
+  for (const line of lines) {
+    if (line.startsWith("## Registry")) {
+      inRegistry = true;
+      headerParsed = false;
+      continue;
+    }
+    if (inRegistry && line.startsWith("## ")) {
+      // Next section — stop
+      break;
+    }
+    if (!inRegistry) continue;
+
+    const trimmed = line.trim();
+    if (!trimmed.startsWith("|") || trimmed.startsWith("|-")) continue;
+
+    const cols = trimmed
+      .split("|")
+      .slice(1, -1)
+      .map((c) => c.trim());
+
+    if (!headerParsed) {
+      headerParsed = true; // skip header row
+      continue;
+    }
+
+    if (cols.length < 6) continue;
+
+    // Strip backticks from script name
+    const script = cols[0].replace(/`/g, "");
+    const status = cols[3] as RegistryEntry["status"];
+
+    entries.push({
+      script,
+      source: cols[1],
+      version: cols[2],
+      status,
+      removalDate: cols[4],
+      securityAdvisory: cols[5],
+      layer: (cols[6] as RegistryEntry["layer"]) || "common",
+      pair: cols[7] || "—",
+    });
+  }
+
+  return entries;
+}
+
+// ── Filesystem Scanner ───────────────────────────────────────────────────────
+
+function walkScripts(dir: string): string[] {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    if (entry.isDirectory()) {
+      // Dependency installs (scripts/-local bun install on CI runners) are not
+      // workspace scripts — their files must not be flagged as unregistered.
+      if (entry.name === "node_modules") return [];
+      // Archived foreign scripts parked by adopt-project (v1.2.0 of this checker's
+      // adoption contract) are preserved project content, not registry-governed
+      // workspace scripts — they keep their original languages and carry no
+      // @version headers by design. The archive stays visible to gitleaks and to
+      // the adopt report instead.
+      if (entry.name === "_legacy") return [];
+      // A variant directory with its OWN SCRIPTS.md sub-registry governs itself
+      // (the main registry doesn't list its files). Without a sub-registry, the
+      // variant's scripts belong to the main registry via their `co-*/…` relative
+      // paths (existing rows like `co-newbiz/graph.ts`) — recurse so nested
+      // variant-specific structures stay governed instead of escaping the scan.
+      if (entry.name.startsWith("co-") && existsSync(join(dir, entry.name, "SCRIPTS.md"))) return [];
+      return walkScripts(join(dir, entry.name));
+    }
+    return SCRIPT_EXTENSIONS.some((ext) => entry.name.endsWith(ext)) && entry.name !== SCRIPTS_MD_FILENAME
+      ? [join(dir, entry.name)]
+      : [];
+  });
+}
+
+function getActualScripts(): string[] {
+  if (!existsSync(scriptsDir)) return [];
+  return walkScripts(scriptsDir)
+    .map((absPath) => relative(scriptsDir, absPath).replace(/\\/g, "/"))
+    .sort();
+}
+
+// ── Layer-Aware Filtering ────────────────────────────────────────────────────
+// In L1/L2/L3 context, L0-only entries are irrelevant (their .ts files are
+// intentionally absent).  Returns true when the entry should be checked.
+
+const L0_ONLY_LAYERS = new Set(["L0", "L0-only"]);
+
+/**
+ * DEC-20261106-03: an `L0+L2` registry row names a variant-scoped script that
+ * lives in templates/co-*\/scripts/ (no scripts/ copy). It is not a ghost when
+ * that variant copy exists on disk.
+ */
+function variantScriptDirs(): string[] {
+  const tplDir = join(process.cwd(), "templates");
+  if (!existsSync(tplDir)) return [];
+  return readdirSync(tplDir)
+    .filter((d) => d.startsWith("co-"))
+    .map((d) => join(tplDir, d, "scripts"));
+}
+function variantScopedScriptExists(script: string): boolean {
+  return variantScriptDirs().some((d) => existsSync(join(d, script)));
+}
+
+function isLayerRelevant(entry: RegistryEntry): boolean {
+  if (contextLayer === "L0") return true;
+  // In L1/L2/L3, skip entries whose layer marks them as workspace-only
+  return !L0_ONLY_LAYERS.has(entry.layer);
+}
+
+// ── Drift Detection ──────────────────────────────────────────────────────────
+
+/**
+ * L0/L1 pair classification (T-20261004-022).
+ * - "in-sync": canonical(L0) === L1 byte-for-byte (any version combination —
+ *   a version-only bump with identical canonical bytes needs no content gate).
+ * - "equal-version-divergence": @version headers MATCH but canonical(L0) !== L1
+ *   — both copies claim the same content version yet the bytes differ. This is
+ *   the mixed-marker corruption class (e.g. a functional existsSync literal
+ *   scrubbed in one copy only) and it FAILS the gate.
+ * - "pending-publish": version-skew with content difference — the ordinary
+ *   pre-propagation state; warn-only.
+ */
+export type DriftClassification = "in-sync" | "pending-publish" | "equal-version-divergence";
+
+export interface L0L1Classification {
+  classification: DriftClassification;
+  l0Version: string;
+  l1Version: string;
+}
+
+/**
+ * Canonicalize the L0 copy exactly the way the propagator does (comments
+ * scrubbed, functional string literals preserved) and classify the pair.
+ * NOTE: a naive blanket context.md→context.md replace on BOTH sides would
+ * normalize away the literal-class divergence this gate exists to catch — the
+ * canonicalization must be applied to the L0 side only, with the same
+ * implementation the publisher uses.
+ */
+export function classifyL0L1Pair(
+  l0Content: string,
+  l1Content: string,
+  l0Path: string,
+  l1Path: string,
+): L0L1Classification {
+  const l0Version = extractHeaderVersion(l0Content);
+  const l1Version = extractHeaderVersion(l1Content);
+  const canonicalL0 = scrubConstitutionRefs(l0Content, l0Path, l1Path);
+  if (canonicalL0 === l1Content) {
+    return { classification: "in-sync", l0Version, l1Version };
+  }
+  return {
+    classification: l0Version === l1Version ? "equal-version-divergence" : "pending-publish",
+    l0Version,
+    l1Version,
+  };
+}
+
+/** Short sha256 prefix for compact drift reports. */
+export function shortContentHash(content: string): string {
+  return createHash("sha256").update(content).digest("hex").slice(0, 12);
+}
+
+// ── CI workflow reference scanner (U-20261112-014; pure, unit-tested) ────────
+
+/**
+ * Every `bun scripts/<name>.ts` reference inside the given workflow files.
+ * v1.15.0 (U-20261112-014): the prune-recurrence class — an upgrade deletes a
+ * script while .github/workflows/ci.yml still invokes it — silently broke CI
+ * because no gate scanned workflow files (T-20261108-008). Pure: callers feed
+ * the workflow contents and do the existence check themselves.
+ */
+export function findDanglingWorkflowScriptRefs(
+  workflows: Array<{ name: string; content: string }>,
+): Array<{ workflow: string; script: string }> {
+  const refs: Array<{ workflow: string; script: string }> = [];
+  for (const wf of workflows) {
+    const re = /\bbun\s+(scripts\/[A-Za-z0-9/_.-]+\.ts)\b/g;
+    let m: RegExpExecArray | null = re.exec(wf.content);
+    while (m !== null) {
+      const script = m[1];
+      if (!refs.some((r) => r.workflow === wf.name && r.script === script)) {
+        refs.push({ workflow: wf.name, script });
+      }
+      m = re.exec(wf.content);
+    }
+  }
+  return refs;
+}
+
+interface DriftPair {
+  script: string;
+  classification: DriftClassification;
+  l0Version: string;
+  l1Version: string;
+  l0Lines: number;
+  l1Lines: number;
+  l0Hash: string;
+  l1Hash: string;
+}
+
+function detectDrift(registry: RegistryEntry[]): { drifted: DriftPair[]; clean: string[] } {
+  const drifted: DriftPair[] = [];
+  const clean: string[] = [];
+
+  for (const entry of registry) {
+    if (entry.source !== "L0") continue;
+
+    const l0Path = join(scriptsDir, entry.script); // workspace L0
+    const l1Path = join(l1TemplateDir, entry.script); // template L1
+
+    if (!existsSync(l0Path) || !existsSync(l1Path)) continue;
+
+    let l0Content: string, l1Content: string;
+    try {
+      l0Content = readFileSync(l0Path, "utf-8");
+      l1Content = readFileSync(l1Path, "utf-8");
+    } catch (err) {
+      console.warn(`⚠️ Warning: Failed to read ${entry.script} (${err}). Skipping.`);
+      continue;
+    }
+
+    const cls = classifyL0L1Pair(l0Content, l1Content, l0Path, l1Path);
+    if (cls.classification === "in-sync") {
+      clean.push(entry.script);
+    } else {
+      drifted.push({
+        script: entry.script,
+        classification: cls.classification,
+        l0Version: cls.l0Version,
+        l1Version: cls.l1Version,
+        l0Lines: l0Content.split("\n").length,
+        l1Lines: l1Content.split("\n").length,
+        l0Hash: shortContentHash(l0Content),
+        l1Hash: shortContentHash(l1Content),
+      });
+    }
+  }
+
+  return { drifted, clean };
+}
+
+function checkDriftReport(): void {
+  if (!existsSync(scriptsMdPath)) {
+    console.error("❌ SCRIPTS.md not found. Run --generate first.");
+    process.exit(1);
+  }
+
+  const content = readFileSync(scriptsMdPath, "utf-8");
+  const registry = parseRegistry(content);
+  const { drifted, clean } = detectDrift(registry);
+
+  console.log("\n=== L0/L1 Drift Report (L0=workspace scripts/, L1=templates/common/scripts/) ===\n");
+
+  const equalVersion = drifted.filter((d) => d.classification === "equal-version-divergence");
+  const pending = drifted.filter((d) => d.classification === "pending-publish");
+
+  const blocking = equalVersion.length > 0 && equalVersionDivergenceBlocks(contextLayer);
+
+  if (equalVersion.length === 0 && pending.length === 0) {
+    console.log(`✅ No unintentional drift detected (${clean.length} L0/L1 pairs in sync)`);
+  } else {
+    if (equalVersion.length > 0) {
+      const label = blocking
+        ? "❌ Equal-version content divergence"
+        : "⚠️  Equal-version content divergence (warning, non-blocking in this context)";
+      console.log(`${label} (${equalVersion.length} script(s)) — ${blocking ? "BLOCKING" : "WARNING"}:`);
+      for (const d of equalVersion) {
+        console.log(
+          `   ${d.script}  @${d.l0Version}  L0 ${d.l0Hash} (${d.l0Lines} lines)  vs  L1 ${d.l1Hash} (${d.l1Lines} lines)`,
+        );
+      }
+      if (blocking) {
+        console.log("\n   Same-@version copies must be byte-identical modulo the sanctioned");
+        console.log("   CONSTITUTION.md→context.md comment scrub (scripts/lib/constitution-scrub.ts).");
+        console.log("   Fix: correct the diverged copy or re-publish: bun run propagate:apply\n");
+      } else {
+        console.log(
+          "\n   Run upgrade-project to reconcile with the workspace template (project-vs-upstream divergence is not a mirror violation).\n",
+        );
+      }
+    }
+    if (pending.length > 0) {
+      console.log(`⚠️  Unintentional drift — publish pending (${pending.length} script(s)):`);
+      for (const d of pending) {
+        const diff = d.l1Lines - d.l0Lines;
+        const sign = diff >= 0 ? "+" : "";
+        console.log(
+          `   ${d.script}  L0 @${d.l0Version}: ${d.l0Lines} lines  L1 @${d.l1Version}: ${d.l1Lines} lines  (${sign}${diff})`,
+        );
+      }
+      console.log("\n   Fix: edit L0 (workspace scripts/) then run bun run propagate:apply to push to L1.\n");
+    }
+  }
+
+  if (clean.length > 0) {
+    console.log(`\n✅ In sync (${clean.length} script(s)):`);
+    for (const s of clean) console.log(`   ${s}`);
+  }
+
+  console.log();
+
+  // T-20261004-022: equal-version content divergence is a real corruption of
+  // the mirror, not a pending publish — it exits 1 in L0/L1 so dev-sync Step 3.7
+  // and CI block on it. In L2/L3 it is warn-only (U-20261026-010). Version-skew
+  // drift stays warn-only (exit 0).
+  if (blocking) process.exit(1);
+  process.exit(0);
+}
+
+// ── Verify Mode ──────────────────────────────────────────────────────────────
+
+function verify(): boolean {
+  let passed = true;
+  const errors: string[] = [];
+  const warnings: string[] = [];
+
+  if (!existsSync(scriptsMdPath)) {
+    console.error(`❌ SCRIPTS.md not found at: ${scriptsMdPath}`);
+    console.error("   Run: bun scripts/verify-scripts.ts --generate  to create a draft");
+    return false;
+  }
+
+  const content = readFileSync(scriptsMdPath, "utf-8");
+  const registry = parseRegistry(content);
+  const actualScripts = getActualScripts();
+
+  for (const row of findMalformedRegistryRows(content)) {
+    errors.push(
+      `Malformed registry row: \`${row.script}\` has ${row.columns} columns, expected ${REGISTRY_COLUMN_COUNT} (script|source|version|status|removal-date|security-advisory|layer|pair)`,
+    );
+  }
+
+  // L0-only: scaffolded projects inherit SCRIPTS.md with historical doc-tail
+  // fragments by design (the registry span is what projects verify against).
+  if (contextLayer === "L0") {
+    for (const dup of findDivergentDuplicateRows(content)) {
+      errors.push(
+        `Divergent duplicate registry rows: \`${dup.script}\` appears with versions ${dup.versions.join(" vs ")} — doc-tail fragments must match the authoritative ## Registry row`,
+      );
+    }
+  }
+
+  const registeredNames = new Set(registry.map((e) => e.script));
+  const actualNames = new Set(actualScripts);
+
+  // Check 0: Architecture compliance (.sh/.ps1 pairs and .ts orchestration)
+  const shScripts = actualScripts.filter((s) => s.endsWith(".sh")).map((s) => s.replace(".sh", ""));
+  const ps1Scripts = actualScripts.filter((s) => s.endsWith(".ps1")).map((s) => s.replace(".ps1", ""));
+  const tsBaseNames = new Set(actualScripts.filter((s) => s.endsWith(".ts")).map((s) => s.replace(".ts", "")));
+
+  for (const name of shScripts) {
+    if (!ps1Scripts.includes(name)) {
+      errors.push(`Missing cross-platform pair: \`${name}.ps1\` is missing for \`${name}.sh\``);
+    }
+  }
+  for (const name of ps1Scripts) {
+    if (!shScripts.includes(name)) {
+      errors.push(`Missing cross-platform pair: \`${name}.sh\` is missing for \`${name}.ps1\``);
+    }
+  }
+  for (const script of actualScripts) {
+    const baseName = script.replace(/\.(sh|ps1)$/, "");
+    const isOrchestrationKeyword =
+      script.includes("lifecycle") ||
+      script.includes("verify") ||
+      script.includes("validate") ||
+      script.includes("agent-") ||
+      script.includes("dispatch");
+    const isTsWrapper = !script.endsWith(".ts") && tsBaseNames.has(baseName);
+    if (isOrchestrationKeyword && !script.endsWith(".ts") && !script.endsWith(".md") && !isTsWrapper) {
+      errors.push(`Architecture violation: Orchestration script \`${script}\` must use Bun (.ts)`);
+    }
+  }
+
+  // Check 1: Scripts on disk but not in registry
+  // In L1/L2/L3, build a set of relevant (non-L0-only) registered names only
+  const relevantRegisteredNames =
+    contextLayer === "L0" ? registeredNames : new Set(registry.filter(isLayerRelevant).map((e) => e.script));
+  for (const script of actualScripts) {
+    if (!relevantRegisteredNames.has(script)) {
+      errors.push(`Unregistered script: \`${script}\` — add to SCRIPTS.md Registry`);
+    }
+  }
+
+  // Check 2: Scripts in registry but not on disk
+  // In L0, check all entries. In L1/L2/L3, skip L0-only entries (intentionally absent).
+  for (const entry of registry) {
+    if (!isLayerRelevant(entry)) continue;
+    if (entry.layer === "L0+L2" && variantScopedScriptExists(entry.script)) continue;
+    if (!existsSync(join(scriptsDir, entry.script))) {
+      errors.push(`Ghost entry: \`${entry.script}\` in Registry but not on disk — remove from SCRIPTS.md`);
+    }
+  }
+
+  // Check 6a: L0/L1 drift (T-20261004-022). Version-skew drift is warning-only
+  // (publish pending). Equal-version content divergence is an ERROR: both
+  // copies claim the same @version yet the canonical bytes differ — the
+  // mixed-marker corruption class. In L2/L3, skip entirely —
+  // templates/common/scripts/ is not comparable from a variant template or project.
+  if (contextLayer === "L0" || contextLayer === "L1") {
+    const { drifted } = detectDrift(registry);
+    for (const d of drifted) {
+      if (d.classification === "equal-version-divergence") {
+        errors.push(
+          `Equal-version L0/L1 content divergence: \`${d.script}\` @${d.l0Version} — L0 ${d.l0Hash} (${d.l0Lines} lines) vs L1 ${d.l1Hash} (${d.l1Lines} lines). Same-@version copies must be byte-identical modulo the sanctioned CONSTITUTION.md→context.md comment scrub (scripts/lib/constitution-scrub.ts); fix the diverged copy or re-publish with propagate-to-templates`,
+        );
+      } else {
+        warnings.push(
+          `L0/L1 drift (publish pending): \`${d.script}\` — L0 @${d.l0Version} (${d.l0Lines} lines), L1 @${d.l1Version} (${d.l1Lines} lines).`,
+        );
+      }
+    }
+  }
+
+  // Check 3: Security advisories — hard block
+  const today = new Date().toISOString().slice(0, 10);
+  for (const entry of registry) {
+    if (entry.securityAdvisory !== "—" && entry.securityAdvisory !== "") {
+      errors.push(
+        `🔒 SECURITY ADVISORY on \`${entry.script}\`: ${entry.securityAdvisory} — update or remove this script immediately`,
+      );
+    }
+  }
+
+  // Check 4: Expired removal dates — hard block
+  for (const entry of registry) {
+    if (entry.status === "deprecated" && entry.removalDate !== "—" && entry.removalDate !== "") {
+      if (entry.removalDate <= today) {
+        errors.push(
+          `⏰ EXPIRED: \`${entry.script}\` removal-date ${entry.removalDate} has passed — delete this script and remove from Registry`,
+        );
+      } else {
+        // Upcoming removal — warn only
+        const daysLeft = Math.ceil((new Date(entry.removalDate).getTime() - new Date(today).getTime()) / 86400000);
+        warnings.push(
+          `⚠️  DEPRECATED: \`${entry.script}\` — scheduled removal on ${entry.removalDate} (${daysLeft} days remaining)`,
+        );
+      }
+    }
+
+    // Check 5: deprecated without removal-date
+    if (entry.status === "deprecated" && (entry.removalDate === "—" || entry.removalDate === "")) {
+      errors.push(`Missing removal-date for deprecated script: \`${entry.script}\` — add YYYY-MM-DD (min 90 days)`);
+    }
+
+    // Check 5b: deprecated .sh/.ps1 with pair field should be thin wrappers (≤8 lines)
+    if (
+      entry.status === "deprecated" &&
+      entry.pair !== "—" &&
+      entry.pair !== "" &&
+      (entry.script.endsWith(".sh") || entry.script.endsWith(".ps1"))
+    ) {
+      const scriptPath = join(scriptsDir, entry.script);
+      if (existsSync(scriptPath)) {
+        const scriptContent = readFileSync(scriptPath, "utf-8");
+        const lineCount = scriptContent.split("\n").filter((l) => l.trim()).length;
+        if (lineCount > 8) {
+          warnings.push(
+            `⚠️  FAT DEPRECATED WRAPPER: \`${entry.script}\` has ${lineCount} non-empty lines — deprecated scripts with a TS pair should be thin wrappers (≤8 lines). Convert to: exec bun $SCRIPT_DIR/${entry.pair.replace(".ps1", ".ts").replace(".sh", ".ts")} "$@"`,
+          );
+        }
+      }
+    }
+  }
+
+  // Check 6: pair field horizontal sync — .sh declares pair, verify version match
+  const byScript = new Map(registry.map((e) => [e.script, e]));
+  for (const entry of registry) {
+    if (entry.pair === "—" || entry.pair === "") continue;
+    const pairEntry = byScript.get(entry.pair);
+    if (!pairEntry) {
+      warnings.push(`⚠️  PAIR MISSING: \`${entry.script}\` declares pair \`${entry.pair}\` but it is not in registry`);
+      continue;
+    }
+    // Version sync check: both files should have same major.minor version
+    const [shMaj, shMin] = entry.version.split(".").map(Number);
+    const [ps1Maj, ps1Min] = pairEntry.version.split(".").map(Number);
+    if (shMaj !== ps1Maj || shMin !== ps1Min) {
+      warnings.push(
+        `⚠️  PAIR VERSION DRIFT: \`${entry.script}\` v${entry.version} ↔ \`${entry.pair}\` v${pairEntry.version} — consider aligning versions`,
+      );
+    }
+    // Status sync check: both should have same status
+    if (entry.status !== pairEntry.status) {
+      warnings.push(
+        `⚠️  PAIR STATUS DRIFT: \`${entry.script}\` (${entry.status}) ↔ \`${entry.pair}\` (${pairEntry.status}) — statuses should match`,
+      );
+    }
+  }
+
+  // Check 7: Template propagation sanity (L0 only)
+  // A script file shipped in templates/common/scripts/ must be registered in the
+  // template SCRIPTS.md with a propagation tag other than L0-only — otherwise every
+  // scaffolded L3 project fails its own audit with "Unregistered script" (the
+  // upgrade-project.ts regression of 2026-09-07).
+  const templateScriptsDir = join(workspaceRoot, "templates", "common", "scripts");
+  const templateScriptsMd = join(templateScriptsDir, SCRIPTS_MD_FILENAME);
+  if (contextLayer === "L0" && existsSync(templateScriptsMd)) {
+    const templateRegistry = parseRegistry(readFileSync(templateScriptsMd, "utf-8"));
+    const templateRegistered = new Map(templateRegistry.map((e) => [e.script, e]));
+    const templateFiles = walkScripts(templateScriptsDir)
+      .map((absPath) => relative(templateScriptsDir, absPath).replace(/\\/g, "/"))
+      .sort();
+    for (const file of templateFiles) {
+      const entry = templateRegistered.get(file);
+      if (!entry) {
+        errors.push(
+          `Template registry gap: \`${file}\` ships in templates/common/scripts/ but has no row in its SCRIPTS.md Registry — add a row or remove the file`,
+        );
+      } else if (L0_ONLY_LAYERS.has(entry.layer)) {
+        errors.push(
+          `Template propagation mismatch: \`${file}\` ships in templates/common/scripts/ but its template-registry row is tagged \`${entry.layer}\` — fix the propagation tag to L0+L1 or remove the file from the template`,
+        );
+      }
+    }
+  }
+
+  // Check 8: header @version vs const VERSION consistency (T-20260926-014).
+  // A script whose printed version (const VERSION, surfaced by --help)
+  // disagrees with its header @version misleads operators and tickets; the
+  // drift class already bit resync-audit.ts and backport-diff.ts. Both
+  // markers optional (a script may carry only one); a disagreement errors.
+  for (const script of actualScripts) {
+    if (!script.endsWith(".ts")) continue;
+    const abs = join(scriptsDir, script);
+    let content: string;
+    try {
+      content = readFileSync(abs, "utf-8");
+    } catch {
+      continue;
+    }
+    const header = content.slice(0, 4000).match(/@version\s+(\d+\.\d+\.\d+)/);
+    const constant = content.match(/const VERSION\s*=\s*["'](\d+\.\d+\.\d+)["']/);
+    if (header && constant && header[1] !== constant[1]) {
+      errors.push(
+        `Version-const drift: \`${script}\` header @version ${header[1]} ≠ const VERSION ${constant[1]} — align the two (the const is what --help prints)`,
+      );
+    }
+  }
+
+  // Check 9: typecheck-baseline.json integrity (L0 only, T-20260926-017).
+  // The baseline is a soft target: hand-raising `count` silently loosens the
+  // typecheck gate. Recorded policy (2026-09-11 triage): count 0 — any type
+  // error fails the gate. The baseline file itself is now gated.
+  if (contextLayer === "L0") {
+    const baselinePath = join(scriptsDir, "helpers", "typecheck-baseline.json");
+    if (!existsSync(baselinePath)) {
+      errors.push(
+        `Typecheck baseline missing: \`scripts/helpers/typecheck-baseline.json\` — the typecheck gate cannot run without it`,
+      );
+    } else {
+      try {
+        const baseline = JSON.parse(readFileSync(baselinePath, "utf-8")) as { count?: unknown };
+        if (typeof baseline.count !== "number") {
+          errors.push(`Typecheck baseline malformed: \`count\` is not a number`);
+        } else if (baseline.count > 0) {
+          errors.push(
+            `Typecheck baseline loosened: \`count\` is ${baseline.count}, recorded policy is 0 (2026-09-11 triage: any type error fails) — fix the errors instead of raising the baseline`,
+          );
+        }
+      } catch {
+        errors.push(`Typecheck baseline unparseable: \`scripts/helpers/typecheck-baseline.json\` is not valid JSON`);
+      }
+    }
+  }
+
+  // Check 10: CI workflow script references (U-20261112-014). Every
+  // `bun scripts/<name>.ts` invocation in .github/workflows/*.yml|*.yaml must
+  // resolve to an existing file under scripts/ — the prune-recurrence class
+  // (T-20261108-008: a deleted script left ci.yml invoking it) silently broke
+  // CI. Error-level, mirroring the ghost-entry convention. Runs wherever a
+  // .github/workflows directory exists relative to the context root (L0 and
+  // projects carry one; L1/L2 template trees do not).
+  const workflowsDir = join(workspaceRoot, ".github", "workflows");
+  if (existsSync(workflowsDir)) {
+    const workflows: Array<{ name: string; content: string }> = [];
+    for (const entry of fs.readdirSync(workflowsDir)) {
+      if (!entry.endsWith(".yml") && !entry.endsWith(".yaml")) continue;
+      const abs = join(workflowsDir, entry);
+      if (!fs.statSync(abs).isFile()) continue;
+      try {
+        workflows.push({ name: entry, content: readFileSync(abs, "utf-8") });
+      } catch {
+        continue; // unreadable workflow — CI itself will fail on it, not this gate
+      }
+    }
+    const scriptsExist = (script: string): boolean => existsSync(join(workspaceRoot, script));
+    for (const ref of findDanglingWorkflowScriptRefs(workflows)) {
+      if (!scriptsExist(ref.script)) {
+        errors.push(
+          `Dangling CI workflow reference: \`.github/workflows/${ref.workflow}\` invokes \`${ref.script}\` but the file does not exist at the context root — restore the script or update the workflow (U-20261112-014)`,
+        );
+      }
+    }
+  }
+
+  // Output
+  console.log(`\n=== verify-scripts.ts ===`);
+  const contextDescriptions: Record<ContextLayer, string> = {
+    L0: "workspace root — full verification",
+    L1: "common template — L0-only entries skipped",
+    L2: "variant template — L0-only entries skipped",
+    L3: "project — L0-only entries skipped",
+  };
+  console.log(`Context: ${contextLayer} (${contextDescriptions[contextLayer]})`);
+  console.log(`Registry: ${scriptsMdPath}`);
+  console.log(`Scripts dir: ${scriptsDir}\n`);
+
+  if (warnings.length > 0) {
+    for (const w of warnings) console.warn(w);
+    console.log();
+  }
+
+  if (errors.length > 0) {
+    for (const e of errors) console.error(`❌ ${e}`);
+    console.log(`\n❌ ${errors.length} error(s) found — pre-commit blocked`);
+    passed = false;
+  } else {
+    console.log(`✅ All ${registry.length} registered scripts verified (${warnings.length} warning(s))`);
+  }
+
+  return passed;
+}
+
+// ── Generate Mode ────────────────────────────────────────────────────────────
+
+function generate(): void {
+  const actualScripts = getActualScripts();
+
+  if (!existsSync(scriptsMdPath)) {
+    console.log(`ℹ️  SCRIPTS.md not found — generating from scratch`);
+  } else {
+    // Load existing registry to preserve metadata for known scripts
+    const existing = readFileSync(scriptsMdPath, "utf-8");
+    const existingRegistry = parseRegistry(existing);
+    const existingMap = new Map(existingRegistry.map((e) => [e.script, e]));
+
+    const rows = actualScripts.map((script) => {
+      const known = existingMap.get(script);
+      if (known) {
+        // Preserve existing metadata
+        return `| \`${known.script}\` | ${known.source} | ${known.version} | ${known.status} | ${known.removalDate} | ${known.securityAdvisory} | ${known.layer} | ${known.pair} |`;
+      }
+      return `| \`${script}\` | L0 | 1.0.0 | active | — | — | common | — |`;
+    });
+
+    // Replace Registry section in existing file
+    const header =
+      "| script | source | version | status | removal-date | security-advisory | layer | pair |\n" +
+      "|--------|--------|---------|--------|--------------|-------------------|-------|------|";
+
+    const updated = existing.replace(
+      /(\| script \|.*?\n\|[-| ]+\|\n)([\s\S]*?)(?=\n---|\n## )/,
+      `${header}\n${rows.join("\n")}\n`,
+    );
+
+    writeFileSync(scriptsMdPath, updated, "utf-8");
+    console.log(`✅ Registry updated: ${rows.length} scripts (${actualScripts.length} on disk)`);
+    console.log(`   Review SCRIPTS.md before committing — metadata is preserved for known scripts`);
+    return;
+  }
+
+  // Fresh generate
+  const rows = actualScripts.map((s) => `| \`${s}\` | L0 | 1.0.0 | active | — | — | common | — |`).join("\n");
+
+  const draft = `# SCRIPTS.md — Script Lifecycle Registry
+
+> Auto-generated draft. Review and fill in the Guide section before committing.
+
+---
+
+## Registry
+
+| script | source | version | status | removal-date | security-advisory | layer | pair |
+|--------|--------|---------|--------|--------------|-------------------|-------|------|
+${rows}
+
+---
+
+## Guide
+
+<!-- Add human-readable documentation for each script here -->
+`;
+
+  writeFileSync(scriptsMdPath, draft, "utf-8");
+  console.log(`✅ Generated SCRIPTS.md draft with ${actualScripts.length} scripts`);
+  console.log(`   Path: ${scriptsMdPath}`);
+  writeFileSync(scriptsMdPath, draft, "utf-8");
+  console.log(`✅ Generated SCRIPTS.md draft with ${actualScripts.length} scripts`);
+  console.log(`   Path: ${scriptsMdPath}`);
+  console.log(`   Next: fill in Guide section, then commit`);
+}
+
+// ── Fix Mode (ADR-0081 / T-20260919-002) ─────────────────────────────────────
+// Auto-registers the scripts Check 1 flags as unregistered. A registry row per
+// script is appended directly after the last Registry table row — version from
+// the script's @version header, description left as a placeholder to fill in.
+// This removes the manual row-hand-writing step that made every new
+// project-local script block its project's audit until someone edited
+// SCRIPTS.md by hand (observed on co-newbiz/co-architect during the
+// 2026-09-19 fleet sweep).
+function fixUnregistered(): void {
+  if (!existsSync(scriptsMdPath)) {
+    console.error(`❌ SCRIPTS.md not found. Run --generate first.`);
+    process.exit(1);
+  }
+  const content = readFileSync(scriptsMdPath, "utf-8");
+  const registry = parseRegistry(content);
+  const actualScripts = getActualScripts();
+  const relevantRegisteredNames =
+    contextLayer === "L0"
+      ? new Set(registry.map((e) => e.script))
+      : new Set(registry.filter(isLayerRelevant).map((e) => e.script));
+  const unregistered = actualScripts.filter((s) => !relevantRegisteredNames.has(s));
+  if (unregistered.length === 0) {
+    console.log(`✅ --fix: no unregistered scripts — Registry is in sync with scripts/`);
+    return;
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const rows = unregistered.map((script) => {
+    let version = "1.0.0";
+    try {
+      version = extractHeaderVersion(readFileSync(join(scriptsDir, script), "utf-8"));
+    } catch {
+      /* header unreadable — default 1.0.0 */
+    }
+    return buildFixRow(script, version, contextLayer, contextLayer, today);
+  });
+  const result = insertRowsIntoRegistry(content, rows);
+  if (!result) {
+    console.error(`❌ --fix: could not locate the ## Registry table in ${scriptsMdPath}`);
+    if (import.meta.main) process.exit(1);
+    return;
+  }
+  writeFileSync(scriptsMdPath, result.content, "utf-8");
+  console.log(`✅ --fix: registered ${rows.length} script(s) in ${scriptsMdPath}:`);
+  for (const script of unregistered) console.log(`   - ${script}`);
+  console.log(`   Re-run --verify to confirm, then fill in the description column.`);
+}
+
+// ── Report Mode ──────────────────────────────────────────────────────────────
+
+function report(): void {
+  if (!existsSync(scriptsMdPath)) {
+    console.error(`❌ SCRIPTS.md not found. Run --generate first.`);
+    process.exit(1);
+  }
+
+  const content = readFileSync(scriptsMdPath, "utf-8");
+  const registry = parseRegistry(content);
+  const actual = getActualScripts();
+  const registeredNames = new Set(registry.map((e) => e.script));
+  const today = new Date().toISOString().slice(0, 10);
+
+  const active = registry.filter((e) => e.status === "active");
+  const deprecated = registry.filter((e) => e.status === "deprecated");
+  const experimental = registry.filter((e) => e.status === "experimental");
+  const unregistered = actual.filter((s) => !registeredNames.has(s));
+  const advisories = registry.filter((e) => e.securityAdvisory !== "—" && e.securityAdvisory !== "");
+
+  console.log(`\n=== Script Lifecycle Report ===`);
+  console.log(`Date: ${today}`);
+  console.log(`Registry: ${registry.length} entries | Disk: ${actual.length} files\n`);
+
+  console.log(`📦 Active (${active.length})`);
+  for (const e of active) console.log(`   ✅ ${e.script} v${e.version}`);
+
+  if (deprecated.length > 0) {
+    console.log(`\n⚠️  Deprecated (${deprecated.length})`);
+    for (const e of deprecated) {
+      const expired = e.removalDate !== "—" && e.removalDate <= today;
+      const marker = expired ? "❌ EXPIRED" : "⏰";
+      console.log(`   ${marker} ${e.script} — removal: ${e.removalDate}`);
+    }
+  }
+
+  if (experimental.length > 0) {
+    console.log(`\n🧪 Experimental (${experimental.length})`);
+    for (const e of experimental) console.log(`   🔬 ${e.script} v${e.version}`);
+  }
+
+  if (advisories.length > 0) {
+    console.log(`\n🔒 Security Advisories (${advisories.length})`);
+    for (const e of advisories) console.log(`   🚨 ${e.script}: ${e.securityAdvisory}`);
+  }
+
+  if (unregistered.length > 0) {
+    console.log(`\n❓ Unregistered on disk (${unregistered.length})`);
+    for (const s of unregistered) console.log(`   ➕ ${s}`);
+  }
+
+  console.log();
+}
+
+// ── Entry Point ──────────────────────────────────────────────────────────────
+
+const args = process.argv.slice(2);
+
+// Dispatch is import-guarded so unit tests can import the scanner helpers without
+// triggering a full verification run.
+if (import.meta.main) {
+  if (args.includes("--generate")) {
+    generate();
+  } else if (args.includes("--fix")) {
+    fixUnregistered();
+  } else if (args.includes("--report")) {
+    report();
+  } else if (args.includes("--check-drift")) {
+    checkDriftReport();
+  } else if (args.includes("--verify") || args.length === 0) {
+    const ok = verify();
+    process.exit(ok ? 0 : 1);
+  } else {
+    console.error(`Usage: bun scripts/verify-scripts.ts [--verify | --fix | --generate | --report | --check-drift]`);
+    process.exit(1);
+  }
+}

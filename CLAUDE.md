@@ -14,7 +14,7 @@ At the start of every Claude Code session, run this checklist:
 
 ```
 0. git config core.hooksPath .githooks   # activate hooks (run once per clone)
-1. Read https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/CONSTITUTION.md               # workspace design standard
+1. Read https://raw.githubusercontent.com/5throck/ai-workspace-standards/main/               # workspace design standard
 2. Read docs/context.md                  # project knowledge ??architecture, i18n, workflow
 3. Read AGENTS.md                        # canonical agent roster
 4. Read memory/MEMORY.md                 # recent session history (skip if absent)
@@ -28,7 +28,7 @@ At the start of every Claude Code session, run this checklist:
 
 Both the CLI and the Desktop App share the same `.claude/settings.json` and slash commands.
 
-> **Hook limitation**: `PostToolUse` hooks defined in `.claude/settings.json` do **not** fire in the Desktop App. After any Write/Edit, run `bash scripts/audit.sh` manually before committing.
+> **Hook limitation**: `PostToolUse` hooks defined in `.claude/settings.json` do **not** fire in the Desktop App. After any Write/Edit, run `bun scripts/audit.ts --skip-memory` manually before committing.
 
 > **Recommended split**: Use CLI for automated workflows (hook-driven audit, multi-step tasks). Use Desktop App for PR monitoring and visual review.
 
@@ -46,15 +46,15 @@ Both files are loaded automatically by Claude Code.
 
 ## Hooks
 
-A `PostToolUse` hook fires after every `Write` or `Edit` call and runs `scripts/sync-md.sh`, which delegates to `scripts/audit.sh`.
+A `PostToolUse` hook fires after every `Write` or `Edit` call and runs `bun scripts/hooks/post-write-lifecycle-check.ts` (workspace standard).
 
 | Environment | Hook fires? | Action if not |
 |-------------|:-----------:|---------------|
 | Claude Code CLI | —| Automatic |
-| Claude Code Desktop App | —| Run `bash scripts/audit.sh` manually |
-| Gemini CLI | —| Run `bash scripts/audit.sh` manually |
+| Claude Code Desktop App | —| Run `bun scripts/audit.ts --skip-memory` manually |
+| Gemini CLI | —| Run `bun scripts/audit.ts --skip-memory` manually |
 
-`audit.sh` checks: CHANGELOG.md existence 쨌 locale key parity 쨌 absolute path detection 쨌 broken markdown links 쨌 `.sh`/`.ps1` script pairing.
+`bun scripts/audit.ts --skip-memory` checks: documentation audit, docs manifest, broken markdown links, language policy, skill/agent/script registries (the full workspace gate suite).
 
 ---
 
@@ -100,22 +100,234 @@ git config core.hooksPath .githooks
 | Hook | Trigger | Action |
 |------|---------|--------|
 | `.githooks/pre-commit` | Every commit | Blocks if `CHANGELOG.md` not staged |
-| `.githooks/pre-push` | Every push | Runs `audit.sh`; aborts on failure |
+| `.githooks/pre-push` | Every push | Runs `bun scripts/audit.ts`; aborts on failure |
 
 ---
 
 ## Git
 
-Follow conventions in [`docs/context.md 짠 Git Conventions`](docs/context.md#git-conventions).
+Follow conventions in [docs/context.md — Git / PR Workflow](docs/context.md#git--pr-workflow).
 Append to AI commits: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>
 Co-Authored-By: Gemini <noreply@google.com>`
 
 ---
 
-*Last Updated: 2026-05-24*
-
+*Last Updated: 2026-11-19*
 
 ### Optimal Interaction Guidelines
 - **XML Tagging**: Utilize XML tags like `<thought>`, `<plan>`, and `<execution>` to structure complex reasoning and plans before generating final responses.
 - **Tone**: Maintain an objective, highly analytical tone. Focus on systematic execution.
 
+<!-- COMMON-CLAUDE:START -->
+> **Mandatory**: Read [`AGENTS.md`](AGENTS.md) first and follow its content in every task. It is the SSOT registry for the agent roster, PM Gateway workflow, tier model, skill resolution priority, and universal baseline behaviors; this file carries platform-specific behavior only.
+
+#### teammateMode (Claude Code Agent Teams execution mode)
+
+**teammateMode** specifies the parallel execution mode when Agent Teams is enabled in Claude Code.
+
+**Values**:
+- `in-process` — Parallel execution within the same process (applies to both Claude Code CLI and Desktop App)
+- `tmux` — Parallel execution using tmux split-pane (Claude Code CLI only, not supported in Desktop App)
+- `null` — Default value (auto-selects based on environment)
+
+**Configuration location**: `.claude/settings.json` → `teammateMode`
+
+**Note**: Antigravity does not have an equivalent to Agent Teams, so teammateMode is a Claude Code-specific setting. Antigravity 2.0+ uses Agent Manager to manage multiple workspace shards.
+
+**Relationship to execution plan table**: teammateMode controls parallel execution mode. The execution plan table defines the multi-agent task dispatch.
+<!-- COMMON-CLAUDE:END -->
+
+### 2.5 Native Slash Commands
+Custom slash commands in `.claude/commands/` are natively recognized by Claude Code. The following commands are available at session start:
+
+| Command | Purpose | Underlying Trigger |
+|---------|---------|--------------------|
+| `/sync "feat: ..."` | Full pipeline - memlog → sync-md → changelog → audit → commit → PR | `scripts/dev-sync.ts` |
+| `/changelog "..."` | Add entry to `CHANGELOG.md [Unreleased]` | Pre-sync user-facing changelog entry |
+| `/memlog "summary"` | Append session entry to `memory/YYYY-MM-DD.md` only | Without triggering full sync |
+| `/new-task "name"` | Create task block in today's memory log | In-session task tracking |
+| `/commit-push-pr` | Commit, push, and open a PR in one step | Standalone commit/PR helper (bypasses full `/sync` pipeline) |
+| `/gateguard` | Investigate importers before first edit per file (GateGuard) | Companion to the PreToolUse GateGuard hook |
+| `/project-review` | Run a structured project review | Project review workflow command |
+
+> **How commands become Skills**: each `.claude/commands/<name>.md` file is automatically
+> registered as a `<name>` Skill. All commands above have corresponding files in `.claude/commands/`. There is no `/new-project` command file — scaffold new projects with `bun scripts/new-project.ts "<name>" --variant <co-variant>` directly (`--variant` is required).
+
+> **Platform parity**: every command file in `.claude/commands/` must have a matching file in `.gemini/commands/`. Intentional Claude-only exceptions use `gemini-parity: skip` in frontmatter. See [docs/context.md](docs/context.md).
+
+> **Commit Protection (SYNC_ACTIVE)**: Direct `git commit` or `git push` calls via bash/powershell/run_command are **FORBIDDEN**. The pre-commit hook blocks direct commits unless executed through `/sync`. Never manipulate environment variables (e.g., `$env:SYNC_ACTIVE=1; git commit`) to bypass QA gates. All commits MUST go through the approved `/sync` pipeline or `dev-sync.ts`. **`--no-verify` is also forbidden**.
+
+> **Sequential Branch Dependency Rule**: Before running `/sync` to open a new PR while a prior PR from the same session is still open and unmerged, merge the prior PR first (or explicitly justify parallel branching in a plan/design doc). `dev-sync.ts` touches shared pipeline files (CHANGELOG.md, memory logs, VERSION_MANIFEST.md, generated READMEs) on every commit, so unmerged parallel branches conflict by default, not by exception. Full rule: context.md §3.3.
+
+### 3. MCP Configurations & Absolute Resolving
+No `.mcp.json` is currently defined at the project root — MCP servers are configured at the user/global level instead. If a project-level `.mcp.json` is added later, keep command executable paths relative to the project directory for portable cross-platform runs; Claude Code resolves relative paths (e.g., `./server` or `python scripts/mcp.py`) against the individual project's root folder.
+
+<!-- COMMON-CLAUDE:START -->
+### 4. Language Policy for Documentation
+
+All `.md` files you create or modify MUST be in English, except in recognized locale translation zones (`<lang-code>/` or `locales/<lang-code>/` directories, plus `*_&lt;lang-code&gt;` suffix files such as `README_ko.md` — see the AGENTS.md Language Policy) or when explicitly declared as a Korean legal/regulatory content exception.
+
+- README.md, CLAUDE.md, GEMINI.md, CODEX.md, AGENTS.md, context.md, CHANGELOG.md — English only
+- All documentation in docs/, agents/, skills/ — English only
+- Git commit messages, PR titles, PR descriptions — English only
+- Branch names — English only
+- Code comments — English (unless documenting locale-specific logic)
+
+#### Language Policy Exception
+For files where Korean is legally or academically mandatory, add to the frontmatter:
+```yaml
+lang: ko
+lang_reason: legal # legal | source-material | proper-noun
+```
+*(Not available for: context.md, CLAUDE.md, GEMINI.md, CODEX.md, AGENTS.md, or any variant context.md)*
+
+#### Korean Plain-Language Preference (`순우리말`-First)
+When writing Korean documentation or Korean translation output, prefer native Korean words (`순우리말`) over loanwords (`외래어`) whenever a natural, widely-understood native equivalent exists — e.g. prefer `만들기` over `크리에이션`, `알림` over `노티피케이션`. Loanwords effectively settled in Korean (`컴퓨터`, `데이터`, `소프트웨어`, `파일`) and established technical terms remain permitted; clarity takes precedence over forced nativization. New Korean content applies this immediately; existing Korean documents are nativized incrementally (touched sections only, no bulk rewrites).
+<!-- COMMON-CLAUDE:END -->
+
+### 4.5 Skill Resolution Priority
+
+When a user request matches a skill trigger, apply this priority order — **enforced every session, regardless of platform**:
+
+| Priority | Source | Location |
+|----------|--------|----------|
+| **1 (highest)** | Local project skills | `skills/<name>/SKILL.md` in the current working directory |
+| **2** | Platform config skills | `.gemini/skills/` or `.claude/skills/` in the project root |
+| **3 (lowest)** | Global plugin skills | e.g., `superpowers/brainstorming`, `superpowers/writing-plans` |
+
+**Rule**: If a local skill's `metadata.triggers` matches the user request, use it — do **not** fall through to a global plugin with overlapping intent.
+
+**Canonical conflict — meeting vs. brainstorming**:
+
+| User says | Correct skill | Priority |
+|-----------|--------------|----------|
+| "meeting", "facilitate", "agent discussion" | `skills/meeting-facilitation` | 1 |
+| "brainstorm", "design before coding", "explore options" | `superpowers/brainstorming` | 3 |
+
+When ambiguous, prefer the local skill and confirm intent with the user.
+Explicit invocation: the `meeting-facilitation` skill with the meeting topic and options (`--agents a,b`, `--rounds N`, `--dialogue`) — the legacy `/meeting` slash command is retired (2026-09-26).
+
+### 5. Agent Dispatch Rules
+
+**MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
+
+For the **4-level enforcement model**, **mandatory criteria**, **execution plan format**, and **phase determination**, see [AGENTS.md §3 and §5](AGENTS.md).
+
+#### Claude Code-Specific Dispatch
+
+Before any multi-agent dispatch (2+ agents), PM **must** output an execution plan table prior to invoking the `Agent` tool.
+
+<!-- COMMON-CLAUDE:START -->
+## Execution Plan Boilerplate
+
+The execution plan table format, the Design Gate (Row 0) rule, exemption categories, and the `/sync`-as-final-step rule are the Single Source of Truth in **[Execution Plan Templates §5.1 Standard Execution Plan Template](docs/governance/agents/execution-plan-templates.md#51-standard-execution-plan-template)** and **[§5.1.1 Design Gate Exemptions](docs/governance/agents/execution-plan-templates.md#511-design-gate-exemptions)** — do not restate them here.
+
+> **Note (Claude Code-specific)**: The `Model` column shows the Claude Code short alias (`sonnet`/`opus`/`haiku`/`fable`) actually passed to the `Agent()` tool's `model` parameter — not the registry ID (e.g. `claude-sonnet-5-5`). See §6 (Native Sub-agents) below for the registry-ID → alias translation table. On Gemini/Antigravity, use the literal model ID instead (see GEMINI.md's equivalent note).
+<!-- Note: `fable` is a forward-looking alias not yet registered in docs/workspace-schema.json; do not use until added to the schema -->
+
+**Claude Code execution**: Use the native `Agent` tool for specialist dispatch. See §6 (Native Sub-agents) and §7 (Native Plan Mode) in this file.
+<!-- COMMON-CLAUDE:END -->
+
+### 6. Native Sub-agents (`Agent` Tool)
+
+<!-- COMMON-CLAUDE:START -->
+Use the native `Agent` tool to spawn sub-agents for parallel or isolated tasks. Sub-agents load their role-based configurations from `agents/<name>.md`.
+
+> **Agent Architecture**: See [docs/context.md](docs/context.md) for governance rules.
+> **Agent Roster**: See [AGENTS.md](AGENTS.md) for the canonical index of all available agents.
+> **docs-writer tier**: Medium (claude-sonnet-5-5) — upgraded from Low per 2026-05-28 team restructuring. (`docs-writer` is a **workspace-root (L0) agent**; in a scaffolded project, substitute your project's equivalent writer agent.)
+
+**Agent Dispatch** - use the `Agent` tool (not a bash CLI command):
+```
+Agent(
+  description   = "Implement automation script",
+  prompt        = "You are an automation engineer. [paste agents/automation-engineer.md content here]\n\nTask: Implement the script per the approved plan.",
+  subagent_type = "claude",  // platform agent type; embed the agents/<name>.md role definition in the prompt
+  model         = "sonnet"   // automation-engineer is Medium-tier (registry: claude-sonnet-5-5) — see registry→model mapping below
+)
+```
+
+> The example dispatches `automation-engineer`, a **common agent** (delivered to every project); a project may substitute a domain implementer's role definition in the prompt.
+
+> **Registry name → `model` parameter mapping**: `docs/workspace-schema.json` and the tables above name models by full registry ID (e.g. `claude-opus-5-5`) for cross-platform documentation. The native `Agent` tool's `model` parameter only accepts the short aliases `sonnet | opus | haiku | fable`. <!-- Note: `fable` is a forward-looking alias not yet registered in workspace-schema.json --> When dispatching, translate the agent's tier to its registry model, then to the matching alias: High → `claude-opus-5-5` → `model = "opus"`; Medium → `claude-sonnet-5-5` → `model = "sonnet"`; Low → `claude-haiku-5-5` → `model = "haiku"`. Omitting `model` lets the subagent fall back to its frontmatter (`model: inherit`), which inherits the parent session's model instead of the tier-appropriate one — always set `model` explicitly to actually get the cost-tier benefit.
+>
+> **Automated enforcement (Claude Code CLI only)**: `scripts/hooks/agent-model-gate.ts` runs as a `PreToolUse` hook (matcher: `Agent`) and asks for confirmation whenever an `Agent()` call dispatches a rostered agent (every `agents/*.md` file except `pm.md`, read live from the project's `agents/` directory; the tier comes from each file's frontmatter) without the matching `model` alias — this is the check that catches the High/Low-tier (`opus`/`haiku`) silent-fallback bug described above before it happens. The hook is also delivered to projects (`templates/common/scripts/hooks/agent-model-gate.ts`), where it reads the project's own roster and `docs/workspace-schema.json`.
+
+Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Agent Roster](AGENTS.md#1-agent-ecosystem-overview)):
+1. **automation-engineer** implements the changes — a **common agent** delivered to every project; a project may route to its own domain implementer (e.g. `code-writer`) instead.
+2. **PM** verifies against acceptance criteria by running `bun scripts/audit.ts` directly.
+3. **Quality gate (audit script)** validates compliance.
+
+> Loop and correct if review errors are flagged - maximum **3 iterations** before escalating to the user.
+<!-- COMMON-CLAUDE:END -->
+
+<!-- COMMON-CLAUDE:START -->
+#### Cost Optimization (3-Tier Model Strategy)
+The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Claude Code's model-ID mapping (overridden per agent invocation when appropriate):
+- **High-tier** → `claude-opus-5-5`
+- **Medium-tier** → `claude-sonnet-5-5`
+- **Low-tier** → `claude-haiku-5-5`
+<!-- COMMON-CLAUDE:END -->
+
+<!-- COMMON-CLAUDE:START -->
+### 7. Native Plan Mode (`EnterPlanMode`)
+Enter native plan mode using the `EnterPlanMode` tool when:
+- The user requests a new feature or significant refactor.
+- The change modifies more than 2 files.
+- The correct approach is unclear or requires clarifying assumptions.
+
+Once in plan mode:
+1. Draft the implementation plan and present it for user review.
+2. Obtain explicit user approval before modifying any code.
+3. Track progress using the native `TaskCreate` / `TaskUpdate` toolset.
+4. After completion, summarize outcomes in the active `memory/YYYY-MM-DD.md` daily log.
+<!-- COMMON-CLAUDE:END -->
+
+<!-- COMMON-CLAUDE:START -->
+### 8. Task Tracking (`TaskCreate` / `TaskUpdate`)
+When working in a plan-mode session:
+- Call `TaskCreate` before starting any multi-step execution.
+- Set status `in_progress` prior to beginning each atomic step.
+- Update status to `completed` immediately upon verification of the step.
+- Never leave tasks `in_progress` at the end of a session.
+<!-- COMMON-CLAUDE:END -->
+
+<!-- COMMON-CLAUDE:START -->
+### 9. Project Boundary Policy
+
+- **Strict Scope**: Work only within the current project directory.
+- **No Cross-Project Modification**: Modifying files outside the project root during a session is forbidden.
+
+> For lifecycle management rules, see [docs/context.md — Lifecycle Management](docs/context.md#lifecycle-management).
+<!-- COMMON-CLAUDE:END -->
+
+<!-- COMMON-CLAUDE:START -->
+### 10. Custom Command Error Recovery
+If a custom slash command or background script returns a non-zero exit code:
+* **Don't bypass hooks**: Never attempt to run git commands with `--no-verify` to bypass the hook system. **`--no-verify` is forbidden.**
+* **Code Page / UTF-8 Issues (Windows)**: If broken Korean characters or Unicode errors appear in CLI output, the Windows terminal code page (CP949) is likely the cause. Ensure `$OutputEncoding = [Console]::OutputEncoding = [System.Text.Encoding]::UTF8;` or `chcp 65001` is prepended to scripts.
+* **Diagnostic Audit**: Immediately read the failure stdout log. Common errors include:
+  * Missing staged `CHANGELOG.md` edits (caught by `pre-commit`). Fix by running `/changelog` and staging the file.
+  * Direct push attempt to `main` (caught by `pre-push`). Fix by executing the `/sync` pipeline script which handles target branch generation and PR staging automatically.
+<!-- COMMON-CLAUDE:END -->
+
+<!-- COMMON-CLAUDE:START -->
+### 11. Windows Platform Requirement
+
+**Git Bash required on Windows**: This workspace uses Unix-style shell scripts (`.sh`) for `.githooks/` hook files. Windows users must have Git Bash installed and configured as the default shell for git hooks.
+
+- Git Bash ships with [Git for Windows](https://gitforwindows.org/) — install if not present.
+- Verify: `git config core.hooksPath` should point to `.githooks/`
+- All `scripts/` operational scripts are TypeScript (`.ts`) — run via `bun scripts/<name>.ts`. No `.sh/.ps1` counterparts (ADR-0036).
+- If a hook fails on Windows with "command not found", run it via Git Bash: `"C:\Program Files\Git\bin\bash.exe" .githooks/pre-commit`
+<!-- COMMON-CLAUDE:END -->
+
+<!-- COMMON-CLAUDE:START -->
+## Git & PR Additions (Claude Code)
+
+All shared Git/PR rules are in [docs/context.md](docs/context.md). Claude Code-specific additions:
+
+- **PR Language**: Governed by [docs/context.md](docs/context.md). All PR titles, bodies, and review comments must be written in English - no exceptions.
+
+*Last Updated: 2026-11-19 — hook table Desktop App rows aligned to ⚠️ (intermittent, manual fallback) and SessionStart Desktop note corrected (eight-platform coverage design); previous: 2026-10-06 annotated the L0-only agent dispatch examples (`docs-writer` / `automation-engineer`) as workspace-root agents (U-20261006-006); previous: 2026-10-02 removed redundant N-1/N boilerplate rows; /sync already covers lifecycle + audit + commit + push + PR*
+<!-- COMMON-CLAUDE:END -->

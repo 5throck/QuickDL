@@ -1,0 +1,62 @@
+# Secrets — never commit
+# (.env.sample untracked 2026-11-19: workspace adoption pre-flight requires no
+#  secret-shaped tracked files; the placeholder sample stays on disk locally)
+.env
+.env.*
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+dist/
+*.egg-info/
+
+# Node.js
+node_modules/
+.next/
+dist/
+build/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Local AI settings (personal overrides — never shared)
+.claude/settings.local.json
+.gemini/settings.local.json
+.mcp.local.json
+
+# Crypto / certificates — never commit private key material
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.jks
+*.keystore
+
+# Temp / build artifacts
+*.log
+*.bak
+*.tmp
+
+# Downloaded media — runtime output, never source (see AGENTS.md Codex notes)
+downloads/
+*.part
+
+# Databases
+*.sqlite
+*.db
+
+# CodeGraph Index
+.codegraph/
+graft/
+.openchrome/

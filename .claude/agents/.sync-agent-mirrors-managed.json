@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "generated": [
+    "backend",
+    "frontend",
+    "i18n-specialist",
+    "pm",
+    "qa",
+    "security"
+  ]
+}

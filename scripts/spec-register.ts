@@ -1,0 +1,377 @@
+// @version 1.6.0
+// v1.6.0 (2026-10-05, T-20261005-005, spec docs/designs/2026-10-05-spec-registry-entries-projection-design.md):
+//           one-file-per-spec SSOT — docs/specs/entries/<id>.json holds one
+//           pretty-printed SpecEntry per file and docs/specs/registry.json
+//           becomes a committed generated projection (same path and shape, so
+//           every reader is unchanged). registerSpec/--update upsert the entry
+//           FILE then regenerateProjection(); the first CRUD in a legacy tree
+//           auto-migrates by splitting the projection into entry files; new
+//           --regenerate flag rebuilds the projection mechanically (the
+//           supported resolution after a same-gap merge, replacing
+//           hand-splicing). insertSpecSorted removed — superseded by
+//           regeneration; loadRegistry/saveRegistry gained optional path
+//           overrides for the regression tests.
+// v1.5.0 (2026-10-05, T-20261005-002, spec docs/designs/2026-10-05-spec-registry-canonical-order-design.md):
+//           content-derived insertion — registerSpec() places new entries by id
+//           (insertSpecSorted) instead of appending at the shared array tail,
+//           and saveRegistry() canonicalizes the whole array (id ascending) on
+//           every write, so concurrent registrations from independent branches
+//           land in different array regions instead of colliding at the same
+//           locus (the append conflicts that forced 5 hand-splices on
+//           2026-10-05). canonicalOrderViolation() is exported for the audit
+//           gate (Check 5) to fail out-of-band non-canonical files.
+
+/**
+ * spec-register.ts
+ *
+ * Spec Registry CRUD -- manages docs/specs/registry.json.
+ * Called by brainstorming skill, meeting skill, variant-feature.ts, audit.ts, spec-backfill.ts.
+ *
+ * Usage:
+ *   bun scripts/spec-register.ts --file docs/designs/foo.md --source brainstorming
+ *   bun scripts/spec-register.ts --file docs/designs/foo.md --source meeting --ref memory/meeting-2026-06-24-foo.md
+ *   bun scripts/spec-register.ts --file docs/designs/foo.md --source manual --status implemented --id 2026-01-02-foo
+ *   bun scripts/spec-register.ts --update 2026-06-24-foo --status implemented
+ *   bun scripts/spec-register.ts --list
+ *   bun scripts/spec-register.ts --list --status approved
+ *
+ * --id <value> overrides the default slugFromPath(filePath) id. Needed for files without a
+ * YYYY-MM-DD- filename prefix, so callers (e.g. spec-backfill.ts) can supply a dated id that
+ * matches the convention used by hand-registered entries.
+ *
+ * v1.2.0 (T-20260912-019): import safety — all CLI dispatch is wrapped in
+ *          `if (import.meta.main)`, so importing this module for its helpers
+ *          (loadRegistry, saveRegistry, slugFromPath, titleFromPath) no longer
+ *          runs CRUD against the registry or prints usage errors. REGISTRY_PATH
+ *          resolves from this script's own location (import.meta.dir/..) instead
+ *          of process.cwd(), so spawned callers (variant-feature.ts,
+ *          project-to-variant.ts, spec-backfill.ts) resolve the workspace
+ *          registry regardless of their working directory; CLI behavior is
+ *          unchanged for the standard workspace-root invocation.
+ */
+
+import * as fs from "node:fs";
+import * as path from "node:path";
+
+// Resolved from the script's own location (scripts/spec-register.ts → workspace
+// root), not cwd — spawned callers may run from a different working directory.
+export const REGISTRY_PATH = path.resolve(import.meta.dir, "..", "docs", "specs", "registry.json");
+
+/** T-20261005-005: one-file-per-spec SSOT — one pretty-printed SpecEntry object
+ * per file; registry.json becomes a committed generated projection (same path
+ * and shape, so every reader works unchanged). */
+export const ENTRIES_DIR = path.resolve(import.meta.dir, "..", "docs", "specs", "entries");
+
+// ANSI colors — explicit \x1b escapes produce the exact same output bytes as the
+// previous raw-escape-character literals.
+const GREEN = "\x1b[32m";
+const RED = "\x1b[31m";
+const YELLOW = "\x1b[33m";
+const CYAN = "\x1b[36m";
+const RESET = "\x1b[0m";
+
+/** T-20261003-013 (2026-10-03 review H7): the legal status vocabulary. `planned` (approved,
+ * awaiting execution) and `superseded` (requires `superseded_by`) joined the set — the
+ * registry previously carried them (and `designed`) as unvalidated casts that no gate saw. */
+const SPEC_STATUSES = [
+  "draft",
+  "proposed",
+  "approved",
+  "planned",
+  "implemented",
+  "superseded",
+  "drifted",
+  "archived",
+] as const;
+type SpecStatus = (typeof SPEC_STATUSES)[number];
+
+function isSpecStatus(value: unknown): value is SpecStatus {
+  return typeof value === "string" && (SPEC_STATUSES as readonly string[]).includes(value);
+}
+
+/** Validate one entry's lifecycle fields — throws on an out-of-vocabulary status or a
+ * `superseded` entry without a `superseded_by` pointer. Shared by register/update/audit. */
+export function validateSpecEntry(entry: { status: string; superseded_by?: string; id?: string }): void {
+  const label = entry.id ? `spec ${entry.id}` : "spec entry";
+  if (!isSpecStatus(entry.status)) {
+    throw new Error(`${label} has illegal status "${entry.status}" (legal: ${SPEC_STATUSES.join("|")})`);
+  }
+  if (entry.status === "superseded" && !entry.superseded_by) {
+    throw new Error(`${label} is superseded but carries no superseded_by pointer to the successor`);
+  }
+}
+type SpecSource = "brainstorming" | "meeting" | "manual" | "architect" | "pm";
+
+interface SpecEntry {
+  id: string;
+  title: string;
+  file: string;
+  status: SpecStatus;
+  source: SpecSource;
+  meeting_ref?: string;
+  /** Required when status is `superseded`: the successor spec id (T-20261003-013). */
+  superseded_by?: string;
+  created: string;
+  last_updated: string;
+}
+
+interface Registry {
+  version: string;
+  specs: SpecEntry[];
+}
+
+/** Read every entry file (sorted by id); empty when the directory is absent. */
+export function readEntryFiles(entriesDir = ENTRIES_DIR): SpecEntry[] {
+  if (!fs.existsSync(entriesDir)) return [];
+  return fs
+    .readdirSync(entriesDir)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => JSON.parse(fs.readFileSync(path.join(entriesDir, f), "utf-8")) as SpecEntry)
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+}
+
+export function entryPath(id: string, entriesDir = ENTRIES_DIR): string {
+  return path.join(entriesDir, `${id}.json`);
+}
+
+export function writeEntryFile(entry: SpecEntry, entriesDir = ENTRIES_DIR): void {
+  fs.mkdirSync(entriesDir, { recursive: true });
+  fs.writeFileSync(entryPath(entry.id, entriesDir), JSON.stringify(entry, null, 2) + "\n", "utf-8");
+}
+
+export function loadRegistry(opts: { entriesDir?: string; registryPath?: string } = {}): Registry {
+  // T-20261005-005: the entries directory is the SSOT when it has files; the
+  // projection fallback keeps legacy trees and not-yet-migrated projects working.
+  const entries = readEntryFiles(opts.entriesDir);
+  if (entries.length > 0) {
+    return { version: "1.0.0", specs: entries };
+  }
+  const registryPath = opts.registryPath ?? REGISTRY_PATH;
+  if (!fs.existsSync(registryPath)) {
+    fs.mkdirSync(path.dirname(registryPath), { recursive: true });
+    return { version: "1.0.0", specs: [] };
+  }
+  return JSON.parse(fs.readFileSync(registryPath, "utf-8"));
+}
+
+export function saveRegistry(registry: Registry, registryPath = REGISTRY_PATH): void {
+  // T-20261005-002: canonicalize on every write — the array is kept sorted by
+  // id so concurrent registrations land in content-derived positions and the
+  // file self-heals from historical arrival-order on the next save.
+  registry.specs.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  fs.mkdirSync(path.dirname(registryPath), { recursive: true });
+  fs.writeFileSync(registryPath, JSON.stringify(registry, null, 2) + "\n", "utf-8");
+}
+
+/** T-20261005-005: rebuild the projection from the entries directory. Legacy
+ * migration is a UNION, not a fallback: projection entries that have no entry
+ * file yet are split into files on every regeneration — so the first CRUD in a
+ * legacy tree migrates automatically even though registerSpec has already
+ * written its own entry file, and a partial state self-heals. */
+export function regenerateProjection(opts: { entriesDir?: string; registryPath?: string } = {}): Registry {
+  const entriesDir = opts.entriesDir ?? ENTRIES_DIR;
+  const registryPath = opts.registryPath ?? REGISTRY_PATH;
+  if (fs.existsSync(registryPath)) {
+    try {
+      const legacy = JSON.parse(fs.readFileSync(registryPath, "utf-8")) as Registry;
+      const have = new Set(readEntryFiles(entriesDir).map((e) => e.id));
+      for (const spec of legacy.specs) {
+        if (!have.has(spec.id)) writeEntryFile(spec, entriesDir);
+      }
+    } catch {
+      // T-20261005-005: a conflicted projection (git merge markers) is not parseable
+      // — the entries directory is the SSOT, so discard it and rebuild from files.
+      console.log(`${YELLOW}Projection is conflicted or unparseable — rebuilding from ${entriesDir}${RESET}`);
+    }
+  }
+  const registry: Registry = { version: "1.0.0", specs: readEntryFiles(entriesDir) };
+  saveRegistry(registry, registryPath);
+  return registry;
+}
+
+/** T-20261005-002: the registry array is canonical when ids ascend. Returns a
+ * message naming the first offending pair, or null. Consumed by the audit
+ * spec-check (Check 5) to fail files hand-spliced out of band; the next
+ * spec-register write re-sorts them. */
+export function canonicalOrderViolation(specs: { id: string }[]): string | null {
+  for (let i = 1; i < specs.length; i++) {
+    if (specs[i - 1].id > specs[i].id) {
+      return `entry ${i + 1} ("${specs[i].id}") sorts before its predecessor ("${specs[i - 1].id}")`;
+    }
+  }
+  return null;
+}
+
+export function slugFromPath(filePath: string): string {
+  return path
+    .basename(filePath, ".md")
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export function titleFromPath(filePath: string): string {
+  const base = path.basename(filePath, ".md");
+  return base.replace(/^\d{4}-\d{2}-\d{2}-/, "").replace(/-/g, " ");
+}
+
+export function today(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+/** Register (or refresh) a spec entry — the `--file` code path, callable without process.argv. */
+export function registerSpec(options: {
+  filePath: string;
+  source?: SpecSource;
+  meetingRef?: string;
+  status?: SpecStatus;
+  id?: string;
+}): { id: string; updated: boolean } {
+  const source = (options.source ?? "manual") as SpecSource;
+  const status = (options.status ?? (source === "brainstorming" ? "approved" : "draft")) as SpecStatus;
+  // T-20261003-013: reject an out-of-vocabulary status at the write gate (previously a
+  // blind cast — `superseded`/`planned`/`designed` landed in the registry unchecked).
+  validateSpecEntry({ status });
+
+  if (!fs.existsSync(options.filePath)) {
+    console.error(`${RED}File not found: ${options.filePath}${RESET}`);
+    if (import.meta.main) {
+      process.exit(1);
+    }
+    throw new Error(`File not found: ${options.filePath}`);
+  }
+
+  const registry = loadRegistry();
+  const id = options.id ?? slugFromPath(options.filePath);
+  const existing = registry.specs.find((s) => s.id === id);
+  if (existing) {
+    existing.last_updated = today();
+    if (options.meetingRef) existing.meeting_ref = options.meetingRef;
+    writeEntryFile(existing);
+    regenerateProjection();
+    console.log(`${GREEN}Updated: ${id}${RESET}`);
+    return { id, updated: true };
+  }
+
+  const entry: SpecEntry = {
+    id,
+    title: titleFromPath(options.filePath),
+    file: options.filePath.split("\\").join("/"),
+    status,
+    source,
+    created: today(),
+    last_updated: today(),
+  };
+  if (options.meetingRef) entry.meeting_ref = options.meetingRef.split("\\").join("/");
+  writeEntryFile(entry);
+  regenerateProjection();
+  console.log(`${GREEN}Registered spec: ${id}${RESET}`);
+  return { id, updated: false };
+}
+
+/**
+ * CLI dispatch. Runs only when executed directly (`bun scripts/spec-register.ts …`).
+ * Output and exit codes are byte-identical to the pre-1.2.0 CLI behavior.
+ */
+function dispatch(): void {
+  const args = process.argv.slice(2);
+
+  function getArg(flag: string): string | undefined {
+    const idx = args.indexOf(flag);
+    return idx !== -1 && idx + 1 < args.length ? args[idx + 1] : undefined;
+  }
+
+  function hasFlag(flag: string): boolean {
+    return args.includes(flag);
+  }
+
+  function isValidSource(source: string): source is SpecSource {
+    const validSources: SpecSource[] = ["brainstorming", "meeting", "manual", "architect", "pm"];
+    return validSources.includes(source as SpecSource);
+  }
+
+  if (getArg("--file")) {
+    const sourceArg = getArg("--source") ?? "manual";
+    if (!isValidSource(sourceArg)) {
+      console.error(
+        `${RED}Invalid --source value: "${sourceArg}". Valid options: brainstorming, meeting, manual, architect, pm${RESET}`,
+      );
+      process.exit(1);
+    }
+    registerSpec({
+      filePath: getArg("--file")!,
+      source: sourceArg,
+      meetingRef: getArg("--ref"),
+      status: (getArg("--status") ?? undefined) as SpecStatus | undefined,
+      id: getArg("--id"),
+    });
+    // The old CLI exited immediately after register/update; preserve that contract.
+    process.exit(0);
+  }
+
+  if (getArg("--update")) {
+    const id = getArg("--update")!;
+    const newStatus = getArg("--status") as SpecStatus | undefined;
+    if (!newStatus) {
+      console.error(`${RED}--update requires --status${RESET}`);
+      process.exit(1);
+    }
+    const registry = loadRegistry();
+    const entry = registry.specs.find((s) => s.id === id);
+    if (!entry) {
+      console.error(`${RED}Spec not found: ${id}${RESET}`);
+      process.exit(1);
+    }
+    // T-20261003-013: --superseded-by <spec-id> is required when status is superseded.
+    const supersededBy = getArg("--superseded-by");
+    try {
+      validateSpecEntry({ status: newStatus, superseded_by: supersededBy, id });
+    } catch (err) {
+      console.error(`${RED}${(err as Error).message}${RESET}`);
+      process.exit(1);
+    }
+    const prev = entry.status;
+    entry.status = newStatus;
+    if (supersededBy) entry.superseded_by = supersededBy;
+    entry.last_updated = today();
+    writeEntryFile(entry);
+    regenerateProjection();
+    console.log(`${GREEN}Updated ${id}: ${prev} -> ${newStatus}${RESET}`);
+    process.exit(0);
+  }
+
+  if (hasFlag("--regenerate")) {
+    const registry = regenerateProjection();
+    console.log(`${GREEN}Regenerated projection: ${registry.specs.length} spec(s)${RESET}`);
+    process.exit(0);
+  }
+
+  if (hasFlag("--list") || args.length === 0) {
+    const registry = loadRegistry();
+    const filterStatus = getArg("--status") as SpecStatus | undefined;
+    const specs = filterStatus ? registry.specs.filter((s) => s.status === filterStatus) : registry.specs;
+    if (specs.length === 0) {
+      console.log(`${CYAN}No specs found${filterStatus ? ` with status: ${filterStatus}` : ""}.${RESET}`);
+      process.exit(0);
+    }
+    console.log(`${CYAN}Spec Registry (${specs.length} entries)${RESET}
+`);
+    for (const s of specs) {
+      const c =
+        s.status === "implemented" ? GREEN : s.status === "approved" ? CYAN : s.status === "drifted" ? RED : YELLOW;
+      console.log(`  ${c}[${s.status.padEnd(11)}]${RESET} ${s.id}
+             ${s.file}`);
+    }
+    process.exit(0);
+  }
+
+  console.error(
+    "Usage: --file <path> --source <brainstorming|meeting|manual|architect|pm> | --update <id> --status <status> | --regenerate | --list",
+  );
+  process.exit(1);
+}
+
+if (import.meta.main) {
+  dispatch();
+}
