@@ -1,5 +1,8 @@
 # Secrets — never commit
+# (.env.sample untracked 2026-11-19: workspace adoption pre-flight requires no
+#  secret-shaped tracked files; the placeholder sample stays on disk locally)
 .env
+.env.*
 
 # Python
 .venv/
