@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-18T20:11:28.001Z
+**Generated**: 2026-11-19T18:34:03.770Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -11,7 +11,7 @@
 - **Agents**: 6
 - **Skills**: 37
 - **Scripts**: 101 *(top-level CLI scripts; library/helper modules under `scripts/lib/`, `scripts/helpers/`, `scripts/hooks/`, and `scripts/validators/` plus experiment files under `scripts/experiments/` are excluded here — `scripts/SCRIPTS.md` is the full registry)*
-- **Commands**: 7
+- **Commands**: 10
 
 ---
 
@@ -122,7 +122,7 @@
 | extract-copycode.ts | 1.0.0 | scripts/handbook/extract-copycode.ts | fs, path |
 | gen-pr-body.ts | 1.2.1 | scripts/gen-pr-body.ts | bun, fs |
 | generate-ide-rules.ts | 1.0.0 | scripts/generate-ide-rules.ts | fs, path |
-| generate-raci.ts | 1.2.0 | scripts/generate-raci.ts | fs, js-yaml, path |
+| generate-raci.ts | 1.2.1 | scripts/generate-raci.ts | fs, js-yaml, path |
 | generate-skill-graph.ts | 2.0.1 | scripts/generate-skill-graph.ts | child_process, fs, js-yaml, path, url |
 | generate-skill-lifecycle-records.ts | 1.3.1 | scripts/generate-skill-lifecycle-records.ts | fs, js-yaml, path, url |
 | generate-version-manifest.ts | 1.12.1 | scripts/generate-version-manifest.ts | bun, child_process, fs, js-yaml, module, path |
@@ -158,7 +158,7 @@
 | typecheck.ts | 1.2.0 | scripts/typecheck.ts | fs, path |
 | update-footers.ts | 1.0.0 | scripts/handbook/update-footers.ts | fs, path |
 | validate-agents.ts | 1.4.1 | scripts/validate-agents.ts | fs, path, process |
-| validate-decisions.ts | 1.1.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
+| validate-decisions.ts | 1.2.0 | scripts/validate-decisions.ts | fs, js-yaml, path, process |
 | validate-doc-folder.ts | 1.5.0 | scripts/validate-doc-folder.ts | fs, path |
 | validate-docs-links.ts | 1.6.0 | scripts/validate-docs-links.ts | fs, path |
 | validate-handbook.ts | 1.1.0 | scripts/handbook/validate-handbook.ts | child_process, path |
@@ -168,7 +168,7 @@
 | validate-pm-extends.ts | 0.3.1 | scripts/validate-pm-extends.ts | child_process, fs, path |
 | validate-procedures.ts | 1.1.0 | scripts/validate-procedures.ts | fs, js-yaml, path |
 | validate-process.ts | 1.0.0 | scripts/validate-process.ts | fs, js-yaml, path |
-| validate-raci.ts | 1.2.0 | scripts/validate-raci.ts | fs, js-yaml, path |
+| validate-raci.ts | 1.2.1 | scripts/validate-raci.ts | fs, js-yaml, path |
 | validate-skills.ts | 1.5.2 | scripts/validate-skills.ts | fs, path, process |
 | validate-surface-registry.ts | 1.1.2 | scripts/validate-surface-registry.ts | fs, path |
 | validate-templates.ts | 1.86.0 | scripts/validate-templates.ts | child_process, crypto, fs, js-yaml, path, url |
@@ -188,10 +188,13 @@
 | Name | File | Platform | Skill Integration |
 |------|------|----------|-------------------|
 | changelog | .claude/commands/changelog.md | all | N/A |
+| commit-push-pr | .claude/commands/commit-push-pr.md | claude | N/A |
+| gateguard | .claude/commands/gateguard.md | claude | N/A |
 | i18n-audit | .claude/commands/i18n-audit.md | all | N/A |
 | memlog | .claude/commands/memlog.md | all | N/A |
 | new-task | .claude/commands/new-task.md | all | N/A |
 | post-write | .claude/commands/post-write.md | all | N/A |
+| project-review | .claude/commands/project-review.md | claude | N/A |
 | security-check | .claude/commands/security-check.md | all | N/A |
 | sync | .claude/commands/sync.md | all | N/A |
 
@@ -201,8 +204,8 @@
 
 **Checked**: Claude (.claude/), Gemini (.gemini/), Antigravity (.agents/), Codex (.codex/ prompts mapping)
 
-- **Commands with parity (gemini mirror)**: 7 / 7
-- **Commands with codex prompts mapping**: 7 / 7
+- **Commands with parity (gemini mirror)**: 7 / 10
+- **Commands with codex prompts mapping**: 7 / 10
 - **Skills in all four mirrors**: 0 / 37
 - **Skills in claude+gemini only (both)**: 0 / 37 (common-template skills are parity-exempt)
 

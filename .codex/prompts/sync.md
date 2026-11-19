@@ -1,52 +1,66 @@
----
-name: sync
-description: Sync today's development session to Git — run the documentation audit, update the memory index, commit all changes, push, and open a GitHub PR.
-argument-hint: "<conventional-commit-message>"
-allowed-tools: ["Bash"]
----
+Run the full project sync pipeline.
 
-# /sync — Full Sync Pipeline
+Arguments: $ARGUMENTS
 
-Run the full commit + PR pipeline for QuickDL.
+## Execution Steps
 
-## Usage
+1. **Write the PR body** (the agent writes it — never shell out to an LLM CLI):
+   - Inspect the change: `git diff HEAD~1 --stat` and `git diff HEAD~1 --name-only` (first 30 files).
+   - Write the body in English using EXACTLY this structure (keep all section headers, fill placeholders):
 
-```
-/sync "feat: description of change"
-```
+     ## Why
+     [1-3 sentences: what problem does this solve and why now?]
 
-## What it does
+     ## What Changed
+     [concise bullet list of actual changes — be specific, not generic]
 
-1. Runs the workspace audit (`bun scripts/audit.ts`) — aborts on any gate failure
-2. Ensures `memory/YYYY-MM-DD.md` exists (creates if missing)
-3. Updates `memory/MEMORY.md` index with today's entry (awk insertion after header)
-4. Stages all changes and commits with the provided message
-5. On `master`/`main`: creates a `pr/<timestamp>-<slug>` branch, resets master, pushes the PR branch, opens a GitHub PR (skips if PR already exists)
-6. On feature branches: pushes directly
+     ## Test Plan
+     - [ ] `bun scripts/audit.ts` passes
+     - [ ] [add relevant manual or automated test steps]
 
-## Steps
+     ## Security Checklist
+     - [ ] No secrets, credentials, or API keys committed
+     - [ ] No `.env` files staged (use `.env.sample` for templates)
+     - [ ] Dependencies unchanged or reviewed for new CVEs
 
-Run:
+     ## Notes
+     [Breaking changes, deployment steps, or reviewer guidance. Write 'None' if not applicable.]
 
-```bash
-bash scripts/dev-sync.sh "$ARGUMENTS"
-```
+     ---
 
-If `$ARGUMENTS` is empty, the script will prompt for a commit message.
+   - Save it to `<git-dir>/sync-pr-body.md`, where `<git-dir>` is `git rev-parse --git-dir` (e.g. `.git/sync-pr-body.md`) — outside the working tree so it is never committed.
 
-Report the PR URL when done.
+2. Run the sync script with the provided arguments, passing the body file:
+   ```bash
+   bun scripts/dev-sync.ts --body-file "$(git rev-parse --git-dir)/sync-pr-body.md" "$ARGUMENTS"
+   ```
 
-## Pre-PR Security Gate (public repos only)
+3. The pipeline executes the following steps in order:
 
-Before pushing/creating PR, check if the repo is public:
+| Step | Name | Fatal? | Description |
+|------|------|:------:|-------------|
+| 0 | CWD Guard | **FATAL** | Verifies script runs from workspace root; exits if CWD mismatches `import.meta.dir/..` |
+| 1 | Language Gate | **FATAL** | Commit message / PR title must be English (context.md S3); blocks non-English via `language-guard.ts` |
+| 2 | Memory Session Entry | **FATAL** | Appends session summary (changes, decisions, open issues) to `memory/YYYY-MM-DD.md` |
+| 2 | MEMORY.md Index Sync | **FATAL** | Updates `memory/MEMORY.md` index via `sync-md.ts` |
+| 2.5 | scripts/README.md Generation | **FATAL** | Regenerates `scripts/README.md` via `generate-scripts-readme.ts` if the script exists |
+| 3 | CHANGELOG.md Check | **FATAL** | Checks `CHANGELOG.md [Unreleased]` — **blocks and exits** if empty (agent must add entries first via `/changelog` or manual edit) |
+| 3.6 | Deprecated Script Warnings | non-fatal | Scans `SCRIPTS.md` for deprecated scripts and prints warnings |
+| 3.7 | L0/L1 Script Drift Check | non-fatal | Runs `verify-scripts.ts --check-drift` to detect drift between L0 and L1 script copies |
+| 3.8 | Memory File Archival | non-fatal | Runs `archive-memory.ts` to archive old memory files |
+| 3.9 | Spec Registry Check | **FATAL** (L0) | Runs `audit.ts --spec-check --lifecycle-only` — blocks on the spec-relevance Fail (code diff with no spec activity; ADR-0055 Stage 2) and any always-on audit Fail; stale/missing-spec stay WARN; escape hatch `--spec-exempt=E1-E5` (AGENTS.md §5.1.1); skipped when `docs/specs/registry.json` is absent |
+| 3.95 | QA Pre-checks | non-fatal | Runs project tests (if `package.json` has `test` script) and warns if `README_ko.md` is missing |
+| 3.97 | Governance Reflection Gate | **FATAL** (L0) | Runs `verify-adr-governance.ts --strict` — blocks sync when post-cutoff Accepted ADRs lack governance-doc references (ADR-0059 Stages 2+2b: unlinked-ADR and marker-drift findings block); skipped in scaffolded projects (L0-only validator) |
+| 4.5 | L0 to L1 Publish | **FATAL** (L0) / non-fatal (L1) | Propagates scripts, skills, commands, docs via `propagate-to-templates.ts --apply`; fatal only in L0 context (context.md present) |
+| 4.6 | Skill Sync to Platforms | non-fatal | Runs `sync-skills.ts` to distribute skills to `.claude/skills/`, `.gemini/skills/`, `.agents/skills/`; warnings only |
+| 4.7 | VERSION_MANIFEST.md Generation | **FATAL** | Generates `VERSION_MANIFEST.md` via `generate-version-manifest.ts` |
+| 4.9 | AUDIT GATE | **FATAL** | Runs `audit.ts` — must exit 0 before proceeding |
+| 5 | Branch Creation | **FATAL** | Creates `pr/<timestamp>-<slug>` branch if on main/master; reuses existing branch otherwise |
+| 6 | Sensitive File Guard + Git Add/Commit/Push | **FATAL** | Guards against `.pem`, `.key`, `.env`, `credentials.json`, etc.; runs `git add -A`, `git commit`, `git push` |
+| 7 | PR Creation | **FATAL** | If `--body-file` was passed, validates it (English) and opens the PR via `gh pr create --body-file`; otherwise falls back to `gen-pr-body.ts` template, `.github/pull_request_template.md`, then `gh pr create --fill`; idempotent — updates existing PR if one already exists for the branch |
 
-```bash
-gh repo view --json isPrivate -q '.isPrivate' 2>/dev/null
-```
+4. If audit fails, fix the reported issue before re-running `/sync`.
 
-If the result is `false` (public repo): run `/security-check --pr` (read-only advisory check).
+## PR Language Rule
 
-- If CRITICAL advisories are found: show the warning and **pause** — let the user decide whether to proceed or stop.
-- If no CRITICAL advisories: continue with push and PR.
-
-For private repos: skip this gate entirely.
+All PR titles and bodies generated by this command **must be written in English**, regardless of the active session language. This applies to the agent-written body in step 1 and to any `gh pr create` / `gh pr edit` calls — `dev-sync.ts` blocks non-English bodies at the same `language-guard` gate used for commit messages.

@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-20](2026-11-20.md) | chore(upgrade): template wave delivery (2026-11-20 runner, dry-run clean) |
 
 # QuickDL — Development Log Index
 
@@ -16,6 +17,7 @@
 | 2026-10-30 | feat: complete & verify Production-Hardened Downloads round (quality/subs/verify/manifest/id-names) — 60 tests pass, i18n 16/16 parity, co-deck ADR-0002 provenance credited |
 | 2026-10-30 | feat: second co-deck round — original-audio forcing (`--audio-lang`, anti-dubbing) + caption fallback chain (`--captions-langs`, manual→auto→translated→failed) — 85 tests pass, i18n 75-key parity |
 | 2026-10-30 | feat: third co-deck round — caption coverage gate (`--require-caption-coverage`), sidecar cleaning pipeline (tag-strip/rolling-dedup/overlap-clip), swap/retire provenance (`--swap`, `retired[]`) — 111 tests pass, i18n 78-key parity |
+| 2026-05-25 | refactor: sync hybrid scripting settings and remove cmd files (archived: memory/archive/2026-05-25.md) |
 | [2026-11-16](2026-11-16.md) | chore: relicense QuickDL from AGPL-3.0 to MIT |
 | [2026-11-17](2026-11-17.md) | fix: strip UTF-8 BOM from 8 text files (docs, agent guides, ps1 scripts, .gitattributes) |
 | [2026-11-19](2026-11-19.md) | chore: sync session memory log (2026-11-17) |
