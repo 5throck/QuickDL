@@ -1,20 +1,132 @@
 {
   "schemaVersion": 2,
-  "timestamp": "2026-11-18T19:21:31.996Z",
-  "project": "QuickDL",
+  "timestamp": "2026-11-19T18:33:00.253Z",
+  "project": "co-utility",
   "templateVersion": "0.30.0",
-  "templateSha": "e14d35b818ed9ad3836a5b90d9b3825e19f46ee0",
-  "baseSha": "e48ed57f0e60db9495d5aba5a5d2f644d2cafd83",
+  "templateSha": "d62ec06e2f90e22b407037b20ce9ff8adac7b13b",
+  "baseSha": "bd22a17a0c00a94d65848fa434bb1e9bd8861a19",
   "files": [
+    ".claude/commands/changelog.md",
+    ".claude/commands/memlog.md",
+    ".claude/commands/new-task.md",
+    ".claude/commands/sync.md",
     ".claude/settings.json",
-    "GEMINI.md",
-    "template-version.txt"
+    ".codex/prompts/changelog.md",
+    ".codex/prompts/memlog.md",
+    ".codex/prompts/new-task.md",
+    ".codex/prompts/sync.md",
+    "CHANGELOG.md",
+    "CLAUDE.md",
+    "agents/backend.md",
+    "agents/frontend.md",
+    "agents/qa.md",
+    "agents/security.md",
+    "docs/co-utility.context.md",
+    "scripts/SCRIPTS.md",
+    "scripts/generate-raci.ts",
+    "scripts/helpers/registries/validation-policy.ts",
+    "scripts/helpers/registries/variant-type-registry.ts",
+    "scripts/helpers/scaffold-markers.ts",
+    "scripts/helpers/template-utils.ts",
+    "scripts/lib/constitution-scrub.ts",
+    "scripts/lib/hook-dedupe.ts",
+    "scripts/lib/platform-skeleton-merge.ts",
+    "scripts/lib/upgrade-policy.ts",
+    "scripts/validate-decisions.ts",
+    "scripts/validate-raci.ts",
+    "template-version.txt",
+    ".claude/commands/commit-push-pr.md",
+    ".claude/commands/gateguard.md",
+    ".claude/commands/project-review.md",
+    ".codex/prompts/commit-push-pr.md",
+    ".codex/prompts/gateguard.md",
+    ".codex/prompts/project-review.md",
+    ".gemini/commands/changelog.toml",
+    ".gemini/commands/commit-push-pr.toml",
+    ".gemini/commands/gateguard.toml",
+    ".gemini/commands/memlog.toml",
+    ".gemini/commands/new-task.toml",
+    ".gemini/commands/project-review.toml",
+    ".gemini/commands/sync.toml",
+    "docs/lifecycle/skills/post-write-check.md",
+    "scripts/helpers/adoption-provenance.ts",
+    "scripts/helpers/delivery-riding.ts"
   ],
   "baselines": {
-    ".claude/settings.json": {
-      "hash": "03a1439fb0e9427479152e231d4d94e3729d6b3f4f6ff80d0445374f766324af",
+    ".claude/commands/changelog.md": {
+      "hash": "f41bdf6b76ec0cbae3de06364eb32d0abc584df027cc600ba2a309c4ab679762",
       "templateVersion": "0.30.0",
-      "blob": "298c94c8d0208da3ab52b6d3fc86eb306d2376e5"
+      "blob": "34cc1056e2ff66eadc31a833add23cd7e7045c65"
+    },
+    ".claude/commands/commit-push-pr.md": {
+      "hash": "e26d0e26596a6bd04aa27d52f72b477856e91670c8eaed2556d22fd929837b58",
+      "templateVersion": "0.30.0",
+      "blob": "94fd958329318062eff04b3a7d0d68d79c0b7f92"
+    },
+    ".claude/commands/gateguard.md": {
+      "hash": "bc4cb646f0fc6276dafca3c075bd47ef82daa2da073a8d059f1a00a91b895902",
+      "templateVersion": "0.30.0",
+      "blob": "afd1a4d7643758b8920c543f18dbc34cd6e19a27"
+    },
+    ".claude/commands/memlog.md": {
+      "hash": "ce6acc582ad967a2dfc473c98d4665c1b5f0fc7bb06fd642968b1f1933ce8062",
+      "templateVersion": "0.30.0",
+      "blob": "eb92f884d3341b9c438039f3bf85d6cc0f1d695c"
+    },
+    ".claude/commands/new-task.md": {
+      "hash": "bc10306ca66a1a678b9fd8c301e85f33eccbda17cd4d1864ef202f876d498f19",
+      "templateVersion": "0.30.0",
+      "blob": "808b43887e6769c5658ef7400c64cd8976fbbad8"
+    },
+    ".claude/commands/project-review.md": {
+      "hash": "ffc79173061cb39dad6af90d8011922f1056a95830580d7d4afa2135872e6aee",
+      "templateVersion": "0.30.0",
+      "blob": "b770563c04f8f2b84cf811b4f67f814b716b6111"
+    },
+    ".claude/commands/sync.md": {
+      "hash": "f3f704618db6e9d6abfc10d0bc4cba42c9e9e6e8db370800269eabf0c1a1cb01",
+      "templateVersion": "0.30.0",
+      "blob": "0fdc67115d9ac17b4be40d95eb9d18c3d1fe1663"
+    },
+    ".claude/settings.json": {
+      "hash": "ebd1f84fa664c522fbf89f8133b357630b6ad5cea6469a36b4ad1e4587d2f36d",
+      "templateVersion": "0.30.0",
+      "blob": "aba82e1d9ac7984653a3f6674feb5db688742c1e"
+    },
+    ".gemini/commands/changelog.toml": {
+      "hash": "f956e534c57d39e07302d84d4f4d01ff7926d773bde5e143062ff83eeb5ac13e",
+      "templateVersion": "0.30.0",
+      "blob": "870fc5ac2d42d9fb412505631456d9d0121741b2"
+    },
+    ".gemini/commands/commit-push-pr.toml": {
+      "hash": "6cb66d203f3c1193e694a8146e68c77ce99280766505ddaffa2b2f03acb4d318",
+      "templateVersion": "0.30.0",
+      "blob": "9f52de4f43677da65b4b19a0cd6e2b500e0f894b"
+    },
+    ".gemini/commands/gateguard.toml": {
+      "hash": "045e33cb4f79bce445cf0352c4ea336eedd64b47e5bb58f64af457e347591aee",
+      "templateVersion": "0.30.0",
+      "blob": "e5a789e0b99d8b23b64b67204e67a43710dee719"
+    },
+    ".gemini/commands/memlog.toml": {
+      "hash": "230f100bb104f46f66e2ca8c2ccc19267b48935fc5c8678de95608b899f8ece7",
+      "templateVersion": "0.30.0",
+      "blob": "b9278e456c9b0e8172ec088a4c1ee2f5eb95f9bb"
+    },
+    ".gemini/commands/new-task.toml": {
+      "hash": "aa6d4c3c2486e38a93f98b627a69a9a6effa5feff88f9815b35ecf0bd9a5f085",
+      "templateVersion": "0.30.0",
+      "blob": "6b1afac04ed75138d14848398cc78639c547698d"
+    },
+    ".gemini/commands/project-review.toml": {
+      "hash": "894d3d41ddb34397bdebfea656e71857b6d6c869cdc55ac4cf51b614a911c548",
+      "templateVersion": "0.30.0",
+      "blob": "81577cc1362185076cd1c73d366c473f587261a6"
+    },
+    ".gemini/commands/sync.toml": {
+      "hash": "88def8a6d33530c00324781741028e9208d761586d2c6e1bacd6182f9fdef244",
+      "templateVersion": "0.30.0",
+      "blob": "77854eb79247d694c12e2ba9daad9c14a015cfbe"
     },
     ".githooks/commit-msg": {
       "hash": "6375ca75a1fa6cf1547835b64f2b36c549b4faf4aa4aab0fccc4e88e06451f54",
@@ -52,9 +164,9 @@
       "blob": "f4973b825a37599062b3b265d7df7482880c9272"
     },
     "CLAUDE.md": {
-      "hash": "e7e538b118024318a75db77318df52c39dcd9dcd63890e24402484872a22e3f6",
+      "hash": "64b4ee349dd8f4030336f58324bffdcf10ba47df649fce2c10ae8d33c48aad90",
       "templateVersion": "0.30.0",
-      "blob": "cbe3c82f5ceb5431cc210f4b3b3e270d88d013b3"
+      "blob": "24467ba581340da086a54a72aba8baab99087327"
     },
     "CODEX.md": {
       "hash": "a97f02c0c20af9a0136854e8655bca22136c225f8d41eacd7690d8c40ac67f39",
@@ -71,35 +183,120 @@
       "templateVersion": "0.30.0",
       "blob": "a5e8ffc9a9b3a699e524d39815d2686865080505"
     },
+    "agents/backend.md": {
+      "hash": "ec4675f95a455e979a6a1374f0f5478e6eefa719a81332ff3e2fe7abba6b77fb",
+      "templateVersion": "0.30.0",
+      "blob": "e8cdcc7d52b404dc50791209c66941a0528fa523"
+    },
+    "agents/frontend.md": {
+      "hash": "fcd7ba6c3ffc132bf372ace11b0f6be53b7f8a0e28fcdbbeb101405d1c0d4f11",
+      "templateVersion": "0.30.0",
+      "blob": "2f9b5fa0b5f9409bfca9391c30314397b8eb7c35"
+    },
     "agents/pm.md": {
       "hash": "ba87a6070e8211abd920be2802e25ab1a427c996f19476cfd6b22fe6b03e5966",
       "templateVersion": "0.30.0",
       "blob": "0608061cd656636b789e59b489a03b5dde43e0eb"
     },
-    "docs/co-develop.context.md": {
-      "hash": "09e70436860450b658861f831e39efc12a4a6cfb584798f0c63f7f5c2e2b6fd0",
+    "agents/qa.md": {
+      "hash": "13fd1233cb52ac9fb065d5625a88a7bd31aa632319d2c03a6601e3a7ffd550a3",
       "templateVersion": "0.30.0",
-      "blob": "dbc590b8b0d5af7f75cfd29d029181d560a48c58"
+      "blob": "90b54d7a63f334a52eded2eb09ff33cd74268b8c"
     },
-    "docs/phase-definitions.md": {
-      "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
+    "agents/security.md": {
+      "hash": "46581d31cfd5764310e3a16614ef3d40b3ea7774a7f245414e0a249379593592",
       "templateVersion": "0.30.0",
-      "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
+      "blob": "68b52d570358f5f3fc43867768d7f0bd16f1b534"
+    },
+    "docs/co-utility.context.md": {
+      "hash": "0a5c2f58762d67cc4bc4db70cc88bc65279d1e60bd47e101d227405d2fd7d021",
+      "templateVersion": "0.30.0",
+      "blob": "d60fbe53e6571ef03c3a3e78f7e74c60f6abdbb8"
+    },
+    "docs/lifecycle/skills/post-write-check.md": {
+      "hash": "bd164861dd163498b91c65b64bb73aa99d28b20fd9ddbf5cf24961df968acbcd",
+      "templateVersion": "0.30.0",
+      "blob": "94a43893fd7117f1237ffcb262080fa0db455d3f"
     },
     "docs/security.md": {
       "hash": "6424d80604638ae56523d66a6a3447b3bb14ec249afb20d2fe70f75bca30f87d",
       "templateVersion": "0.30.0",
       "blob": "dc6dd2e84dd1ad63b77bbdde06e6ff63eeb2151e"
     },
+    "scripts/generate-raci.ts": {
+      "hash": "064c6c449fd2c6059c9aacbe12d84359c85312bb611d6688037aecd9f717d2e7",
+      "templateVersion": "0.30.0",
+      "blob": "a534f246a5758a8b1a4b9729c4afc8d4af7cbc40"
+    },
+    "scripts/helpers/adoption-provenance.ts": {
+      "hash": "0bc4f52ab132de3cbec4c6faad17ff36956d15ef7dffb1f2322fe3a1d4af2e40",
+      "templateVersion": "0.30.0",
+      "blob": "0f81bc15d39f952bf7968ca7ac0e4b61f8b0de71"
+    },
+    "scripts/helpers/delivery-riding.ts": {
+      "hash": "19f2b3b2cc7b6093604ef86d93b2c8fc8f4d9b70364c5c89f9b60ca0d3e47d91",
+      "templateVersion": "0.30.0",
+      "blob": "599fa6b1c5edd4329dadb6efdbe256cc92f1acc3"
+    },
+    "scripts/helpers/registries/validation-policy.ts": {
+      "hash": "ffffc1a2535444f54b3aad48608fddddd434a0c72fcc95229b8378745dfb5cd7",
+      "templateVersion": "0.30.0",
+      "blob": "03502f567e5571c316daea85b8f6cff3f914cdf6"
+    },
+    "scripts/helpers/registries/variant-type-registry.ts": {
+      "hash": "6562b53ec47d001b554156a067c7b597ea2ec34dfdfe3ee8dfb8305d8dd4c716",
+      "templateVersion": "0.30.0",
+      "blob": "09115c631e0964dea832694aa085f6adbcf726fc"
+    },
+    "scripts/helpers/scaffold-markers.ts": {
+      "hash": "6a6636833d35bb2dd62e9d7b65f7d268be21c39a9bbdc5b0fba25b8540490070",
+      "templateVersion": "0.30.0",
+      "blob": "06a6ce727845c46e9d958e2b30e070bec77aa415"
+    },
+    "scripts/helpers/template-utils.ts": {
+      "hash": "d511ab11bc45700d909e283a75592c954961211582832373441d6b8006f5166f",
+      "templateVersion": "0.30.0",
+      "blob": "d3b5e7e1297a827624a5835a4f3a56bce0f7276d"
+    },
+    "scripts/lib/constitution-scrub.ts": {
+      "hash": "0b24285273d0f74c88ea920ce92a995ba9048f9160fd09f3d8d56e544244be03",
+      "templateVersion": "0.30.0",
+      "blob": "a7f47a9538ad12ddd7ff8419ce2d975dbdcb24b4"
+    },
+    "scripts/lib/hook-dedupe.ts": {
+      "hash": "7ddd04198a167c913dcd287bd65c6d50ba75ca6f079923ff3c869ffa2fc75d60",
+      "templateVersion": "0.30.0",
+      "blob": "1d6e5bae2d7ec4b96ad455142fd151bef82de767"
+    },
+    "scripts/lib/platform-skeleton-merge.ts": {
+      "hash": "a234033c5bb02102873cbbcbe0a276f27e890752c5ee8583ea9f684a76050b13",
+      "templateVersion": "0.30.0",
+      "blob": "6a03d69639b6c7e96da8216da93640098480ec24"
+    },
+    "scripts/lib/upgrade-policy.ts": {
+      "hash": "32ce566c70f3eadacd9e79a19f83cb01862257da5424f7d0c8c17f8fd5f17ed8",
+      "templateVersion": "0.30.0",
+      "blob": "c696e7ec4686db68c2be7c9c2620afbad4cef103"
+    },
+    "scripts/validate-decisions.ts": {
+      "hash": "f52c3b6e59d1b881c18f4a412e1808f8ef458d6596c909848bc54a76a5ce3c76",
+      "templateVersion": "0.30.0",
+      "blob": "78e450bfe78c41f57655043573d2f518ef051e83"
+    },
+    "scripts/validate-raci.ts": {
+      "hash": "d6c1f86190e5b07e8a24e59c4ffe9c3aa7a93fec93fe08b01db4cd365e9e3606",
+      "templateVersion": "0.30.0",
+      "blob": "bec71965d5fee6105fded4224bbe72ecff2548f1"
+    },
+    "docs/phase-definitions.md": {
+      "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
+      "templateVersion": "0.30.0",
+      "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
+    },
     "scripts/lib/external-deps.ts": {
       "hash": "952377ae40fb15b1599ee378a5961a2bc6caea991e9e41597bc914134c6a5e8a",
       "templateVersion": "0.30.0",
       "blob": "4b1e7fe3b7e43348d9abc3fbc2d5bf38ce5659df"
-    },
-    "scripts/lib/upgrade-policy.ts": {
-      "hash": "73b19b13d1be90bf8edce154a50c869e217f755c65881c76d808f2f7346e2980",
-      "templateVersion": "0.30.0",
-      "blob": "197bec686457190c2d0d6b85e82000fddf3b9d20"
     },
     "agents/automation-engineer.md": {
       "hash": "0cdff6f6439400114ddd590fff00f01ea96f3c2e47091c8f7ae8d14b10ea554a",
@@ -161,11 +358,6 @@
       "templateVersion": "0.30.0",
       "blob": "a090ee059307167b2b5d45c4d864571adb0f3d36"
     },
-    ".claude/commands/security-check.md": {
-      "hash": "1dbf88ca08f3f5e745e0e7490b427c6de395ed9ed2f619e74d76ffad49f92cd5",
-      "templateVersion": "0.30.0",
-      "blob": "d2bc97ff3a3d1ff725d0fc9eb06b26376607c386"
-    },
     ".claude/skills.json": {
       "hash": "c514710d97899e895bd333386ddc107db091cd39b50a4ca494d530b9d7a4e4d7",
       "templateVersion": "0.30.0",
@@ -190,11 +382,6 @@
       "hash": "452b5b9bee150a83e14d13ef258f99e8ffa0daa1b8cb12b8e78720cc64ffb2a4",
       "templateVersion": "0.30.0",
       "blob": "a85208df6444319af9760517d60c773349ca355a"
-    },
-    ".gemini/commands/security-check.md": {
-      "hash": "1dbf88ca08f3f5e745e0e7490b427c6de395ed9ed2f619e74d76ffad49f92cd5",
-      "templateVersion": "0.30.0",
-      "blob": "d2bc97ff3a3d1ff725d0fc9eb06b26376607c386"
     },
     ".gemini/settings.json": {
       "hash": "b47f600b675a18c8f1b1b6f1a77e750a4e70c6443e66ca62da113d2e6ddfd5e4",
@@ -251,40 +438,10 @@
       "templateVersion": "0.30.0",
       "blob": "b43647e61635a1db8ac49b678f8175671255f5b0"
     },
-    "agents/architect.md": {
-      "hash": "463ba4c99d3d03816efb8a74bf6e82deb836e1aee6a206d4518e4e6da30739ae",
-      "templateVersion": "0.30.0",
-      "blob": "faec1cde31c79a709a0e7ca836b177dbf4c52c59"
-    },
-    "agents/code-writer.md": {
-      "hash": "f0fa4618e47610016ae13d9bc427fc39a0d5ec242cd39b25d08eff8ffbfc3c36",
-      "templateVersion": "0.30.0",
-      "blob": "a3b3fa781c8b10514c07bc53e2b3b185e8c04731"
-    },
-    "agents/designer.md": {
-      "hash": "35649b2b0b71f86479ee792fca0d6f5711762f18f4a383ef1678059d881b84f9",
-      "templateVersion": "0.30.0",
-      "blob": "465571fac624ab0ab57d57fcfdab6586075cd15c"
-    },
     "agents/i18n-specialist.md": {
       "hash": "1ccd5feff8c801dfa11efff2e0afc195f962a5c344bed6ae627884ce61e68248",
       "templateVersion": "0.30.0",
       "blob": "57d24a23968eed6f6a220925e0bb261881879802"
-    },
-    "agents/security-monitor.md": {
-      "hash": "58e3eea825ac061d7b945039a3cc473c94176c9efadfec60afb1cb3de5bb3043",
-      "templateVersion": "0.30.0",
-      "blob": "c8ea465faa1d4b6a8ef286c8eac48c510f5b8733"
-    },
-    "agents/stack-setup.md": {
-      "hash": "6eeb5b749ae24472ec9c42ecb8b5c41413aa9d6d3ef745d213d62d741bf407d0",
-      "templateVersion": "0.30.0",
-      "blob": "9a198868b71ced34d940ed1529ed03b14ebfd693"
-    },
-    "agents/test-runner.md": {
-      "hash": "08463cbb3918ebbaa7cb9627e600b79215cb16b61bca862f5e9caa9715dc7ece",
-      "templateVersion": "0.30.0",
-      "blob": "d30e1f8ea5d7603ac674b3475ee41b348eb07aea"
     },
     "docs/README.template.md": {
       "hash": "fa89d4dc399f0c60a1e42ed9d3d2a2f513312f52db435dbcac15c843fce18403",
@@ -295,26 +452,6 @@
       "hash": "6b7eb305341a089ec3dc7ef09bfbbfde76384105384dcf78e2767b1a57739c82",
       "templateVersion": "0.30.0",
       "blob": "9f852ea91a1af1a82de281e9e486195848513fb5"
-    },
-    "docs/benchmark-fixtures/ISSUE-001.md": {
-      "hash": "669a3831ef0030bf1646925a1db784da05440f9bdb1ff79b188066963e6c3bf0",
-      "templateVersion": "0.30.0",
-      "blob": "8467541791a578bc03252e5becdcc7a738dcae0b"
-    },
-    "docs/benchmark-fixtures/ISSUE-002.md": {
-      "hash": "270267697d73bda5790d1951e3258665e1260fd215f2ef89f61306ae87234aa1",
-      "templateVersion": "0.30.0",
-      "blob": "00fe69009d5fe39a2ddf87715f43a09252858d9b"
-    },
-    "docs/benchmark-fixtures/ISSUE-003.md": {
-      "hash": "d0be3e7eca8e1c0cd34d6794abfe1470d929ce94f9f74a543caf7f6ce546dbc0",
-      "templateVersion": "0.30.0",
-      "blob": "9b7e9ea81dc10ab3cd43265490dbb016f2cba4f9"
-    },
-    "docs/benchmark-fixtures/README.md": {
-      "hash": "559d53f5a375376460b4aa978cf496d9bd82b5df09296cf2beccccdfa5669e09",
-      "templateVersion": "0.30.0",
-      "blob": "0ae4f6b27e76cab36940336935f401fd9449bd37"
     },
     "docs/components.template.md": {
       "hash": "aa879df56299d1d863eadf27342aa897d399cd86b159d5e4b296dfdae19c3524",
@@ -346,31 +483,6 @@
       "templateVersion": "0.30.0",
       "blob": "ca736ada226741444bcf71e0f420db27c0a88b16"
     },
-    "docs/handoff-spec.md": {
-      "hash": "b0ec9e1ab19bc4544900a5f7bdfa7cd1144c525ee21bb86d2d8689fe3b0be9d1",
-      "templateVersion": "0.30.0",
-      "blob": "03c81b8ede708e77d364546365d00003b473e6ed"
-    },
-    "docs/handoff-spec_ko.md": {
-      "hash": "1c25745c2cc0ef8831d06f005136f5281a521ba7db91202763dbdce27930c164",
-      "templateVersion": "0.30.0",
-      "blob": "175045c9ae0d5b76ce89179ad5466ee074f45ee7"
-    },
-    "docs/lifecycle/agents/architect.md": {
-      "hash": "648e578ba75b8f98f0fb4287a959b975f93ce60fc23b37cbbb90d880f6e59799",
-      "templateVersion": "0.30.0",
-      "blob": "3020f76c0508dbd203bbcbe19bac906433fb0fc2"
-    },
-    "docs/lifecycle/agents/code-writer.md": {
-      "hash": "6deafb62cea4afe7d79bb0bba6f349b94d9f47a445f90ee9b40bfb977338426a",
-      "templateVersion": "0.30.0",
-      "blob": "6c444d37a888650d143421279cc3449a1bdf692c"
-    },
-    "docs/lifecycle/agents/designer.md": {
-      "hash": "09296a2865583d0c485f81802391dc378d1066789c4568c1f7a5202b7a324eb6",
-      "templateVersion": "0.30.0",
-      "blob": "cc0ba438a3115221e2ae53154a495246c9c5f936"
-    },
     "docs/lifecycle/agents/i18n-specialist.md": {
       "hash": "43df588c63bebb096f987a4cb3c573fcba4bf934d71d05c89fb5565cc28de0d3",
       "templateVersion": "0.30.0",
@@ -380,21 +492,6 @@
       "hash": "b2d66ebbd448ac85bf94176cb1a87370592eeeac65d14189af59a3139fb6ce9e",
       "templateVersion": "0.30.0",
       "blob": "b9a92ea2c8c140ea1801b1947b760e5c7b52aca0"
-    },
-    "docs/lifecycle/agents/security-monitor.md": {
-      "hash": "0d6e5bf4bd5d72185d86dc3432fef4c87c4b0900b3c68d1dcf2fbbeb39f46ce9",
-      "templateVersion": "0.30.0",
-      "blob": "eb29d4437432680fc096b51f26824d6dc7698625"
-    },
-    "docs/lifecycle/agents/stack-setup.md": {
-      "hash": "bd0f54b20fdb0070d9011af62b61a807c84f0490afae841788b13250293f2f19",
-      "templateVersion": "0.30.0",
-      "blob": "c90fc145ceb338925d3d86275d5ee3d186dea578"
-    },
-    "docs/lifecycle/agents/test-runner.md": {
-      "hash": "ee7508ffcfe506528fb22fd2aef75caa110c0e98b6d92550f9867819f101dca6",
-      "templateVersion": "0.30.0",
-      "blob": "cd29f81c739d7e28aadf94fff90008504a45eae1"
     },
     "docs/lifecycle/skills/accessibility-audit.md": {
       "hash": "3c1a35dbf8c2ff05e988783674ab3249f11546544d43769937446604f621a1da",
@@ -415,11 +512,6 @@
       "hash": "e605f120a026eeae4a9569f0d905589824436da3f57d2c26470516a8538e3513",
       "templateVersion": "0.30.0",
       "blob": "e8785eac5640084a9e7fe75e25d84af6b1113562"
-    },
-    "docs/lifecycle/skills/code-review.md": {
-      "hash": "71d03a8449c5cd560967ea69dbc8984cb1f2ee6caf2602f4046eb31e3441c8c6",
-      "templateVersion": "0.30.0",
-      "blob": "2e59983c92e819ac694c9db89b8f350aefd3a3ab"
     },
     "docs/lifecycle/skills/decision-record.md": {
       "hash": "6b20d950028c8232d1354b1bdd1b983783d2f88cf7a55e69341bd4937f4efc74",
@@ -541,11 +633,6 @@
       "templateVersion": "0.30.0",
       "blob": "23d8bc999de62895c0cb39be8867e4a50432a3f2"
     },
-    "docs/lifecycle/skills/refactoring.md": {
-      "hash": "3b8107445949c8024a11493c5a37d960646c5f8ebb5c1cb860112a6cc6c8f250",
-      "templateVersion": "0.30.0",
-      "blob": "688d81a31a4f970c5c64fc912fba6908b0048d70"
-    },
     "docs/lifecycle/skills/research-analysis.md": {
       "hash": "e34c76bc5f56f77dff9207e57dc11c246c519a0980ce6ab4431e3cd388398d12",
       "templateVersion": "0.30.0",
@@ -581,11 +668,6 @@
       "templateVersion": "0.30.0",
       "blob": "1eb9510233d1ac4b645f30f6823fab45be6670a8"
     },
-    "docs/lifecycle/skills/swe-solve.md": {
-      "hash": "03d4b2c1bf52bf93007e965ebb65b2d9b07a71f55995022c384153eedcca78a8",
-      "templateVersion": "0.30.0",
-      "blob": "ef02d09c43f8c32cee92ed3e10073088409bd872"
-    },
     "docs/lifecycle/skills/sync.md": {
       "hash": "56962b67829f0d8c06e8e02059af84241da394cc8e0aaad7539d36cd252fe976",
       "templateVersion": "0.30.0",
@@ -595,11 +677,6 @@
       "hash": "86bcd48beeba7182f3e91b423d8b5a52457d24e9b79e2670806fef61f794da74",
       "templateVersion": "0.30.0",
       "blob": "fab70b25b70fc760fb51579e16869d9032731974"
-    },
-    "docs/lifecycle/skills/test-driven-development.md": {
-      "hash": "7eed115a2b0ee054cc96891a8e8948c658ea2b7ab484fc2377c61cdda3ac4ebf",
-      "templateVersion": "0.30.0",
-      "blob": "526fe53c84c8543644b6838954e8ff7465c7dc36"
     },
     "docs/lifecycle/skills/token-usage-lint.md": {
       "hash": "ab5b8facb6ab28d7c8d6a8c9c275b58178a7be00bc13c7c62ddef358708c70c7",
@@ -626,16 +703,6 @@
       "templateVersion": "0.30.0",
       "blob": "7d3436769ad39d0f560a926cde0fa2ef519f2dbb"
     },
-    "docs/privacy-design-checklist.md": {
-      "hash": "df1e47b46dcb20cb08e1af6e1fe745f7faa9d9e978ae32e8fef26be3f2baa860",
-      "templateVersion": "0.30.0",
-      "blob": "2fb405d2c71188701559fc6914f4393d1c0c6749"
-    },
-    "docs/privacy-design-checklist_ko.md": {
-      "hash": "ddb9912bbb8a76dd7fe8a2b18197afad529b880701fe7c12b47fa21aa28a59dd",
-      "templateVersion": "0.30.0",
-      "blob": "fffcbb13054c41adeb285edc22abe0cdc7a8d5d6"
-    },
     "docs/procedure-schema-spec.md": {
       "hash": "0b1d6d858141615eac860b67d01d5b8eaac5b49acd8d8a28c6df60da709d30f0",
       "templateVersion": "0.30.0",
@@ -661,11 +728,6 @@
       "templateVersion": "0.30.0",
       "blob": "02cb886220a92a203ca03b111db93a1918576c79"
     },
-    "docs/stack-profile.json": {
-      "hash": "caf8125315ab3820ac185d5d537f7d2ad30d99c38ceb281f8bab51e38c1479a4",
-      "templateVersion": "0.30.0",
-      "blob": "6f5df01ed8a26938e495fe612a5c6d0a72b4d01d"
-    },
     "docs/standards/llm-interaction-standard.md": {
       "hash": "32751a50c0f4790e640961a1588dff60de22046c42be74b475f45ef4ea87d585",
       "templateVersion": "0.30.0",
@@ -686,11 +748,6 @@
       "templateVersion": "0.30.0",
       "blob": "e4333d80439835273da1722415bdedbabc1dc517"
     },
-    "procedures/architecture-design/schema.yaml": {
-      "hash": "a08e5634bc473c5b4dc5de2fe780d268a82816f5b172e426d11295a3a02c981a",
-      "templateVersion": "0.30.0",
-      "blob": "9ca28ebe8d8e4e62184ae0d8cf8ee6838af77071"
-    },
     "procedures/environment-bootstrap/schema.yaml": {
       "hash": "0cd8867b4d185228e681fb6cce85dfca0ccf66377fdb80377812cb8b44389bd7",
       "templateVersion": "0.30.0",
@@ -700,21 +757,6 @@
       "hash": "892e67121ef5c3c5c78adf2c9882eaec90ccf026e853414484f58f44cb22a842",
       "templateVersion": "0.30.0",
       "blob": "597af752f3f7ef806b5fd71e76e6390901fd56b6"
-    },
-    "procedures/release-verification/schema.yaml": {
-      "hash": "f8e581ceb0ee963c7d69211103e8b11fee2824925335ab98f53b58a57e8ffa09",
-      "templateVersion": "0.30.0",
-      "blob": "5d76625a0f9f622801393cc45ebcedb079315f03"
-    },
-    "procedures/security-release-retrospective/schema.yaml": {
-      "hash": "536a1403f3076c9fe82727eb6a55a4546cd63ce050fc4749fa1c0224b23042b4",
-      "templateVersion": "0.30.0",
-      "blob": "26a329f7b45cd2a894a9b9029edfc88ca6c7909e"
-    },
-    "procedures/technical-planning/schema.yaml": {
-      "hash": "c61b5f0b5e24e980c3514e58ff13d3c4c2f2eb580f0b4388234e13cabac00445",
-      "templateVersion": "0.30.0",
-      "blob": "d0dc3ac157242758e8ca9b5db3b3b6d81f240a1f"
     },
     "scripts/agent-create.ts": {
       "hash": "8cc7cefe53585b0ccf860e412a1224c76e58d1119db51bb64f8b06dc35ed3223",
@@ -835,11 +877,6 @@
       "hash": "23ca97e31c8a9485655164a825682f2eb56a7a88586ce4d6f93b22efd1e474fe",
       "templateVersion": "0.30.0",
       "blob": "67b243ebdd3a292500682b7c06d34e344035c81c"
-    },
-    "scripts/generate-raci.ts": {
-      "hash": "387dc9b8c0cd6c12c80ece06895c6e2ec5a36bb26a21c564c2274aafaf7aa0a7",
-      "templateVersion": "0.30.0",
-      "blob": "9870dff24b883661afaaeeb876aacb4753ee128c"
     },
     "scripts/generate-skill-graph.ts": {
       "hash": "d8f7ee30cf43b4bad40f400243a1cf78bc3c3c56c3ea7f48b346b287bdb4096a",
@@ -1086,16 +1123,6 @@
       "templateVersion": "0.30.0",
       "blob": "d4e52eae1a7abc343bbc6fdbf13d2985ed7b351f"
     },
-    "scripts/helpers/registries/validation-policy.ts": {
-      "hash": "74b9ca2088ff230596e14d583bb14a874c0f58bcba92d3ad4e65836821809085",
-      "templateVersion": "0.30.0",
-      "blob": "b5e91e98d33c823b23bbdcedc5dde6cab14ed08f"
-    },
-    "scripts/helpers/registries/variant-type-registry.ts": {
-      "hash": "ed1a6dbfba4fec554d7a0b3f62f51273407ac91dd076beb467d0f421269de252",
-      "templateVersion": "0.30.0",
-      "blob": "6e3f78181e9bc4e1e6282e6a5f1b43f717344c87"
-    },
     "scripts/helpers/registry-append.ts": {
       "hash": "2708b26e97f6add5eefaca91f5b066e9680108256ce5ff14eb8372bb605aad0a",
       "templateVersion": "0.30.0",
@@ -1110,11 +1137,6 @@
       "hash": "3dd05906b7206dfb82683933bf34c7fabd6fd107227579f7411f952de0ddb619",
       "templateVersion": "0.30.0",
       "blob": "631c1ec25d92515c4a0357f0b0f62b9e2083773e"
-    },
-    "scripts/helpers/scaffold-markers.ts": {
-      "hash": "7ec8169c1db9161455f9e242887bbab624cf33622d3ae2d729ed118d855a3e7b",
-      "templateVersion": "0.30.0",
-      "blob": "24e0c835da3456310443c9c37f93b77a282c2766"
     },
     "scripts/helpers/security-validator.ts": {
       "hash": "6d6e479da907ff06c40966136f9666eaaa3a5aa68f596db1a6cfde357eec8bb5",
@@ -1135,11 +1157,6 @@
       "hash": "7ec47bad797078868bba52aac3dd2e51b1cfc3514069c805b242c62924403931",
       "templateVersion": "0.30.0",
       "blob": "686178e65cf35b415fb2b5eca13f62350d4cc6f5"
-    },
-    "scripts/helpers/template-utils.ts": {
-      "hash": "e89e7541c8d990b80ef66427733a2969afc5019914e4c1f1c7a5a8b2dcd0a70a",
-      "templateVersion": "0.30.0",
-      "blob": "b807868570a273997c623c060d8de9fb47285a73"
     },
     "scripts/helpers/theme-token-policy.ts": {
       "hash": "f37942ee6b97c6e8b8871faf676c91fd684c567a3c2ba44c3cf584fc672579d6",
@@ -1221,11 +1238,6 @@
       "templateVersion": "0.30.0",
       "blob": "81ad89bb919a97fe003ee9a44d8f556465e865c7"
     },
-    "scripts/lib/constitution-scrub.ts": {
-      "hash": "3ae81a52d3c253730e79040e6635fb9bf46a2eb46ac17102e6fa4534f6135d13",
-      "templateVersion": "0.30.0",
-      "blob": "a0509854a1da3edd5c1a36bca848662d234ab99e"
-    },
     "scripts/lib/context-md-schema.ts": {
       "hash": "5720d2ff01765c5b69efe095df96f1fe07663c4771d4db7f1f904027f1b2984e",
       "templateVersion": "0.30.0",
@@ -1286,11 +1298,6 @@
       "templateVersion": "0.30.0",
       "blob": "040673f577300cea9a80ccd9f17a9758d93e1ed6"
     },
-    "scripts/lib/hook-dedupe.ts": {
-      "hash": "0432d75d48c47000ce53ad57d900b73ea3e36a1bdffbd943f532880a504b8d18",
-      "templateVersion": "0.30.0",
-      "blob": "275335152ae871149ff02f78eb1d2806ef596903"
-    },
     "scripts/lib/language-guard.ts": {
       "hash": "b4face7e6be0d3a06b2ce3ba3d84355de22c8b2f58cb17eb13a24e2b4041192f",
       "templateVersion": "0.30.0",
@@ -1340,11 +1347,6 @@
       "hash": "0ba657cdd3ea9ca84d65517d9989a2d8425a327930f519f4e824a9c5a73345c7",
       "templateVersion": "0.30.0",
       "blob": "f82c26eec2b764ef512c0c0cc5286d25041dcb23"
-    },
-    "scripts/lib/platform-skeleton-merge.ts": {
-      "hash": "663b958250d0464339b79779486e5f545b0c45e51b25c13ec37cd832e9ada383",
-      "templateVersion": "0.30.0",
-      "blob": "f87780fbe33a66e37527a7128af4117cf1a7a66c"
     },
     "scripts/lib/platforms.ts": {
       "hash": "cd7f599de44b4cde5c7bde59f62ea42bc2391612637f0d230b2624928d925302",
@@ -1556,11 +1558,6 @@
       "templateVersion": "0.30.0",
       "blob": "de8605cb5b58a65dccb66735009dca9851860ec1"
     },
-    "scripts/validate-decisions.ts": {
-      "hash": "488604fe552e42a5c1e2bad2ffc0318e78a38cc54f5c44efe5e66589522df856",
-      "templateVersion": "0.30.0",
-      "blob": "239b94d8ac79a38d7f272cab2d50c0ee57db3349"
-    },
     "scripts/validate-doc-folder.ts": {
       "hash": "bf898e30825782eaeb2ae906289a5f29890b59af7195effe76ef0d704775de19",
       "templateVersion": "0.30.0",
@@ -1595,11 +1592,6 @@
       "hash": "4557b1db60c187faed6b8f488dd00f59a0a174d4bf4d5bea1cd95122712fd960",
       "templateVersion": "0.30.0",
       "blob": "7dceacca315939e5b7a9c59420ad4a5a8e951bd7"
-    },
-    "scripts/validate-raci.ts": {
-      "hash": "520520c9bb8bd339aa5a01ad6064e3f3df013211637529f931fee74747a2c3d0",
-      "templateVersion": "0.30.0",
-      "blob": "1eb6b6da27a99fc83c07b9fbbbe43e1b8d62aeee"
     },
     "scripts/validate-skills.ts": {
       "hash": "cc9804b65a7effcf489363ecfd4b23cb87f75e75e7a1edc98b5bc1f17dc17c35",
@@ -1675,11 +1667,6 @@
       "hash": "29f6d48f781dd325541073ab6b61ff2e182c5f841bab980d3cb86af0c8c28f31",
       "templateVersion": "0.30.0",
       "blob": "ddd7d8df8ef9a3361b49ef8d06c46281e286540b"
-    },
-    "skills/code-review/SKILL.md": {
-      "hash": "10b1f9daaaedba439eb6e65b522bed03f8b691885db674d3c81509c2ade1d776",
-      "templateVersion": "0.30.0",
-      "blob": "9c2e0d11b2f012cacd5a1d20032d235a8bd5481a"
     },
     "skills/decision-record/SKILL.md": {
       "hash": "7e1e8e8f02710b3412e0bf8e9a2a60d94b738007bb1cb704a7a85b80d00b80ad",
@@ -1971,11 +1958,6 @@
       "templateVersion": "0.30.0",
       "blob": "b5196db0b8d28a915b8c72cbeab9d0ca425b1ed8"
     },
-    "skills/refactoring/SKILL.md": {
-      "hash": "582ba8406658769f2d296af80dcc6e1f6b18e77118d3a3988856ad825c916812",
-      "templateVersion": "0.30.0",
-      "blob": "af086b87db6ec78224318a96cf5165d542d8f99a"
-    },
     "skills/research-analysis/SKILL.md": {
       "hash": "05b1bb424575f6a3cdf58f29e3d7aebabbcd38638bc8130880c2e4a2d5bc7eba",
       "templateVersion": "0.30.0",
@@ -2011,11 +1993,6 @@
       "templateVersion": "0.30.0",
       "blob": "9abe377a01de443971bbcba9cfb090de877fd8bb"
     },
-    "skills/swe-solve/SKILL.md": {
-      "hash": "8b75156bea42670aefbe2651b48c52a544a6ce47e0584f97ff9e9c32056c2f53",
-      "templateVersion": "0.30.0",
-      "blob": "ea41b0a14927b328d22a08443f297542de668ee4"
-    },
     "skills/sync/SKILL.md": {
       "hash": "01b9901834d71d0b98f2fbc968da4b3ea994c73368f8bf60e76d7c875f0d0d92",
       "templateVersion": "0.30.0",
@@ -2025,11 +2002,6 @@
       "hash": "0d72a72c0721343df821904bf0ee76665e7b559b070ef63d3f174d7af444885c",
       "templateVersion": "0.30.0",
       "blob": "72cf4070a1c31ac72deaac7ba1058b387b554d53"
-    },
-    "skills/test-driven-development/SKILL.md": {
-      "hash": "1e803bba71078001fafa099e2beebd484d90af239daae62f0f269b44740fbc92",
-      "templateVersion": "0.30.0",
-      "blob": "fb95fbc2f9b48bac714ecdb01fef2610a0bda3ae"
     },
     "skills/token-usage-lint/SKILL.md": {
       "hash": "814458ed2e87a1451e3731efee56507d615a75ada0aa793d26c2a45a7b3ac125",
@@ -2257,6 +2229,14 @@
       "verdict": "TEMPLATE_AHEAD_REGION",
       "detail": "template line-block (36 line(s)) absent from the project copy after '### Optimal Interaction Guidelines' — template content the project never received, or a deliberate project deletion (WARN — never silently reverted; ERROR only when a write channel targets the span)",
       "severity": "WARN"
+    },
+    {
+      "path": "CLAUDE.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "MERGE",
+      "verdict": "TEMPLATE_DELTA",
+      "detail": "template-authoritative managed block restamped (template wins): COMMON-CLAUDE — project block diverged from the template and was restamped (9 line(s) → 10 line(s))",
+      "severity": "INFO"
     },
     {
       "path": "CLAUDE.md",
@@ -2585,14 +2565,6 @@
       "verdict": "TEMPLATE_AHEAD_REGION",
       "detail": "template line-block (1 line(s)) absent from the project copy after '### Model Selection Override' — template content the project never received, or a deliberate project deletion (WARN — never silently reverted; ERROR only when a write channel targets the span)",
       "severity": "WARN"
-    },
-    {
-      "path": "GEMINI.md",
-      "policy": "MERGE_MANAGED",
-      "pass": "MERGE",
-      "verdict": "TEMPLATE_DELTA",
-      "detail": "template-authoritative managed block restamped (template wins): COMMON-GEMINI — project block diverged from the template and was restamped (22 line(s) → 22 line(s))",
-      "severity": "INFO"
     },
     {
       "path": "GEMINI.md",
@@ -2939,7 +2911,7 @@
       "severity": "INFO"
     },
     {
-      "path": "docs/co-develop.context.md",
+      "path": "docs/co-utility.context.md",
       "policy": "MERGE_MANAGED",
       "pass": "DOCS_MERGE",
       "verdict": "MERGE",
@@ -2950,13 +2922,125 @@
       "path": "docs/phase-definitions.md",
       "policy": "OVERWRITE",
       "pass": "DOCS_OVERWRITE",
-      "verdict": "ADOPT",
-      "detail": "project copy already matches the template (in sync)",
+      "verdict": "CONFLICT",
+      "detail": "project-evolved since the last delivery AND template changed — CONFLICT disposition: delivery SKIPPED, project copy preserved",
       "baseline": {
         "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
         "templateVersion": "0.30.0",
         "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
       },
+      "severity": "ERROR"
+    },
+    {
+      "path": ".claude/commands/changelog.md",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "UPDATE",
+      "detail": "hash-gated command delivery over the delivered baseline",
+      "severity": "INFO"
+    },
+    {
+      "path": ".claude/commands/memlog.md",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "UPDATE",
+      "detail": "hash-gated command delivery over the delivered baseline",
+      "severity": "INFO"
+    },
+    {
+      "path": ".claude/commands/commit-push-pr.md",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
+      "severity": "INFO"
+    },
+    {
+      "path": ".claude/commands/sync.md",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "UPDATE",
+      "detail": "hash-gated command delivery over the delivered baseline",
+      "severity": "INFO"
+    },
+    {
+      "path": ".claude/commands/project-review.md",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
+      "severity": "INFO"
+    },
+    {
+      "path": ".claude/commands/new-task.md",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "UPDATE",
+      "detail": "hash-gated command delivery over the delivered baseline",
+      "severity": "INFO"
+    },
+    {
+      "path": ".claude/commands/gateguard.md",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
+      "severity": "INFO"
+    },
+    {
+      "path": ".gemini/commands/memlog.toml",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
+      "severity": "INFO"
+    },
+    {
+      "path": ".gemini/commands/changelog.toml",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
+      "severity": "INFO"
+    },
+    {
+      "path": ".gemini/commands/project-review.toml",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
+      "severity": "INFO"
+    },
+    {
+      "path": ".gemini/commands/commit-push-pr.toml",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
+      "severity": "INFO"
+    },
+    {
+      "path": ".gemini/commands/gateguard.toml",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
+      "severity": "INFO"
+    },
+    {
+      "path": ".gemini/commands/new-task.toml",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
+      "severity": "INFO"
+    },
+    {
+      "path": ".gemini/commands/sync.toml",
+      "policy": "HASH_SYNC",
+      "pass": "COMMANDS_SYNC",
+      "verdict": "NEW",
+      "detail": "command file delivered (project copy absent)",
       "severity": "INFO"
     },
     {
@@ -2984,68 +3068,186 @@
       "severity": "INFO"
     },
     {
-      "path": "agents/security-monitor.md",
+      "path": "scripts/generate-raci.ts",
       "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.2.0 → 1.2.1 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "58e3eea825ac061d7b945039a3cc473c94176c9efadfec60afb1cb3de5bb3043",
+        "hash": "387dc9b8c0cd6c12c80ece06895c6e2ec5a36bb26a21c564c2274aafaf7aa0a7",
         "templateVersion": "0.30.0",
-        "blob": "c8ea465faa1d4b6a8ef286c8eac48c510f5b8733"
+        "blob": "9870dff24b883661afaaeeb876aacb4753ee128c"
       },
       "severity": "INFO"
     },
     {
-      "path": "agents/test-runner.md",
+      "path": "scripts/helpers/adoption-provenance.ts",
       "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "NEW",
+      "detail": "delivered (none) → 1.0.0",
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/helpers/delivery-riding.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "NEW",
+      "detail": "delivered (none) → 1.0.0",
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/helpers/registries/validation-policy.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.3.0 → 1.4.0 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "08463cbb3918ebbaa7cb9627e600b79215cb16b61bca862f5e9caa9715dc7ece",
+        "hash": "74b9ca2088ff230596e14d583bb14a874c0f58bcba92d3ad4e65836821809085",
         "templateVersion": "0.30.0",
-        "blob": "d30e1f8ea5d7603ac674b3475ee41b348eb07aea"
+        "blob": "b5e91e98d33c823b23bbdcedc5dde6cab14ed08f"
       },
       "severity": "INFO"
     },
     {
-      "path": "agents/architect.md",
+      "path": "scripts/helpers/registries/variant-type-registry.ts",
       "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.2.0 → 1.3.0 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "463ba4c99d3d03816efb8a74bf6e82deb836e1aee6a206d4518e4e6da30739ae",
+        "hash": "ed1a6dbfba4fec554d7a0b3f62f51273407ac91dd076beb467d0f421269de252",
         "templateVersion": "0.30.0",
-        "blob": "faec1cde31c79a709a0e7ca836b177dbf4c52c59"
+        "blob": "6e3f78181e9bc4e1e6282e6a5f1b43f717344c87"
       },
       "severity": "INFO"
     },
     {
-      "path": "agents/designer.md",
+      "path": "scripts/helpers/scaffold-markers.ts",
       "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.10.3 → 1.10.4 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "35649b2b0b71f86479ee792fca0d6f5711762f18f4a383ef1678059d881b84f9",
+        "hash": "7ec8169c1db9161455f9e242887bbab624cf33622d3ae2d729ed118d855a3e7b",
         "templateVersion": "0.30.0",
-        "blob": "465571fac624ab0ab57d57fcfdab6586075cd15c"
+        "blob": "24e0c835da3456310443c9c37f93b77a282c2766"
       },
       "severity": "INFO"
     },
     {
-      "path": "agents/code-writer.md",
+      "path": "scripts/helpers/template-utils.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.3.0 → 1.4.0 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "e89e7541c8d990b80ef66427733a2969afc5019914e4c1f1c7a5a8b2dcd0a70a",
+        "templateVersion": "0.30.0",
+        "blob": "b807868570a273997c623c060d8de9fb47285a73"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/lib/constitution-scrub.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.3.0 → 1.3.1 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "3ae81a52d3c253730e79040e6635fb9bf46a2eb46ac17102e6fa4534f6135d13",
+        "templateVersion": "0.30.0",
+        "blob": "a0509854a1da3edd5c1a36bca848662d234ab99e"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/lib/hook-dedupe.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.3.0 → 1.4.0 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "0432d75d48c47000ce53ad57d900b73ea3e36a1bdffbd943f532880a504b8d18",
+        "templateVersion": "0.30.0",
+        "blob": "275335152ae871149ff02f78eb1d2806ef596903"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/lib/platform-skeleton-merge.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.2.0 → 1.2.1 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "663b958250d0464339b79779486e5f545b0c45e51b25c13ec37cd832e9ada383",
+        "templateVersion": "0.30.0",
+        "blob": "f87780fbe33a66e37527a7128af4117cf1a7a66c"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/lib/upgrade-policy.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.47.0 → 1.48.0 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "73b19b13d1be90bf8edce154a50c869e217f755c65881c76d808f2f7346e2980",
+        "templateVersion": "0.30.0",
+        "blob": "197bec686457190c2d0d6b85e82000fddf3b9d20"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/validate-decisions.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.1.0 → 1.2.0 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "488604fe552e42a5c1e2bad2ffc0318e78a38cc54f5c44efe5e66589522df856",
+        "templateVersion": "0.30.0",
+        "blob": "239b94d8ac79a38d7f272cab2d50c0ee57db3349"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/validate-raci.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.2.0 → 1.2.1 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "520520c9bb8bd339aa5a01ad6064e3f3df013211637529f931fee74747a2c3d0",
+        "templateVersion": "0.30.0",
+        "blob": "1eb6b6da27a99fc83c07b9fbbbe43e1b8d62aeee"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "agents/qa.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "f0fa4618e47610016ae13d9bc427fc39a0d5ec242cd39b25d08eff8ffbfc3c36",
-        "templateVersion": "0.30.0",
-        "blob": "a3b3fa781c8b10514c07bc53e2b3b185e8c04731"
-      },
+      "verdict": "UPDATE",
+      "detail": "project copy carried no frontmatter version — template copy delivered",
+      "severity": "INFO"
+    },
+    {
+      "path": "agents/backend.md",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: agents/",
+      "verdict": "UPDATE",
+      "detail": "project copy carried no frontmatter version — template copy delivered",
+      "severity": "INFO"
+    },
+    {
+      "path": "agents/frontend.md",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: agents/",
+      "verdict": "UPDATE",
+      "detail": "project copy carried no frontmatter version — template copy delivered",
       "severity": "INFO"
     },
     {
@@ -3057,16 +3259,11 @@
       "severity": "INFO"
     },
     {
-      "path": "agents/stack-setup.md",
+      "path": "agents/security.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "6eeb5b749ae24472ec9c42ecb8b5c41413aa9d6d3ef745d213d62d741bf407d0",
-        "templateVersion": "0.30.0",
-        "blob": "9a198868b71ced34d940ed1529ed03b14ebfd693"
-      },
+      "verdict": "UPDATE",
+      "detail": "project copy carried no frontmatter version — template copy delivered",
       "severity": "INFO"
     },
     {
@@ -3083,16 +3280,24 @@
       "severity": "ERROR"
     },
     {
+      "path": "agents/i18n-specialist.md",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: agents/",
+      "verdict": "STUB_VERSION_BUMP_ADVICE",
+      "detail": "stub-owned fields changed template-side without a stub `version` bump — bump the stub version in the port PR so future changes re-deliver as version-gated ADOPT (design D9/Q5, advisory)",
+      "baseline": {
+        "hash": "1ccd5feff8c801dfa11efff2e0afc195f962a5c344bed6ae627884ce61e68248",
+        "templateVersion": "0.30.0",
+        "blob": "57d24a23968eed6f6a220925e0bb261881879802"
+      },
+      "severity": "INFO"
+    },
+    {
       "path": "agents/automation-engineer.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "0cdff6f6439400114ddd590fff00f01ea96f3c2e47091c8f7ae8d14b10ea554a",
-        "templateVersion": "0.30.0",
-        "blob": "3d0107088cab9aedef71eef4c06089a16eb6abda"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -3100,12 +3305,7 @@
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "9397774935c34456d63a233eabad10cad3eba175769387509a98c0761469755e",
-        "templateVersion": "0.30.0",
-        "blob": "a66068e3b45c67504a02c050bed82497bf9f7cd4"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -3121,44 +3321,7 @@
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: agents/",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "4d6cc2e7bbad8968987318a484c3b511c53c7f23dfbee9b78428552439a2f1d0",
-        "templateVersion": "0.30.0",
-        "blob": "51e2cd1523178757d81a95702070fbc644b6ede8"
-      },
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/qa.md",
-      "policy": "PRESERVE",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "SKIP",
-      "detail": "project-only agent — no template counterpart, preserved",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/backend.md",
-      "policy": "PRESERVE",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "SKIP",
-      "detail": "project-only agent — no template counterpart, preserved",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/frontend.md",
-      "policy": "PRESERVE",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "SKIP",
-      "detail": "project-only agent — no template counterpart, preserved",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/security.md",
-      "policy": "PRESERVE",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "SKIP",
-      "detail": "project-only agent — no template counterpart, preserved",
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -3262,30 +3425,6 @@
       "severity": "INFO"
     },
     {
-      "path": "skills/swe-solve/",
-      "policy": "PRESERVE",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "project-only skill — no template counterpart, preserved",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/test-driven-development/",
-      "policy": "PRESERVE",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "project-only skill — no template counterpart, preserved",
-      "severity": "INFO"
-    },
-    {
-      "path": "skills/code-review/",
-      "policy": "PRESERVE",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "project-only skill — no template counterpart, preserved",
-      "severity": "INFO"
-    },
-    {
       "path": "skills/post-write-check/",
       "policy": "PRESERVE",
       "pass": "SYNC_IF_NEWER: skills/",
@@ -3294,12 +3433,20 @@
       "severity": "INFO"
     },
     {
-      "path": "skills/refactoring/",
-      "policy": "PRESERVE",
-      "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "SKIP",
-      "detail": "project-only skill — no template counterpart, preserved",
-      "severity": "INFO"
+      "path": "skills/post-write-check/SKILL.md",
+      "policy": "SYNC",
+      "pass": "VARIANT SKILLS",
+      "verdict": "DRIFT_PRESERVE",
+      "detail": "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+      "severity": "WARN"
+    },
+    {
+      "path": "skills/post-write-check/SKILL.md",
+      "policy": "SYNC",
+      "pass": "VARIANT SKILLS",
+      "verdict": "PROJECT_AHEAD",
+      "detail": "project version 1.1.0 is ahead of the template 1.0.0 — never delivered over a newer project copy; port the content template-side (pendingBackport)",
+      "severity": "WARN"
     },
     {
       "path": "LICENSE",
@@ -3318,39 +3465,7 @@
       "severity": "INFO"
     },
     {
-      "path": "procedures/architecture-design/",
-      "policy": "ADD_IF_MISSING",
-      "pass": "PROCEDURES",
-      "verdict": "SEED_SKIP",
-      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
-      "severity": "INFO"
-    },
-    {
-      "path": "procedures/security-release-retrospective/",
-      "policy": "ADD_IF_MISSING",
-      "pass": "PROCEDURES",
-      "verdict": "SEED_SKIP",
-      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
-      "severity": "INFO"
-    },
-    {
-      "path": "procedures/technical-planning/",
-      "policy": "ADD_IF_MISSING",
-      "pass": "PROCEDURES",
-      "verdict": "SEED_SKIP",
-      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
-      "severity": "INFO"
-    },
-    {
       "path": "procedures/feature-implementation/",
-      "policy": "ADD_IF_MISSING",
-      "pass": "PROCEDURES",
-      "verdict": "SEED_SKIP",
-      "detail": "project-owned procedure entry exists — add-if-missing seed withheld (project-local workflow edits are intentional)",
-      "severity": "INFO"
-    },
-    {
-      "path": "procedures/release-verification/",
       "policy": "ADD_IF_MISSING",
       "pass": "PROCEDURES",
       "verdict": "SEED_SKIP",
@@ -3370,33 +3485,7 @@
       "policy": "JSON_MERGE",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "MERGE",
-      "detail": "settings deep-merged — project-only entries preserved: mcpServers",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/stack-profile.json",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "caf8125315ab3820ac185d5d537f7d2ad30d99c38ceb281f8bab51e38c1479a4",
-        "templateVersion": "0.30.0",
-        "blob": "6f5df01ed8a26938e495fe612a5c6d0a72b4d01d"
-      },
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/handoff-spec_ko.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "1c25745c2cc0ef8831d06f005136f5281a521ba7db91202763dbdce27930c164",
-        "templateVersion": "0.30.0",
-        "blob": "175045c9ae0d5b76ce89179ad5466ee074f45ee7"
-      },
+      "detail": "settings deep-merged — project-only entries preserved: hooks.WorktreeCreate, mcpServers",
       "severity": "INFO"
     },
     {
@@ -3408,95 +3497,27 @@
       "severity": "INFO"
     },
     {
-      "path": "docs/benchmark-fixtures/ISSUE-001.md",
-      "policy": "SYNC",
+      "path": "docs/lifecycle/agents/qa.md",
+      "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "TOMBSTONED",
-      "detail": "project deleted a previously delivered file — delivery REFUSED (severity ERROR): confirm with --tombstone <path>, or restore the project copy and re-run",
-      "baseline": {
-        "hash": "669a3831ef0030bf1646925a1db784da05440f9bdb1ff79b188066963e6c3bf0",
-        "templateVersion": "0.30.0",
-        "blob": "8467541791a578bc03252e5becdcc7a738dcae0b"
-      },
-      "severity": "ERROR"
-    },
-    {
-      "path": "docs/benchmark-fixtures/README.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "TOMBSTONED",
-      "detail": "project deleted a previously delivered file — delivery REFUSED (severity ERROR): confirm with --tombstone <path>, or restore the project copy and re-run",
-      "baseline": {
-        "hash": "559d53f5a375376460b4aa978cf496d9bd82b5df09296cf2beccccdfa5669e09",
-        "templateVersion": "0.30.0",
-        "blob": "0ae4f6b27e76cab36940336935f401fd9449bd37"
-      },
-      "severity": "ERROR"
-    },
-    {
-      "path": "docs/benchmark-fixtures/ISSUE-003.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "TOMBSTONED",
-      "detail": "project deleted a previously delivered file — delivery REFUSED (severity ERROR): confirm with --tombstone <path>, or restore the project copy and re-run",
-      "baseline": {
-        "hash": "d0be3e7eca8e1c0cd34d6794abfe1470d929ce94f9f74a543caf7f6ce546dbc0",
-        "templateVersion": "0.30.0",
-        "blob": "9b7e9ea81dc10ab3cd43265490dbb016f2cba4f9"
-      },
-      "severity": "ERROR"
-    },
-    {
-      "path": "docs/benchmark-fixtures/ISSUE-002.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "TOMBSTONED",
-      "detail": "project deleted a previously delivered file — delivery REFUSED (severity ERROR): confirm with --tombstone <path>, or restore the project copy and re-run",
-      "baseline": {
-        "hash": "270267697d73bda5790d1951e3258665e1260fd215f2ef89f61306ae87234aa1",
-        "templateVersion": "0.30.0",
-        "blob": "00fe69009d5fe39a2ddf87715f43a09252858d9b"
-      },
-      "severity": "ERROR"
-    },
-    {
-      "path": "docs/lifecycle/agents/security-monitor.md",
-      "policy": "CORRECTIVE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SKIP",
-      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
-      "path": "docs/lifecycle/agents/test-runner.md",
-      "policy": "CORRECTIVE",
+      "path": "docs/lifecycle/agents/backend.md",
+      "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SKIP",
-      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
-      "path": "docs/lifecycle/agents/architect.md",
-      "policy": "CORRECTIVE",
+      "path": "docs/lifecycle/agents/frontend.md",
+      "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SKIP",
-      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/lifecycle/agents/designer.md",
-      "policy": "CORRECTIVE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SKIP",
-      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/lifecycle/agents/code-writer.md",
-      "policy": "CORRECTIVE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SKIP",
-      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
@@ -3508,11 +3529,11 @@
       "severity": "INFO"
     },
     {
-      "path": "docs/lifecycle/agents/stack-setup.md",
-      "policy": "CORRECTIVE",
+      "path": "docs/lifecycle/agents/security.md",
+      "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SKIP",
-      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
@@ -3524,48 +3545,11 @@
       "severity": "INFO"
     },
     {
-      "path": "docs/lifecycle/skills/swe-solve.md",
+      "path": "docs/lifecycle/skills/post-write-check.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SEED_SKIP",
-      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/lifecycle/skills/test-driven-development.md",
-      "policy": "WORKSPACE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SEED_SKIP",
-      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/lifecycle/skills/code-review.md",
-      "policy": "WORKSPACE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SEED_SKIP",
-      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/lifecycle/skills/refactoring.md",
-      "policy": "WORKSPACE",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "SEED_SKIP",
-      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/handoff-spec.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "b0ec9e1ab19bc4544900a5f7bdfa7cd1144c525ee21bb86d2d8689fe3b0be9d1",
-        "templateVersion": "0.30.0",
-        "blob": "03c81b8ede708e77d364546365d00003b473e6ed"
-      },
+      "verdict": "NEW",
+      "detail": "workspace seed delivered (absent from the project)",
       "severity": "INFO"
     },
     {
@@ -3573,38 +3557,7 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "c3dbd9fd1f2edbca30401b351df7aa38f3d066a6bd8d7f695aae80de39e7b5e2",
-        "templateVersion": "0.30.0",
-        "blob": "9d2dbc75f21b5eedb4a47501abb69f77bfa358bc"
-      },
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/privacy-design-checklist.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "df1e47b46dcb20cb08e1af6e1fe745f7faa9d9e978ae32e8fef26be3f2baa860",
-        "templateVersion": "0.30.0",
-        "blob": "2fb405d2c71188701559fc6914f4393d1c0c6749"
-      },
-      "severity": "INFO"
-    },
-    {
-      "path": "docs/privacy-design-checklist_ko.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "ddb9912bbb8a76dd7fe8a2b18197afad529b880701fe7c12b47fa21aa28a59dd",
-        "templateVersion": "0.30.0",
-        "blob": "fffcbb13054c41adeb285edc22abe0cdc7a8d5d6"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -3612,25 +3565,28 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "1c96540ade7d4eb54318e6e0d8572ef38fe0d752537f66bd0e63301cc839db7a",
-        "templateVersion": "0.30.0",
-        "blob": "23a0c259fcb4ce2f5126897c85afb464f910ba10"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
+    },
+    {
+      "path": "PROMOTION_CHECKLIST.md",
+      "policy": "SYNC",
+      "pass": "TEMPLATE TREE SYNC",
+      "verdict": "TOMBSTONED",
+      "detail": "project deleted a previously delivered file — delivery REFUSED (severity ERROR): confirm with --tombstone <path>, or restore the project copy and re-run",
+      "baseline": {
+        "hash": "42c570239ce4ea8d83bf69d39cf3136b24b9c547f1cf5b50fae93b671b0e39c8",
+        "templateVersion": "0.30.0",
+        "blob": "b43647e61635a1db8ac49b678f8175671255f5b0"
+      },
+      "severity": "ERROR"
     },
     {
       "path": ".mcp.json",
       "policy": "JSON_MERGE",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "c476496f307e18aa8454e7b202e1ae24f67582f391cba7b9b323cf22de0f055a",
-        "templateVersion": "0.30.0",
-        "blob": "8a0c10cf9546b0fbe990b71de02ce1187f114357"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -3638,21 +3594,8 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "d6e26c50f0adc30e22380899e242e4e5cdffce4911106e67a1869e7414c15ce5",
-        "templateVersion": "0.30.0",
-        "blob": "70fa921bd7350040f711afe09c9f3076f689a531"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
-    },
-    {
-      "path": "docs/context.md",
-      "policy": "SYNC",
-      "pass": "TEMPLATE TREE SYNC",
-      "verdict": "CONTEXT_PRESERVE",
-      "detail": "(no version) → v2.16 — preserved: entire file project-owned (no version footer)",
-      "severity": "WARN"
     },
     {
       "path": "docs/specs/registry.json",
@@ -3688,6 +3631,14 @@
     },
     {
       "path": "docs/lifecycle/agents/contract-gate-engineer.md",
+      "policy": "CORRECTIVE",
+      "pass": "TEMPLATE TREE SYNC",
+      "verdict": "SKIP",
+      "detail": "agent withheld by variant.json registry — lifecycle record withheld (T-20261114-010)",
+      "severity": "INFO"
+    },
+    {
+      "path": "docs/lifecycle/agents/execution-plan-templates.md",
       "policy": "CORRECTIVE",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "SKIP",
@@ -4035,12 +3986,7 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "fa89d4dc399f0c60a1e42ed9d3d2a2f513312f52db435dbcac15c843fce18403",
-        "templateVersion": "0.30.0",
-        "blob": "80057cdef03b22b8657705f6bb9803468abd9ed0"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -4048,12 +3994,7 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "6b7eb305341a089ec3dc7ef09bfbbfde76384105384dcf78e2767b1a57739c82",
-        "templateVersion": "0.30.0",
-        "blob": "9f852ea91a1af1a82de281e9e486195848513fb5"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -4061,12 +4002,7 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "aa879df56299d1d863eadf27342aa897d399cd86b159d5e4b296dfdae19c3524",
-        "templateVersion": "0.30.0",
-        "blob": "70da688ae8ca7a77f87739d901059a91cc45c446"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -4074,12 +4010,7 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "98561ab110677b3de962ad573d0ccdb8b62c5bf0b13ce8648cf5f336b2116ac6",
-        "templateVersion": "0.30.0",
-        "blob": "ade183fff5d683df17221154a72b8be6330e4799"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -4100,12 +4031,7 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "b0d67270481eb921d1a8054b9ae239785947a2997d04f2eeb59274800b62be57",
-        "templateVersion": "0.30.0",
-        "blob": "20d50d7670fa6ef10307c5057f01fcbd71dda2e3"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -4113,12 +4039,7 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "c38750a09393225fa5cb3c144fc47713d3e5f98c574126d2b7dc02661c15f4a4",
-        "templateVersion": "0.30.0",
-        "blob": "fa19671cb3fe4f0547a9693d149bed3395456706"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -4126,12 +4047,7 @@
       "policy": "SYNC",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "TOMBSTONED_SKIP",
-      "detail": "tombstone recorded via --tombstone (reason: utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — deletion honored from this run on",
-      "baseline": {
-        "hash": "0b1d6d858141615eac860b67d01d5b8eaac5b49acd8d8a28c6df60da709d30f0",
-        "templateVersion": "0.30.0",
-        "blob": "e28304f397df38d3d70b08c2503ea3701ab4c556"
-      },
+      "detail": "tombstoned deletion honored (recorded 2026-11-18 — utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)) — delivery skipped, project copy stays absent",
       "severity": "INFO"
     },
     {
@@ -4199,6 +4115,38 @@
       "severity": "INFO"
     },
     {
+      "path": "skills/code-review",
+      "policy": "VARIANT_SCOPE_PRUNE",
+      "pass": "VARIANT-SCOPE SKILL PRUNE",
+      "verdict": "SKIP",
+      "detail": "source-variant adoption residue kept — not present in the project (no SSOT dir, no mirror dir) (adoption variant: co-develop)",
+      "severity": "INFO"
+    },
+    {
+      "path": "skills/refactoring",
+      "policy": "VARIANT_SCOPE_PRUNE",
+      "pass": "VARIANT-SCOPE SKILL PRUNE",
+      "verdict": "SKIP",
+      "detail": "source-variant adoption residue kept — not present in the project (no SSOT dir, no mirror dir) (adoption variant: co-develop)",
+      "severity": "INFO"
+    },
+    {
+      "path": "skills/swe-solve",
+      "policy": "VARIANT_SCOPE_PRUNE",
+      "pass": "VARIANT-SCOPE SKILL PRUNE",
+      "verdict": "SKIP",
+      "detail": "source-variant adoption residue kept — not present in the project (no SSOT dir, no mirror dir) (adoption variant: co-develop)",
+      "severity": "INFO"
+    },
+    {
+      "path": "skills/test-driven-development",
+      "policy": "VARIANT_SCOPE_PRUNE",
+      "pass": "VARIANT-SCOPE SKILL PRUNE",
+      "verdict": "SKIP",
+      "detail": "source-variant adoption residue kept — not present in the project (no SSOT dir, no mirror dir) (adoption variant: co-develop)",
+      "severity": "INFO"
+    },
+    {
       "path": "docs/security.md",
       "policy": "OVERWRITE",
       "pass": "DOCS_OVERWRITE",
@@ -4245,42 +4193,6 @@
     }
   ],
   "tombstones": {
-    "agents/security-monitor.md": {
-      "hash": "58e3eea825ac061d7b945039a3cc473c94176c9efadfec60afb1cb3de5bb3043",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
-    "agents/test-runner.md": {
-      "hash": "08463cbb3918ebbaa7cb9627e600b79215cb16b61bca862f5e9caa9715dc7ece",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
-    "agents/architect.md": {
-      "hash": "463ba4c99d3d03816efb8a74bf6e82deb836e1aee6a206d4518e4e6da30739ae",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
-    "agents/designer.md": {
-      "hash": "35649b2b0b71f86479ee792fca0d6f5711762f18f4a383ef1678059d881b84f9",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
-    "agents/code-writer.md": {
-      "hash": "f0fa4618e47610016ae13d9bc427fc39a0d5ec242cd39b25d08eff8ffbfc3c36",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
-    "agents/stack-setup.md": {
-      "hash": "6eeb5b749ae24472ec9c42ecb8b5c41413aa9d6d3ef745d213d62d741bf407d0",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
     "agents/automation-engineer.md": {
       "hash": "0cdff6f6439400114ddd590fff00f01ea96f3c2e47091c8f7ae8d14b10ea554a",
       "templateVersion": "0.30.0",
@@ -4299,38 +4211,8 @@
       "recordedAt": "2026-11-18",
       "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
     },
-    "docs/stack-profile.json": {
-      "hash": "caf8125315ab3820ac185d5d537f7d2ad30d99c38ceb281f8bab51e38c1479a4",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
-    "docs/handoff-spec_ko.md": {
-      "hash": "1c25745c2cc0ef8831d06f005136f5281a521ba7db91202763dbdce27930c164",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
-    "docs/handoff-spec.md": {
-      "hash": "b0ec9e1ab19bc4544900a5f7bdfa7cd1144c525ee21bb86d2d8689fe3b0be9d1",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
     "docs/user-guide.md": {
       "hash": "c3dbd9fd1f2edbca30401b351df7aa38f3d066a6bd8d7f695aae80de39e7b5e2",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
-    "docs/privacy-design-checklist.md": {
-      "hash": "df1e47b46dcb20cb08e1af6e1fe745f7faa9d9e978ae32e8fef26be3f2baa860",
-      "templateVersion": "0.30.0",
-      "recordedAt": "2026-11-18",
-      "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
-    },
-    "docs/privacy-design-checklist_ko.md": {
-      "hash": "ddb9912bbb8a76dd7fe8a2b18197afad529b880701fe7c12b47fa21aa28a59dd",
       "templateVersion": "0.30.0",
       "recordedAt": "2026-11-18",
       "reason": "utility project — template-generic agents and design-system/procedure docs out of scope (2026-11-19 co-utility consolidation)"
@@ -4411,8 +4293,26 @@
       "deliverableHash": "7a36d707e42341786fad59b004d3391450140969cb1beda1d441e1859922156a",
       "firstSeen": "2026-11-18",
       "firstSeenTemplateVersion": "0.30.0"
+    },
+    {
+      "path": "docs/phase-definitions.md",
+      "kind": "CONFLICT",
+      "projectHash": "48020e851d6c714a3870446235b666bd554b493a756d8765e39755ecb0b72b4f",
+      "deliverableHash": "4d390df63d267a6124230647bcd5002de1b6f20c230e851bf7373080df69d601",
+      "firstSeen": "2026-11-19",
+      "firstSeenTemplateVersion": "0.30.0"
+    },
+    {
+      "path": "skills/post-write-check/SKILL.md",
+      "kind": "PROJECT_AHEAD",
+      "projectHash": "1f7f64c3e70cf666f59178a48bc964d59375cf1bf874d767cb8a405029c65888",
+      "deliverableHash": "a2af6daa149197369703501d1ad942fc9a5ab46d6e657d0308d98bd81c700c46",
+      "projectVersion": "1.1.0",
+      "templateVersion": "1.0.0",
+      "firstSeen": "2026-11-19",
+      "firstSeenTemplateVersion": "0.30.0"
     }
   ],
   "templateDirty": true,
-  "engineVersion": "1.111.0"
+  "engineVersion": "1.113.0"
 }

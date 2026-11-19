@@ -1,38 +1,24 @@
----
-name: new-task
-description: Create a new structured task for the current session using TaskCreate.
-argument-hint: "<task title>"
-allowed-tools: ["TaskCreate"]
----
+Create a new task tracking entry in memory for the current session.
 
-# /new-task — Create a New Task
+Arguments: $ARGUMENTS
 
-Create a structured task entry for the current session.
+Steps:
+1. Determine today's date in YYYY-MM-DD format.
+2. Ensure `memory/` directory exists.
+3. Append the following block to `memory/YYYY-MM-DD.md` (create if missing):
+   ```markdown
+   ## Task: $ARGUMENTS
 
-## Usage
+   **Status**: in_progress
+   **Started**: YYYY-MM-DD
 
-```
-/new-task "Task title"
-```
+   ### Plan
+   - [ ] (fill in steps)
 
-## What it does
+   ### Notes
+   -
+   ```
+4. Confirm: "📋 Task created: $ARGUMENTS"
 
-1. Calls `TaskCreate` with the provided subject and a prompted description
-2. Sets the task to `pending` (default)
-3. Reports the task ID for future reference
-
-## Guidelines
-
-- Write task subjects in imperative form: "Add Thai locale", not "Adding Thai locale"
-- Keep subjects concise (under 60 characters)
-- Description should clarify scope, files affected, and acceptance criteria
-- Use `TaskUpdate` to set `in_progress` before starting work
-- Use `TaskUpdate` to set `completed` immediately after finishing
-
-## Steps
-
-Use the TaskCreate tool with:
-- `subject`: `"$ARGUMENTS"` or prompt the user if empty
-- `description`: describe scope, files affected, acceptance criteria
-
-Confirm the created task ID to the user.
+This command creates a lightweight in-session task record in the daily memory log.
+For multi-session task tracking, use the TaskCreate tool directly.

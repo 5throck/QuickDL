@@ -2,4 +2,4 @@ variant=co-utility
 version=0.30.0
 platform=all
 country=none
-upgraded=2026-11-18T19:21:31.902Z
+upgraded=2026-11-19T18:33:00.157Z
