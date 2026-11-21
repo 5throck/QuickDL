@@ -66,7 +66,7 @@
 - **How to apply**:
   - Cite official documentation (Anthropic, Antigravity, etc.) as primary authority for numbers, classifications, and naming.
   - Verify that core capabilities (e.g., "dynamic team composition is possible", "multiple workflows can be combined") are not missing from concept or hands-on chapters.
-  - When covering inter-document relationships (e.g., `AGENTS.md` ↔ `docs/context.md` ↔ `co-develop/docs/context.md`), draw the SSOT/hierarchy accurately.
+  - When covering inter-document relationships (e.g., `AGENTS.md` ↔ `docs/context.md` ↔ `<variant>/docs/context.md`), draw the SSOT/hierarchy accurately.
 
 ---
 
@@ -77,7 +77,7 @@
 - **Why**: A co-consult/co-deck practice handbook told readers to run `git clone https://github.com/5throck/co-consult.git` — but that repository is private, so the exercise failed at step one for any reader without access. The correct source was already public: `templates/co-consult/` inside the public `ai-workspace-standards` repository, reachable via `bun scripts/new-project.ts "<name>" --variant co-consult`.
 - **How to apply**:
   - Before writing any `git clone <url>` instruction, verify the target repository is public (check it loads in a private/incognito browser session, or confirm via `gh repo view <owner>/<repo> --json visibility`).
-  - When the content lives inside a variant of `ai-workspace-standards` (e.g. `templates/co-consult/`, `templates/co-deck/`), point readers at the public workspace repo and the real scaffolding command (`bun scripts/new-project.ts "<name>" --variant co-develop`) — never at a private per-variant repo, even if one exists internally for other purposes.
+  - When the content lives inside a variant of `ai-workspace-standards` (e.g. `templates/co-consult/`, `templates/co-deck/`), point readers at the public workspace repo and the real scaffolding command (`bun scripts/new-project.ts "<name>" --variant <variant>`) — never at a private per-variant repo, even if one exists internally for other purposes.
   - This applies to every reference type, not just clone commands: `<a href>` links, "GitHub repository:" lines, screenshots showing a private repo URL, and code comments.
   - If a source is genuinely private and no public equivalent exists, either omit it or describe the concept without a clickable/copyable pointer a reader would fail to follow — do not silently include an inaccessible link.
   - Applies to both standalone and companion modes, and to every language edition (a link private in one language is private in all).
@@ -194,6 +194,7 @@ Exception: Reference/procedure documents such as glossaries, FAQs, and installat
 - **Consistent wrapper style** — all SVG containers use the same wrapper:
   `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:20px;margin:20px 0 28px;">`
 - **Text size** — use 11–13px (`font-size`) for text inside SVG; make labels bold.
+- **Fonts** — inline SVG text inherits the page font (`font-family: inherit`, the default), so Japanese pages get Meiryo via `--font-family`. Standalone `.svg` files used via `<img>` cannot inherit: set `font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Meiryo, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif"` on the root `<svg>`. Meiryo glyphs are wider; leave generous text-box slack in Japanese diagrams.
 - **Color palette** (maintain consistency):
 
   | Purpose | Color |

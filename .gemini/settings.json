@@ -18,11 +18,31 @@
   "hooks": {
     "BeforeTool": [
       {
+        "matcher": "run_shell_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/delete-guard.ts --platform gemini",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
         "matcher": "write_file|replace_file_content|multi_replace_file_content",
         "hooks": [
           {
             "type": "command",
             "command": "bun scripts/hooks/gateguard-fact-force.ts --platform gemini",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "invoke_subagent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun scripts/hooks/pm-dispatch-gate.ts",
             "timeout": 5000
           }
         ]
@@ -129,5 +149,11 @@
     "run_shell_command(less .env)",
     "run_shell_command(head .env)",
     "run_shell_command(tail .env)"
-  ]
+  ],
+  "general": {
+    "defaultApprovalMode": "default"
+  },
+  "security": {
+    "disableYoloMode": true
+  }
 }

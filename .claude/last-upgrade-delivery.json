@@ -1,132 +1,128 @@
 {
   "schemaVersion": 2,
-  "timestamp": "2026-11-19T18:33:00.253Z",
+  "timestamp": "2026-11-21T18:13:29.404Z",
   "project": "co-utility",
   "templateVersion": "0.30.0",
-  "templateSha": "d62ec06e2f90e22b407037b20ce9ff8adac7b13b",
-  "baseSha": "bd22a17a0c00a94d65848fa434bb1e9bd8861a19",
+  "templateSha": "658dc23e79ae7b104167ff32a90c2ede239c693a",
+  "baseSha": "3e64e2868d3035db8fee7ae3c456c35edf5cd84f",
   "files": [
-    ".claude/commands/changelog.md",
-    ".claude/commands/memlog.md",
-    ".claude/commands/new-task.md",
-    ".claude/commands/sync.md",
+    ".agents/skills/handbook/SKILL.md",
+    ".agents/skills/handbook/assets/css/handbook-variables.css",
+    ".agents/skills/handbook/references/AUTHORING_GUIDELINES.md",
+    ".agents/skills/handbook/references/BUILD_GUIDE.md",
+    ".agents/skills/handbook/references/QUALITY_CHECKLIST.md",
+    ".agents/skills/handbook/templates/base.html",
+    ".agents/skills/handbook/templates/chapter.html",
+    ".agents/skills/handbook/templates/course-overview.html",
+    ".agents/skills/handbook/templates/examples.html",
+    ".agents/skills/handbook/templates/index.html",
+    ".agents/skills/handbook/templates/instructor-guide.html",
+    ".agents/skills/handbook/templates/manual.html",
+    ".agents/skills/handbook/templates/quiz.html",
+    ".agents/skills/meeting-facilitation/SKILL.md",
     ".claude/settings.json",
-    ".codex/prompts/changelog.md",
-    ".codex/prompts/memlog.md",
-    ".codex/prompts/new-task.md",
-    ".codex/prompts/sync.md",
-    "CHANGELOG.md",
-    "CLAUDE.md",
-    "agents/backend.md",
-    "agents/frontend.md",
-    "agents/qa.md",
-    "agents/security.md",
-    "docs/co-utility.context.md",
+    ".claude/skills/handbook/SKILL.md",
+    ".claude/skills/handbook/assets/css/handbook-variables.css",
+    ".claude/skills/handbook/references/AUTHORING_GUIDELINES.md",
+    ".claude/skills/handbook/references/BUILD_GUIDE.md",
+    ".claude/skills/handbook/references/QUALITY_CHECKLIST.md",
+    ".claude/skills/handbook/templates/base.html",
+    ".claude/skills/handbook/templates/chapter.html",
+    ".claude/skills/handbook/templates/course-overview.html",
+    ".claude/skills/handbook/templates/examples.html",
+    ".claude/skills/handbook/templates/index.html",
+    ".claude/skills/handbook/templates/instructor-guide.html",
+    ".claude/skills/handbook/templates/manual.html",
+    ".claude/skills/handbook/templates/quiz.html",
+    ".claude/skills/meeting-facilitation/SKILL.md",
+    ".codex/skills/handbook/SKILL.md",
+    ".codex/skills/handbook/assets/css/handbook-variables.css",
+    ".codex/skills/handbook/references/AUTHORING_GUIDELINES.md",
+    ".codex/skills/handbook/references/BUILD_GUIDE.md",
+    ".codex/skills/handbook/references/QUALITY_CHECKLIST.md",
+    ".codex/skills/handbook/templates/base.html",
+    ".codex/skills/handbook/templates/chapter.html",
+    ".codex/skills/handbook/templates/course-overview.html",
+    ".codex/skills/handbook/templates/examples.html",
+    ".codex/skills/handbook/templates/index.html",
+    ".codex/skills/handbook/templates/instructor-guide.html",
+    ".codex/skills/handbook/templates/manual.html",
+    ".codex/skills/handbook/templates/quiz.html",
+    ".codex/skills/meeting-facilitation/SKILL.md",
+    ".gemini/settings.json",
+    ".gemini/skills/handbook/SKILL.md",
+    ".gemini/skills/handbook/assets/css/handbook-variables.css",
+    ".gemini/skills/handbook/references/AUTHORING_GUIDELINES.md",
+    ".gemini/skills/handbook/references/BUILD_GUIDE.md",
+    ".gemini/skills/handbook/references/QUALITY_CHECKLIST.md",
+    ".gemini/skills/handbook/templates/base.html",
+    ".gemini/skills/handbook/templates/chapter.html",
+    ".gemini/skills/handbook/templates/course-overview.html",
+    ".gemini/skills/handbook/templates/examples.html",
+    ".gemini/skills/handbook/templates/index.html",
+    ".gemini/skills/handbook/templates/instructor-guide.html",
+    ".gemini/skills/handbook/templates/manual.html",
+    ".gemini/skills/handbook/templates/quiz.html",
+    ".gemini/skills/meeting-facilitation/SKILL.md",
+    ".gitattributes",
+    ".hermes/skills/handbook/SKILL.md",
+    ".hermes/skills/handbook/assets/css/handbook-variables.css",
+    ".hermes/skills/handbook/references/AUTHORING_GUIDELINES.md",
+    ".hermes/skills/handbook/references/BUILD_GUIDE.md",
+    ".hermes/skills/handbook/references/QUALITY_CHECKLIST.md",
+    ".hermes/skills/handbook/templates/base.html",
+    ".hermes/skills/handbook/templates/chapter.html",
+    ".hermes/skills/handbook/templates/course-overview.html",
+    ".hermes/skills/handbook/templates/examples.html",
+    ".hermes/skills/handbook/templates/index.html",
+    ".hermes/skills/handbook/templates/instructor-guide.html",
+    ".hermes/skills/handbook/templates/manual.html",
+    ".hermes/skills/handbook/templates/quiz.html",
+    ".hermes/skills/meeting-facilitation/SKILL.md",
+    "HERMES.md",
+    "docs/lifecycle/skills/handbook.md",
+    "docs/phase-definitions.md",
+    "docs/workspace-schema.json",
     "scripts/SCRIPTS.md",
-    "scripts/generate-raci.ts",
-    "scripts/helpers/registries/validation-policy.ts",
-    "scripts/helpers/registries/variant-type-registry.ts",
-    "scripts/helpers/scaffold-markers.ts",
-    "scripts/helpers/template-utils.ts",
-    "scripts/lib/constitution-scrub.ts",
-    "scripts/lib/hook-dedupe.ts",
-    "scripts/lib/platform-skeleton-merge.ts",
-    "scripts/lib/upgrade-policy.ts",
-    "scripts/validate-decisions.ts",
-    "scripts/validate-raci.ts",
+    "scripts/dev-sync.ts",
+    "scripts/handbook/apply-handbook-theme.ts",
+    "scripts/handbook/check-authoring.ts",
+    "scripts/handbook/check-external-links.ts",
+    "scripts/handbook/scaffold-handbook.ts",
+    "scripts/handbook/update-footers.ts",
+    "scripts/helpers/memory-union-verify.ts",
+    "scripts/lib/external-deps.ts",
+    "scripts/sync-agent-mirrors.ts",
+    "scripts/validate-doc-folder.ts",
+    "scripts/validate-templates.ts",
+    "scripts/validate-variant-readiness.ts",
+    "skills/handbook/SKILL.md",
+    "skills/handbook/assets/css/handbook-variables.css",
+    "skills/handbook/references/AUTHORING_GUIDELINES.md",
+    "skills/handbook/references/BUILD_GUIDE.md",
+    "skills/handbook/references/QUALITY_CHECKLIST.md",
+    "skills/handbook/templates/base.html",
+    "skills/handbook/templates/chapter.html",
+    "skills/handbook/templates/course-overview.html",
+    "skills/handbook/templates/examples.html",
+    "skills/handbook/templates/index.html",
+    "skills/handbook/templates/instructor-guide.html",
+    "skills/handbook/templates/manual.html",
+    "skills/handbook/templates/quiz.html",
+    "skills/meeting-facilitation/SKILL.md",
     "template-version.txt",
-    ".claude/commands/commit-push-pr.md",
-    ".claude/commands/gateguard.md",
-    ".claude/commands/project-review.md",
-    ".codex/prompts/commit-push-pr.md",
-    ".codex/prompts/gateguard.md",
-    ".codex/prompts/project-review.md",
-    ".gemini/commands/changelog.toml",
-    ".gemini/commands/commit-push-pr.toml",
-    ".gemini/commands/gateguard.toml",
-    ".gemini/commands/memlog.toml",
-    ".gemini/commands/new-task.toml",
-    ".gemini/commands/project-review.toml",
-    ".gemini/commands/sync.toml",
-    "docs/lifecycle/skills/post-write-check.md",
-    "scripts/helpers/adoption-provenance.ts",
-    "scripts/helpers/delivery-riding.ts"
+    "scripts/handbook/check-generated-content.ts"
   ],
   "baselines": {
-    ".claude/commands/changelog.md": {
-      "hash": "f41bdf6b76ec0cbae3de06364eb32d0abc584df027cc600ba2a309c4ab679762",
-      "templateVersion": "0.30.0",
-      "blob": "34cc1056e2ff66eadc31a833add23cd7e7045c65"
-    },
-    ".claude/commands/commit-push-pr.md": {
-      "hash": "e26d0e26596a6bd04aa27d52f72b477856e91670c8eaed2556d22fd929837b58",
-      "templateVersion": "0.30.0",
-      "blob": "94fd958329318062eff04b3a7d0d68d79c0b7f92"
-    },
-    ".claude/commands/gateguard.md": {
-      "hash": "bc4cb646f0fc6276dafca3c075bd47ef82daa2da073a8d059f1a00a91b895902",
-      "templateVersion": "0.30.0",
-      "blob": "afd1a4d7643758b8920c543f18dbc34cd6e19a27"
-    },
-    ".claude/commands/memlog.md": {
-      "hash": "ce6acc582ad967a2dfc473c98d4665c1b5f0fc7bb06fd642968b1f1933ce8062",
-      "templateVersion": "0.30.0",
-      "blob": "eb92f884d3341b9c438039f3bf85d6cc0f1d695c"
-    },
-    ".claude/commands/new-task.md": {
-      "hash": "bc10306ca66a1a678b9fd8c301e85f33eccbda17cd4d1864ef202f876d498f19",
-      "templateVersion": "0.30.0",
-      "blob": "808b43887e6769c5658ef7400c64cd8976fbbad8"
-    },
-    ".claude/commands/project-review.md": {
-      "hash": "ffc79173061cb39dad6af90d8011922f1056a95830580d7d4afa2135872e6aee",
-      "templateVersion": "0.30.0",
-      "blob": "b770563c04f8f2b84cf811b4f67f814b716b6111"
-    },
-    ".claude/commands/sync.md": {
-      "hash": "f3f704618db6e9d6abfc10d0bc4cba42c9e9e6e8db370800269eabf0c1a1cb01",
-      "templateVersion": "0.30.0",
-      "blob": "0fdc67115d9ac17b4be40d95eb9d18c3d1fe1663"
-    },
     ".claude/settings.json": {
-      "hash": "ebd1f84fa664c522fbf89f8133b357630b6ad5cea6469a36b4ad1e4587d2f36d",
+      "hash": "a4747443040b84ad327c9f3856858a0beea7daeb5545240dff217bca8d480b52",
       "templateVersion": "0.30.0",
-      "blob": "aba82e1d9ac7984653a3f6674feb5db688742c1e"
+      "blob": "5b65d3d8415d20d49f1b39c451d46fcb1a398c7f"
     },
-    ".gemini/commands/changelog.toml": {
-      "hash": "f956e534c57d39e07302d84d4f4d01ff7926d773bde5e143062ff83eeb5ac13e",
+    ".gemini/settings.json": {
+      "hash": "1e60efe86c061612b61f37e34ce88c51ff4a211c03790d137396134872b839df",
       "templateVersion": "0.30.0",
-      "blob": "870fc5ac2d42d9fb412505631456d9d0121741b2"
-    },
-    ".gemini/commands/commit-push-pr.toml": {
-      "hash": "6cb66d203f3c1193e694a8146e68c77ce99280766505ddaffa2b2f03acb4d318",
-      "templateVersion": "0.30.0",
-      "blob": "9f52de4f43677da65b4b19a0cd6e2b500e0f894b"
-    },
-    ".gemini/commands/gateguard.toml": {
-      "hash": "045e33cb4f79bce445cf0352c4ea336eedd64b47e5bb58f64af457e347591aee",
-      "templateVersion": "0.30.0",
-      "blob": "e5a789e0b99d8b23b64b67204e67a43710dee719"
-    },
-    ".gemini/commands/memlog.toml": {
-      "hash": "230f100bb104f46f66e2ca8c2ccc19267b48935fc5c8678de95608b899f8ece7",
-      "templateVersion": "0.30.0",
-      "blob": "b9278e456c9b0e8172ec088a4c1ee2f5eb95f9bb"
-    },
-    ".gemini/commands/new-task.toml": {
-      "hash": "aa6d4c3c2486e38a93f98b627a69a9a6effa5feff88f9815b35ecf0bd9a5f085",
-      "templateVersion": "0.30.0",
-      "blob": "6b1afac04ed75138d14848398cc78639c547698d"
-    },
-    ".gemini/commands/project-review.toml": {
-      "hash": "894d3d41ddb34397bdebfea656e71857b6d6c869cdc55ac4cf51b614a911c548",
-      "templateVersion": "0.30.0",
-      "blob": "81577cc1362185076cd1c73d366c473f587261a6"
-    },
-    ".gemini/commands/sync.toml": {
-      "hash": "88def8a6d33530c00324781741028e9208d761586d2c6e1bacd6182f9fdef244",
-      "templateVersion": "0.30.0",
-      "blob": "77854eb79247d694c12e2ba9daad9c14a015cfbe"
+      "blob": "7c8e8ce04d38e28d97a5011ad908e372aa9f6bec"
     },
     ".githooks/commit-msg": {
       "hash": "6375ca75a1fa6cf1547835b64f2b36c549b4faf4aa4aab0fccc4e88e06451f54",
@@ -164,9 +160,9 @@
       "blob": "f4973b825a37599062b3b265d7df7482880c9272"
     },
     "CLAUDE.md": {
-      "hash": "64b4ee349dd8f4030336f58324bffdcf10ba47df649fce2c10ae8d33c48aad90",
+      "hash": "843783d8dc8b06d952cc3b14912eff6403efb43f11ced5e9be0513e81088727b",
       "templateVersion": "0.30.0",
-      "blob": "24467ba581340da086a54a72aba8baab99087327"
+      "blob": "5f9a5fa8ece95c49634b5cca8b891a27412508d0"
     },
     "CODEX.md": {
       "hash": "a97f02c0c20af9a0136854e8655bca22136c225f8d41eacd7690d8c40ac67f39",
@@ -179,9 +175,359 @@
       "blob": "672801c9e73a5090c87dc08f799d5cd39811ce6f"
     },
     "HERMES.md": {
-      "hash": "99c0722c58dbc5640de6f486c85d4f934e8d318d31b76593ffb7f8d8423ae121",
+      "hash": "737a55d544d74589353cf3f15b3b24c1c20e7c8f240483b7f67376f1043c04f1",
       "templateVersion": "0.30.0",
-      "blob": "a5e8ffc9a9b3a699e524d39815d2686865080505"
+      "blob": "ab563b549598145996032f94fecfcdf228b2772b"
+    },
+    "agents/pm.md": {
+      "hash": "ba87a6070e8211abd920be2802e25ab1a427c996f19476cfd6b22fe6b03e5966",
+      "templateVersion": "0.30.0",
+      "blob": "0608061cd656636b789e59b489a03b5dde43e0eb"
+    },
+    "docs/co-utility.context.md": {
+      "hash": "0a5c2f58762d67cc4bc4db70cc88bc65279d1e60bd47e101d227405d2fd7d021",
+      "templateVersion": "0.30.0",
+      "blob": "d60fbe53e6571ef03c3a3e78f7e74c60f6abdbb8"
+    },
+    "docs/phase-definitions.md": {
+      "hash": "4d390df63d267a6124230647bcd5002de1b6f20c230e851bf7373080df69d601",
+      "templateVersion": "0.30.0",
+      "blob": "885a850c1e45b65f2ad97b63e1aae98b47699820"
+    },
+    "docs/security.md": {
+      "hash": "6424d80604638ae56523d66a6a3447b3bb14ec249afb20d2fe70f75bca30f87d",
+      "templateVersion": "0.30.0",
+      "blob": "dc6dd2e84dd1ad63b77bbdde06e6ff63eeb2151e"
+    },
+    "docs/workspace-schema.json": {
+      "hash": "629c97e630372abd73922a5f2fd9685e0a4c023fcaf74f2c62b4290eec8948b6",
+      "templateVersion": "0.30.0",
+      "blob": "686e057a9f7d83cf4dd73483efd0a0871d6c6c3a"
+    },
+    "scripts/dev-sync.ts": {
+      "hash": "9dce60ee4e166512881390ee3e7d8cdefe0a1c028868429b7c6646ce85b880b8",
+      "templateVersion": "0.30.0",
+      "blob": "e8a9811a57df511da0b6a7d5a31a2538c61e1330"
+    },
+    "scripts/handbook/apply-handbook-theme.ts": {
+      "hash": "9f8675bcb9dc925172486d4f15bbc34edfd2a96a015044c7aaa4aa46ec30dbdd",
+      "templateVersion": "0.30.0",
+      "blob": "b3aea5f85384d657e5bf1425588aa00162cf97aa"
+    },
+    "scripts/handbook/check-authoring.ts": {
+      "hash": "d5f18c5541d0a80b6158c902b92d78e59b43cb3fddda2a2c1db6885fa4237e82",
+      "templateVersion": "0.30.0",
+      "blob": "ac95fb0865a2c898ecde97f81dd974db86f5418e"
+    },
+    "scripts/handbook/check-external-links.ts": {
+      "hash": "7d9b37349a794e85e6eb295d8b4b3009f440027a4f9c45d5dabec7d5f0b8ce38",
+      "templateVersion": "0.30.0",
+      "blob": "15ff87853f28c1a2e452da1b49ff0928938b6343"
+    },
+    "scripts/handbook/check-generated-content.ts": {
+      "hash": "515fcc503f44834104e119206f6910e53dccaa06baa3269255c71954f4250842",
+      "templateVersion": "0.30.0",
+      "blob": "fbdd74892a88e7a1d1f5f52823b62f80d06d36d4"
+    },
+    "scripts/handbook/scaffold-handbook.ts": {
+      "hash": "b1e0c7fbf0c95750f08ebc068c942a4394b3c6e3788d79f4fecc44b7ce4fb815",
+      "templateVersion": "0.30.0",
+      "blob": "4d0240f13c4a0af3446303e3a573464fad65768d"
+    },
+    "scripts/handbook/update-footers.ts": {
+      "hash": "d6aaf5d2b80e75bcca6b40ed4ee221a753bfe4bac279ac506b5aec3995cfa88b",
+      "templateVersion": "0.30.0",
+      "blob": "354d3c9f6dac755376a6dfcec921539668e578d8"
+    },
+    "scripts/helpers/memory-union-verify.ts": {
+      "hash": "319dca5d1f919533ced253e7c82146ebb31daa26577aa78241af1db8bf3b4ca2",
+      "templateVersion": "0.30.0",
+      "blob": "117ef4745463d466cd4623243178910ed34d2db8"
+    },
+    "scripts/lib/external-deps.ts": {
+      "hash": "a7ccf1fced563ed3be7df0985a430a98ba602f6d36687a2f8490829d7fa560e1",
+      "templateVersion": "0.30.0",
+      "blob": "27528d2ce4a6d0e333f9a896233dc257d70c1523"
+    },
+    "scripts/sync-agent-mirrors.ts": {
+      "hash": "57a20647756efad430ed1815cfb4e282ac7e80e9e137e4131c474daa19f3f872",
+      "templateVersion": "0.30.0",
+      "blob": "274bcdcda9dad76a2bb42ed61d7b17931caeafb4"
+    },
+    "scripts/validate-doc-folder.ts": {
+      "hash": "d2a7f2715583d29bdb35f043a847ce40cd5afe90ea1ee8a5c86c97402dbbc111",
+      "templateVersion": "0.30.0",
+      "blob": "b2f369c21877acf1d4f23ceb8708191715cbd715"
+    },
+    "scripts/validate-templates.ts": {
+      "hash": "597309c0fb220cee662d9aaec49e0a9e6e5172af53d86ec373d55f3808dfe963",
+      "templateVersion": "0.30.0",
+      "blob": "887e49f9d4d38c8a34d41ec36cdf45610b26dc7e"
+    },
+    "scripts/validate-variant-readiness.ts": {
+      "hash": "7f5e8ec3620e2b416fc432d803192436a78e720538c33eddfa6ef6ef4a01495f",
+      "templateVersion": "0.30.0",
+      "blob": "d2f42ff6418a6242696288d985989a49ef11e78c"
+    },
+    "skills/handbook/references/AUTHORING_GUIDELINES.md": {
+      "hash": "6d186f3b9532ed6ee4a54d7c9647ef141154ef411460d4a44d9b9d5d610c1fa6",
+      "templateVersion": "0.30.0",
+      "blob": "198976ed38eaf1ec289d6625cec642666dec3793"
+    },
+    "skills/handbook/references/I18N_PARITY_PLAYBOOK.md": {
+      "hash": "b1b8a83ea82c8c94aeddc402541fe0ea08afaeae1c9745d5fd5bc855dc3f4a02",
+      "templateVersion": "0.30.0",
+      "blob": "5773c67d359096cbe116567fa92902a4407c9b54"
+    },
+    "skills/handbook/references/SECTION_TYPES.md": {
+      "hash": "40492530f9f1583b519f97c23c55b486398880703056f8525a3e103c92c3cba8",
+      "templateVersion": "0.30.0",
+      "blob": "3d0ab3e266403b83fd8cfa169f96dec90db37581"
+    },
+    "skills/handbook/references/MAINTENANCE_PLAYBOOK.md": {
+      "hash": "046bf26ecfc1becd90d822e1b4b7f3ed026cad53579f2b97c4f344e395c6778f",
+      "templateVersion": "0.30.0",
+      "blob": "037b1c7a4a9f38361a294a49c80298bff466fd66"
+    },
+    "skills/handbook/references/BUILD_GUIDE.md": {
+      "hash": "c48fd72db5d4913d8053396d7dab6f921d1f48e3a36b820f954cee8bc14b140a",
+      "templateVersion": "0.30.0",
+      "blob": "6ba077c28aada88517c2cae26bf8a9224f4fd3a6"
+    },
+    "skills/handbook/references/KOREAN_LANGUAGE.md": {
+      "hash": "e216fb4711bf55b0ea3e651160e6b55360924fdf0bcb62e6c6adf7afe79069e6",
+      "templateVersion": "0.30.0",
+      "blob": "0102a1ce1ab0ef831125b405f9a6beb04ab77ef1"
+    },
+    "skills/handbook/references/validation/NAV_VALIDATION.md": {
+      "hash": "632f65882b1070ccb63650f2008b207b77471c0f94f049d7f80316a97cc5cb2f",
+      "templateVersion": "0.30.0",
+      "blob": "5afa8189ddef6491e658ec383b9b2e615502385b"
+    },
+    "skills/handbook/references/QUALITY_CHECKLIST.md": {
+      "hash": "23572d297452fe70d24a7817da0a47bcf3f9b046714620b4ea61f4cc801acca1",
+      "templateVersion": "0.30.0",
+      "blob": "f5b93f08b1ad202b4faa1295d0a1f95e50505a49"
+    },
+    "skills/handbook/examples/course/index.html": {
+      "hash": "ff1643e5e7e77806d3071067a66f4d92ff8da4fff9266ecfaacb28bb6a81986b",
+      "templateVersion": "0.30.0",
+      "blob": "be2f2c8b2aa333a4819fc497dd60bdc4638c053b"
+    },
+    "skills/handbook/examples/course/chapter_01.html": {
+      "hash": "2af9210e33af1e01df7b0375e115b16bb991f1d83d1dfeb82c3d4a3fba9d4bf3",
+      "templateVersion": "0.30.0",
+      "blob": "51f1ca7ee9a6336ed3641ec8b2511d721fa21851"
+    },
+    "skills/handbook/examples/course/chapter_02.html": {
+      "hash": "caee96546ffea073d6aedf9fb399d9af2b189fb53a977314984b05d962e429db",
+      "templateVersion": "0.30.0",
+      "blob": "5b48d6b9f90a7407daf67fcd44c423f3106bfff9"
+    },
+    "skills/handbook/examples/course/course-overview.html": {
+      "hash": "fda85a30b4af73abf3df81fd6348e724365224c60b39b88ea57bdd02199d8e70",
+      "templateVersion": "0.30.0",
+      "blob": "cfdb55122f0f690f28e125627c87c86ae6769a14"
+    },
+    "skills/handbook/examples/course/instructor-guide.html": {
+      "hash": "9b3bc51abc2ad21cd74cb8604169091b6f5f2b0fcd46e8a31c15333325aab53e",
+      "templateVersion": "0.30.0",
+      "blob": "74da21f17d5b96ea1f4be154503b772512e174fe"
+    },
+    "skills/handbook/examples/minimal/index.html": {
+      "hash": "e29e951a85029d859c50026f30d8a3a429fcd02b136b950f289ce8c9ca5ae269",
+      "templateVersion": "0.30.0",
+      "blob": "744f950a515fc78b13675020c566bc623d076d0d"
+    },
+    "skills/handbook/examples/minimal/chapter_01.html": {
+      "hash": "b7e6385699bc1426f557dc5770920d7993d0ce42106739c28675e168080e2f7f",
+      "templateVersion": "0.30.0",
+      "blob": "1ba3758f5fa67b04feaa0516bfe89f4ee29a76a9"
+    },
+    "skills/handbook/examples/handbook/index.html": {
+      "hash": "ba99aaa5ef4a9f81009eb5a20cedf01efbf60512d5dee95e70fd103d164d237d",
+      "templateVersion": "0.30.0",
+      "blob": "750ac4898deb24b93a1357f0aa96456a77c5e88f"
+    },
+    "skills/handbook/examples/handbook/chapter_01.html": {
+      "hash": "d7648f6bd0674a17c55ed0b8ce9cad3723121bde41d407c805e1f4be0118af0a",
+      "templateVersion": "0.30.0",
+      "blob": "e2be5f892b7640a86de75363508d197d24915382"
+    },
+    "skills/handbook/examples/handbook/chapter_03.html": {
+      "hash": "e61b0abb21a9176331c0b802d8951e0277f36f1a5920b73926c66eb99c18a510",
+      "templateVersion": "0.30.0",
+      "blob": "473496fc74b41d8cc47af7be558d6efdb22fa568"
+    },
+    "skills/handbook/examples/handbook/chapter_02.html": {
+      "hash": "daa763184233b1ad6ab7de333e4bdfa01d8d7a60e8d2ae3640ea48dd3c55be41",
+      "templateVersion": "0.30.0",
+      "blob": "faaaf99746817bf41aaccf9c7cf64b775cc348d0"
+    },
+    "skills/handbook/SKILL.md": {
+      "hash": "bbf5ebad3440be533666e53f12365bfcb2e77d111b9f2889aab7421c0764d400",
+      "templateVersion": "0.30.0",
+      "blob": "cfcc5f1165a8979fd81c40da6d2cf8987b1b0b2e"
+    },
+    "skills/handbook/templates/index.html": {
+      "hash": "b1e2ecb7158123070a13ebe7e898547c23c9393eea944f7190d1dfd02c5da916",
+      "templateVersion": "0.30.0",
+      "blob": "e25b24b2a960f34f7dbf6f81a42722be83294980"
+    },
+    "skills/handbook/templates/base.html": {
+      "hash": "c7f2ca317444f738a2c66672c0d4b309889ab1b393c37b130822d42ae996a385",
+      "templateVersion": "0.30.0",
+      "blob": "f8916e188a5ba2b17c132b0b8f7a64f906478b9a"
+    },
+    "skills/handbook/templates/quiz.html": {
+      "hash": "c1024539a04d4f072728268db56a72555a25bb596d5f26a08d4fd650daa7153b",
+      "templateVersion": "0.30.0",
+      "blob": "82fb43a350d744c5593b5b917c1b569e01c65648"
+    },
+    "skills/handbook/templates/.nojekyll": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "templateVersion": "0.30.0",
+      "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    "skills/handbook/templates/.gitignore": {
+      "hash": "dbb63f63739e94be5081a54ee5b7ffd94022a657eec20f1f7ede0a702f06d576",
+      "templateVersion": "0.30.0",
+      "blob": "32162624c233c151a6564280c93069fd3b9c4ba1"
+    },
+    "skills/handbook/templates/chapter.html": {
+      "hash": "5de0b605fbaa002dd8f61ec5a15102a13e1f3063ada3a8936b907a603c97fb88",
+      "templateVersion": "0.30.0",
+      "blob": "52a239e9c8ed9ff994ef584ad900c6bd3bf37f05"
+    },
+    "skills/handbook/templates/examples.html": {
+      "hash": "2fd9354a06beb8fd5f6ab4febd2c1f927a4625b7598259ea9de783e99dae4802",
+      "templateVersion": "0.30.0",
+      "blob": "e6c8495253f06299f197724744acc6939c1ac643"
+    },
+    "skills/handbook/templates/manual.html": {
+      "hash": "bc823d550164e7a60a6ed612c33bfa92e11e2f3b84dc3482bc01c3870bf7be21",
+      "templateVersion": "0.30.0",
+      "blob": "7065303d09d153ef95243de35098027b5a6aaaea"
+    },
+    "skills/handbook/templates/course-overview.html": {
+      "hash": "69bb4e5c959a0d671e30a750f333df1a3e684a58888ef3a4b1a9ee1f0b2b39c1",
+      "templateVersion": "0.30.0",
+      "blob": "22bf364b956de4f61e914c9f440c18d0857e117d"
+    },
+    "skills/handbook/templates/instructor-guide.html": {
+      "hash": "c49a4f397c0b00bf62cd70a7dd04357bdbf356d936cdcea65ecf2aa903fb3c4b",
+      "templateVersion": "0.30.0",
+      "blob": "8afc90d1305bf71fbaa2e978431562e6ba367b27"
+    },
+    "skills/handbook/assets/css/handbook-variables.css": {
+      "hash": "17683cf03777d9d479c3d4ce6460d1fb3ad63a55fa627f6a7900c7f22dcde38f",
+      "templateVersion": "0.30.0",
+      "blob": "36e2e50a344e27e15885238ff8c0a548efd192c1"
+    },
+    "skills/handbook/assets/css/handbook-components.css": {
+      "hash": "7b390a59bc71332ce2e9c4e3bec50ff7ef71be5de33132e1f02a972276e92a5b",
+      "templateVersion": "0.30.0",
+      "blob": "8150e9011e59e305c88b1b6a1c7d04e43ea6ea1b"
+    },
+    "skills/handbook/assets/js/dark-mode-toggle.js": {
+      "hash": "08ee757324a6519a3ba6f6e2e6bc535d65fa3f26fcc4c1c9f67582d84907880f",
+      "templateVersion": "0.30.0",
+      "blob": "ff62c3904d1b2fc0ca5e13a67b902754cebb9ba1"
+    },
+    "skills/handbook/assets/js/inpage-search.js": {
+      "hash": "1af5418de135957ec85699eb95e0162d080e9959b86398ee6715797c0d690729",
+      "templateVersion": "0.30.0",
+      "blob": "4fd957704d8729966bbbe4de654ee31a36af4252"
+    },
+    "skills/handbook/assets/js/site-search.js": {
+      "hash": "4f941335064c8b406391a8a9577c5b934ec5ca43e06df8cfdcbe1668eba43ed9",
+      "templateVersion": "0.30.0",
+      "blob": "be48c08d1b9d6c26d50481e1ec1350c85d042129"
+    },
+    "skills/handbook/assets/js/copy-code.js": {
+      "hash": "703cdad2d3c3ae87623dfa173df9ced4b24e56d5078d6d7c2e5768f17fb865c5",
+      "templateVersion": "0.30.0",
+      "blob": "1b318498021a8a492d6888946e40971e986889da"
+    },
+    "skills/handbook/assets/js/lang-switcher.js": {
+      "hash": "4ce261d32d8c93894fabdba292075b15c92c8243f52cec96ec1f6100a3da5134",
+      "templateVersion": "0.30.0",
+      "blob": "8e4afa206a70116fd58807a73c3347dba6365654"
+    },
+    "skills/meeting-facilitation/SKILL.md": {
+      "hash": "aa2ffa3083eda0e4528e3a8f7cd6f0b1a2cf0308f7e3a56536f3b2fa50b5cd50",
+      "templateVersion": "0.30.0",
+      "blob": "2af1e785d9e8a7e70875b6d2596c4f1b91f92c6b"
+    },
+    ".claude/commands/changelog.md": {
+      "hash": "f41bdf6b76ec0cbae3de06364eb32d0abc584df027cc600ba2a309c4ab679762",
+      "templateVersion": "0.30.0",
+      "blob": "34cc1056e2ff66eadc31a833add23cd7e7045c65"
+    },
+    ".claude/commands/commit-push-pr.md": {
+      "hash": "e26d0e26596a6bd04aa27d52f72b477856e91670c8eaed2556d22fd929837b58",
+      "templateVersion": "0.30.0",
+      "blob": "94fd958329318062eff04b3a7d0d68d79c0b7f92"
+    },
+    ".claude/commands/gateguard.md": {
+      "hash": "bc4cb646f0fc6276dafca3c075bd47ef82daa2da073a8d059f1a00a91b895902",
+      "templateVersion": "0.30.0",
+      "blob": "afd1a4d7643758b8920c543f18dbc34cd6e19a27"
+    },
+    ".claude/commands/memlog.md": {
+      "hash": "ce6acc582ad967a2dfc473c98d4665c1b5f0fc7bb06fd642968b1f1933ce8062",
+      "templateVersion": "0.30.0",
+      "blob": "eb92f884d3341b9c438039f3bf85d6cc0f1d695c"
+    },
+    ".claude/commands/new-task.md": {
+      "hash": "bc10306ca66a1a678b9fd8c301e85f33eccbda17cd4d1864ef202f876d498f19",
+      "templateVersion": "0.30.0",
+      "blob": "808b43887e6769c5658ef7400c64cd8976fbbad8"
+    },
+    ".claude/commands/project-review.md": {
+      "hash": "ffc79173061cb39dad6af90d8011922f1056a95830580d7d4afa2135872e6aee",
+      "templateVersion": "0.30.0",
+      "blob": "b770563c04f8f2b84cf811b4f67f814b716b6111"
+    },
+    ".claude/commands/sync.md": {
+      "hash": "f3f704618db6e9d6abfc10d0bc4cba42c9e9e6e8db370800269eabf0c1a1cb01",
+      "templateVersion": "0.30.0",
+      "blob": "0fdc67115d9ac17b4be40d95eb9d18c3d1fe1663"
+    },
+    ".gemini/commands/changelog.toml": {
+      "hash": "f956e534c57d39e07302d84d4f4d01ff7926d773bde5e143062ff83eeb5ac13e",
+      "templateVersion": "0.30.0",
+      "blob": "870fc5ac2d42d9fb412505631456d9d0121741b2"
+    },
+    ".gemini/commands/commit-push-pr.toml": {
+      "hash": "6cb66d203f3c1193e694a8146e68c77ce99280766505ddaffa2b2f03acb4d318",
+      "templateVersion": "0.30.0",
+      "blob": "9f52de4f43677da65b4b19a0cd6e2b500e0f894b"
+    },
+    ".gemini/commands/gateguard.toml": {
+      "hash": "045e33cb4f79bce445cf0352c4ea336eedd64b47e5bb58f64af457e347591aee",
+      "templateVersion": "0.30.0",
+      "blob": "e5a789e0b99d8b23b64b67204e67a43710dee719"
+    },
+    ".gemini/commands/memlog.toml": {
+      "hash": "230f100bb104f46f66e2ca8c2ccc19267b48935fc5c8678de95608b899f8ece7",
+      "templateVersion": "0.30.0",
+      "blob": "b9278e456c9b0e8172ec088a4c1ee2f5eb95f9bb"
+    },
+    ".gemini/commands/new-task.toml": {
+      "hash": "aa6d4c3c2486e38a93f98b627a69a9a6effa5feff88f9815b35ecf0bd9a5f085",
+      "templateVersion": "0.30.0",
+      "blob": "6b1afac04ed75138d14848398cc78639c547698d"
+    },
+    ".gemini/commands/project-review.toml": {
+      "hash": "894d3d41ddb34397bdebfea656e71857b6d6c869cdc55ac4cf51b614a911c548",
+      "templateVersion": "0.30.0",
+      "blob": "81577cc1362185076cd1c73d366c473f587261a6"
+    },
+    ".gemini/commands/sync.toml": {
+      "hash": "88def8a6d33530c00324781741028e9208d761586d2c6e1bacd6182f9fdef244",
+      "templateVersion": "0.30.0",
+      "blob": "77854eb79247d694c12e2ba9daad9c14a015cfbe"
     },
     "agents/backend.md": {
       "hash": "ec4675f95a455e979a6a1374f0f5478e6eefa719a81332ff3e2fe7abba6b77fb",
@@ -193,11 +539,6 @@
       "templateVersion": "0.30.0",
       "blob": "2f9b5fa0b5f9409bfca9391c30314397b8eb7c35"
     },
-    "agents/pm.md": {
-      "hash": "ba87a6070e8211abd920be2802e25ab1a427c996f19476cfd6b22fe6b03e5966",
-      "templateVersion": "0.30.0",
-      "blob": "0608061cd656636b789e59b489a03b5dde43e0eb"
-    },
     "agents/qa.md": {
       "hash": "13fd1233cb52ac9fb065d5625a88a7bd31aa632319d2c03a6601e3a7ffd550a3",
       "templateVersion": "0.30.0",
@@ -208,20 +549,10 @@
       "templateVersion": "0.30.0",
       "blob": "68b52d570358f5f3fc43867768d7f0bd16f1b534"
     },
-    "docs/co-utility.context.md": {
-      "hash": "0a5c2f58762d67cc4bc4db70cc88bc65279d1e60bd47e101d227405d2fd7d021",
-      "templateVersion": "0.30.0",
-      "blob": "d60fbe53e6571ef03c3a3e78f7e74c60f6abdbb8"
-    },
     "docs/lifecycle/skills/post-write-check.md": {
       "hash": "bd164861dd163498b91c65b64bb73aa99d28b20fd9ddbf5cf24961df968acbcd",
       "templateVersion": "0.30.0",
       "blob": "94a43893fd7117f1237ffcb262080fa0db455d3f"
-    },
-    "docs/security.md": {
-      "hash": "6424d80604638ae56523d66a6a3447b3bb14ec249afb20d2fe70f75bca30f87d",
-      "templateVersion": "0.30.0",
-      "blob": "dc6dd2e84dd1ad63b77bbdde06e6ff63eeb2151e"
     },
     "scripts/generate-raci.ts": {
       "hash": "064c6c449fd2c6059c9aacbe12d84359c85312bb611d6688037aecd9f717d2e7",
@@ -288,16 +619,6 @@
       "templateVersion": "0.30.0",
       "blob": "bec71965d5fee6105fded4224bbe72ecff2548f1"
     },
-    "docs/phase-definitions.md": {
-      "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
-      "templateVersion": "0.30.0",
-      "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
-    },
-    "scripts/lib/external-deps.ts": {
-      "hash": "952377ae40fb15b1599ee378a5961a2bc6caea991e9e41597bc914134c6a5e8a",
-      "templateVersion": "0.30.0",
-      "blob": "4b1e7fe3b7e43348d9abc3fbc2d5bf38ce5659df"
-    },
     "agents/automation-engineer.md": {
       "hash": "0cdff6f6439400114ddd590fff00f01ea96f3c2e47091c8f7ae8d14b10ea554a",
       "templateVersion": "0.30.0",
@@ -327,11 +648,6 @@
       "hash": "787eae1d14126494342b8c954e6404c502535a360423454962233fe0fa3fbd4d",
       "templateVersion": "0.30.0",
       "blob": "7ada33249f5664598a871f3f078b9ef2fc12fc20"
-    },
-    "docs/workspace-schema.json": {
-      "hash": "48a1f35440a561a1f06f28d638990bc44bf0e6798dba7a8ceb0b4685f4185220",
-      "templateVersion": "0.30.0",
-      "blob": "f279bfda4415a57e6a40072bfb9c263584ee7cb4"
     },
     "skills/finishing-a-development-branch/SKILL.md": {
       "hash": "d12e2be7adcd46dbee73d9f71506fd0131b26e9df3db097466910d5d7a09e8bb",
@@ -382,11 +698,6 @@
       "hash": "452b5b9bee150a83e14d13ef258f99e8ffa0daa1b8cb12b8e78720cc64ffb2a4",
       "templateVersion": "0.30.0",
       "blob": "a85208df6444319af9760517d60c773349ca355a"
-    },
-    ".gemini/settings.json": {
-      "hash": "b47f600b675a18c8f1b1b6f1a77e750a4e70c6443e66ca62da113d2e6ddfd5e4",
-      "templateVersion": "0.30.0",
-      "blob": "77dd73a4fc98be85d582f1db388a6d0ded1a9313"
     },
     ".gemini/skills.json": {
       "hash": "c514710d97899e895bd333386ddc107db091cd39b50a4ca494d530b9d7a4e4d7",
@@ -838,11 +1149,6 @@
       "templateVersion": "0.30.0",
       "blob": "a10b491213a5dfadf3a6f083333a50fbc1056d83"
     },
-    "scripts/dev-sync.ts": {
-      "hash": "48577c0fef211329985e37f74a9b6161484a8d21402abd97d4ffa64609ba15e3",
-      "templateVersion": "0.30.0",
-      "blob": "e6869164ef6249b387431873727681591a3a8544"
-    },
     "scripts/dispatch-parallel.ts": {
       "hash": "ef03879cd06ddb8c1dd55e3e9ba7cb32d2982afffa82a9bc54dabb4e397746dc",
       "templateVersion": "0.30.0",
@@ -898,11 +1204,6 @@
       "templateVersion": "0.30.0",
       "blob": "307581716efcfde0b53a9cd03a826aec8d882d6a"
     },
-    "scripts/handbook/apply-handbook-theme.ts": {
-      "hash": "1ff0e11a137267a3572b113a45d0aa5810ce0d81a21a242408a4df921d67dc41",
-      "templateVersion": "0.30.0",
-      "blob": "ea22dc8fdbe6be71011105b57a3181bb94fbe48b"
-    },
     "scripts/handbook/build-search-index.ts": {
       "hash": "382867a9b5dcf836f094c829acd3b9a68348e37ae3185fd3f814192d02e21d3f",
       "templateVersion": "0.30.0",
@@ -912,16 +1213,6 @@
       "hash": "3b2ea624a1f86ce7b08549ad97db672617e2543686dc1d026e81d62610b6b925",
       "templateVersion": "0.30.0",
       "blob": "629f5767127e9520f94338d3004764c902519575"
-    },
-    "scripts/handbook/check-authoring.ts": {
-      "hash": "5e54c6e68c9d9b814726f7dfeec153e9b3af9f180fa745c615e7ea4d006362a5",
-      "templateVersion": "0.30.0",
-      "blob": "d086e8cf10648dc43fa1750ff648fa8c1b4115d7"
-    },
-    "scripts/handbook/check-external-links.ts": {
-      "hash": "f6985468d04d951a01d1627ea6747e46ae0ffe55364d31613ffcc5a7a040c8c3",
-      "templateVersion": "0.30.0",
-      "blob": "a3ec4e70e540a62e9db5d59310446ecea2cba861"
     },
     "scripts/handbook/check-i18n-parity.ts": {
       "hash": "5d81655c735edc4af28b61d7cd9935482cf3fb55b8e96e1eb25ec9de58cd82c7",
@@ -992,16 +1283,6 @@
       "hash": "a8f89ff468c0dd4d2ffab4ad29d4d53c38ba1591255c3ce9c2facd7e1316e627",
       "templateVersion": "0.30.0",
       "blob": "f42efbc91a390e26c7a6a9e41c8568937b0dd2df"
-    },
-    "scripts/handbook/scaffold-handbook.ts": {
-      "hash": "c49bbbe20be31403e44597986fc2c69f00b6036a3a7e42c04c6320579eb6581c",
-      "templateVersion": "0.30.0",
-      "blob": "24145e96a1f0defc67b4cfb50d9e92e7766ee9f5"
-    },
-    "scripts/handbook/update-footers.ts": {
-      "hash": "059532c27690aa18c1c1fbd1740640ca3d25c19cae715f676a75c8f8612618a1",
-      "templateVersion": "0.30.0",
-      "blob": "97e402694c9cb956a34a7310a7d3bf5e483883c3"
     },
     "scripts/handbook/validate-handbook.ts": {
       "hash": "0da10af442f8b7ccd898494a91de123a7ff3024bebbcb39c8f913bf40187d545",
@@ -1087,11 +1368,6 @@
       "hash": "6549c0d77c929b9e3746c7d49a1be9f00217c710ecbb2ffdfb3f83c41e185bbf",
       "templateVersion": "0.30.0",
       "blob": "5fca39f7499ee8fbf169977bc2af1c677b35eed7"
-    },
-    "scripts/helpers/memory-union-verify.ts": {
-      "hash": "637ad87d9b202a1d940ab8da733926b60a1f42ad884378472922da4f9fb73f5e",
-      "templateVersion": "0.30.0",
-      "blob": "b6454e350d00cec961275880fb016f8eae2fcdfc"
     },
     "scripts/helpers/merge-frontmatter.ts": {
       "hash": "76dd410df03641b20b60e1c1d5bbf33af81276c6dbb4af56b770d77db538e539",
@@ -1498,11 +1774,6 @@
       "templateVersion": "0.30.0",
       "blob": "f7fb53bb1f15d3bc41965b1b2294909b10fdc820"
     },
-    "scripts/sync-agent-mirrors.ts": {
-      "hash": "b2d598d626dc0c03d0d98601dc66d06ef30afb8453271cdd115743684477b86e",
-      "templateVersion": "0.30.0",
-      "blob": "b7894ee559b20a8481bfc203d564dcedf26c8627"
-    },
     "scripts/sync-md.ts": {
       "hash": "0f96612215f44cd9d53714ccf97b737112b824417e2906fe15113059cd408e7f",
       "templateVersion": "0.30.0",
@@ -1558,11 +1829,6 @@
       "templateVersion": "0.30.0",
       "blob": "de8605cb5b58a65dccb66735009dca9851860ec1"
     },
-    "scripts/validate-doc-folder.ts": {
-      "hash": "bf898e30825782eaeb2ae906289a5f29890b59af7195effe76ef0d704775de19",
-      "templateVersion": "0.30.0",
-      "blob": "85a71f29d80bad830c9cfb6dfe7131eb36ea6679"
-    },
     "scripts/validate-docs-links.ts": {
       "hash": "16c39374ed43b08c7f2363bef20dee613e878340658badcbcd180061840777ce",
       "templateVersion": "0.30.0",
@@ -1602,16 +1868,6 @@
       "hash": "70b2281cf9c791907995d837d1cbe9fc8511c69fe86e8f93fc944fab047c7e45",
       "templateVersion": "0.30.0",
       "blob": "76dd3e1f71c262fff31d1db1dbb70c08b1f7560d"
-    },
-    "scripts/validate-templates.ts": {
-      "hash": "7f1cd5bce71454aa9dfff47252e02e846324fdc13c0e36b714df2f0f06a1360f",
-      "templateVersion": "0.30.0",
-      "blob": "85edcead00db81a3c5010a0047d7fc23c77ed7ce"
-    },
-    "scripts/validate-variant-readiness.ts": {
-      "hash": "dede9c6cdfe7fcd09214d1b2a3134bc16c74246373f82056bae77c3510ec465c",
-      "templateVersion": "0.30.0",
-      "blob": "37f1a6dcf824c86f1c70b089d1c56aec1bedc661"
     },
     "scripts/verify-agent-deliverables.ts": {
       "hash": "a016299e7d721597a06333a56530efb82ad0225f7ab31d27574e50e77b51895f",
@@ -1738,191 +1994,6 @@
       "templateVersion": "0.30.0",
       "blob": "381f2c0d1ffd8d61e7f5e6e01b76ad4d8f8c3e20"
     },
-    "skills/handbook/references/AUTHORING_GUIDELINES.md": {
-      "hash": "899ca7499eceebff6b390aa52c457d0727279d0defd0c376e0e6f98713828218",
-      "templateVersion": "0.30.0",
-      "blob": "bf08b5b9e34107bd80b409c5d4fb386a5a20da4f"
-    },
-    "skills/handbook/references/I18N_PARITY_PLAYBOOK.md": {
-      "hash": "b1b8a83ea82c8c94aeddc402541fe0ea08afaeae1c9745d5fd5bc855dc3f4a02",
-      "templateVersion": "0.30.0",
-      "blob": "5773c67d359096cbe116567fa92902a4407c9b54"
-    },
-    "skills/handbook/references/SECTION_TYPES.md": {
-      "hash": "40492530f9f1583b519f97c23c55b486398880703056f8525a3e103c92c3cba8",
-      "templateVersion": "0.30.0",
-      "blob": "3d0ab3e266403b83fd8cfa169f96dec90db37581"
-    },
-    "skills/handbook/references/MAINTENANCE_PLAYBOOK.md": {
-      "hash": "046bf26ecfc1becd90d822e1b4b7f3ed026cad53579f2b97c4f344e395c6778f",
-      "templateVersion": "0.30.0",
-      "blob": "037b1c7a4a9f38361a294a49c80298bff466fd66"
-    },
-    "skills/handbook/references/BUILD_GUIDE.md": {
-      "hash": "43220977fc17336c0805c6ebbbef8e72d8df0fc7674d44d20501c5f02f39c1b1",
-      "templateVersion": "0.30.0",
-      "blob": "8be55abf30f33259e9e1339b0fc2ca3fe39975e6"
-    },
-    "skills/handbook/references/KOREAN_LANGUAGE.md": {
-      "hash": "e216fb4711bf55b0ea3e651160e6b55360924fdf0bcb62e6c6adf7afe79069e6",
-      "templateVersion": "0.30.0",
-      "blob": "0102a1ce1ab0ef831125b405f9a6beb04ab77ef1"
-    },
-    "skills/handbook/references/validation/NAV_VALIDATION.md": {
-      "hash": "632f65882b1070ccb63650f2008b207b77471c0f94f049d7f80316a97cc5cb2f",
-      "templateVersion": "0.30.0",
-      "blob": "5afa8189ddef6491e658ec383b9b2e615502385b"
-    },
-    "skills/handbook/references/QUALITY_CHECKLIST.md": {
-      "hash": "dcb328da7fe5b37af7e3a3f6da15b8df17aeb0e92fa5a3b3823465a2ff74b0d7",
-      "templateVersion": "0.30.0",
-      "blob": "8d4f3c133a29f4c4bcf07ffc87def840221b48c7"
-    },
-    "skills/handbook/examples/course/index.html": {
-      "hash": "ff1643e5e7e77806d3071067a66f4d92ff8da4fff9266ecfaacb28bb6a81986b",
-      "templateVersion": "0.30.0",
-      "blob": "be2f2c8b2aa333a4819fc497dd60bdc4638c053b"
-    },
-    "skills/handbook/examples/course/chapter_01.html": {
-      "hash": "2af9210e33af1e01df7b0375e115b16bb991f1d83d1dfeb82c3d4a3fba9d4bf3",
-      "templateVersion": "0.30.0",
-      "blob": "51f1ca7ee9a6336ed3641ec8b2511d721fa21851"
-    },
-    "skills/handbook/examples/course/chapter_02.html": {
-      "hash": "caee96546ffea073d6aedf9fb399d9af2b189fb53a977314984b05d962e429db",
-      "templateVersion": "0.30.0",
-      "blob": "5b48d6b9f90a7407daf67fcd44c423f3106bfff9"
-    },
-    "skills/handbook/examples/course/course-overview.html": {
-      "hash": "fda85a30b4af73abf3df81fd6348e724365224c60b39b88ea57bdd02199d8e70",
-      "templateVersion": "0.30.0",
-      "blob": "cfdb55122f0f690f28e125627c87c86ae6769a14"
-    },
-    "skills/handbook/examples/course/instructor-guide.html": {
-      "hash": "9b3bc51abc2ad21cd74cb8604169091b6f5f2b0fcd46e8a31c15333325aab53e",
-      "templateVersion": "0.30.0",
-      "blob": "74da21f17d5b96ea1f4be154503b772512e174fe"
-    },
-    "skills/handbook/examples/minimal/index.html": {
-      "hash": "e29e951a85029d859c50026f30d8a3a429fcd02b136b950f289ce8c9ca5ae269",
-      "templateVersion": "0.30.0",
-      "blob": "744f950a515fc78b13675020c566bc623d076d0d"
-    },
-    "skills/handbook/examples/minimal/chapter_01.html": {
-      "hash": "b7e6385699bc1426f557dc5770920d7993d0ce42106739c28675e168080e2f7f",
-      "templateVersion": "0.30.0",
-      "blob": "1ba3758f5fa67b04feaa0516bfe89f4ee29a76a9"
-    },
-    "skills/handbook/examples/handbook/index.html": {
-      "hash": "ba99aaa5ef4a9f81009eb5a20cedf01efbf60512d5dee95e70fd103d164d237d",
-      "templateVersion": "0.30.0",
-      "blob": "750ac4898deb24b93a1357f0aa96456a77c5e88f"
-    },
-    "skills/handbook/examples/handbook/chapter_01.html": {
-      "hash": "d7648f6bd0674a17c55ed0b8ce9cad3723121bde41d407c805e1f4be0118af0a",
-      "templateVersion": "0.30.0",
-      "blob": "e2be5f892b7640a86de75363508d197d24915382"
-    },
-    "skills/handbook/examples/handbook/chapter_03.html": {
-      "hash": "e61b0abb21a9176331c0b802d8951e0277f36f1a5920b73926c66eb99c18a510",
-      "templateVersion": "0.30.0",
-      "blob": "473496fc74b41d8cc47af7be558d6efdb22fa568"
-    },
-    "skills/handbook/examples/handbook/chapter_02.html": {
-      "hash": "daa763184233b1ad6ab7de333e4bdfa01d8d7a60e8d2ae3640ea48dd3c55be41",
-      "templateVersion": "0.30.0",
-      "blob": "faaaf99746817bf41aaccf9c7cf64b775cc348d0"
-    },
-    "skills/handbook/SKILL.md": {
-      "hash": "930e9ce941dbff4407a8b007ce164d2f09f7df970c3d3764cc016961d729b968",
-      "templateVersion": "0.30.0",
-      "blob": "7e63feee66b195e84a8f6ccfe42465d739f88374"
-    },
-    "skills/handbook/templates/index.html": {
-      "hash": "a7d3a47d1f33e75eac6857c41e87e646e3ea34eb013c8c3fe7075e8c27d460b1",
-      "templateVersion": "0.30.0",
-      "blob": "0e94459a0b5b4e035496c762a7481fccd20249db"
-    },
-    "skills/handbook/templates/base.html": {
-      "hash": "9e841532656446fb438779503796e2272eea50c48ea4e75f8fcfd2b96fda898f",
-      "templateVersion": "0.30.0",
-      "blob": "5eb5b08aadc0baec199af867acfda2e5009be0a5"
-    },
-    "skills/handbook/templates/quiz.html": {
-      "hash": "e671e9480da095635a4c714ea4e887fda3d2428db7dadc9cdfd8dc8404ad1f1d",
-      "templateVersion": "0.30.0",
-      "blob": "87da7fdba07163b1399f246915827ea23e9d0bc5"
-    },
-    "skills/handbook/templates/.nojekyll": {
-      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "templateVersion": "0.30.0",
-      "blob": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
-    },
-    "skills/handbook/templates/.gitignore": {
-      "hash": "dbb63f63739e94be5081a54ee5b7ffd94022a657eec20f1f7ede0a702f06d576",
-      "templateVersion": "0.30.0",
-      "blob": "32162624c233c151a6564280c93069fd3b9c4ba1"
-    },
-    "skills/handbook/templates/chapter.html": {
-      "hash": "4f234393369b1a3e7efed13bce8c27e5ff33a599271b20b721101a882ee2598d",
-      "templateVersion": "0.30.0",
-      "blob": "f52c9f4371f8dad3b53a106612e90c8c3b4666a3"
-    },
-    "skills/handbook/templates/examples.html": {
-      "hash": "f2a3f5f873ac852d86a3b8d5d4c852831120c7ef385470e0a7f382c3036c2cd4",
-      "templateVersion": "0.30.0",
-      "blob": "cae94e84b9709321746fa3a104a7a5212137df29"
-    },
-    "skills/handbook/templates/manual.html": {
-      "hash": "969344723df19cec43e40f2b3b47cce7e263990db4f4b3abaec270855caced78",
-      "templateVersion": "0.30.0",
-      "blob": "c2301f2779861671f703b3dc1d1237851fe38386"
-    },
-    "skills/handbook/templates/course-overview.html": {
-      "hash": "33a18f053b6b4547685ed4727aecb4cbf3568876d20703768bbcc06a404f53c7",
-      "templateVersion": "0.30.0",
-      "blob": "c2bcb944da9d97b5b59fe1497773e79cf9da482e"
-    },
-    "skills/handbook/templates/instructor-guide.html": {
-      "hash": "8d2c3c572c8ac017298465d1f728bf90ec37d608c0e39097fc87e1fcab321008",
-      "templateVersion": "0.30.0",
-      "blob": "28259187ee12e957fcb13c201f4c525c38561ad8"
-    },
-    "skills/handbook/assets/css/handbook-variables.css": {
-      "hash": "1eccd92d619cfcc8e8e86436f42b34102adcdc96be50694425b083d93b8d8e02",
-      "templateVersion": "0.30.0",
-      "blob": "aa6d1f5fee8a3b9c81f682935788b6e6c8d0faf9"
-    },
-    "skills/handbook/assets/css/handbook-components.css": {
-      "hash": "7b390a59bc71332ce2e9c4e3bec50ff7ef71be5de33132e1f02a972276e92a5b",
-      "templateVersion": "0.30.0",
-      "blob": "8150e9011e59e305c88b1b6a1c7d04e43ea6ea1b"
-    },
-    "skills/handbook/assets/js/dark-mode-toggle.js": {
-      "hash": "08ee757324a6519a3ba6f6e2e6bc535d65fa3f26fcc4c1c9f67582d84907880f",
-      "templateVersion": "0.30.0",
-      "blob": "ff62c3904d1b2fc0ca5e13a67b902754cebb9ba1"
-    },
-    "skills/handbook/assets/js/inpage-search.js": {
-      "hash": "1af5418de135957ec85699eb95e0162d080e9959b86398ee6715797c0d690729",
-      "templateVersion": "0.30.0",
-      "blob": "4fd957704d8729966bbbe4de654ee31a36af4252"
-    },
-    "skills/handbook/assets/js/site-search.js": {
-      "hash": "4f941335064c8b406391a8a9577c5b934ec5ca43e06df8cfdcbe1668eba43ed9",
-      "templateVersion": "0.30.0",
-      "blob": "be48c08d1b9d6c26d50481e1ec1350c85d042129"
-    },
-    "skills/handbook/assets/js/copy-code.js": {
-      "hash": "703cdad2d3c3ae87623dfa173df9ced4b24e56d5078d6d7c2e5768f17fb865c5",
-      "templateVersion": "0.30.0",
-      "blob": "1b318498021a8a492d6888946e40971e986889da"
-    },
-    "skills/handbook/assets/js/lang-switcher.js": {
-      "hash": "4ce261d32d8c93894fabdba292075b15c92c8243f52cec96ec1f6100a3da5134",
-      "templateVersion": "0.30.0",
-      "blob": "8e4afa206a70116fd58807a73c3347dba6365654"
-    },
     "skills/handbook-sync-audit/SKILL.md": {
       "hash": "f6f7da79c9912eb2aa9e8e1911f85567cac02d244a6da927db73302cd35a0655",
       "templateVersion": "0.30.0",
@@ -1947,11 +2018,6 @@
       "hash": "acccee0665953643b7e44735911b1c82509bc87cf1f9b02f61ed835dbc0cdd45",
       "templateVersion": "0.30.0",
       "blob": "27e740dad8fb7277b5a2206b240e1800dc1bfde5"
-    },
-    "skills/meeting-facilitation/SKILL.md": {
-      "hash": "9e51bb7a7b1fdc8a4eabd739eb2f887ee6b1a65d5ad04132693bb2e9998b53bc",
-      "templateVersion": "0.30.0",
-      "blob": "1eaa5395a9a7ef0370db07ed5396fa05867e7790"
     },
     "skills/project-review/SKILL.md": {
       "hash": "0185f04148c1d59d9acd12a3c8caa6dc415d60fe2c701bf35d05132a2412f020",
@@ -2229,14 +2295,6 @@
       "verdict": "TEMPLATE_AHEAD_REGION",
       "detail": "template line-block (36 line(s)) absent from the project copy after '### Optimal Interaction Guidelines' — template content the project never received, or a deliberate project deletion (WARN — never silently reverted; ERROR only when a write channel targets the span)",
       "severity": "WARN"
-    },
-    {
-      "path": "CLAUDE.md",
-      "policy": "MERGE_MANAGED",
-      "pass": "MERGE",
-      "verdict": "TEMPLATE_DELTA",
-      "detail": "template-authoritative managed block restamped (template wins): COMMON-CLAUDE — project block diverged from the template and was restamped (9 line(s) → 10 line(s))",
-      "severity": "INFO"
     },
     {
       "path": "CLAUDE.md",
@@ -2634,6 +2692,14 @@
       "path": "HERMES.md",
       "policy": "MERGE_MANAGED",
       "pass": "MERGE",
+      "verdict": "TEMPLATE_DELTA",
+      "detail": "template-authoritative managed block restamped (template wins): COMMON-HERMES — project block diverged from the template and was restamped (53 line(s) → 54 line(s))",
+      "severity": "INFO"
+    },
+    {
+      "path": "HERMES.md",
+      "policy": "MERGE_MANAGED",
+      "pass": "MERGE",
       "verdict": "MERGE",
       "detail": "managed-zone merge delivered (non-destructive union/insert)",
       "severity": "INFO"
@@ -2922,125 +2988,27 @@
       "path": "docs/phase-definitions.md",
       "policy": "OVERWRITE",
       "pass": "DOCS_OVERWRITE",
-      "verdict": "CONFLICT",
-      "detail": "project-evolved since the last delivery AND template changed — CONFLICT disposition: delivery SKIPPED, project copy preserved",
+      "verdict": "ADOPT",
+      "detail": "project-evolved + template changed — delivered via explicit --disposition adopt-template (decision recorded) [grant: adopt-template=docs/phase-definitions.md]",
       "baseline": {
         "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
         "templateVersion": "0.30.0",
         "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
       },
-      "severity": "ERROR"
-    },
-    {
-      "path": ".claude/commands/changelog.md",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "UPDATE",
-      "detail": "hash-gated command delivery over the delivered baseline",
+      "grant": "adopt-template",
       "severity": "INFO"
     },
     {
-      "path": ".claude/commands/memlog.md",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "UPDATE",
-      "detail": "hash-gated command delivery over the delivered baseline",
-      "severity": "INFO"
-    },
-    {
-      "path": ".claude/commands/commit-push-pr.md",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".claude/commands/sync.md",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "UPDATE",
-      "detail": "hash-gated command delivery over the delivered baseline",
-      "severity": "INFO"
-    },
-    {
-      "path": ".claude/commands/project-review.md",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".claude/commands/new-task.md",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "UPDATE",
-      "detail": "hash-gated command delivery over the delivered baseline",
-      "severity": "INFO"
-    },
-    {
-      "path": ".claude/commands/gateguard.md",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/commands/memlog.toml",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/commands/changelog.toml",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/commands/project-review.toml",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/commands/commit-push-pr.toml",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/commands/gateguard.toml",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/commands/new-task.toml",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
-      "severity": "INFO"
-    },
-    {
-      "path": ".gemini/commands/sync.toml",
-      "policy": "HASH_SYNC",
-      "pass": "COMMANDS_SYNC",
-      "verdict": "NEW",
-      "detail": "command file delivered (project copy absent)",
+      "path": "docs/phase-definitions.md",
+      "policy": "OVERWRITE",
+      "pass": "DOCS_OVERWRITE",
+      "verdict": "ADOPT",
+      "detail": "template copy delivered over the delivered baseline (version-gated)",
+      "baseline": {
+        "hash": "55a699277b53e72debfd46e270f684f10350b407009910e1afcb40990c35eba9",
+        "templateVersion": "0.30.0",
+        "blob": "c484653f4795f120c2f3ac11f418376e675cefa3"
+      },
       "severity": "INFO"
     },
     {
@@ -3068,186 +3036,167 @@
       "severity": "INFO"
     },
     {
-      "path": "scripts/generate-raci.ts",
+      "path": "scripts/dev-sync.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
       "verdict": "ADOPT",
-      "detail": "1.2.0 → 1.2.1 — version-gated delivery over the delivered baseline",
+      "detail": "1.52.0 → 1.52.1 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "387dc9b8c0cd6c12c80ece06895c6e2ec5a36bb26a21c564c2274aafaf7aa0a7",
+        "hash": "48577c0fef211329985e37f74a9b6161484a8d21402abd97d4ffa64609ba15e3",
         "templateVersion": "0.30.0",
-        "blob": "9870dff24b883661afaaeeb876aacb4753ee128c"
+        "blob": "e6869164ef6249b387431873727681591a3a8544"
       },
       "severity": "INFO"
     },
     {
-      "path": "scripts/helpers/adoption-provenance.ts",
+      "path": "scripts/handbook/apply-handbook-theme.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
+      "verdict": "ADOPT",
+      "detail": "1.0.0 → 1.2.0 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "1ff0e11a137267a3572b113a45d0aa5810ce0d81a21a242408a4df921d67dc41",
+        "templateVersion": "0.30.0",
+        "blob": "ea22dc8fdbe6be71011105b57a3181bb94fbe48b"
+      },
       "severity": "INFO"
     },
     {
-      "path": "scripts/helpers/delivery-riding.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "NEW",
-      "detail": "delivered (none) → 1.0.0",
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/helpers/registries/validation-policy.ts",
+      "path": "scripts/handbook/check-authoring.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
       "verdict": "ADOPT",
       "detail": "1.3.0 → 1.4.0 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "74b9ca2088ff230596e14d583bb14a874c0f58bcba92d3ad4e65836821809085",
+        "hash": "5e54c6e68c9d9b814726f7dfeec153e9b3af9f180fa745c615e7ea4d006362a5",
         "templateVersion": "0.30.0",
-        "blob": "b5e91e98d33c823b23bbdcedc5dde6cab14ed08f"
+        "blob": "d086e8cf10648dc43fa1750ff648fa8c1b4115d7"
       },
       "severity": "INFO"
     },
     {
-      "path": "scripts/helpers/registries/variant-type-registry.ts",
+      "path": "scripts/handbook/check-external-links.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
       "verdict": "ADOPT",
       "detail": "1.2.0 → 1.3.0 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "ed1a6dbfba4fec554d7a0b3f62f51273407ac91dd076beb467d0f421269de252",
+        "hash": "f6985468d04d951a01d1627ea6747e46ae0ffe55364d31613ffcc5a7a040c8c3",
         "templateVersion": "0.30.0",
-        "blob": "6e3f78181e9bc4e1e6282e6a5f1b43f717344c87"
+        "blob": "a3ec4e70e540a62e9db5d59310446ecea2cba861"
       },
       "severity": "INFO"
     },
     {
-      "path": "scripts/helpers/scaffold-markers.ts",
+      "path": "scripts/handbook/check-generated-content.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "NEW",
+      "detail": "delivered (none) → 1.0.0",
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/handbook/scaffold-handbook.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
       "verdict": "ADOPT",
-      "detail": "1.10.3 → 1.10.4 — version-gated delivery over the delivered baseline",
+      "detail": "1.2.0 → 1.3.1 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "7ec8169c1db9161455f9e242887bbab624cf33622d3ae2d729ed118d855a3e7b",
+        "hash": "c49bbbe20be31403e44597986fc2c69f00b6036a3a7e42c04c6320579eb6581c",
         "templateVersion": "0.30.0",
-        "blob": "24e0c835da3456310443c9c37f93b77a282c2766"
+        "blob": "24145e96a1f0defc67b4cfb50d9e92e7766ee9f5"
       },
       "severity": "INFO"
     },
     {
-      "path": "scripts/helpers/template-utils.ts",
+      "path": "scripts/handbook/update-footers.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.0.0 → 1.1.0 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "059532c27690aa18c1c1fbd1740640ca3d25c19cae715f676a75c8f8612618a1",
+        "templateVersion": "0.30.0",
+        "blob": "97e402694c9cb956a34a7310a7d3bf5e483883c3"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/helpers/memory-union-verify.ts",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: scripts/",
+      "verdict": "ADOPT",
+      "detail": "1.5.0 → 1.6.0 — version-gated delivery over the delivered baseline",
+      "baseline": {
+        "hash": "637ad87d9b202a1d940ab8da733926b60a1f42ad884378472922da4f9fb73f5e",
+        "templateVersion": "0.30.0",
+        "blob": "b6454e350d00cec961275880fb016f8eae2fcdfc"
+      },
+      "severity": "INFO"
+    },
+    {
+      "path": "scripts/lib/external-deps.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
       "verdict": "ADOPT",
       "detail": "1.3.0 → 1.4.0 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "e89e7541c8d990b80ef66427733a2969afc5019914e4c1f1c7a5a8b2dcd0a70a",
+        "hash": "952377ae40fb15b1599ee378a5961a2bc6caea991e9e41597bc914134c6a5e8a",
         "templateVersion": "0.30.0",
-        "blob": "b807868570a273997c623c060d8de9fb47285a73"
+        "blob": "4b1e7fe3b7e43348d9abc3fbc2d5bf38ce5659df"
       },
       "severity": "INFO"
     },
     {
-      "path": "scripts/lib/constitution-scrub.ts",
+      "path": "scripts/sync-agent-mirrors.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
       "verdict": "ADOPT",
       "detail": "1.3.0 → 1.3.1 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "3ae81a52d3c253730e79040e6635fb9bf46a2eb46ac17102e6fa4534f6135d13",
+        "hash": "b2d598d626dc0c03d0d98601dc66d06ef30afb8453271cdd115743684477b86e",
         "templateVersion": "0.30.0",
-        "blob": "a0509854a1da3edd5c1a36bca848662d234ab99e"
+        "blob": "b7894ee559b20a8481bfc203d564dcedf26c8627"
       },
       "severity": "INFO"
     },
     {
-      "path": "scripts/lib/hook-dedupe.ts",
+      "path": "scripts/validate-doc-folder.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
       "verdict": "ADOPT",
-      "detail": "1.3.0 → 1.4.0 — version-gated delivery over the delivered baseline",
+      "detail": "1.5.0 → 1.5.1 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "0432d75d48c47000ce53ad57d900b73ea3e36a1bdffbd943f532880a504b8d18",
+        "hash": "bf898e30825782eaeb2ae906289a5f29890b59af7195effe76ef0d704775de19",
         "templateVersion": "0.30.0",
-        "blob": "275335152ae871149ff02f78eb1d2806ef596903"
+        "blob": "85a71f29d80bad830c9cfb6dfe7131eb36ea6679"
       },
       "severity": "INFO"
     },
     {
-      "path": "scripts/lib/platform-skeleton-merge.ts",
+      "path": "scripts/validate-templates.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
       "verdict": "ADOPT",
-      "detail": "1.2.0 → 1.2.1 — version-gated delivery over the delivered baseline",
+      "detail": "1.86.0 → 1.87.0 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "663b958250d0464339b79779486e5f545b0c45e51b25c13ec37cd832e9ada383",
+        "hash": "7f1cd5bce71454aa9dfff47252e02e846324fdc13c0e36b714df2f0f06a1360f",
         "templateVersion": "0.30.0",
-        "blob": "f87780fbe33a66e37527a7128af4117cf1a7a66c"
+        "blob": "85edcead00db81a3c5010a0047d7fc23c77ed7ce"
       },
       "severity": "INFO"
     },
     {
-      "path": "scripts/lib/upgrade-policy.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "ADOPT",
-      "detail": "1.47.0 → 1.48.0 — version-gated delivery over the delivered baseline",
-      "baseline": {
-        "hash": "73b19b13d1be90bf8edce154a50c869e217f755c65881c76d808f2f7346e2980",
-        "templateVersion": "0.30.0",
-        "blob": "197bec686457190c2d0d6b85e82000fddf3b9d20"
-      },
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-decisions.ts",
+      "path": "scripts/validate-variant-readiness.ts",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: scripts/",
       "verdict": "ADOPT",
       "detail": "1.1.0 → 1.2.0 — version-gated delivery over the delivered baseline",
       "baseline": {
-        "hash": "488604fe552e42a5c1e2bad2ffc0318e78a38cc54f5c44efe5e66589522df856",
+        "hash": "dede9c6cdfe7fcd09214d1b2a3134bc16c74246373f82056bae77c3510ec465c",
         "templateVersion": "0.30.0",
-        "blob": "239b94d8ac79a38d7f272cab2d50c0ee57db3349"
+        "blob": "37f1a6dcf824c86f1c70b089d1c56aec1bedc661"
       },
-      "severity": "INFO"
-    },
-    {
-      "path": "scripts/validate-raci.ts",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: scripts/",
-      "verdict": "ADOPT",
-      "detail": "1.2.0 → 1.2.1 — version-gated delivery over the delivered baseline",
-      "baseline": {
-        "hash": "520520c9bb8bd339aa5a01ad6064e3f3df013211637529f931fee74747a2c3d0",
-        "templateVersion": "0.30.0",
-        "blob": "1eb6b6da27a99fc83c07b9fbbbe43e1b8d62aeee"
-      },
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/qa.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "UPDATE",
-      "detail": "project copy carried no frontmatter version — template copy delivered",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/backend.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "UPDATE",
-      "detail": "project copy carried no frontmatter version — template copy delivered",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/frontend.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "UPDATE",
-      "detail": "project copy carried no frontmatter version — template copy delivered",
       "severity": "INFO"
     },
     {
@@ -3256,14 +3205,6 @@
       "pass": "SYNC_IF_NEWER: agents/",
       "verdict": "STUB_SKIP",
       "detail": "template extends-stub never delivers through this pass — resolved at scaffold (MERGE pass owns the body)",
-      "severity": "INFO"
-    },
-    {
-      "path": "agents/security.md",
-      "policy": "SYNC",
-      "pass": "SYNC_IF_NEWER: agents/",
-      "verdict": "UPDATE",
-      "detail": "project copy carried no frontmatter version — template copy delivered",
       "severity": "INFO"
     },
     {
@@ -3383,17 +3324,25 @@
       "severity": "INFO"
     },
     {
-      "path": "skills/handbook/references/AUTHORING_GUIDELINES.md",
+      "path": "skills/handbook/SKILL.md",
       "policy": "SYNC",
       "pass": "SYNC_IF_NEWER: skills/",
-      "verdict": "DRIFT_PRESERVE",
-      "detail": "same-version content drift — project copy PRESERVED (ADR-0085 D3)",
+      "verdict": "ADOPT",
+      "detail": "0.6.0 → 0.6.2 — version-gated whole-directory delivery over the delivered baseline",
       "baseline": {
-        "hash": "899ca7499eceebff6b390aa52c457d0727279d0defd0c376e0e6f98713828218",
+        "hash": "930e9ce941dbff4407a8b007ce164d2f09f7df970c3d3764cc016961d729b968",
         "templateVersion": "0.30.0",
-        "blob": "bf08b5b9e34107bd80b409c5d4fb386a5a20da4f"
+        "blob": "7e63feee66b195e84a8f6ccfe42465d739f88374"
       },
-      "severity": "WARN"
+      "severity": "INFO"
+    },
+    {
+      "path": "docs/lifecycle/skills/handbook.md",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: skills/",
+      "verdict": "RECORD_BUMP",
+      "detail": "hand-authored record metadata aligned to the delivered SKILL.md: Version line inserted (0.6.2 — record carried none)",
+      "severity": "INFO"
     },
     {
       "path": "skills/k-dart/SKILL.md",
@@ -3401,6 +3350,19 @@
       "pass": "SYNC_IF_NEWER: skills/",
       "verdict": "SKIP",
       "detail": "not in the variant.json skill allowlist — new-asset injection withheld",
+      "severity": "INFO"
+    },
+    {
+      "path": "skills/meeting-facilitation/SKILL.md",
+      "policy": "SYNC",
+      "pass": "SYNC_IF_NEWER: skills/",
+      "verdict": "ADOPT",
+      "detail": "1.5.0 → 1.6.0 — version-gated whole-directory delivery over the delivered baseline",
+      "baseline": {
+        "hash": "9e51bb7a7b1fdc8a4eabd739eb2f887ee6b1a65d5ad04132693bb2e9998b53bc",
+        "templateVersion": "0.30.0",
+        "blob": "1eaa5395a9a7ef0370db07ed5396fa05867e7790"
+      },
       "severity": "INFO"
     },
     {
@@ -3481,11 +3443,19 @@
       "severity": "INFO"
     },
     {
+      "path": ".gemini/settings.json",
+      "policy": "JSON_MERGE",
+      "pass": "TEMPLATE TREE SYNC",
+      "verdict": "MERGE",
+      "detail": "settings deep-merged — project-only entries preserved: hooks.BeforeTool[], hooks.BeforeTool[], mcpServers.codegraph",
+      "severity": "INFO"
+    },
+    {
       "path": ".claude/settings.json",
       "policy": "JSON_MERGE",
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "MERGE",
-      "detail": "settings deep-merged — project-only entries preserved: hooks.WorktreeCreate, mcpServers",
+      "detail": "settings deep-merged — 2 duplicate hook command(s) collapsed (U-20261031-008)",
       "severity": "INFO"
     },
     {
@@ -3548,8 +3518,8 @@
       "path": "docs/lifecycle/skills/post-write-check.md",
       "policy": "WORKSPACE",
       "pass": "TEMPLATE TREE SYNC",
-      "verdict": "NEW",
-      "detail": "workspace seed delivered (absent from the project)",
+      "verdict": "SEED_SKIP",
+      "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
       "severity": "INFO"
     },
     {
@@ -3603,6 +3573,14 @@
       "pass": "TEMPLATE TREE SYNC",
       "verdict": "SEED_SKIP",
       "detail": "project workspace file exists — seed-only claim withheld (never overwritten, never pruned)",
+      "severity": "INFO"
+    },
+    {
+      "path": "docs/workspace-schema.json",
+      "policy": "SCHEMA_MERGE",
+      "pass": "TEMPLATE TREE SYNC",
+      "verdict": "MERGE",
+      "detail": "schema merge — landed: —; preserved: —; landed template deltas: 0; template changes withheld (project-wins): 0",
       "severity": "INFO"
     },
     {
@@ -4295,14 +4273,6 @@
       "firstSeenTemplateVersion": "0.30.0"
     },
     {
-      "path": "docs/phase-definitions.md",
-      "kind": "CONFLICT",
-      "projectHash": "48020e851d6c714a3870446235b666bd554b493a756d8765e39755ecb0b72b4f",
-      "deliverableHash": "4d390df63d267a6124230647bcd5002de1b6f20c230e851bf7373080df69d601",
-      "firstSeen": "2026-11-19",
-      "firstSeenTemplateVersion": "0.30.0"
-    },
-    {
       "path": "skills/post-write-check/SKILL.md",
       "kind": "PROJECT_AHEAD",
       "projectHash": "1f7f64c3e70cf666f59178a48bc964d59375cf1bf874d767cb8a405029c65888",
@@ -4313,6 +4283,6 @@
       "firstSeenTemplateVersion": "0.30.0"
     }
   ],
-  "templateDirty": true,
-  "engineVersion": "1.113.0"
+  "templateDirty": false,
+  "engineVersion": "1.115.0"
 }

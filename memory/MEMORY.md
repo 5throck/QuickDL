@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-22](2026-11-22.md) | chore(upgrade): template 0.30.0 wave delivery (2026-11-22 runner, dry-run resolved) |
 | [2026-11-20](2026-11-20.md) | chore(upgrade): template wave delivery (2026-11-20 runner, dry-run clean) |
 
 # QuickDL — Development Log Index

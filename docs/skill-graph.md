@@ -25,13 +25,13 @@
 | `root/explain-me` | L3 | 1.0.1 | — | — | — | — | — |
 | `root/finishing-a-development-branch` | L3 | 1.0.2 | — | — | — | — | — |
 | `root/gateguard` | L3 | 1.0.2 | — | — | — | — | — |
-| `root/handbook` | L3 | 0.6.0 | — | — | — | — | — |
+| `root/handbook` | L3 | 0.6.2 | — | — | — | — | — |
 | `root/handbook-sync-audit` | L3 | 1.0.5 | — | — | — | — | — |
 | `root/i18n-audit` | L3 | 1.0.2 | root/i18n-specialist | — | — | — | — |
 | `root/i18n-formatting` | L3 | 1.0.1 | root/i18n-specialist | — | — | — | — |
 | `root/i18n-layout` | L3 | 1.1.1 | root/i18n-specialist | — | — | — | — |
 | `root/i18n-locale-config` | L3 | 1.0.1 | root/i18n-specialist | — | — | — | — |
-| `root/meeting-facilitation` | L3 | 1.5.0 | — | — | — | — | — |
+| `root/meeting-facilitation` | L3 | 1.6.0 | — | — | — | — | — |
 | `root/platform-command-lifecycle-manager` | L3 | 1.0.3 | — | — | — | — | — |
 | `root/platform-skill-lifecycle-manager` | L3 | 1.0.3 | — | — | — | — | — |
 | `root/post-write-check` | L3 | 1.1.0 | root/backend, root/frontend, root/qa | root/phase 4 | — | — | — |
@@ -111,7 +111,7 @@ No suggestions: no procedure step pairs one of these skills with an owning agent
 
 ## Skill Usage (E3)
 
-Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-20), window 90 days. Skill nodes with usage: 0.
+Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-22), window 90 days. Skill nodes with usage: 0.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (0): —
 - **unused** (0 sessions in 90 days) (40): co-develop/code-review, co-develop/refactoring, co-develop/test-driven-development, root/accessibility-audit, root/agent-lifecycle-manager, root/api-documentation, root/ci-triage, root/decision-record, root/delegate-to-hub, root/design-foundation, root/documentation-writing, root/evidence-ledger, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/handbook, root/handbook-sync-audit, root/i18n-audit, root/i18n-formatting, root/i18n-layout, root/i18n-locale-config, root/meeting-facilitation, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/post-write-check, root/project-review, root/research-analysis, root/script-lifecycle-manager, root/security-scan, root/service-design, root/skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/sync, root/team-builder, root/token-usage-lint, root/translate, root/ui-ux-design-intelligence, root/update-bun-packages, root/zod-contract-gate
