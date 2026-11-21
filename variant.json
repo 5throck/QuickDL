@@ -2,6 +2,7 @@
   "name": "co-utility",
   "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization)",
   "variant_type": "utility",
+  "consumption": "adoption-only",
   "status": "stable",
   "version": "1.0.0",
   "inherits_common": "templates/common",

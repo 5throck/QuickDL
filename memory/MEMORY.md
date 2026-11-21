@@ -4,6 +4,7 @@
 
 | Date | Summary |
 |------|---------|
+| [2026-11-21](2026-11-21.md) | chore: workspace sync (1 file) |
 | [2026-11-20](2026-11-20.md) | chore(upgrade): template wave delivery (2026-11-20 runner, dry-run clean) |
 
 # QuickDL — Development Log Index
