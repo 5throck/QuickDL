@@ -190,3 +190,23 @@ The three deferred batches were executed after the initial report:
 | `pytest tests/ -q` | ✅ 111 passed |
 | `trail check` | ✅ no conflicts |
 | `verify-skill-graph` | ✅ 55 nodes, 83 edges |
+
+### Post-report discovery + fix: GitHub Actions was disabled at repo level
+
+The re-run on merged main surfaced a gap NO finding covered and no machine battery
+queries: `actions: enabled: false` at the repo settings — the committed `ci.yml` had
+NEVER executed on GitHub (last run 2026-05-23, pre-rename). Fixed via the Actions
+permissions API (enabled, `allowed_actions: all`), then verified end-to-end:
+
+- First dispatch exposed H-7's practical form: setup-python no longer provisions 3.8
+  on `ubuntu-latest` (26.04) — 3.8 leg pinned to `ubuntu-22.04` via matrix include +
+  exclude (3.13 added, fail-fast disabled).
+- Final run 44972128032: **9/9 jobs green** — Documentation Audit, Unit Tests,
+  Dependency Audit, Secret Scan, test (3.8/ubuntu-22.04, 3.10, 3.12, 3.13/ubuntu-latest).
+
+This closes the loop the review could not see from files alone: CI now actually runs,
+and it runs green with every remediation applied.
+
+| Gate (final, post-fix, on GitHub) | Result |
+|-----------------------------------|--------|
+| CI run 44972128032 (main) | ✅ 9/9 jobs green |
