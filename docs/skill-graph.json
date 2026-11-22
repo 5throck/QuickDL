@@ -35,7 +35,7 @@
       "name": "i18n-specialist",
       "scope": "root",
       "capability": "i18n-specialist",
-      "content_hash": "ddebfc6bd8f23a3b",
+      "content_hash": "da40dbd68a785c65",
       "version": "1.1.1",
       "mirrors": [
         "agents/i18n-specialist.md"
@@ -61,7 +61,7 @@
       "name": "qa",
       "scope": "root",
       "capability": "qa",
-      "content_hash": "cad52b1395854bb5",
+      "content_hash": "db83a45cfe02a360",
       "version": "1.0.0",
       "mirrors": [
         "agents/qa.md"
@@ -96,27 +96,12 @@
       "layer": "L3"
     },
     {
-      "id": "output_type.approved_implementation_plan",
-      "type": "output_type",
-      "layer": "L3"
-    },
-    {
       "id": "output_type.environment_manifest",
       "type": "output_type",
       "layer": "L3"
     },
     {
       "id": "output_type.implementation_commit",
-      "type": "output_type",
-      "layer": "L3"
-    },
-    {
-      "id": "output_type.regression_report",
-      "type": "output_type",
-      "layer": "L3"
-    },
-    {
-      "id": "output_type.release_notes",
       "type": "output_type",
       "layer": "L3"
     },
@@ -131,17 +116,7 @@
       "layer": "L3"
     },
     {
-      "id": "output_type.technical_findings",
-      "type": "output_type",
-      "layer": "L3"
-    },
-    {
       "id": "output_type.test_scaffold",
-      "type": "output_type",
-      "layer": "L3"
-    },
-    {
-      "id": "output_type.tooling_adjustments",
       "type": "output_type",
       "layer": "L3"
     },
@@ -149,6 +124,14 @@
       "id": "output_type.ui_specification",
       "type": "output_type",
       "layer": "L3"
+    },
+    {
+      "id": "phase:root/3",
+      "type": "phase",
+      "layer": "L3",
+      "scope": "root",
+      "ordinal": 3,
+      "label": "Implementation"
     },
     {
       "id": "phase:root/4",
@@ -159,67 +142,14 @@
       "label": "QA Verification"
     },
     {
-      "id": "procedure.co-develop.architecture-design",
+      "id": "procedure.co-utility.environment-bootstrap",
       "type": "procedure",
       "layer": "L3"
     },
     {
-      "id": "procedure.co-develop.environment-bootstrap",
+      "id": "procedure.co-utility.feature-implementation",
       "type": "procedure",
       "layer": "L3"
-    },
-    {
-      "id": "procedure.co-develop.feature-implementation",
-      "type": "procedure",
-      "layer": "L3"
-    },
-    {
-      "id": "procedure.co-develop.release-verification",
-      "type": "procedure",
-      "layer": "L3"
-    },
-    {
-      "id": "procedure.co-develop.security-release-retrospective",
-      "type": "procedure",
-      "layer": "L3"
-    },
-    {
-      "id": "procedure.co-develop.technical-planning",
-      "type": "procedure",
-      "layer": "L3"
-    },
-    {
-      "id": "skill:co-develop/code-review",
-      "type": "skill",
-      "layer": "L3",
-      "name": "code-review",
-      "scope": "co-develop",
-      "capability": "code-review",
-      "content_hash": null,
-      "version": null,
-      "mirrors": []
-    },
-    {
-      "id": "skill:co-develop/refactoring",
-      "type": "skill",
-      "layer": "L3",
-      "name": "refactoring",
-      "scope": "co-develop",
-      "capability": "refactoring",
-      "content_hash": null,
-      "version": null,
-      "mirrors": []
-    },
-    {
-      "id": "skill:co-develop/test-driven-development",
-      "type": "skill",
-      "layer": "L3",
-      "name": "test-driven-development",
-      "scope": "co-develop",
-      "capability": "test-driven-development",
-      "content_hash": null,
-      "version": null,
-      "mirrors": []
     },
     {
       "id": "skill:root/accessibility-audit",
@@ -998,171 +928,71 @@
       "source": "workflow-doc"
     },
     {
-      "type": "produces",
-      "from": "procedure.co-develop.architecture-design",
-      "to": "output_type.approved_implementation_plan",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "enables",
-      "from": "procedure.co-develop.architecture-design",
-      "to": "procedure.co-develop.feature-implementation",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.co-develop.architecture-design",
-      "to": "procedure.co-develop.technical-planning",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.co-develop.architecture-design",
-      "to": "skill:co-develop/code-review",
-      "source": "procedure_schema"
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "agent:root/pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
-      "from": "procedure.co-develop.environment-bootstrap",
+      "from": "procedure.co-utility.environment-bootstrap",
       "to": "output_type.environment_manifest",
       "source": "procedure_schema"
     },
     {
       "type": "enables",
-      "from": "procedure.co-develop.environment-bootstrap",
-      "to": "procedure.co-develop.technical-planning",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "procedure.co-utility.feature-implementation",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
-      "from": "procedure.co-develop.environment-bootstrap",
-      "to": "skill:co-develop/code-review",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "skill:root/post-write-check",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
-      "from": "procedure.co-develop.environment-bootstrap",
-      "to": "skill:co-develop/test-driven-development",
+      "from": "procedure.co-utility.environment-bootstrap",
+      "to": "skill:root/security-scan",
       "source": "procedure_schema"
+    },
+    {
+      "type": "step_by_agent",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "agent:root/pm",
+      "source": "procedure_schema",
+      "actor_type": "agent"
     },
     {
       "type": "produces",
-      "from": "procedure.co-develop.feature-implementation",
+      "from": "procedure.co-utility.feature-implementation",
       "to": "output_type.implementation_commit",
       "source": "procedure_schema"
     },
     {
-      "type": "step_uses_skill",
-      "from": "procedure.co-develop.feature-implementation",
-      "to": "skill:co-develop/code-review",
-      "source": "procedure_schema"
-    },
-    {
       "type": "follows",
-      "from": "procedure.co-develop.feature-implementation",
-      "to": "skill:co-develop/refactoring",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "skill:root/post-write-check",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
-      "from": "procedure.co-develop.feature-implementation",
-      "to": "skill:co-develop/test-driven-development",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "skill:root/post-write-check",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
-      "from": "procedure.co-develop.feature-implementation",
-      "to": "skill:root/documentation-writing",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.co-develop.release-verification",
-      "to": "output_type.regression_report",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.co-develop.release-verification",
-      "to": "procedure.co-develop.feature-implementation",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "skill:root/security-scan",
       "source": "procedure_schema"
     },
     {
       "type": "step_uses_skill",
-      "from": "procedure.co-develop.release-verification",
-      "to": "skill:co-develop/test-driven-development",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.co-develop.release-verification",
-      "to": "skill:root/documentation-writing",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.co-develop.security-release-retrospective",
-      "to": "output_type.review_findings",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.co-develop.security-release-retrospective",
-      "to": "procedure.co-develop.release-verification",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.co-develop.security-release-retrospective",
-      "to": "skill:co-develop/code-review",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "procedure.co-develop.technical-planning",
-      "to": "output_type.technical_findings",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "follows",
-      "from": "procedure.co-develop.technical-planning",
-      "to": "procedure.co-develop.environment-bootstrap",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.co-develop.technical-planning",
-      "to": "skill:co-develop/refactoring",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "step_uses_skill",
-      "from": "procedure.co-develop.technical-planning",
-      "to": "skill:root/research-analysis",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-develop/code-review",
-      "to": "output_type.review_findings",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-develop/code-review",
-      "to": "output_type.security_baseline",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-develop/refactoring",
-      "to": "output_type.tooling_adjustments",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "skill:co-develop/test-driven-development",
-      "to": "output_type.test_scaffold",
+      "from": "procedure.co-utility.feature-implementation",
+      "to": "skill:root/sync",
       "source": "procedure_schema"
     },
     {
@@ -1253,18 +1083,6 @@
       "from": "skill:root/design-foundation",
       "to": "skill:root/ui-ux-design-intelligence",
       "source": "prose"
-    },
-    {
-      "type": "produces",
-      "from": "skill:root/documentation-writing",
-      "to": "output_type.release_notes",
-      "source": "procedure_schema"
-    },
-    {
-      "type": "produces",
-      "from": "skill:root/documentation-writing",
-      "to": "output_type.ui_specification",
-      "source": "procedure_schema"
     },
     {
       "type": "composes_with",
@@ -1449,6 +1267,18 @@
       "source": "skill_manifest"
     },
     {
+      "type": "produces",
+      "from": "skill:root/post-write-check",
+      "to": "output_type.test_scaffold",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "phase",
+      "from": "skill:root/post-write-check",
+      "to": "phase:root/3",
+      "source": "skill_manifest"
+    },
+    {
       "type": "phase",
       "from": "skill:root/post-write-check",
       "to": "phase:root/4",
@@ -1464,6 +1294,18 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/security-scan",
+      "to": "output_type.security_baseline",
+      "source": "procedure_schema"
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/security-scan",
+      "to": "output_type.ui_specification",
+      "source": "procedure_schema"
     },
     {
       "type": "references",
@@ -1521,6 +1363,12 @@
         "field": "relates_to",
         "index": 0
       }
+    },
+    {
+      "type": "produces",
+      "from": "skill:root/sync",
+      "to": "output_type.review_findings",
+      "source": "procedure_schema"
     },
     {
       "type": "references",

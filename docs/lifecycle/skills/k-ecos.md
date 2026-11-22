@@ -5,7 +5,7 @@
 ## Metadata
 
 - **Skill**: k-ecos
-- **Status**: active
+- **Status**: archived (not delivered in this project — co-utility rebase 2026-11-19)
 - **Owner**: public-data-analyst
 - **Created**: 2026-09-21
 
@@ -24,3 +24,7 @@ Queries the Bank of Korea Economic Statistics System (`한국은행 경제통계
 - [x] Skill directory exists in L1 (`templates/common/skills/k-ecos/`) with valid frontmatter.
 - [x] Registered as KR-scoped under `country_scoped_assets` in `docs/workspace-schema.json`.
 - [x] Delivered to matching-country projects through the standard scaffold/upgrade path.
+
+## Tombstone
+
+- **2026-11-19**: Surface not delivered under the co-utility variant (co-develop variant-exclusive or workspace doctrine skill). The SKILL.md and acceptance criteria above describe the workspace/co-develop context, not this project. Record retained for provenance.

@@ -14,7 +14,7 @@
 
 ### Production Phase
 
-- [x] Skill SKILL.md exists at `templates/common/skills/i18n-layout/SKILL.md`
+- [x] Skill SKILL.md exists at the workspace root `templates/common/skills/i18n-layout/SKILL.md`
 - [x] Frontmatter valid: name, description, status, scope (`common`), version, owner populated
 - [x] Member of the i18n suite (constitution §4.4) dispatched by the `i18n-specialist` agent
 - [x] L1-only asset — deliberately absent from workspace-root `skills/` (2026-09-12 root-upgrade incident rule)

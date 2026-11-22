@@ -1,5 +1,5 @@
 schema_version: "1.0"
-variant: co-develop
+variant: co-utility
 output_types:
   approved_implementation_plan:
     description: "Registered procedure output type"

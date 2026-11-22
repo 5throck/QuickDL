@@ -408,7 +408,9 @@ def _build_ydl_opts(
         'outtmpl': os.path.join(output_dir, '%(title).100s.%(ext)s'),
         'merge_output_format': 'mp4',
         'windowsfilenames': True,
-        'nocheckcertificate': True,
+        # TLS verification is ON by default; opt out only for broken-cert
+        # environments via QUICKDL_INSECURE_TLS=1 (at your own risk).
+        'nocheckcertificate': os.environ.get('QUICKDL_INSECURE_TLS', '') == '1',
     }
     if id_keyed_names:
         # ID-keyed naming: unambiguous file identity for scripted batches

@@ -10,9 +10,6 @@
 
 | Skill (scope/name) | Layer | Version | Required-by Agents | Phases | Relates-to | Inputs | Outputs |
 |--------------------|-------|---------|-------------------|--------|------------|--------|---------|
-| `co-develop/code-review` | L3 | — | — | — | — | — | — |
-| `co-develop/refactoring` | L3 | — | — | — | — | — | — |
-| `co-develop/test-driven-development` | L3 | — | — | — | — | — | — |
 | `root/accessibility-audit` | L3 | 1.1.0 | — | — | — | — | — |
 | `root/agent-lifecycle-manager` | L3 | 1.4.0 | — | — | root/skill-lifecycle-manager (composes_with) | — | — |
 | `root/api-documentation` | L3 | 1.0.2 | — | — | — | — | — |
@@ -34,7 +31,7 @@
 | `root/meeting-facilitation` | L3 | 1.5.0 | — | — | — | — | — |
 | `root/platform-command-lifecycle-manager` | L3 | 1.0.3 | — | — | — | — | — |
 | `root/platform-skill-lifecycle-manager` | L3 | 1.0.3 | — | — | — | — | — |
-| `root/post-write-check` | L3 | 1.1.0 | root/backend, root/frontend, root/qa | root/phase 4 | — | — | — |
+| `root/post-write-check` | L3 | 1.1.0 | root/backend, root/frontend, root/qa | root/phase 3, root/phase 4 | — | — | — |
 | `root/project-review` | L3 | 1.3.2 | — | — | — | — | — |
 | `root/research-analysis` | L3 | 1.0.2 | — | — | root/documentation-writing (enables) | — | — |
 | `root/script-lifecycle-manager` | L3 | 1.2.2 | — | — | — | — | — |
@@ -55,6 +52,7 @@
 
 Skills used in specific lifecycle phases (from `variant.json` `skill_manifest`); phase numbering is per scope:
 
+- **root/phase 3** (Implementation): root/post-write-check
 - **root/phase 4** (QA Verification): root/post-write-check
 
 ## Edge Types
@@ -103,15 +101,20 @@ None — every capability has a single content hash.
 
 ## Skills Without `used_by` (G6)
 
-35 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
+32 skill nodes have no `used_by` edge (no agent `required_skills` / manifest `used_by_agents` entry).
 
 ### Suggested `required_by` agents (E4, report-only)
 
-No suggestions: no procedure step pairs one of these skills with an owning agent.
+Inferred from procedure steps that cite the skill and are owned via `step_by_agent`. This report never edits SKILL.md.
+
+| Skill | Suggested agents (via procedures) |
+|-------|-----------------------------------|
+| `root/security-scan` | root/pm (co-utility.environment-bootstrap) |
+| `root/sync` | root/pm (co-utility.feature-implementation) |
 
 ## Skill Usage (E3)
 
 Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-22), window 90 days. Skill nodes with usage: 0.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (0): —
-- **unused** (0 sessions in 90 days) (40): co-develop/code-review, co-develop/refactoring, co-develop/test-driven-development, root/accessibility-audit, root/agent-lifecycle-manager, root/api-documentation, root/ci-triage, root/decision-record, root/delegate-to-hub, root/design-foundation, root/documentation-writing, root/evidence-ledger, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/handbook, root/handbook-sync-audit, root/i18n-audit, root/i18n-formatting, root/i18n-layout, root/i18n-locale-config, root/meeting-facilitation, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/post-write-check, root/project-review, root/research-analysis, root/script-lifecycle-manager, root/security-scan, root/service-design, root/skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/sync, root/team-builder, root/token-usage-lint, root/translate, root/ui-ux-design-intelligence, root/update-bun-packages, root/zod-contract-gate
+- **unused** (0 sessions in 90 days) (37): root/accessibility-audit, root/agent-lifecycle-manager, root/api-documentation, root/ci-triage, root/decision-record, root/delegate-to-hub, root/design-foundation, root/documentation-writing, root/evidence-ledger, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/handbook, root/handbook-sync-audit, root/i18n-audit, root/i18n-formatting, root/i18n-layout, root/i18n-locale-config, root/meeting-facilitation, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/post-write-check, root/project-review, root/research-analysis, root/script-lifecycle-manager, root/security-scan, root/service-design, root/skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/sync, root/team-builder, root/token-usage-lint, root/translate, root/ui-ux-design-intelligence, root/update-bun-packages, root/zod-contract-gate

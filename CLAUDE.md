@@ -211,7 +211,7 @@ Explicit invocation: the `meeting-facilitation` skill with the meeting topic and
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 
-For the **4-level enforcement model**, **mandatory criteria**, **execution plan format**, and **phase determination**, see [AGENTS.md §3 and §5](AGENTS.md).
+For the **4-level enforcement model**, **mandatory criteria**, **execution plan format**, and **phase determination**, see [AGENTS.md](AGENTS.md) (PM Subagent Dispatch Protocol; Universal Baseline Behaviors).
 
 #### Claude Code-Specific Dispatch
 
@@ -253,7 +253,7 @@ Agent(
 >
 > **Automated enforcement (Claude Code CLI only)**: `scripts/hooks/agent-model-gate.ts` runs as a `PreToolUse` hook (matcher: `Agent`) and asks for confirmation whenever an `Agent()` call dispatches a rostered agent (every `agents/*.md` file except `pm.md`, read live from the project's `agents/` directory; the tier comes from each file's frontmatter) without the matching `model` alias — this is the check that catches the High/Low-tier (`opus`/`haiku`) silent-fallback bug described above before it happens. The hook is also delivered to projects (`templates/common/scripts/hooks/agent-model-gate.ts`), where it reads the project's own roster and `docs/workspace-schema.json`.
 
-Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md - Agent Roster](AGENTS.md#1-agent-ecosystem-overview)):
+Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md — Agent Groups](AGENTS.md)):
 1. **automation-engineer** implements the changes — a **common agent** delivered to every project; a project may route to its own domain implementer (e.g. `code-writer`) instead.
 2. **PM** verifies against acceptance criteria by running `bun scripts/audit.ts` directly.
 3. **Quality gate (audit script)** validates compliance.
@@ -263,7 +263,7 @@ Each implementation task follows the **Phase 4 execution loop** (see [AGENTS.md 
 
 <!-- COMMON-CLAUDE:START -->
 #### Cost Optimization (3-Tier Model Strategy)
-The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Claude Code's model-ID mapping (overridden per agent invocation when appropriate):
+The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md — Tier Model Mapping](AGENTS.md) (WORKSPACE-MANAGED tier-model-mapping block). Claude Code's model-ID mapping (overridden per agent invocation when appropriate):
 - **High-tier** → `claude-opus-5-5`
 - **Medium-tier** → `claude-sonnet-5-5`
 - **Low-tier** → `claude-haiku-5-5`

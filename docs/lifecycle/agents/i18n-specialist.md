@@ -33,3 +33,7 @@
 - **Tier**: Medium
 - **Last Updated**: 2026-09-21
 - **Last Reviewer**: pm
+
+## Project note (QuickDL)
+
+- **2026-11-19**: This is the common-template record (extends-stub agent, not QuickDL-specific). In this project the agent engages on locale deliverables per `docs/co-utility.context.md` §Agents; QuickDL locale doctrine lives in `docs/co-utility.context.md` §i18n System.

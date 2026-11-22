@@ -14,7 +14,7 @@
 
 ### Production Phase
 
-- [x] Skill SKILL.md exists at `templates/common/skills/i18n-audit/SKILL.md`
+- [x] Skill SKILL.md exists at the workspace root `templates/common/skills/i18n-audit/SKILL.md`
 - [x] Frontmatter valid: name, description, status, scope, version, owner populated
 - [x] Triggers defined: i18n audit, locale parity, translation parity, glossary audit, L10N parity
 - [x] co-price `i18n-audit` re-anchored as a variant specialization of this common base (v2.1.0)

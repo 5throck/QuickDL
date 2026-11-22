@@ -14,7 +14,7 @@
 
 ### Production Phase
 
-- [x] Skill SKILL.md exists at `templates/common/skills/i18n-locale-config/SKILL.md`
+- [x] Skill SKILL.md exists at the workspace root `templates/common/skills/i18n-locale-config/SKILL.md`
 - [x] Frontmatter valid: name, description, status, scope (`common`), version, owner populated
 - [x] Member of the i18n suite (constitution §4.4) dispatched by the `i18n-specialist` agent
 - [x] Locale model consistent with `docs/workspace-schema.json` `i18n.locale_codes` (skill §129 vs constitution §4.1 matrix verified 2026-09-21)

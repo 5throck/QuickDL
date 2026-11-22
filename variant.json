@@ -50,6 +50,7 @@
           "qa"
         ],
         "phases": [
+          3,
           4
         ],
         "platform_parity": "required"

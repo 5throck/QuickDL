@@ -5,7 +5,7 @@
 ## Metadata
 
 - **Skill**: k-law
-- **Status**: active
+- **Status**: archived (not delivered in this project — co-utility rebase 2026-11-19)
 - **Owner**: public-data-analyst
 - **Created**: 2026-09-21
 
@@ -23,3 +23,7 @@ Queries the Korean Ministry of Government Legislation (`법제처`) National Law
 
 - [x] Skill directory exists in L1 with valid frontmatter.
 - [x] Delivered to projects through the standard upgrade path.
+
+## Tombstone
+
+- **2026-11-19**: Surface not delivered under the co-utility variant (co-develop variant-exclusive or workspace doctrine skill). The SKILL.md and acceptance criteria above describe the workspace/co-develop context, not this project. Record retained for provenance.
