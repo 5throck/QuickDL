@@ -1,6 +1,6 @@
 # VERSION_MANIFEST.md
 
-**Generated**: 2026-11-22T01:41:04.055Z
+**Generated**: 2026-11-22T01:51:34.051Z
 **Manifest Version**: 1.0
 **Location**: docs/VERSION_MANIFEST.md
 
@@ -19,7 +19,7 @@
 
 | Name | File | Tier | Model | Last Modified |
 |------|------|------|-------|---------------|
-| backend | agents/backend.md | high | inherit | 2026-11-19 |
+| backend | agents/backend.md | high | inherit | 2026-11-22 |
 | frontend | agents/frontend.md | medium | inherit | 2026-11-22 |
 | i18n-specialist | agents/i18n-specialist.md | medium | claude-sonnet-5-5 | 2026-11-22 |
 | pm | agents/pm.md | high | inherit | 2026-11-22 |

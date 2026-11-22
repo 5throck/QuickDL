@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 /**
  * pre-push.ts — TS-based pre-push hook.
- * @version 1.9.0
+ * @version 1.10.0
  * v1.9.0 (2026-11-09, spec docs/designs/2026-11-09-repo-integrity-mode1-detector-design.md
  *          §3.3, T-20261109-002): two additions, both fail-closed with no env skip path.
  *          (a) ROGUE-COMMIT SCAN over the exact range the push would transfer, placed
@@ -66,6 +66,7 @@
 
 import { $ } from "bun";
 import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { gitCleanEnvForShell } from "../lib/git-env.ts";
 import {
   diffRepoConfig,
@@ -423,7 +424,7 @@ async function main() {
   // sanctioned audit mode (the same gate the pre-commit hook runs). When
   // running via /sync (SYNC_ACTIVE=1), dev-sync.ts already ran the full audit
   // before commit — skip here to avoid duplicate execution. The full
-  // workspace audit runs in CI (test.yml "Workspace audit").
+  // workspace audit runs in CI (ci.yml "Documentation Audit").
   const auditAlreadyRan = process.env.SYNC_ACTIVE === "1";
   if (!auditAlreadyRan) {
     try {
@@ -437,8 +438,7 @@ async function main() {
   }
 
   // Changed-path tests (T-20260910-025): the full integration suite moved to
-  // CI (test.yml "Run integration tests" runs `bun run test` on every
-  // push/PR). Locally, only re-run the test files touched by the pushed
+  // CI (ci.yml "test" job runs the full pytest suite on every push/PR). Locally, only re-run the test files touched by the pushed
   // commits; when the push touches no test files, skip tests entirely.
   console.log("=== pre-push changed-path tests ===");
   const changedTestFiles = (await collectPushedChangedFiles(refUpdates))
@@ -447,6 +447,30 @@ async function main() {
     // re-run — bun test would fail with "filters did not match any test
     // files" and block every deletion push (observed 2026-11-04, PR #1848).
     .filter((f) => f.startsWith("tests/") && f.endsWith(".test.ts") && existsSync(f));
+  // M-18 (project review 2026-11-22): the Python suite (pytest) was CI-only — a red
+  // suite surfaced only after push. Run changed-path pytest here via the project
+  // venv when the push touches tests/*.py. Absent venv/python → skip silently
+  // (pure-TS machines stay green; CI remains the authoritative full-suite gate).
+  const changedPyTestFiles = (await collectPushedChangedFiles(refUpdates))
+    .map((f) => f.replace(/\\/g, "/"))
+    .filter((f) => f.startsWith("tests/") && f.endsWith(".py"));
+  if (changedPyTestFiles.length > 0) {
+    const venvPy = existsSync(join(".venv", "bin", "python"))
+      ? join(".venv", "bin", "python")
+      : existsSync(join(".venv", "Scripts", "python.exe"))
+        ? join(".venv", "Scripts", "python.exe")
+        : null;
+    if (venvPy) {
+      console.log(`=== pre-push changed-path pytest (${changedPyTestFiles.length} file(s) touched) ===`);
+      try {
+        await $`${venvPy} -m pytest tests/ -q`.env(gitCleanEnvForShell());
+      } catch {
+        console.error("\n\x1b[31m❌ pytest failed — push blocked. Fix test failures before pushing.\x1b[0m");
+        process.exit(1);
+      }
+    }
+  }
+
   if (changedTestFiles.length > 0) {
     // Repository-config baseline (design §11, 2026-11-09 incident): the test children
     // below are the exact spawn that once wrote into this repository's .git/config —

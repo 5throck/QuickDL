@@ -3,7 +3,7 @@ import json
 import locale
 import os
 from pathlib import Path
-from typing import Optional
+
 
 SUPPORTED = {"ko", "en", "ja", "zh-TW", "zh-CN", "de", "es", "fr", "pt", "vi", "ms", "id", "th", "ru", "it", "ar"}
 DEFAULT_LANG = "en"
@@ -34,7 +34,7 @@ def _detect_lang() -> str:
     return DEFAULT_LANG
 
 
-def init(lang: Optional[str] = None) -> None:
+def init(lang: str | None = None) -> None:
     """Initialise translations. Call once at app startup."""
     global _lang, _translations
     _lang = lang if (lang and lang in SUPPORTED) else _detect_lang()

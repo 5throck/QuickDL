@@ -2,7 +2,7 @@ import html
 import os
 import re
 import threading
-from typing import Optional, Callable
+from typing import Callable
 from i18n import t, format_duration
 
 # Default subtitle language patterns — order is priority (spoken language first).
@@ -21,7 +21,7 @@ BEST_FORMAT_SORT = ['res', 'fps', 'vcodec:avc1', 'acodec:mp4a', 'br']
 LEGACY_FORMAT = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
 
 
-def parse_quality(quality: Optional[str]) -> Optional[int]:
+def parse_quality(quality: str | None) -> int | None:
     """Validate a quality mode string.
 
     Returns the height cap for 'cap:N', or None for None/'best'.
@@ -42,7 +42,7 @@ def parse_quality(quality: Optional[str]) -> Optional[int]:
     raise ValueError("Invalid quality '%s': expected 'best' or 'cap:N'" % quality)
 
 
-def format_for_quality(quality: Optional[str], audio_lang: Optional[str] = None) -> str:
+def format_for_quality(quality: str | None, audio_lang: str | None = None) -> str:
     """Return the yt-dlp format selector string for a quality mode.
 
     When `audio_lang` is given, the FIRST alternative gets a language filter
@@ -90,7 +90,7 @@ def probe_audio_languages(info_dict: dict) -> list:
     return langs
 
 
-def select_original_audio_language(info_dict: dict, audio_languages: Optional[list] = None) -> Optional[str]:
+def select_original_audio_language(info_dict: dict, audio_languages: list | None = None) -> str | None:
     """Pick the video's ORIGINAL spoken-language audio code (anti-dubbing).
 
     Priority: a track explicitly flagged `audio_is_original`, then the track
@@ -116,7 +116,7 @@ def select_original_audio_language(info_dict: dict, audio_languages: Optional[li
     return info_dict.get('language') or langs[0]
 
 
-def resolve_audio_language(mode: Optional[str], info: dict) -> Optional[str]:
+def resolve_audio_language(mode: str | None, info: dict) -> str | None:
     """Resolve a CLI `--audio-lang` value into a concrete language code.
 
     'auto' (or None) picks the probed original spoken language; any other
@@ -136,8 +136,8 @@ CAPTION_SOURCES = ('manual', 'auto', 'translated', 'failed', 'unknown')
 
 def plan_caption_sources(
     requested_langs: list,
-    manual_langs: Optional[list],
-    auto_langs: Optional[list],
+    manual_langs: list | None,
+    auto_langs: list | None,
 ) -> list:
     """Resolve the best caption acquisition source per requested language.
 
@@ -193,7 +193,7 @@ def classify_sidecar_token(token: str) -> str:
     return 'unknown'
 
 
-def subtitle_entry(vtt_path: str, saved_path: str, plan: Optional[list] = None) -> dict:
+def subtitle_entry(vtt_path: str, saved_path: str, plan: list | None = None) -> dict:
     """Build one manifest `subtitles[]` record for a downloaded sidecar.
 
     Source resolution: the plan entry whose request exactly matches the file's
@@ -339,7 +339,7 @@ def clean_vtt(raw: str) -> str:
     return format_vtt(cues)
 
 
-def clean_sidecar(vtt_path: str) -> Optional[int]:
+def clean_sidecar(vtt_path: str) -> int | None:
     """Clean a downloaded sidecar VTT in place; return the final cue count.
 
     The raw file is overwritten with the cleaned pipeline output (the raw
@@ -397,11 +397,11 @@ def get_video_info(url: str, ydl_class=None) -> dict:
 
 def _build_ydl_opts(
     output_dir: str,
-    quality: Optional[str],
+    quality: str | None,
     id_keyed_names: bool,
     write_subs: bool,
-    sub_langs: Optional[str],
-    audio_lang: Optional[str] = None,
+    sub_langs: str | None,
+    audio_lang: str | None = None,
 ) -> dict:
     ydl_opts = {
         'format': format_for_quality(quality, audio_lang),
@@ -441,13 +441,13 @@ def download_video(
     url: str,
     output_dir: str,
     ydl_class=None,
-    progress_hook: Optional[Callable] = None,
-    cancel_event: Optional[threading.Event] = None,
-    quality: Optional[str] = None,
+    progress_hook: Callable | None = None,
+    cancel_event: threading.Event | None = None,
+    quality: str | None = None,
     write_subs: bool = False,
-    sub_langs: Optional[str] = None,
+    sub_langs: str | None = None,
     id_keyed_names: bool = False,
-    audio_lang: Optional[str] = None,
+    audio_lang: str | None = None,
 ) -> str:
     """Download a video and return the merged .mp4 path.
 
