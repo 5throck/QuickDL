@@ -1,6 +1,7 @@
 # Secrets — never commit
-# (.env.sample untracked 2026-11-19: workspace adoption pre-flight requires no
-#  secret-shaped tracked files; the placeholder sample stays on disk locally)
+# (.env.sample untracked: adoption pre-flight requires no secret-shaped tracked
+#  files; it was re-added by the 0.30.0 delivery and untracked again 2026-11-22.
+#  The placeholder sample stays on disk locally; copy it to .env and edit.)
 .env
 .env.*
 
@@ -66,7 +67,6 @@ graft/
 # Secrets — never commit
 .env
 .env.*
-!.env.sample
 
 # Python
 .venv/

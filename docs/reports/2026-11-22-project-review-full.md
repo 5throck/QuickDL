@@ -127,3 +127,66 @@ Applied in-session fixes; re-ran every touched domain's gate:
 | `bun scripts/audit.ts --skip-memory` | ✅ All checks passed |
 | `pytest tests/ -q` | ✅ 111 passed |
 | Regenerated: VERSION_MANIFEST (6 agents/37 skills), agent mirrors (qa.md), skill-graph | ✅ |
+
+## Remediation follow-through (2026-11-22, same-day batches)
+
+The three deferred batches were executed after the initial report:
+
+### Batch 1 — rebase-residue sweep ✅
+- `procedures/`: 4 co-develop-only procedures (architecture-design, release-verification,
+  security-release-retrospective, technical-planning) removed; environment-bootstrap +
+  feature-implementation replaced with the co-utility doctrine versions (correct agent
+  keys, post-write-check/security-scan skill refs). Skill graph regenerated: 67 → 55
+  nodes (co-develop ghost skill/procedure nodes cleared), `verify-skill-graph` passes.
+- Skill lifecycle records: 10 stale `active` records (code-review, k-* ×6, refactoring,
+  swe-solve, test-driven-development) re-stamped `archived (not delivered …)` with a
+  tombstone section; the 7 workspace-authored records' template-path criteria qualified
+  as workspace-root checks.
+- Agent lifecycle records: co-utility re-base entries added (pm rewritten to match
+  frontmatter; backend/frontend/qa/security gained the same-day re-base entry;
+  i18n-specialist annotated as the common-template record).
+- H-13 qa phase alignment: AGENTS.md Phase 3 serial table no longer lists qa (qa writes
+  in Phase 4 only; Phase 1 read-only); `variant.json` post-write-check phases → [3, 4].
+- M-11: i18n-specialist phantom k-* routes qualified (workspace-level, escalate to pm).
+- M-21: qa.md contradictory test counts → live-count wording (111 collected).
+- H-5 remainder: dead AGENTS.md §-anchors and archived-agent references fixed across
+  CLAUDE.md / GEMINI.md / CODEX.md / HERMES.md (tier-mapping pointer → managed block;
+  HERMES specialist list; GEMINI define_subagent example → qa).
+
+### Batch 2 — launcher/CI hardening ✅
+- H-1 `ytdl.bat` rewritten: goto-label structure (fixes `%MSG%` parse-time expansion),
+  `setlocal`/`chcp 65001`, all 15 locales added (parity with `ytdl.sh`), `exit /b 1`.
+- H-7 CI project-job actions pinned to full SHAs (checkout v4.2.2, setup-python v5.6.0).
+- H-8 `test:unit` removed from package.json (CI detect step now honestly skips).
+- M-19 `.codex/hooks.json` SessionStart gains `git config core.hooksPath .githooks`.
+
+### Batch 3 — security posture ✅ (safe defaults + opt-in escapes)
+- H-10 Flask binds `127.0.0.1` by default; `QUICKDL_HOST` env override for LAN exposure.
+- H-11 TLS verification ON by default; `QUICKDL_INSECURE_TLS=1` opt-in escape.
+- M-12 SSRF `_validate_url` now resolves hostnames and blocks private/loopback/link-local
+  resolved addresses (nip.io-style and non-canonical-IP bypasses rejected; unresolvable
+  hosts rejected).
+- H-12 `.env.sample` policy settled: untracked (per the recorded 150ea2b decision);
+  `!.env.sample` negation removed from .gitignore; gitleaks path exemption removed.
+- M-13 SECURITY.md Supported Versions: `1.x (main) ✅`.
+- M-3 install.py hardcoded Korean connector removed; M-5 `getdefaultlocale()` →
+  `getlocale()`.
+
+### Still deferred (recorded, needs upstream/workspace action)
+- M-4 (duplicate managed-block id — shipped by the template itself; renaming would
+  create managed-block drift), M-10 (VERSION_MANIFEST parity-line semantics — generator
+  L0 machinery), M-14 (Korean vocabulary carve-out — policy decision), M-15 (gitignore
+  dedupe — partial via H-12; full dedupe risks managed-block drift), M-16/M-17/M-20
+  (delivered-script drift: pre-commit regex hole, pre-push comments, settings matcher),
+  M-18 (pytest in local gates — deliberate choice), H-9 (typecheck gate inactive —
+  core-script guard; skill-text amendment is upstream-side). All complement
+  upstream ticket U-20261119-002.
+
+### Verification (this batch)
+
+| Gate | Result |
+|------|--------|
+| `bun scripts/audit.ts --skip-memory` | ✅ All checks passed |
+| `pytest tests/ -q` | ✅ 111 passed |
+| `trail check` | ✅ no conflicts |
+| `verify-skill-graph` | ✅ 55 nodes, 83 edges |

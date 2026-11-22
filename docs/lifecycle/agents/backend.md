@@ -16,3 +16,4 @@
 - [x] Defined in `agents/backend.md`
 - [x] Follows standard agent structure
 - [x] Validated by `scripts/validate-agents.ts`
+- **2026-11-19 (later same day)**: Project re-based onto the co-utility variant — roster and doctrine updated (src/ package layout; security-monitor absorbed into security for the security record).

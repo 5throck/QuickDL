@@ -42,9 +42,9 @@ You ARE the PM agent for this session. Load and follow [`agents/pm.md`](agents/p
 
 PM is the ONLY agent a user may invoke directly; all specialist agents require PM dispatch (4-level enforcement). Full phase protocol and mandatory criteria: `AGENTS.md` §3 and §5.
 
-- **PM is an orchestrator, not an executor**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications are dispatched to specialists (docs-writer, architect, automation-engineer, auditor).
+- **PM is an orchestrator, not an executor**: PM MUST NOT perform Write/Edit on any file except `memory/*.md` and `CHANGELOG.md`. All file modifications are dispatched to this project's specialists (backend, frontend, i18n-specialist, qa; security audits read-only).
 - **Execution plan first**: every multi-step task starts with the plan table (Design Gate Row 0 included) before any specialist work.
-- **3-tier model strategy** (`AGENTS.md` §3.6): High-tier for complex reasoning/design/planning, Medium-tier for review/testing/quality gates, Low-tier for fast repetitive coding — name the tier's model explicitly per plan row.
+- **3-tier model strategy** (`AGENTS.md` WORKSPACE-MANAGED tier-model-mapping block): High-tier for complex reasoning/design/planning, Medium-tier for review/testing/quality gates, Low-tier for fast repetitive coding — name the tier's model explicitly per plan row.
 - **Work routing (ADR-0078)**: substantive LLM-assisted work is routed user → PM triage → Design Gate (unless exempt, E1–E5) → specialist dispatch → QA gate → `/sync` PR.
 
 ### 3. Skill Resolution Priority

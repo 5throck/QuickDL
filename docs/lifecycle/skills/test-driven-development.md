@@ -5,7 +5,7 @@
 ## Metadata
 
 - **Skill**: test-driven-development
-- **Status**: active
+- **Status**: archived (not delivered in this project — co-utility rebase 2026-11-19)
 - **Owner**: pm
 - **Created**: 2026-11-06
 
@@ -26,3 +26,7 @@ Implements software using Test-Driven Development (TDD) methodology with red-gre
 - [x] Skill SKILL.md exists at `skills/test-driven-development/SKILL.md`
 - [x] Frontmatter valid: name, description, status, scope, version, owner populated
 - [x] Owner assigned: pm
+
+## Tombstone
+
+- **2026-11-19**: Surface not delivered under the co-utility variant (co-develop variant-exclusive or workspace doctrine skill). The SKILL.md and acceptance criteria above describe the workspace/co-develop context, not this project. Record retained for provenance.

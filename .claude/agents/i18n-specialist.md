@@ -50,7 +50,7 @@ What this suite covers vs. what it routes (2026-08-29, `reledgev` design):
 | Date/number/currency notation, units of measure, paper sizes (A4/Letter) | `i18n-formatting` (here) |
 | File translation process | `translate` (not this suite) |
 | Locale parity / glossary audit | `i18n-audit` (here; variant specializations extend it) |
-| Legal & regulatory, trade & customs | Routed out — jurisdiction agents + country-scoped skills (`k-law`, `k-dart`, `k-kosis`); never answered here |
+| Legal & regulatory, trade & customs | Routed out — jurisdiction agents + country-scoped skills (`k-law`, `k-dart`, `k-kosis` — workspace-level; NOT delivered in this variant — escalate to pm); never answered here |
 
 ## Legal & Trade Routing
 

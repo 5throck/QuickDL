@@ -10,7 +10,6 @@ useDefault = true
 [allowlist]
 description = "Allowlist for known false positives"
 regexes = [
-  # Placeholder values in .env.sample and docs
   '''your[_-]?(api[_-]?)?key[_-]?here''',
   '''your[_-]?secret[_-]?here''',
   '''replace[_-]?with[_-]?actual''',

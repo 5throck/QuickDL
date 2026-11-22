@@ -137,7 +137,7 @@ When writing Korean documentation or Korean translation output, prefer native Ko
 
 **MANDATORY PM GATEWAY**: All specialist agent dispatch MUST go through PM.
 
-For the **4-level enforcement model**, **mandatory criteria**, **execution plan format**, and **phase determination**, see [AGENTS.md §3 and §5](AGENTS.md).
+For the **4-level enforcement model**, **mandatory criteria**, **execution plan format**, and **phase determination**, see [AGENTS.md](AGENTS.md) (PM Subagent Dispatch Protocol; Universal Baseline Behaviors).
 
 **Execution Plan Boilerplate**: the table format, the Design Gate (Row 0) rule, exemption categories, and the `/sync`-as-final-step rule are the Single Source of Truth in [Execution Plan Templates §5.1](docs/governance/agents/execution-plan-templates.md#51-standard-execution-plan-template) and [§5.1.1](docs/governance/agents/execution-plan-templates.md#511-design-gate-exemptions).
 
@@ -150,7 +150,7 @@ For the **4-level enforcement model**, **mandatory criteria**, **execution plan 
 - **No native subagents**: specialist "dispatch" means loading `agents/<name>.md` as role context and executing that row's work in-session. Parallelism is not available; order plan rows sequentially.
 
 #### Cost Optimization (3-Tier Model Strategy)
-The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md §3.6 3-Tier Strategy](AGENTS.md#36-3-tier-strategy). Codex's model-ID mapping:
+The High/Medium/Low tier concept and its usage rules are the Single Source of Truth in [AGENTS.md — Tier Model Mapping](AGENTS.md) (WORKSPACE-MANAGED tier-model-mapping block). Codex's model-ID mapping:
 - **High-tier** → `gpt-6.1-sol`
 - **Medium-tier** → `gpt-6.1-terra`
 - **Low-tier** → `gpt-6-luna`

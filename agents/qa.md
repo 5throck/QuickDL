@@ -56,7 +56,7 @@ Output: New/updated test file + passing test run output + coverage summary.
 ## 5. Test Checklist
 
 ```
-[ ] pytest tests/ -v         — 23 tests pass (14 i18n + 9 API)
+[ ] pytest tests/ -v         — the full suite passes (111 collected — run `pytest tests/ -q --collect-only` for the live count)
 [ ] bun scripts/audit.ts --skip-memory — audit passes
 [ ] QUICKDL_LANG=en python cli.py --help  — English output
 [ ] QUICKDL_LANG=ko python cli.py --help  — Korean output

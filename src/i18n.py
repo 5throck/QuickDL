@@ -20,7 +20,7 @@ def _detect_lang() -> str:
 
     # Priority 2: OS locale
     try:
-        loc, _ = locale.getdefaultlocale()  # e.g. "ko_KR", "zh_TW"
+        loc, _ = locale.getlocale()  # e.g. "ko_KR", "zh_TW"
         if loc:
             lang = loc.replace("_", "-")  # "zh_TW" → "zh-TW"
             if lang in SUPPORTED:

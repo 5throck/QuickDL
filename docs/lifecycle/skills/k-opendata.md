@@ -5,7 +5,7 @@
 ## Metadata
 
 - **Skill**: k-opendata
-- **Status**: active
+- **Status**: archived (not delivered in this project — co-utility rebase 2026-11-19)
 - **Owner**: public-data-analyst
 - **Created**: 2026-09-21
 
@@ -23,3 +23,7 @@ Queries Korea's Public Data Portal (`공공데이터포털`, data.go.kr) Open AP
 
 - [x] Skill directory exists in L1 with valid frontmatter.
 - [x] Delivered to projects through the standard upgrade path.
+
+## Tombstone
+
+- **2026-11-19**: Surface not delivered under the co-utility variant (co-develop variant-exclusive or workspace doctrine skill). The SKILL.md and acceptance criteria above describe the workspace/co-develop context, not this project. Record retained for provenance.

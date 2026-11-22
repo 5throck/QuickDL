@@ -56,7 +56,8 @@
 | `backend` | ❌ Serial | ✅ Python files |
 | `frontend` | ❌ Serial (after backend) | ✅ JS/HTML |
 | `i18n-specialist` | ❌ Serial (after frontend) | ✅ src/locales/*.json |
-| `qa` | ❌ Serial (after all writes) | ✅ test files only |
+
+> `qa` writes only in **Phase 4** (test suite ownership); it joins Phase 1 as read-only analysis.
 
 > **Why serial writes?** File lock contention and merge conflicts. Backend must finish before frontend reads updated API shape; i18n must run after all new strings are known.
 

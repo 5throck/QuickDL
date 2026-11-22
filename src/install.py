@@ -113,10 +113,10 @@ def set_environment():
 
 def print_done():
     if SYSTEM == "Windows":
-        run_cmd = "ytdl.bat  (더블클릭) 또는  python src/desktop.py"
+        run_cmd = "ytdl.bat  (double-click) or  python src/desktop.py"
         cli_cmd = "python src/cli.py <URL>"
     else:
-        run_cmd = "./ytdl.sh  또는  python src/desktop.py"
+        run_cmd = "./ytdl.sh  or  python src/desktop.py"
         cli_cmd = "python src/cli.py <URL>"
     print()
     print("=" * 50)

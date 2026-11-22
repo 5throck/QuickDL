@@ -2,7 +2,7 @@
 
 ## Metadata
 - **Skill**: swe-solve
-- **Status**: active
+- **Status**: archived (not delivered in this project — co-utility rebase 2026-11-19)
 - **Version**: 1.1.1
 - **Created**: 2026-08-16
 - **Last Updated**: 2026-08-29
@@ -37,3 +37,7 @@ Autonomous 5-stage issue-to-PR resolution pipeline for software engineering task
 ## Notes
 - Variant-exclusive skill (owner: co-develop) — reaches only co-develop projects via the variant overlay; other variants no longer receive the stale common copy
 - Owner: pm
+
+## Tombstone
+
+- **2026-11-19**: Surface not delivered under the co-utility variant (co-develop variant-exclusive or workspace doctrine skill). The SKILL.md and acceptance criteria above describe the workspace/co-develop context, not this project. Record retained for provenance.

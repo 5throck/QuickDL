@@ -3,6 +3,7 @@ import os
 import re
 import threading
 import time
+import socket
 import urllib.parse
 import uuid
 from pathlib import Path
@@ -34,15 +35,22 @@ def _validate_url(url: str) -> bool:
     """Return True only for http/https URLs that do not resolve to private/loopback addresses."""
     if not url or not _URL_PATTERN.match(url):
         return False
+    host = urllib.parse.urlparse(url).hostname or ''
+    # Block SSRF via private, loopback, or link-local addresses — resolve
+    # hostnames too, so DNS names pointing at internal addresses are rejected
+    # (nip.io-style bypasses and non-canonical IP literals included).
     try:
-        host = urllib.parse.urlparse(url).hostname or ''
-        addr = ipaddress.ip_address(host)
-        # Block SSRF via private, loopback, or link-local IP literals
+        infos = socket.getaddrinfo(host, None)
+    except (socket.gaierror, ValueError, TypeError):
+        return False  # unresolvable host — reject rather than allow blindly
+    for info in infos:
+        addr_str = info[4][0]
+        try:
+            addr = ipaddress.ip_address(addr_str)
+        except ValueError:
+            return False
         if addr.is_private or addr.is_loopback or addr.is_link_local:
             return False
-    except (ValueError, TypeError):
-        # host is a domain name (not an IP literal) — allow it through
-        pass
     return True
 
 
@@ -181,4 +189,7 @@ if __name__ == '__main__':
     _keep_hours = int(os.environ.get('QUICKDL_KEEP_HOURS', '24'))
     _cleanup_downloads(DOWNLOAD_DIR, _keep_hours)
     debug = os.environ.get('FLASK_DEBUG', '0') == '1'
-    app.run(debug=debug, threaded=True, host='0.0.0.0', port=5000)
+    # Bind loopback by default: the CORS policy and URL validation assume a local
+    # app. Set QUICKDL_HOST=0.0.0.0 explicitly to expose the server on the LAN.
+    host = os.environ.get('QUICKDL_HOST', '127.0.0.1')
+    app.run(debug=debug, threaded=True, host=host, port=5000)

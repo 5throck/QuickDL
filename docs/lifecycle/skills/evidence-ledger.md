@@ -14,7 +14,7 @@
 
 ### Production Phase
 
-- [x] Skill SKILL.md exists at `templates/common/skills/evidence-ledger/SKILL.md`
+- [x] Skill SKILL.md exists at the workspace root `templates/common/skills/evidence-ledger/SKILL.md`
 - [x] Frontmatter valid: name, description, status, scope (`common`), version, owner populated
 - [x] L1-only asset — deliberately absent from workspace-root `skills/` (2026-09-12 root-upgrade incident rule)
 - [x] Delivered to scaffolded projects via `docs/templates/common-contract.json`
