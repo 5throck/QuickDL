@@ -50,8 +50,8 @@ Per each agent's frontmatter `phases:` field in `agents/*.md`:
    construction from external names, and any subprocess use are audited at
    triage and re-audited before merge; findings follow the SEV classification.
 4. **Runtime-output isolation (every phase)** — `downloads/` and `.venv/` stay
-   repo-level and gitignored; output roots resolve from the repo layout, never
-   `__file__`.
+   repo-level and gitignored; output roots resolve from the `src/` file anchors one level under the repo
+   root.
 5. **Launcher pairing (Phase 3)** — `ytdl.sh` and `ytdl.bat` behavior changes
    land in both halves of the pair in the same change.
 

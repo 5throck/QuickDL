@@ -111,7 +111,7 @@ No suggestions: no procedure step pairs one of these skills with an owning agent
 
 ## Skill Usage (E3)
 
-Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-19), window 90 days. Skill nodes with usage: 0.
+Joined from memory `## Skills Used` sections (names resolve via capability); reference date = newest memory log (2026-11-22), window 90 days. Skill nodes with usage: 0.
 
 - **used-but-unlinked** (usage > 0, no `used_by`) (0): —
 - **unused** (0 sessions in 90 days) (40): co-develop/code-review, co-develop/refactoring, co-develop/test-driven-development, root/accessibility-audit, root/agent-lifecycle-manager, root/api-documentation, root/ci-triage, root/decision-record, root/delegate-to-hub, root/design-foundation, root/documentation-writing, root/evidence-ledger, root/explain-me, root/finishing-a-development-branch, root/gateguard, root/handbook, root/handbook-sync-audit, root/i18n-audit, root/i18n-formatting, root/i18n-layout, root/i18n-locale-config, root/meeting-facilitation, root/platform-command-lifecycle-manager, root/platform-skill-lifecycle-manager, root/post-write-check, root/project-review, root/research-analysis, root/script-lifecycle-manager, root/security-scan, root/service-design, root/skill-lifecycle-manager, root/source-command-commit-push-pr, root/standup-synthesizer, root/sync, root/team-builder, root/token-usage-lint, root/translate, root/ui-ux-design-intelligence, root/update-bun-packages, root/zod-contract-gate

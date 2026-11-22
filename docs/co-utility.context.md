@@ -7,8 +7,8 @@
 >   1. docs/context.md              —pipeline-maintained shared reference (immutable)
 >   2. docs/co-utility.context.md   —THIS FILE —QuickDL stack, doctrine, workflow
 >
-> Variant: **co-utility** (beta 0.1.0 doctrine — multi-interface utility apps over
-> one core service; rebase from co-develop completed 2026-11-19).
+> Variant: **co-utility** (doctrine per `variant.json`; delivered from workspace
+> template 0.30.0; rebase from co-develop completed 2026-11-19).
 
 ---
 
@@ -42,7 +42,7 @@ The co-utility variant doctrine applied to QuickDL's concrete shape:
 | Doctrine area | QuickDL instantiation |
 |---------------|----------------------|
 | **Multi-interface surface matrix** | Core service `src/download_service.py`; adapters: web UI (`src/app.py` + `src/templates/`), desktop shell (`src/desktop.py`, pywebview + pystray), CLI (`src/cli.py`) |
-| **Runtime-output isolation** | `downloads/` at repo root (gitignored, never source); `.venv/` repo-level; output root resolved from the repo layout, not `__file__` |
+| **Runtime-output isolation** | `downloads/` at repo root (gitignored, never source); `.venv/` repo-level; output root resolved from the `src/` file anchors one level under the repo root |
 | **Locale-matrix i18n** | 16 locales (`src/locales/*.json`), `en.json` baseline key parity; runtime loader `src/i18n.py` (`SUPPORTED` set mirrors the directory); detection chain `QUICKDL_LANG` env → OS locale → `en` |
 | **External-input security** | URL handling (yt-dlp), path construction from video titles/IDs, no subprocess with user strings; double-audited at Phase 1 and Phase 4 |
 | **Cross-platform script pairing** | `ytdl.sh` / `ytdl.bat` launchers change together |
@@ -84,7 +84,7 @@ quickdl/
 | `src/app.py` | Flask routes: `/api/info`, `/api/download`, `/api/status/<id>`, `/api/file/<id>` |
 | `src/download_service.py` | `get_video_info(url)`, `download_video(url, dir, progress_hook, cancel_event)` |
 | `src/i18n.py` | `init()`, `t(key)`, `get_all()`, `get_lang()`, `format_duration(seconds)` |
-| `src/locales/en.json` | i18n baseline —56 keys, all other locales must match exactly |
+| `src/locales/en.json` | i18n baseline —all other locales must match its key set exactly (parity is asserted by `tests/test_i18n.py`) |
 | `tests/test_i18n.py` | Locale key parity + format_duration tests |
 | `tests/test_app.py` | Flask API endpoint tests (unittest) |
 | `tests/manual/test_api.py` | Manual integration test —requires live server at :5000 |
@@ -246,7 +246,7 @@ launchers, requirements).
 
 - **16 languages:** en, ko, ja, zh-TW, zh-CN, de, es, fr, pt, vi, ms, id, th, ru, it, ar
 - **Detection priority:** `QUICKDL_LANG` env var → OS locale → `en` fallback
-- **Baseline:** `src/locales/en.json` (56 keys) —all other files must match exactly
+- **Baseline:** `src/locales/en.json` —all other files must match its key set exactly (count asserted by `tests/test_i18n.py`, never hardcoded here)
 - **Web UI injection:** `render_template('index.html', i18n=get_all(), lang=get_lang())`
 - **Runtime loader contract (`src/i18n.py`):** `SUPPORTED` set lists the 16 shipped
   locales and must match the `src/locales/*.json` directory exactly — the common

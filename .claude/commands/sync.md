@@ -29,7 +29,7 @@ Run the full commit + PR pipeline for QuickDL.
 Run:
 
 ```bash
-bash scripts/dev-sync.sh "$ARGUMENTS"
+bun scripts/dev-sync.ts "$ARGUMENTS"
 ```
 
 If `$ARGUMENTS` is empty, the script will prompt for a commit message.

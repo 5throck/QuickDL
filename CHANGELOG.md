@@ -8,7 +8,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed (2026-11-19 src/ Package Layout + co-utility Rebase)
+
+- **[2026-11-19]**: Repository layout: all application code (`app.py`, `download_service.py`, `i18n.py`, `cli.py`, `desktop.py`, `install.py`, `verification.py`) and runtime assets (`locales/`, `templates/`, `static/`) moved under `src/`. Launch commands are now `python src/app.py`, `python src/desktop.py`, `python src/cli.py <URL>`; `ytdl.sh`/`ytdl.bat` launch the new paths automatically. `downloads/` and `.venv/` remain at the repository root. CI and test configuration updated to the `src/` paths. Project doctrine re-based onto the co-utility variant (multi-interface utility doctrine); superseded standalone tooling scripts (`audit.sh`/`dev-sync.sh`/etc.) replaced by the workspace-standard `bun scripts/audit.ts` / `bun scripts/dev-sync.ts` pipeline.
+
 ### Changed (2026-11-16 Relicense to MIT)
+
 
 - **[2026-11-16]**: `LICENSE` / `README.md` / `README_ko.md`: Relicense QuickDL from GNU AGPL-3.0 to the MIT License. The sole copyright holder (SungHyuk Park, 5throck) made the change so QuickDL can be declared as an external dependency of ai_workspace templates, whose external-deps policy denies AGPL. Runtime dependencies (flask, yt-dlp, flask-cors, pywebview, pystray, pillow) are installed separately and keep their own licenses.
 
