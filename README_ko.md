@@ -9,7 +9,7 @@ sync_version: 1
 데스크톱 앱, 시스템 트레이, 웹 UI, CLI를 갖춘 경량 YouTube 영상 다운로더입니다.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![CI](https://github.com/5throck/QuickDL/actions/workflows/ci.yml/badge.svg)
 
 [View English Documentation](README.md)
@@ -41,7 +41,7 @@ sync_version: 1
 
 ## 시스템 요구사항
 
-- Python 3.8 이상
+- Python 3.10 이상
 - ffmpeg (고화질 영상/오디오 병합 시 필요)
   - Windows: `winget install ffmpeg` 또는 https://ffmpeg.org/download.html
   - macOS: `brew install ffmpeg`
@@ -58,7 +58,7 @@ python src/install.py
 ```
 
 `install.py`가 자동으로 수행하는 작업:
-- Python 버전 확인 (3.8+)
+- Python 버전 확인 (3.10+)
 - 가상환경(`.venv/`) 생성
 - `requirements.txt`의 모든 의존성 설치
 - 시스템에 누락된 경우 패키지 매니저(winget, brew, apt)를 통해 `ffmpeg` 자동 설치

@@ -28,7 +28,7 @@ def python_in_venv():
 
 
 def check_python_version():
-    if sys.version_info < (3, 8):
+    if sys.version_info < (3, 10):
         print(t("install.python_bad"))
         sys.exit(1)
     print(t("install.python_ok", version=sys.version.split()[0]))

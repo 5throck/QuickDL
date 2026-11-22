@@ -24,14 +24,14 @@ documented in `README.md` and `CHANGELOG.md`.
 
 | Layer | Technology |
 |-------|------------|
-| Language | Python 3.8+ |
+| Language | Python 3.10+ |
 | Web backend | Flask |
 | Download engine | yt-dlp |
 | Desktop shell | pywebview + pystray |
 | Frontend | Vanilla JS + Jinja2 templates |
 | i18n | Custom `src/i18n.py` (flat JSON locale files) |
 | Tests | pytest + unittest (`tests/`, 111 tests) |
-| CI | GitHub Actions (`.github/workflows/ci.yml`) —Python 3.8/3.10/3.12 |
+| CI | GitHub Actions (`.github/workflows/ci.yml`) —Python 3.10/3.12/3.14 |
 
 ---
 
@@ -122,7 +122,7 @@ based on emerging requirements (PM Team-Management Authority, ADR-0080).
 ## Environment Setup
 
 ```bash
-# Python 3.8+
+# Python 3.10+
 python -m venv .venv
 source .venv/bin/activate        # macOS/Linux
 .venv\Scripts\activate           # Windows
@@ -196,7 +196,7 @@ Manual branches: `feature/<name>`, `fix/<name>`, `chore/<name>` — merge into
 
 ### Coding Guidelines (QuickDL)
 
-- **Python version:** 3.8+ —use `Optional[str]` from `typing`, NOT `str | None`
+- **Python version:** 3.10+ —`X | None` unions (PEP 604) are the house style; legacy `Optional[str]` remains acceptable
 - **Encoding:** UTF-8 (no BOM) everywhere; files opened with `encoding="utf-8"`;
   script outputs specify the encoding explicitly
 - **Function size:** single responsibility; split functions that exceed ~30 lines
@@ -281,7 +281,7 @@ launchers, requirements).
 ### Utility-Specific Rules
 
 - **Minimum runtime version is a contract** — code targets the documented floor
-  (e.g. Python 3.8+ means `Optional[str]`, not `X | None`).
+  (floor 3.10: PEP 604 `X | None` unions are in; verify anything older-API against the floor).
 - **One core service** — interface adapters call the service module; duplicated
   logic across interfaces is a defect.
 - **Runtime output never lands in source** — output directories are repo-level,

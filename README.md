@@ -3,7 +3,7 @@
 A lightweight YouTube video downloader with a desktop app, system tray, web UI, and CLI.
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-![Python 3.8+](https://img.shields.io/badge/Python-3.8%2B-blue)
+![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![CI](https://github.com/5throck/QuickDL/actions/workflows/ci.yml/badge.svg)
 
 [한국어 문서 보기](README_ko.md)
@@ -35,7 +35,7 @@ A lightweight YouTube video downloader with a desktop app, system tray, web UI, 
 
 ## Requirements
 
-- Python 3.8+
+- Python 3.10+
 - ffmpeg (required for high-quality video/audio merging)
   - Windows: `winget install ffmpeg` or https://ffmpeg.org/download.html
   - macOS: `brew install ffmpeg`
@@ -52,7 +52,7 @@ python src/install.py
 ```
 
 `install.py` automatically:
-- Verifies Python version (3.8+)
+- Verifies Python version (3.10+)
 - Creates a virtual environment (`.venv/`)
 - Installs all dependencies from `requirements.txt`
 - Installs `ffmpeg` via package manager (winget, brew, apt) if missing

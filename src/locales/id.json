@@ -13,7 +13,7 @@
   "install.start": "🚀 Memulai instalasi QuickDL...",
   "install.os_info": "   OS: {system} / Python: {version}",
   "install.python_ok": "✅ Python {version} terdeteksi",
-  "install.python_bad": "❌ Python 3.8 atau lebih tinggi diperlukan.",
+  "install.python_bad": "❌ Python 3.10 atau lebih tinggi diperlukan.",
   "install.ffmpeg_ok": "✅ ffmpeg terdeteksi",
   "install.ffmpeg_missing": "⚠️  ffmpeg tidak ditemukan. Penggabungan MP4 berkualitas tinggi mungkin terbatas.",
   "install.ffmpeg_win": "   Instal: https://ffmpeg.org/download.html atau 'winget install ffmpeg'",
