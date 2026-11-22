@@ -9,7 +9,7 @@
       "name": "backend",
       "scope": "root",
       "capability": "backend",
-      "content_hash": "c179f4153f66e11c",
+      "content_hash": "50453cac5f3616c4",
       "version": "1.0.0",
       "mirrors": [
         "agents/backend.md"

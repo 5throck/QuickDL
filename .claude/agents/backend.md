@@ -32,7 +32,7 @@ Output: Working implementation + passing `pytest tests/test_app.py -v` + list of
 ## 4. Behavior Rules
 
 1. **No bare `except:`** — always catch specific exceptions.
-2. **Python 3.8 compatibility** — use `Optional[str]` from `typing`, not `str | None`.
+2. **Python 3.10 floor** — PEP 604 unions (`str | None`) are the house style; keep syntax 3.10-compatible (no 3.12+-only features without a floor bump).
 3. **New user-visible strings use `t()`** — never hardcode English text in responses.
 4. **GIL ordering for job state** — write `_completed[job_id]` BEFORE `_jobs["status"] = "done"`.
 5. **No direct push to master** — all changes via PR.
