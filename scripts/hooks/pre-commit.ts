@@ -2,7 +2,7 @@
 /**
  * pre-commit.ts — TS-based pre-commit hook.
  * Replaces the legacy bash/ps1 hooks.
- * @version 1.14.0
+ * @version 1.14.1
  *
  * v1.14.0 (2026-11-07, spec docs/designs/2026-11-07-external-deps-standard-design.md
  *  §5.4 E3, DEC-20261107-02, T-20261107-005): check 4b — when the project-root
@@ -170,7 +170,7 @@ async function main() {
 
   // 2. Block .env files (".env.example" / ".env.sample" templates are allowed)
   const envStaged = staged.filter((f) =>
-    /^\.env$|^\.env\.(?!example$|sample$)[^s]|(\/|\\)\.env$|(\/|\\)\.env\.(?!example$|sample$)[^s]/.test(f),
+    /^\.env$|^\.env\.(?!example$|sample$).+|(\/|\\)\.env$|(\/|\\)\.env\.(?!example$|sample$).+/.test(f),
   );
   if (envStaged.length > 0) {
     console.error("\x1b[31m[FAIL]\x1b[0m Attempt to commit .env file detected.");

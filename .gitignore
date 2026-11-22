@@ -1,67 +1,7 @@
-# Secrets — never commit
-# (.env.sample untracked: adoption pre-flight requires no secret-shaped tracked
-#  files; it was re-added by the 0.30.0 delivery and untracked again 2026-11-22.
-#  The placeholder sample stays on disk locally; copy it to .env and edit.)
-.env
-.env.*
-
-# Python
-.venv/
-__pycache__/
-*.pyc
-*.pyo
-dist/
-*.egg-info/
-
-# Node.js
-node_modules/
-.next/
-dist/
-build/
-
-# OS artifacts
-.DS_Store
-Thumbs.db
-
-# IDE
-.idea/
-.vscode/
-*.swp
-
-# Local AI settings (personal overrides — never shared)
-.claude/settings.local.json
-.gemini/settings.local.json
-.mcp.local.json
-
-# Crypto / certificates — never commit private key material
-*.pem
-*.key
-*.p12
-*.pfx
-*.cer
-*.crt
-*.der
-*.jks
-*.keystore
-
-# Temp / build artifacts
-*.log
-*.bak
-*.tmp
-
-# Downloaded media — runtime output, never source (see AGENTS.md Codex notes)
+# QuickDL project-specific (hand-maintained — not covered by the managed block)
+# Runtime output: downloaded media is never source
 downloads/
 *.part
-
-# Databases
-*.sqlite
-*.db
-
-# CodeGraph Index
-.codegraph/
-graft/
-.openchrome/
-
 
 <!-- WORKSPACE-MANAGED: Git ignore patterns. Content outside this block is preserved during project upgrades. -->
 # Secrets — never commit
@@ -118,7 +58,6 @@ Desktop.ini
 # Databases
 *.sqlite
 *.db
-
 
 # Antigravity/ZCode session-local state (plans, config — never shared)
 .zcode/

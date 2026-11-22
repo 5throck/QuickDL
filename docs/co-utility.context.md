@@ -225,7 +225,11 @@ Manual branches: `feature/<name>`, `fix/<name>`, `chore/<name>` — merge into
 ### Language Policy (project application)
 
 English-only documentation: all `.md` files, commit messages, PR titles and bodies
-are written in English. `README_ko.md` is the sanctioned Korean translation zone
+are written in English.
+**Inline vocabulary carve-out** (project ruling 2026-11-22): illustrative vocabulary
+examples inside governance prose (e.g. a translation-guideline section naming a
+locale-specific word it prefers) are permitted as un-translatable evidence — they are
+quoted terms, not prose. Full sentences of documentation remain English-only. `README_ko.md` is the sanctioned Korean translation zone
 (`lang: ko`, `lang_reason: source-material`) and must stay in sync with `README.md`.
 
 ---

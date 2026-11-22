@@ -19,7 +19,7 @@ import subprocess
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
-from typing import Callable, Dict, List, Optional
+from typing import Callable
 
 MIN_SIZE_BYTES = 1024 * 1024          # a healthy download is never under 1 MB
 DURATION_TOLERANCE = 0.05             # ±5% of the expected duration
@@ -48,16 +48,16 @@ RunCmd = Callable[..., 'subprocess.CompletedProcess']
 Fetch = Callable[..., str]
 
 
-def _default_run_cmd(argv: List[str], timeout: Optional[float] = None) -> 'subprocess.CompletedProcess':
+def _default_run_cmd(argv: list[str], timeout: float | None = None) -> 'subprocess.CompletedProcess':
     return subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
 
 
-def _default_fetch(url: str, timeout: Optional[float] = None) -> str:
+def _default_fetch(url: str, timeout: float | None = None) -> str:
     with urllib.request.urlopen(url, timeout=timeout) as resp:
         return resp.read().decode('utf-8')
 
 
-def extract_video_id(url: str) -> Optional[str]:
+def extract_video_id(url: str) -> str | None:
     """Extract an 11-char YouTube video ID from common URL shapes."""
     m = re.search(r'(?:v=|youtu\.be/|/shorts/|/embed/)([A-Za-z0-9_-]{11})', url)
     return m.group(1) if m else None
@@ -72,7 +72,7 @@ def titles_match(a: str, b: str) -> bool:
     return _normalize_title(a) == _normalize_title(b)
 
 
-def _probe_duration(path: str, run_cmd: RunCmd) -> Optional[float]:
+def _probe_duration(path: str, run_cmd: RunCmd) -> float | None:
     """Return media duration in seconds via ffprobe, or None when unavailable."""
     try:
         proc = run_cmd(
@@ -90,7 +90,7 @@ def _probe_duration(path: str, run_cmd: RunCmd) -> Optional[float]:
         return None
 
 
-def _probe_height(path: str, run_cmd: RunCmd) -> Optional[int]:
+def _probe_height(path: str, run_cmd: RunCmd) -> int | None:
     """Return the first video stream height via ffprobe, or None."""
     try:
         proc = run_cmd(
@@ -108,7 +108,7 @@ def _probe_height(path: str, run_cmd: RunCmd) -> Optional[int]:
         return None
 
 
-def _probe_mean_volume_db(path: str, run_cmd: RunCmd) -> Optional[float]:
+def _probe_mean_volume_db(path: str, run_cmd: RunCmd) -> float | None:
     """Return the ffmpeg volumedetect mean_volume in dB, or None.
 
     ffmpeg writes volume stats to stderr; parse them regardless of the
@@ -127,7 +127,7 @@ def _probe_mean_volume_db(path: str, run_cmd: RunCmd) -> Optional[float]:
     return float(m.group(1)) if m else None
 
 
-def _fetch_oembed_title(video_id: str, fetch: Fetch) -> Optional[str]:
+def _fetch_oembed_title(video_id: str, fetch: Fetch) -> str | None:
     """Return the canonical YouTube title via oEmbed, or None when unavailable."""
     qs = urllib.parse.urlencode({
         'url': 'https://www.youtube.com/watch?v=' + video_id,
@@ -154,7 +154,7 @@ def _vtt_ts_to_sec(groups) -> float:
     return (int(h) if h else 0) * 3600 + int(m) * 60 + int(s) + int(ms) / 1000.0
 
 
-def parse_vtt_last_cue_end(vtt_path: str) -> Optional[float]:
+def parse_vtt_last_cue_end(vtt_path: str) -> float | None:
     """Return the END time (seconds) of the latest cue in a WebVTT file.
 
     Scans every `-->` timing line and keeps the maximum end timestamp, so
@@ -177,7 +177,7 @@ def parse_vtt_last_cue_end(vtt_path: str) -> Optional[float]:
     return last
 
 
-def caption_coverage(vtt_path: str, duration_sec: Optional[float]) -> Optional[float]:
+def caption_coverage(vtt_path: str, duration_sec: float | None) -> float | None:
     """Coverage ratio (0–1) of a caption sidecar vs the video duration.
 
     Ratio = last cue end / video duration, clamped to 1.0. Returns None when
@@ -202,17 +202,17 @@ def _coverage_warning(lang: str, last_end: float, duration: float,
 
 
 def annotate_caption_coverage(
-    subtitles: List[Dict],
-    duration_sec: Optional[float],
+    subtitles: list[dict],
+    duration_sec: float | None,
     threshold: float = CAPTION_COVERAGE_THRESHOLD,
-) -> List[str]:
+) -> list[str]:
     """Fill `coverage` into manifest `subtitles[]` entries and return warnings.
 
     Mutates each entry in place: entries with a real sidecar path gain
     `coverage` (0–1, or None when duration/cues are unknown). A warning
     string is returned for every entry measurably below `threshold`.
     """
-    warnings: List[str] = []
+    warnings: list[str] = []
     for sub in subtitles:
         path = sub.get('path')
         if not path:
@@ -228,10 +228,10 @@ def annotate_caption_coverage(
 
 
 def apply_swaps(
-    entries: List[Dict],
-    swaps: List,
-    reason: Optional[str] = None,
-    today: Optional[str] = None,
+    entries: list[dict],
+    swaps: list,
+    reason: str | None = None,
+    today: str | None = None,
 ):
     """Apply `--swap OLD_ID:NEW_URL` directives to a batch of manifest entries.
 
@@ -244,7 +244,7 @@ def apply_swaps(
     """
     if today is None:
         today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-    retired: List[Dict] = []
+    retired: list[dict] = []
     for old_id, new_url in swaps:
         idx = next((i for i, e in enumerate(entries) if e.get('id') == old_id), None)
         if idx is None:
@@ -273,17 +273,17 @@ def apply_swaps(
 
 def verify_download(
     path: str,
-    expected_duration_sec: Optional[float] = None,
-    expected_height: Optional[int] = None,
-    expected_title: Optional[str] = None,
-    video_id: Optional[str] = None,
-    reference_height: Optional[int] = None,
-    run_cmd: Optional[RunCmd] = None,
-    fetch: Optional[Fetch] = None,
-    subtitles: Optional[List[Dict]] = None,
+    expected_duration_sec: float | None = None,
+    expected_height: int | None = None,
+    expected_title: str | None = None,
+    video_id: str | None = None,
+    reference_height: int | None = None,
+    run_cmd: RunCmd | None = None,
+    fetch: Fetch | None = None,
+    subtitles: list[dict] | None = None,
     require_caption_coverage: bool = False,
     caption_coverage_threshold: float = CAPTION_COVERAGE_THRESHOLD,
-) -> Dict:
+) -> dict:
     """Run the post-download verification gates for one file.
 
     Status semantics:
@@ -306,7 +306,7 @@ def verify_download(
     if fetch is None:
         fetch = _default_fetch
 
-    result: Dict = {
+    result: dict = {
         'path': path,
         'size_mb': None,
         'checks': {
@@ -460,10 +460,10 @@ def verify_download(
 
 
 def build_manifest(
-    entries: List[Dict],
-    tool: Optional[Dict] = None,
-    retired: Optional[List[Dict]] = None,
-) -> Dict:
+    entries: list[dict],
+    tool: dict | None = None,
+    retired: list[dict] | None = None,
+) -> dict:
     """Assemble a batch manifest: per-video entries + totals + tool info.
 
     `retired` (additive): swapped-out video records from `apply_swaps`. The

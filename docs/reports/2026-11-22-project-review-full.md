@@ -210,3 +210,25 @@ and it runs green with every remediation applied.
 | Gate (final, post-fix, on GitHub) | Result |
 |-----------------------------------|--------|
 | CI run 44972128032 (main) | ✅ 9/9 jobs green |
+
+### Remaining deferred items executed (2026-11-22, follow-up batch)
+
+User directive executed the rest: Python modernization sweep (78 `Optional[X]` →
+`X | None` sites + PEP 585 generics, typing imports pruned), M-16 (pre-commit .env
+regex hole), M-17 (pre-push stale comments), M-18 (changed-path pytest arm in
+pre-push), M-20 (settings matcher alignment), M-15 (.gitignore dedupe), M-14
+(inline-vocabulary carve-out recorded in the customization layer), bun upgraded
+1.4.4 → 1.4.5. Hooks version-bumped (pre-commit 1.14.1, pre-push 1.10.0) with
+SCRIPTS.md registry rows updated; spec `2026-11-22-remaining-deferred-batches-design`
+registered.
+
+**Genuinely remaining (upstream-owned, recorded)**: H-9, M-4, M-10 — all L0 core
+machinery or template-shipped patterns that a project must not hand-edit; tracked
+alongside upstream ticket U-20261119-002.
+
+| Gate (final) | Result |
+|--------------|--------|
+| `verify-scripts --verify` | ✅ 192/192 |
+| `audit --skip-memory` | ✅ |
+| pytest | ✅ 111 passed |
+| bun | ✅ 1.4.5 |
