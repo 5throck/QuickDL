@@ -9,8 +9,8 @@
       "name": "backend",
       "scope": "root",
       "capability": "backend",
-      "content_hash": "0d8f6c6ce71f2596",
-      "version": null,
+      "content_hash": "c179f4153f66e11c",
+      "version": "1.0.0",
       "mirrors": [
         "agents/backend.md"
       ]
@@ -22,8 +22,8 @@
       "name": "frontend",
       "scope": "root",
       "capability": "frontend",
-      "content_hash": "ecf1fffa9fb530a9",
-      "version": null,
+      "content_hash": "728833bf50ed98b3",
+      "version": "1.0.0",
       "mirrors": [
         "agents/frontend.md"
       ]
@@ -61,8 +61,8 @@
       "name": "qa",
       "scope": "root",
       "capability": "qa",
-      "content_hash": "8995ce9beaaccb00",
-      "version": null,
+      "content_hash": "cad52b1395854bb5",
+      "version": "1.0.0",
       "mirrors": [
         "agents/qa.md"
       ]
@@ -74,8 +74,8 @@
       "name": "security",
       "scope": "root",
       "capability": "security",
-      "content_hash": "3fc70a2a38fabf16",
-      "version": null,
+      "content_hash": "850ab76c3f423938",
+      "version": "1.0.0",
       "mirrors": [
         "agents/security.md"
       ]

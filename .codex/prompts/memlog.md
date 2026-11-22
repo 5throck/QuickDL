@@ -1,43 +1,46 @@
----
-name: memlog
-description: Write or update today's development log entry in memory/YYYY-MM-DD.md and update the MEMORY.md index.
-argument-hint: "[session summary]"
-allowed-tools: ["Read", "Write", "Edit", "Bash"]
----
+Append a session summary entry to today's memory log file.
 
-# /memlog — Write Development Log
+Arguments: $ARGUMENTS
 
-Write or update today's development log entry in `memory/YYYY-MM-DD.md`.
+Steps:
+1. Determine today's date in YYYY-MM-DD format.
+2. Ensure `memory/` directory exists.
+3. Collect context automatically:
+   - Run `git diff --name-only HEAD` to get the list of files changed in this session.
+   - Run `git log --oneline -5` to see recent commit messages for context.
+4. Append to `memory/YYYY-MM-DD.md` (create if missing) using the mandatory 4-section format:
+   ```
+   ## Session Summary
+   $ARGUMENTS
 
-## Usage
+   ## Changes
+   <!-- Auto-populated from git diff --name-only HEAD -->
+   - `path/to/file` — brief description of what changed
 
-```
-/memlog
-```
+   ## Decisions
+   <!-- Fill in architectural or design choices made this session, with rationale -->
+   - None
 
-## What it does
+   ## Open Issues
+   <!-- Fill in unresolved problems, blockers, or follow-up items -->
+   - None
+   ```
+   If `memory/YYYY-MM-DD.md` already has content, prepend a `---` separator before the new entry.
+5. After writing the entry:
+   - Fill in `## Changes` from the git diff output collected in step 3.
+   - Fill in `## Decisions` based on key architectural/design choices discussed this session.
+   - Fill in `## Open Issues` based on any unresolved problems or follow-up items.
+6. Update `memory/MEMORY.md` Sessions section — run:
+   ```bash
+   bun run scripts/sync-md.ts "YYYY-MM-DD" "$ARGUMENTS"
+   ```
+7. Confirm: "📝 Session logged to memory/YYYY-MM-DD.md"
 
-1. Determines today's date (YYYY-MM-DD)
-2. Opens (or creates) `memory/YYYY-MM-DD.md`
-3. Fills in the log based on this session's work
-4. Updates `memory/MEMORY.md` index if the date isn't already listed
+> **Format note**: The four section headings (`## Session Summary`, `## Changes`, `## Decisions`, `## Open Issues`) are mandatory. All AI tools must produce logs with these exact headings for cross-tool consistency. See workspace standards.
 
-## Log format
+> **MEMORY.md structure**: MEMORY.md has three sections — Sessions, Meetings, ADRs.
+> - Sessions: auto-updated by this command and the commit-msg hook.
+> - Meetings: register via `bun run scripts/sync-md.ts "DATE" "TOPIC" --meeting` after a meeting-facilitation session.
+> - ADRs: register via `bun run scripts/sync-md.ts "DATE" "TITLE" --adr ADR-NNNN` when creating an ADR file.
 
-```markdown
-## <Feature / Module Name>
-- **Files**: path/to/file1.py, path/to/file2.js
-- **Purpose**: one-line summary of what was built/changed
-- **Decisions**: key technical choices and why
-- **Issues**: symptom → root cause → resolution
-```
-
-## Steps
-
-1. Check today's date: `date +%Y-%m-%d`
-2. Read `memory/YYYY-MM-DD.md` if it exists
-3. Write the log entry in the format above using this session's context
-4. Ensure `memory/MEMORY.md` has a row for today:
-   `| [YYYY-MM-DD](YYYY-MM-DD.md) | <summary> |`
-
-Always write log files in **English**.
+Note: `/sync` already runs memlog automatically. Use `/memlog` only when you want to log a session entry without triggering a full sync.

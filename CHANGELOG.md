@@ -7,6 +7,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ---
 
 ## [Unreleased]
+- **[2026-11-19]**: chore(upgrade): template sync v0.30.0 (47 file(s) delivered; engine-scaffolded — edit or merge before commit; see templates/CHANGELOG.md v0.30.0)
 
 ### Changed (2026-11-19 src/ Package Layout + co-utility Rebase)
 

@@ -2,6 +2,7 @@
   "name": "co-utility",
   "description": "Standalone utility/tool application — multi-interface YouTube downloader (Flask web UI + pywebview desktop shell + CLI) over one core service, with runtime-output isolation, a 16-locale i18n matrix, and external-input security audits. Lean co-utility roster: PM, Backend, Frontend, QA, Security + common i18n-specialist; security-monitor absorbed into security (2026-11-19).",
   "variant_type": "utility",
+  "consumption": "adoption-only",
   "status": "stable",
   "version": "1.0.0",
   "inherits_common": "templates/common",
