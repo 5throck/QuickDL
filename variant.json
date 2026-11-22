@@ -1,6 +1,6 @@
 {
   "name": "co-utility",
-  "description": "Software development workflow — full agent team with PM, Architect, Designer, Code Writer, Test Runner, Security Monitor, and Stack Setup Specialist (tech stack detection and environment initialization)",
+  "description": "Standalone utility/tool application — multi-interface YouTube downloader (Flask web UI + pywebview desktop shell + CLI) over one core service, with runtime-output isolation, a 16-locale i18n matrix, and external-input security audits. Lean co-utility roster: PM, Backend, Frontend, QA, Security + common i18n-specialist; security-monitor absorbed into security (2026-11-19).",
   "variant_type": "utility",
   "consumption": "adoption-only",
   "status": "stable",
@@ -13,6 +13,10 @@
     "stablePromotedOn": "2026-06-13"
   },
   "agents": [
+    {
+      "name": "pm",
+      "file": "agents/pm.md"
+    },
     {
       "name": "backend",
       "file": "agents/backend.md"

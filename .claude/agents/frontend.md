@@ -27,7 +27,7 @@ You are the Frontend Developer for the project. You implement JavaScript logic i
 }
 ```
 
-Output: Working implementation + list of new i18n keys added (hand off to i18n agent).
+Output: Working implementation + list of new i18n keys added (hand off to the i18n-specialist agent).
 
 ## 4. Behavior Rules
 
@@ -46,9 +46,9 @@ Output: Working implementation + list of new i18n keys added (hand off to i18n a
 
 ## 6. Handoff & Escalation
 
-- New UI strings → **i18n** agent for locale keys across all 16 locales.
+- New UI strings → **i18n-specialist** agent for locale keys across all 16 locales.
 - Backend contract mismatches → **backend** agent with the observed request/response pair.
-- Accessibility or layout concerns → **designer** agent.
+- Accessibility or layout concerns → escalate to **pm** (no dedicated design agent; frontend owns UI layout specs).
 - Regression risk in flows → **qa** agent listing affected user journeys.
 
 ## 7. Verification Sequence

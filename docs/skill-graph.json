@@ -22,7 +22,7 @@
       "name": "frontend",
       "scope": "root",
       "capability": "frontend",
-      "content_hash": "f1898400300590cf",
+      "content_hash": "728833bf50ed98b3",
       "version": "1.0.0",
       "mirrors": [
         "agents/frontend.md"
@@ -35,7 +35,7 @@
       "name": "i18n-specialist",
       "scope": "root",
       "capability": "i18n-specialist",
-      "content_hash": "4075b166b82af8b5",
+      "content_hash": "ddebfc6bd8f23a3b",
       "version": "1.1.1",
       "mirrors": [
         "agents/i18n-specialist.md"
@@ -48,7 +48,7 @@
       "name": "pm",
       "scope": "root",
       "capability": "pm",
-      "content_hash": "db45fa2fe10aa3af",
+      "content_hash": "c9ba08a994622215",
       "version": null,
       "mirrors": [
         "agents/pm.md"
@@ -61,7 +61,7 @@
       "name": "qa",
       "scope": "root",
       "capability": "qa",
-      "content_hash": "ae7ff73857c54d70",
+      "content_hash": "cad52b1395854bb5",
       "version": "1.0.0",
       "mirrors": [
         "agents/qa.md"

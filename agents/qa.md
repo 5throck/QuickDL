@@ -57,7 +57,7 @@ Output: New/updated test file + passing test run output + coverage summary.
 
 ```
 [ ] pytest tests/ -v         — 23 tests pass (14 i18n + 9 API)
-[ ] bash scripts/audit.sh    — audit passes
+[ ] bun scripts/audit.ts --skip-memory — audit passes
 [ ] QUICKDL_LANG=en python cli.py --help  — English output
 [ ] QUICKDL_LANG=ko python cli.py --help  — Korean output
 ```

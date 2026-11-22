@@ -17,7 +17,7 @@ Run the full commit + PR pipeline for QuickDL.
 
 ## What it does
 
-1. Runs `scripts/audit.sh` — aborts if CHANGELOG or i18n keys have issues
+1. Runs `bun scripts/audit.ts --skip-memory` — aborts if CHANGELOG or i18n keys have issues
 2. Ensures `memory/YYYY-MM-DD.md` exists (creates if missing)
 3. Updates `memory/MEMORY.md` index with today's entry (awk insertion after header)
 4. Stages all changes and commits with the provided message
@@ -29,7 +29,7 @@ Run the full commit + PR pipeline for QuickDL.
 Run:
 
 ```bash
-bash scripts/dev-sync.sh "$ARGUMENTS"
+bun scripts/dev-sync.ts "$ARGUMENTS"
 ```
 
 If `$ARGUMENTS` is empty, the script will prompt for a commit message.
